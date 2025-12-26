@@ -7,45 +7,44 @@
             <p class="text-muted mb-0">ยินดีต้อนรับกลับมาอีกครั้ง
                 ขณะนี้คือสรุปข้อมูลสำคัญและสถานการณ์ล่าสุดที่เกิดขึ้นในวันนี้</p>
         </div>
-        <a href="/tickets/create/" class="btn-create-link">+ Create New Ticket</a>
     </div>
-  <div class="dashboard-cards">
-    <div class="card card-total shadow-sm border-0">
-        <div class="d-flex justify-content-between align-items-start">
-            <div>
-                <p class="text-muted small fw-bold text-uppercase mb-1">ยอดรวมรายการแจ้งเรื่อง</p>
-                <h3 class="fw-bold mb-0">{{ total }}</h3>
-            </div>
-            <div class="icon-box bg-primary-soft text-primary">
-                <i class="fas fa-ticket-alt"></i>
+    <div class="dashboard-cards">
+        <div class="card card-total shadow-sm border-0">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="text-muted small fw-bold text-uppercase mb-1">ยอดรวมรายการแจ้งเรื่อง</p>
+                    <h3 class="fw-bold mb-0">{{ total }}</h3>
+                </div>
+                <div class="icon-box bg-primary-soft text-primary">
+                    <i class="fas fa-ticket-alt"></i>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="card card-pending shadow-sm border-0">
-        <div class="d-flex justify-content-between align-items-start">
-            <div>
-                <p class="text-muted small fw-bold text-uppercase mb-1">รอจัดการ</p>
-                <h3 class="fw-bold mb-0 text-warning">{{ pending }}</h3>
-            </div>
-            <div class="icon-box bg-warning-soft text-warning">
-                <i class="fas fa-clock"></i>
+        <div class="card card-pending shadow-sm border-0">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="text-muted small fw-bold text-uppercase mb-1">รอจัดการ</p>
+                    <h3 class="fw-bold mb-0 text-warning">{{ pending }}</h3>
+                </div>
+                <div class="icon-box bg-warning-soft text-warning">
+                    <i class="fas fa-clock"></i>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="card card-closed shadow-sm border-0">
-        <div class="d-flex justify-content-between align-items-start">
-            <div>
-                <p class="text-muted small fw-bold text-uppercase mb-1">ดำเนินการเสร็จสิ้น</p>
-                <h3 class="fw-bold mb-0 text-success">{{ closed }}</h3>
-            </div>
-            <div class="icon-box bg-success-soft text-success">
-                <i class="fas fa-check-circle"></i>
+        <div class="card card-closed shadow-sm border-0">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="text-muted small fw-bold text-uppercase mb-1">ดำเนินการเสร็จสิ้น</p>
+                    <h3 class="fw-bold mb-0 text-success">{{ closed }}</h3>
+                </div>
+                <div class="icon-box bg-success-soft text-success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
             </div>
         </div>
     </div>
-</div>
     <div class="row mb-4">
         <div class="col-lg-7 mb-4 mb-lg-0">
             <div class="dashboard-table h-100">
@@ -92,46 +91,10 @@
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const ctx = document.getElementById('ticketChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Network', 'Hardware', 'Software', 'Access'],
-                    datasets: [{
-                        data: [45, 32, 18, 10], // นำข้อมูลจาก Backend มาใส่ที่นี่
-                        backgroundColor: [
-                            '#2563eb', // Primary Blue
-                            '#f59e0b', // Warning Orange
-                            '#10b981', // Success Green
-                            '#64748b'  // Muted Gray
-                        ],
-                        hoverOffset: 15,
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 20,
-                                usePointStyle: true,
-                                font: { size: 12, family: "'Inter', sans-serif" }
-                            }
-                        }
-                    },
-                    cutout: '70%' // ทำให้เป็นวงโดนัทเพื่อให้ดูทันสมัย
-                }
-            });
-        });
-    </script>
 </main>
 </div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/script.js' %}"></script>
 {% endblock %}

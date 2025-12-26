@@ -25,7 +25,6 @@
 
 ## 📁 Project Structure
 
-```
 ticket-system/
 ├── backend/
 │   ├── sql/
@@ -45,7 +44,6 @@ ticket-system/
 ├── .env.example
 ├── .gitignore
 └── README.md
-```
 
 ---
 
@@ -92,12 +90,10 @@ git push origin feature/ชื่อฟีเจอร์
 
 โครงสร้างไฟล์:
 
-```
 sql/migrations/
 ├── 001_create_base_tables.sql
 ├── 002_add_ticket_workflow.sql
 ├── 003_add_notification.sql
-```
 
 ---
 
@@ -122,11 +118,9 @@ psql -U postgres -d ticket_dev -f sql/migrations/001_create_base_tables.sql
 
 ข้อมูลตั้งต้นต้องอยู่ใน `sql/seeds/`
 
-```
 001_roles.sql
 002_ticket_category.sql
 003_ticket_type.sql
-```
 
 รันด้วย:
 
@@ -196,3 +190,8 @@ DB_PORT=5432
 ---
 
 ✍️ Last Update: ____________________
+เพื่อเก็บรายชื่อไลบรารี (packages)
+ pip list --format=freeze > requirements.txt
+
+เมื่อต้องการติดตั้งจากไฟล์นี้ในเครื่องอื่น
+pip install -r requirements.txt
