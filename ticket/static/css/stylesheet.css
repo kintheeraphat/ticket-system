@@ -157,3 +157,35 @@ body {
     .layout { flex-direction: column; }
     .sidebar { width: 100%; height: auto; position: relative; }
 }
+/* เพิ่มเติมจาก CSS เดิมของคุณ */
+
+/* จัดการช่องไฟชื่อระบบ */
+.brand-text {
+    letter-spacing: -0.5px;
+}
+
+/* วงกลม Avatar ของผู้ใช้ */
+.user-avatar-circle {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+    font-weight: bold;
+    flex-shrink: 0; /* ป้องกันวงกลมเบี้ยว */
+}
+
+/* ปรับระยะขอบ Dashboard ให้สวยขึ้น */
+.container-main {
+    max-width: 1400px;
+}
+
+/* ลบขอบเส้นใต้ของปุ่มสร้าง Ticket */
+.btn-create-link {
+    text-decoration: none;
+    font-weight: 600;
+    color: var(--primary-color);
+    transition: 0.2s;
+}
+
+.btn-create-link:hover {
+    opacity: 0.8;
+}
