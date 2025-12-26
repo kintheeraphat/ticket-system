@@ -1,7 +1,37 @@
-<form method="post">
-  {% csrf_token %}
-  <input name="username" placeholder="username">
-  <input name="password" type="password" placeholder="password">
-  <button type="submit">Login</button>
-  {% if error %}<p>{{ error }}</p>{% endif %}
-</form>
+{% extends "base.html" %}
+{% block title %}เข้าสู่ระบบ{% endblock %}
+
+{% block content %}
+<div class="login-wrapper d-flex align-items-center justify-content-center">
+  <div class="login-card shadow-sm">
+    
+    <div class="text-center mb-4">
+      <h3 class="fw-bold">Ticket System</h3>
+      <p class="text-muted">เข้าสู่ระบบสำหรับพนักงาน</p>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label class="form-label">ชื่อผู้ใช้</label>
+        <input type="text" name="username" class="form-control" required>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label">รหัสผ่าน</label>
+        <input type="password" name="password" class="form-control" required>
+      </div>
+
+      <button class="btn btn-primary w-100 py-2">
+        เข้าสู่ระบบ
+      </button>
+    </form>
+
+    <div class="text-center mt-4 small text-muted">
+      © 2025 Your Company
+    </div>
+
+  </div>
+</div>
+{% endblock %}
