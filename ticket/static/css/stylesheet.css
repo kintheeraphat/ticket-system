@@ -228,3 +228,9 @@ body {
 .btn-create-link:hover {
     opacity: 0.8;
 }
+.login-card {
+    max-width: 400px;
+    width: 100%;
+    background-color: #ffffff;
+    border-radius: 8px;
+}

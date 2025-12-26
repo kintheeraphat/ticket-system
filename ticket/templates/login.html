@@ -1,35 +1,37 @@
 {% extends "base.html" %}
-{% block title %}เข้าสู่ระบบ{% endblock %}
+{% block title %}ลงชื่อเข้าใช้งานระบบ{% endblock %}
 
 {% block content %}
 <div class="login-wrapper d-flex align-items-center justify-content-center">
-  <div class="login-card shadow-sm">
+  <div class="login-card shadow-sm p-4">
     
     <div class="text-center mb-4">
-      <h3 class="fw-bold">Ticket System</h3>
-      <p class="text-muted">เข้าสู่ระบบสำหรับพนักงาน</p>
+      <h3 class="fw-bold text-primary">Ticket System</h3>
+      <p class="text-muted small">ระบบจัดการรายการแจ้งซ่อมและคำร้อง</p>
     </div>
 
     <form method="post">
       {% csrf_token %}
 
       <div class="mb-3">
-        <label class="form-label">ชื่อผู้ใช้</label>
-        <input type="text" name="username" class="form-control" required>
+        <label for="username" class="form-label text-secondary">บัญชีผู้ใช้งาน</label>
+        <input type="text" id="username" name="username" class="form-control" 
+               placeholder="กรอกชื่อผู้ใช้งานของคุณ" required>
       </div>
 
       <div class="mb-4">
-        <label class="form-label">รหัสผ่าน</label>
-        <input type="password" name="password" class="form-control" required>
+        <label for="password" class="form-label text-secondary">รหัสผ่าน</label>
+        <input type="password" id="password" name="password" class="form-control" 
+               placeholder="กรอกรหัสผ่าน" required>
       </div>
 
-      <button class="btn btn-primary w-100 py-2">
-        เข้าสู่ระบบ
+      <button type="submit" class="btn btn-primary w-100 py-2 shadow-sm">
+        ลงชื่อเข้าใช้งาน
       </button>
     </form>
 
     <div class="text-center mt-4 small text-muted">
-      © 2025 Your Company
+      &copy; 2025 Your Company. All rights reserved.
     </div>
 
   </div>
