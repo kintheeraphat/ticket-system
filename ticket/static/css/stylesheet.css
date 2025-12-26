@@ -159,34 +159,61 @@ body {
 .card-pending h3 { color: #f59e0b; }
 .card-closed h3 { color: #10b981; }
 
-/* ====== Professional Table ====== */
-.dashboard-table {
-    background: #fff;
-    border-radius: 16px;
-    padding: 1.5rem;
-    box-shadow: var(--card-shadow);
-}
-
-.dashboard-table h4 {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 1.25rem;
-}
 
 .table thead th {
-    background: #f8fafc;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
+    background: #fcfdfe;
+    border-bottom: 2px solid #f1f5f9;
     color: var(--text-muted);
-    border-top: none;
-    padding: 1rem;
+    font-size: 0.7rem;
+    padding: 1.25rem 1rem;
 }
 
+/* เพิ่มระยะห่างในแถว (Cell Padding) */
 .table tbody td {
-    padding: 1rem;
-    vertical-align: middle;
-    color: #334155;
+    padding: 1.2rem 1rem;
+    border-bottom: 1px solid #f8fafc;
+}
+
+/* เอฟเฟกต์นุ่มนวลเวลา Hover บนตาราง */
+.table-hover tbody tr:hover {
+    background-color: #fbfcfe;
+    transition: all 0.2s ease;
+}
+
+/* ตกแต่ง Input และ Select ให้เข้ากับ Card Shadow */
+.form-select, .form-control {
+    border: 1px solid #e2e8f0;
+    font-size: 0.875rem;
+    border-radius: 10px;
+    padding: 0.6rem 1rem;
+    transition: all 0.2s;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Badge Success แบบมีมิติ (Soft Style ตามที่คุณต้องการ) */
+.badge-success {
+    background: #ecfdf5 !important;
+    color: #047857 !important;
+    border: 1px solid #a7f3d0;
+}
+
+/* ปุ่ม Pagination */
+.pagination .page-link {
+    border-radius: 8px;
+    border: none;
+    margin: 0 4px;
+    padding: 8px 14px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--primary-color);
+    color: #fff;
 }
 
 /* Badge System for Status */
@@ -238,7 +265,11 @@ body {
 .container-main {
     max-width: 1400px;
 }
-
+.container-main2 {
+    max-width: 100%; /* ให้ขยายเต็มพื้นที่ที่เหลือ */
+    width: 100%;
+    padding: 0 1.5rem; /* เพิ่มช่องว่างขอบซ้ายขวานิดหน่อย */
+}
 /* ลบขอบเส้นใต้ของปุ่มสร้าง Ticket */
 .btn-create-link {
     text-decoration: none;
@@ -272,4 +303,11 @@ body {
 /* กราฟควรมี Padding รอบๆ เพื่อให้หายใจออก */
 .dashboard-table {
     padding: 2rem !important; /* เพิ่มพื้นที่ว่าง */
+}
+
+.footer-text {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 1.5rem;
+    margin-top: 2rem;
+    color: #94a3b8;
 }

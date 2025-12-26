@@ -1,15 +1,26 @@
 <div class="layout">
   <aside class="sidebar d-none d-lg-block">
     <div class="sidebar-title">
-      <span class="custom-brand-text fw-bold">
-        <i class="fas fa-ticket-alt"></i> TICKETS
-      </span>
+        <span class="custom-brand-text fw-bold">
+            <i class="fas fa-ticket-alt"></i> TICKETS
+        </span>
     </div>
-  <ul class="sidebar-menu list-unstyled">
-    <li class="active"><a href="/">Dashboard</a></li>
-    <li><a href="/tickets/">Tickets</a></li>
-    <li><a href="/tickets/create/">Create Ticket</a></li>
-    <li class="mt-4"><a href="/logout/" class="text-danger-emphasis">Logout</a></li>
-  </ul>
-  </aside>
+    <ul class="sidebar-menu list-unstyled">
+        
+        <li class="{% if request.path == '/' %}active{% endif %}">
+            <a href="/">Dashboard</a>
+        </li>
 
+        <li class="{% if request.path == '/tickets/' %}active{% endif %}">
+            <a href="/tickets/">Tickets</a>
+        </li>
+
+        <li class="{% if request.path == '/tickets/create/' %}active{% endif %}">
+            <a href="/tickets/create/">Create Ticket</a>
+        </li>
+
+        <li class="mt-4">
+            <a href="/logout/" class="text-danger-emphasis">Logout</a>
+        </li>
+    </ul>
+</aside>
