@@ -1,33 +1,15 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top shadow-sm">
-    <div class="container-fluid px-4">
-        <a class="navbar-brand d-flex align-items-center fw-bold text-primary" href="/">
-            <span class="me-2">🎫</span>
-            <span class="brand-text">TICKET SYSTEM</span>
-        </a>
-        
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">MENU
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto align-items-center">
-                <li class="nav-item px-2"><a class="nav-link" href="/">Dashboard</a></li>
-                <li class="nav-item px-2"><a class="nav-link" href="/tickets/">Tickets</a></li>
-                
-                <li class="nav-item dropdown ms-3">
-                    <a class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark" href="#" id="userDropdown" data-bs-toggle="dropdown">
-                        <div class="user-avatar me-2 d-flex align-items-center justify-content-center bg-primary text-white rounded-circle">
-                            AD
-                        </div>
-                        <span class="fw-medium d-none d-sm-inline">Admin User</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                        <li><a class="dropdown-item" href="#">Settings</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="/logout/">Logout</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
+<div class="layout">
+  <aside class="sidebar d-none d-lg-block">
+    <div class="sidebar-title">
+      <span class="custom-brand-text fw-bold">
+        <i class="fas fa-ticket-alt"></i> TICKETS
+      </span>
     </div>
-</nav>
+  <ul class="sidebar-menu list-unstyled">
+    <li class="active"><a href="/">Dashboard</a></li>
+    <li><a href="/tickets/">Tickets</a></li>
+    <li><a href="/tickets/create/">Create Ticket</a></li>
+    <li class="mt-4"><a href="/logout/" class="text-danger-emphasis">Logout</a></li>
+  </ul>
+  </aside>
+

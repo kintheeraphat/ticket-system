@@ -1,70 +1,56 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="layout">
-    <aside class="sidebar d-none d-lg-block">
-        <div class="sidebar-title">
-            <strong>🎫 IT SERVICE DESK</strong>
+<main class="main-content">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Dashboard Overview</h2>
+            <p class="text-muted mb-0">ยินดีต้อนรับกลับมาอีกครั้ง ขณะนี้คือสรุปข้อมูลสำคัญและสถานการณ์ล่าสุดที่เกิดขึ้นในวันนี้</p>
         </div>
-        <ul class="sidebar-menu list-unstyled">
-            <li class="active"><a href="/">Dashboard</a></li>
-            <li><a href="/tickets/">Tickets</a></li>
-            <li><a href="/tickets/create/">Create Ticket</a></li>
-            <li class="mt-4"><a href="/logout/" class="text-danger-emphasis">Logout</a></li>
-        </ul>
-    </aside>
+        <a href="/tickets/create/" class="btn-create-link">+ Create New Ticket</a>
+    </div>
+    <div class="dashboard-cards">
+        <div class="card card-total">
+            <p>ยอดรวมรายการแจ้งเรื่อง</p>
+            <h3>{{ total }}</h3>
+        </div>
+        <div class="card card-pending">
+            <p>รอจัดการ</p>
+            <h3>{{ pending }}</h3>
+        </div>
+        <div class="card card-closed">
+            <p>ดำเนินการเสร็จสิ้น</p>
+            <h3>{{ closed }}</h3>
+        </div>
+    </div>
 
-    <main class="main-content">
-        <div class="d-flex justify-content-between align-items-end mb-4">
-            <div>
-                <h2 class="fw-bold mb-0">Dashboard Overview</h2>
-                <p class="text-muted mb-0">Welcome back, admin. Here's what's happening today.</p>
-            </div>
-            <a href="/tickets/create/" class="btn-create-link">+ Create New Ticket</a>
+    <div class="dashboard-table">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">รายการล่าสุด</h4>
+            <a href="/tickets/" class="btn btn-link btn-sm text-decoration-none">ดูทั้งหมด</a>
         </div>
-
-        <div class="dashboard-cards">
-            <div class="card card-total">
-                <p>Total Tickets</p>
-                <h3>{{ total }}</h3>
-            </div>
-            <div class="card card-pending">
-                <p>Pending</p>
-                <h3>{{ pending }}</h3>
-            </div>
-            <div class="card card-closed">
-                <p>Closed</p>
-                <h3>{{ closed }}</h3>
-            </div>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Subject</th>
+                        <th>Category</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>#1001</td>
+                        <td class="fw-semibold text-dark">Internet connection issue</td>
+                        <td>Network</td>
+                        <td>24 Dec 2025</td>
+                        <td><span class="status-badge badge-pending">Pending</span></td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-
-        <div class="dashboard-table">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0">Recent Tickets</h4>
-                <a href="/tickets/" class="btn btn-link btn-sm text-decoration-none">View All</a>
-            </div>
-            <div class="table-responsive">
-                <table class="table align-middle">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Subject</th>
-                            <th>Category</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>#1001</td>
-                            <td class="fw-semibold text-dark">Internet connection issue</td>
-                            <td>Network</td>
-                            <td>24 Dec 2025</td>
-                            <td><span class="status-badge badge-pending">Pending</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </main>
+    </div>
+</main>
 </div>
 {% endblock %}
