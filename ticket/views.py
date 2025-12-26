@@ -9,16 +9,13 @@ def dashboard(req):
 def admin_page(request):
     return render(request, "admin.html")
 
-
 @role_required(["manager", "admin"])
 def manager_page(request):
     return render(request, "manager.html")
 
-
 @role_required(["user", "manager", "admin"])
 def user_page(request):
     return render(request, "user.html")
-
 
 def login_view(request):
     if request.method == "POST":
@@ -37,7 +34,6 @@ def login_view(request):
         return render(request, "login.html", {"error": "Login failed"})
 
     return render(request, "login.html")
-
 
 def logout_view(request):
     request.session.flush()
