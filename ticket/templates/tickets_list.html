@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}รายการคำขอทั้งหมด | Ticket System{% endblock %}
+
+{% block content %}
+<main class="main-content">
+    <div class="container-main">
+        <div class="d-flex justify-content-between align-items-center mb-4 pt-2">
+            <div>
+                <h2 class="fw-bold text-dark mb-1">รายการคำขอทั้งหมด</h2>
+                <p class="text-muted small mb-0">ตรวจสอบและบริหารจัดการสถานะรายการแจ้งซ่อมหรือคำร้องขอภายในระบบ</p>
+            </div>
+        </div>
+        <div class="dashboard-table mb-4 p-4">
+            <form method="GET" class="row g-3 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-muted">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="ค้นหาตามรหัส หรือ หัวข้อเรื่อง...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="status" class="form-select border-1">
+                        <option value="">ทุกสถานะรายการ</option>
+                        <option value="pending">รอดำเนินการ</option>
+                        <option value="closed">เสร็จสิ้นแล้ว</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-secondary w-100 fw-bold border-0 py-2">กรองข้อมูล</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="dashboard-table overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="width: 100px;">รหัสรายการ</th>
+                            <th>รายละเอียดคำขอ</th>
+                            <th>หมวดหมู่</th>
+                            <th>ผู้แจ้งเรื่อง</th>
+                            <th>วันที่ส่งคำขอ</th>
+                            <th class="text-center">สถานะ</th>
+                            <th class="text-end pe-4">การจัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in tickets %}
+                        <tr>
+                            <td class="text-center">
+                                <span class="badge bg-light text-muted border px-2 py-1">#{{ ticket.id }}</span>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark mb-0">{{ ticket.subject }}</div>
+                                <small class="text-muted d-block text-truncate" style="max-width: 300px;">
+                                    {{ ticket.description|truncatechars:65 }}
+                                </small>
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill bg-light text-primary border border-primary-subtle fw-medium px-3">
+                                    {{ ticket.category }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="user-avatar-circle bg-primary text-white d-flex align-items-center justify-content-center me-2 shadow-sm">
+                                        {{ ticket.user.username|slice:":1"|upper }}
+                                    </div>
+                                    <span class="fw-medium small">{{ ticket.user.username }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="small text-muted fw-medium">{{ ticket.created_at|date:"d M Y" }}</div>
+                                <div class="text-muted" style="font-size: 10px;">{{ ticket.created_at|date:"H:i" }} น.</div>
+                            </td>
+                            <td class="text-center">
+                                {% if ticket.status == 'pending' %}
+                                    <span class="status-badge badge-pending shadow-sm">รอดำเนินการ</span>
+                                {% else %}
+                                    <span class="status-badge badge-success shadow-sm">เสร็จสิ้นแล้ว</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                <a href="/tickets/{{ ticket.id }}/" class="btn btn-outline-secondary btn-sm border-0 rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <div class="py-4">
+                                    <i class="fas fa-inbox fa-3x mb-3 text-light-emphasis opacity-25"></i>
+                                    <h6 class="text-muted fw-bold">ไม่พบข้อมูลคำขอในระบบ</h6>
+                                    <p class="text-muted small">ยังไม่มีรายการที่ตรงกับเงื่อนไขการค้นหาของคุณ</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 px-2 border-top">
+                <p class="text-muted small mb-0">แสดงรายการทั้งหมด {{ tickets|length }} รายการ</p>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item disabled"><a class="page-link shadow-none" href="#">ก่อนหน้า</a></li>
+                        <li class="page-item active"><a class="page-link shadow-none" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link shadow-none" href="#">ถัดไป</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

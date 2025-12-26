@@ -10,4 +10,6 @@ urlpatterns = [
     path("admin-page/", views.admin_page),
     path("manager-page/", views.manager_page),
     path("user-page/", views.user_page),
+    
+    path("tickets/",views.tickets_list,name="tickets")
 ]
