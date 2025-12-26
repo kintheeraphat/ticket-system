@@ -1,3 +1,159 @@
-body{
-    background-color: aquamarine;
+/* ====== Global Variables ====== */
+:root {
+    --primary-color: #2563eb;
+    --secondary-bg: #1e293b;
+    --sidebar-width: 260px;
+    --body-bg: #f8fafc;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+body {
+    background-color: var(--body-bg);
+    color: var(--text-main);
+    font-family: 'Inter', 'Segoe UI', sans-serif; /* แนะนำให้ใช้ Inter จะดูโปรมาก */
+}
+
+/* ====== Layout Structure ====== */
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Modernized */
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--secondary-bg);
+    color: #fff;
+    padding: 1.5rem 1rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    transition: all 0.3s ease;
+}
+
+.sidebar-title {
+    font-size: 1.25rem;
+    letter-spacing: -0.5px;
+    padding: 0 1rem 2rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 1.5rem;
+}
+
+.sidebar-menu a {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    color: #94a3b8;
+    text-decoration: none;
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.sidebar-menu a:hover, 
+.sidebar-menu li.active a {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+/* Main Content Area */
+.main-content {
+    flex: 1;
+    padding: 2rem;
+    overflow-x: hidden;
+}
+
+/* ====== Modern Cards ====== */
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.card {
+    border: none;
+    border-radius: 16px;
+    padding: 1.5rem;
+    background: #fff;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.card p {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.card h3 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+/* Card Status Colors - Using subtle left border instead of full background */
+.card-total { border-left: 6px solid #4f46e5; }
+.card-pending { border-left: 6px solid #f59e0b; }
+.card-closed { border-left: 6px solid #10b981; }
+
+.card-total h3 { color: #4f46e5; }
+.card-pending h3 { color: #f59e0b; }
+.card-closed h3 { color: #10b981; }
+
+/* ====== Professional Table ====== */
+.dashboard-table {
+    background: #fff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+}
+
+.dashboard-table h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+}
+
+.table thead th {
+    background: #f8fafc;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    border-top: none;
+    padding: 1rem;
+}
+
+.table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    color: #334155;
+}
+
+/* Badge System for Status */
+.status-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-pending { background: #fef3c7; color: #92400e; }
+.badge-success { background: #d1fae5; color: #065f46; }
+
+/* Responsive */
+@media (max-width: 992px) {
+    .layout { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; position: relative; }
 }

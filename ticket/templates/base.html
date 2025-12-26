@@ -1,25 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% load static %}
     <title>{% block title %}Ticket System{% endblock %}</title>
-    
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/stylesheet.css' %}">
+    
+    {% block extra_css %}{% endblock %}
 </head>
-<body>
 
-    {% include "header.html" %}
+<body class="bg-light d-flex flex-column min-vh-100">
 
-    <main class=>
-        <div class=>
-            {% block content %}
-            {% endblock %}
-        </div>
+    {% include 'header.html' %}
+
+    <main class="flex-shrink-0">
+        {% block content %}
+        {% endblock %}
     </main>
 
-    {% include "footer.html" %}
+    {% include 'footer.html' %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>
