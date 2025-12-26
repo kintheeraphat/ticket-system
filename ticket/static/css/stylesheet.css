@@ -1,4 +1,6 @@
-/* ====== Global Variables ====== */
+/* ===============================
+   GLOBAL VARIABLES
+================================ */
 :root {
     --primary-color: #2563eb;
     --secondary-bg: #1e293b;
@@ -6,54 +8,35 @@
     --body-bg: #f8fafc;
     --text-main: #1e293b;
     --text-muted: #64748b;
-    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-/* ====== LOgin = */
-
-.login-wrapper {
-    min-height: 100vh;
-    background-color: #f4f6f8;
+    --card-shadow: 0 4px 6px -1px rgba(0,0,0,.08),
+                   0 2px 4px -1px rgba(0,0,0,.04);
 }
 
-.login-card {
-    width: 100%;
-    max-width: 380px;
-    background: #fff;
-    padding: 2.2rem;
-    border-radius: 12px;
+/* ===============================
+   BASE
+================================ */
+* {
+    box-sizing: border-box;
 }
 
-.login-card h3 {
-    color: #1f3c88;
-}
-
-.form-control {
-    padding: 0.6rem 0.75rem;
-    border-radius: 8px;
-}
-
-.btn-primary {
-    background-color: #1f3c88;
-    border: none;
-}
-
-.btn-primary:hover {
-    background-color: #162c63;
-}
-/* ====================== */
 body {
+    margin: 0;
     background-color: var(--body-bg);
     color: var(--text-main);
-    font-family: 'Inter', 'Segoe UI', sans-serif; /* แนะนำให้ใช้ Inter จะดูโปรมาก */
+    font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
-/* ====== Layout Structure ====== */
+/* ===============================
+   LAYOUT
+================================ */
 .layout {
     display: flex;
     min-height: 100vh;
 }
 
-/* Sidebar Modernized */
+/* ===============================
+   SIDEBAR
+================================ */
 .sidebar {
     width: var(--sidebar-width);
     background: var(--secondary-bg);
@@ -61,23 +44,19 @@ body {
     padding: 1.5rem 1rem;
     position: sticky;
     top: 0;
-    height: 100vh;
-    transition: all 0.3s ease;
 }
 
 .sidebar-title {
-    font-size: 1.25rem;
-    padding: 0 1rem 2rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    margin-bottom: 1.5rem;
-    color: #ffffff; 
     text-align: center;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
 .custom-brand-text {
-    font-weight: 800 !important; 
-    letter-spacing: 0.5px;      
-    text-transform: uppercase;  
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
 .sidebar-menu a {
@@ -89,145 +68,150 @@ body {
     border-radius: 10px;
     margin-bottom: 0.5rem;
     font-weight: 500;
-    transition: 0.2s;
+    transition: all .2s ease;
 }
 
-.sidebar-menu a:hover, 
+.sidebar-menu a:hover,
 .sidebar-menu li.active a {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255,255,255,0.1);
     color: #fff;
 }
 
-/* Main Content Area */
-.main-content {
+/* ===============================
+   MAIN CONTENT
+================================ */
+main {
     flex: 1;
     padding: 2rem;
     overflow-x: hidden;
 }
 
-/* ====== Modern Cards ====== */
+/* ===============================
+   LOGIN
+================================ */
+.login-wrapper {
+    min-height: 100vh;
+    background-color: #f4f6f8;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    background: #fff;
+    padding: 2.2rem;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+}
+
+.login-card h3 {
+    color: #1f3c88;
+}
+
+/* ===============================
+   DASHBOARD CARDS
+================================ */
 .dashboard-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
 
-.card {
-    border: none;
-    border-radius: 16px;
-    padding: 1.5rem;
+.dashboard-card {
     background: #fff;
+    padding: 1.5rem;
+    border-radius: 16px;
     box-shadow: var(--card-shadow);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform .2s ease, box-shadow .2s ease;
+    border-left: 6px solid transparent;
 }
 
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.05);
+.dashboard-card:hover {
+    transform: translateY(-4px);
 }
 
-.card p {
+.dashboard-card p {
     color: var(--text-muted);
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: .75rem;
     text-transform: uppercase;
-    margin-bottom: 0.5rem;
-    letter-spacing: -1px;
-    margin-top: 5px;
+    margin-bottom: .5rem;
 }
 
-.dashboard-cards .card {
-    position: relative;
-    overflow: hidden;
-    padding: 1.5rem !important; 
-    transition: all 0.3s ease;
-}
-
-.card h3 {
-    font-size: 2.25rem;
+.dashboard-card h3 {
+    font-size: 2.2rem;
     font-weight: 700;
     margin: 0;
 }
 
-/* Card Status Colors - Using subtle left border instead of full background */
-.card-total { border-left: 6px solid #4f46e5; }
-.card-pending { border-left: 6px solid #f59e0b; }
-.card-closed { border-left: 6px solid #10b981; }
+/* Card States */
+.card-total { border-color: #4f46e5; }
+.card-pending { border-color: #f59e0b; }
+.card-closed { border-color: #10b981; }
 
 .card-total h3 { color: #4f46e5; }
 .card-pending h3 { color: #f59e0b; }
 .card-closed h3 { color: #10b981; }
 
+/* ===============================
+   TABLE
+================================ */
+.dashboard-table {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+}
 
 .table thead th {
     background: #fcfdfe;
     border-bottom: 2px solid #f1f5f9;
     color: var(--text-muted);
-    font-size: 0.7rem;
-    padding: 1.25rem 1rem;
+    font-size: .75rem;
 }
 
-/* เพิ่มระยะห่างในแถว (Cell Padding) */
 .table tbody td {
-    padding: 1.2rem 1rem;
-    border-bottom: 1px solid #f8fafc;
+    padding: 1.1rem;
+    border-bottom: 1px solid #f1f5f9;
 }
 
-/* เอฟเฟกต์นุ่มนวลเวลา Hover บนตาราง */
 .table-hover tbody tr:hover {
     background-color: #fbfcfe;
-    transition: all 0.2s ease;
 }
 
-/* ตกแต่ง Input และ Select ให้เข้ากับ Card Shadow */
-.form-select, .form-control {
-    border: 1px solid #e2e8f0;
-    font-size: 0.875rem;
+/* ===============================
+   FORM
+================================ */
+.form-control,
+.form-select {
     border-radius: 10px;
-    padding: 0.6rem 1rem;
-    transition: all 0.2s;
+    font-size: .875rem;
+    border: 1px solid #e2e8f0;
 }
 
-.form-control:focus, .form-select:focus {
+.form-control:focus,
+.form-select:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 3px rgba(37,99,235,.12);
 }
 
-/* Badge Success แบบมีมิติ (Soft Style ตามที่คุณต้องการ) */
-.badge-success {
-    background: #ecfdf5 !important;
-    color: #047857 !important;
-    border: 1px solid #a7f3d0;
-}
-
-/* ปุ่ม Pagination */
-.pagination .page-link {
-    border-radius: 8px;
-    border: none;
-    margin: 0 4px;
-    padding: 8px 14px;
-    color: var(--text-muted);
-    font-weight: 600;
-}
-
-.pagination .page-item.active .page-link {
-    background-color: var(--primary-color);
-    color: #fff;
-}
-
-/* Badge System for Status */
+/* ===============================
+   BADGE
+================================ */
 .status-badge {
-    padding: 0.35rem 0.75rem;
+    padding: .35rem .75rem;
     border-radius: 50px;
-    font-size: 0.75rem;
+    font-size: .75rem;
     font-weight: 600;
 }
 
-.bg-primary-soft { background-color: rgba(37, 99, 235, 0.1); }
-.bg-warning-soft { background-color: rgba(245, 158, 11, 0.1); }
-.bg-success-soft { background-color: rgba(16, 185, 129, 0.1); }
+.bg-primary-soft { background: rgba(37,99,235,.1); color:#2563eb; }
+.bg-warning-soft { background: rgba(245,158,11,.1); color:#b45309; }
+.bg-success-soft { background: rgba(16,185,129,.1); color:#047857; }
 
+/* ===============================
+   ICON BOX
+================================ */
 .icon-box {
     width: 48px;
     height: 48px;
@@ -238,76 +222,26 @@ body {
     font-size: 1.25rem;
 }
 
-
-
-/* Responsive */
-@media (max-width: 992px) {
-    .layout { flex-direction: column; }
-    .sidebar { width: 100%; height: auto; position: relative; }
-}
-/* เพิ่มเติมจาก CSS เดิมของคุณ */
-
-/* จัดการช่องไฟชื่อระบบ */
-.brand-text {
-    letter-spacing: -0.5px;
-}
-
-/* วงกลม Avatar ของผู้ใช้ */
-.user-avatar-circle {
-    width: 32px;
-    height: 32px;
-    font-size: 12px;
-    font-weight: bold;
-    flex-shrink: 0; /* ป้องกันวงกลมเบี้ยว */
-}
-
-/* ปรับระยะขอบ Dashboard ให้สวยขึ้น */
-.container-main {
-    max-width: 1400px;
-}
-.container-main2 {
-    max-width: 200%; /* ให้ขยายเต็มพื้นที่ที่เหลือ */
-    width: 100%;
-    padding: 0 1.5rem; /* เพิ่มช่องว่างขอบซ้ายขวานิดหน่อย */
-}
-/* ลบขอบเส้นใต้ของปุ่มสร้าง Ticket */
-.btn-create-link {
-    text-decoration: none;
-    font-weight: 600;
-    color: var(--primary-color);
-    transition: 0.2s;
-}
-
-.btn-create-link:hover {
-    opacity: 0.8;
-}
-.login-card {
-    max-width: 400px;
-    width: 100%;
-    background-color: #ffffff;
-    border-radius: 8px;
-}
-/* เพิ่มเงาแบบนุ่มนวล (Soft Shadow) แทนเส้นขอบ */
-.dashboard-table, .card {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02) !important;
-    border: 1px solid rgba(0, 0, 0, 0.05); /* เส้นขอบบางๆ เพื่อความคมชัด */
-}
-
-/* ทำให้ Badge มีมิติด้วยการใช้สีพื้นหลังอ่อนและตัวหนังสือเข้ม */
-.badge-pending {
-    background: #fffbeb !important;
-    color: #b45309 !important;
-    border: 1px solid #fde68a;
-}
-
-/* กราฟควรมี Padding รอบๆ เพื่อให้หายใจออก */
-.dashboard-table {
-    padding: 2rem !important; /* เพิ่มพื้นที่ว่าง */
-}
-
+/* ===============================
+   FOOTER
+================================ */
 .footer-text {
     border-top: 1px solid #e2e8f0;
     padding-top: 1.5rem;
     margin-top: 2rem;
     color: #94a3b8;
+}
+
+/* ===============================
+   RESPONSIVE
+================================ */
+@media (max-width: 992px) {
+    .layout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        position: relative;
+    }
 }
