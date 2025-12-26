@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="layout">
-    <aside class="sidebar">
+    <aside class="sidebar d-none d-lg-block">
         <div class="sidebar-title">
             <strong>🎫 IT SERVICE DESK</strong>
         </div>
@@ -19,7 +19,7 @@
                 <h2 class="fw-bold mb-0">Dashboard Overview</h2>
                 <p class="text-muted mb-0">Welcome back, admin. Here's what's happening today.</p>
             </div>
-            <a href="#">  + Create New Ticket</a>
+            <a href="/tickets/create/" class="btn-create-link">+ Create New Ticket</a>
         </div>
 
         <div class="dashboard-cards">
@@ -56,12 +56,12 @@
                     <tbody>
                         <tr>
                             <td>#1001</td>
-                            <td class="fw-semibold">Internet connection issue</td>
+                            <td class="fw-semibold text-dark">Internet connection issue</td>
                             <td>Network</td>
                             <td>24 Dec 2025</td>
                             <td><span class="status-badge badge-pending">Pending</span></td>
                         </tr>
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
         </div>
