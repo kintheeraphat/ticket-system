@@ -40,7 +40,7 @@
 .btn-primary:hover {
     background-color: #162c63;
 }
-/* ====================== */
+
 body {
     background-color: var(--body-bg);
     color: var(--text-main);
