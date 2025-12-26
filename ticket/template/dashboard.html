@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | IT Service Desk{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-dark">ภาพรวมระบบ (Dashboard)</h2>
+    <a href="/tickets/create/" class="btn btn-primary shadow-sm">+ สร้างรายการใหม่</a>
+</div>
+
+<div class="row g-3 mb-5">
+    <div class="col-md-4">
+        <div class="card border-0 bg-primary text-white shadow-sm h-100">
+            <div class="card-body py-4">
+                <h6 class="text-white-50 uppercase small fw-bold">รายการทั้งหมด</h6>
+                <h2 class="display-6 fw-bold mb-0">{{ total }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 bg-warning text-dark shadow-sm h-100">
+            <div class="card-body py-4">
+                <h6 class="text-dark-50 uppercase small fw-bold">รอดำเนินการ</h6>
+                <h2 class="display-6 fw-bold mb-0">{{ pending }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 bg-success text-white shadow-sm h-100">
+            <div class="card-body py-4">
+                <h6 class="text-white-50 uppercase small fw-bold">เสร็จสิ้นแล้ว</h6>
+                <h2 class="display-6 fw-bold mb-0">{{ closed }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="recent-section">
+    <h5 class="fw-bold mb-3 d-flex align-items-center">
+        <span class="badge bg-secondary me-2"> </span> รายการล่าสุด
+    </h5>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle border-top">
+            <thead class="bg-light">
+                <tr>
+                    <th class="py-3">ID</th>
+                    <th class="py-3">หัวข้อคำร้อง</th>
+                    <th class="py-3 text-center">ประเภท</th>
+                    <th class="py-3 text-center">วันที่แจ้ง</th>
+                    <th class="py-3 text-end">สถานะ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in recent_tickets %}
+                <tr>
+                    <td class="fw-bold text-muted">#{{ ticket.id }}</td>
+                    <td>
+                        <div class="fw-bold">{{ ticket.title }}</div>
+                        <small class="text-muted">{{ ticket.description|truncatechars:50 }}</small>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge rounded-pill bg-light text-dark border">{{ ticket.ticket_type.name }}</span>
+                    </td>
+                    <td class="text-center small text-muted">
+                        {{ ticket.create_at|date:"d/m/Y H:i" }}
+                    </td>
+                    <td class="text-end">
+                        {% if ticket.status_id == 1 %}
+                            <span class="badge bg-warning-subtle text-warning border border-warning px-3">Pending</span>
+                        {% elif ticket.status_id == 5 %}
+                            <span class="badge bg-success-subtle text-success border border-success px-3">Completed</span>
+                        {% else %}
+                            <span class="badge bg-info-subtle text-info border border-info px-3">In Progress</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-5 text-muted">ไม่มีรายการล่าสุดในขณะนี้</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
