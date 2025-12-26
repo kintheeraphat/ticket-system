@@ -2,9 +2,6 @@ from django.shortcuts import render, redirect
 from .auth_users import USERS
 from .decorators import role_required
 
-def dashboard(req):
-    return render(req, 'dashboard.html')
-
 @role_required(["admin"])
 def admin_page(request):
     return render(request, "admin.html")
@@ -42,3 +39,9 @@ def login_view(request):
 def logout_view(request):
     request.session.flush()
     return redirect("login")    
+
+def dashboard(req):
+    return render(req, 'dashboard.html')
+
+def tickets_list(req):
+    return render(req,'tickets_list.html')

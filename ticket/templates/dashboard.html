@@ -4,53 +4,134 @@
     <div class="d-flex justify-content-between align-items-end mb-4">
         <div>
             <h2 class="fw-bold mb-0">Dashboard Overview</h2>
-            <p class="text-muted mb-0">ยินดีต้อนรับกลับมาอีกครั้ง ขณะนี้คือสรุปข้อมูลสำคัญและสถานการณ์ล่าสุดที่เกิดขึ้นในวันนี้</p>
+            <p class="text-muted mb-0">ยินดีต้อนรับกลับมาอีกครั้ง
+                ขณะนี้คือสรุปข้อมูลสำคัญและสถานการณ์ล่าสุดที่เกิดขึ้นในวันนี้</p>
         </div>
         <a href="/tickets/create/" class="btn-create-link">+ Create New Ticket</a>
     </div>
-    <div class="dashboard-cards">
-        <div class="card card-total">
-            <p>ยอดรวมรายการแจ้งเรื่อง</p>
-            <h3>{{ total }}</h3>
-        </div>
-        <div class="card card-pending">
-            <p>รอจัดการ</p>
-            <h3>{{ pending }}</h3>
-        </div>
-        <div class="card card-closed">
-            <p>ดำเนินการเสร็จสิ้น</p>
-            <h3>{{ closed }}</h3>
+  <div class="dashboard-cards">
+    <div class="card card-total shadow-sm border-0">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <p class="text-muted small fw-bold text-uppercase mb-1">ยอดรวมรายการแจ้งเรื่อง</p>
+                <h3 class="fw-bold mb-0">{{ total }}</h3>
+            </div>
+            <div class="icon-box bg-primary-soft text-primary">
+                <i class="fas fa-ticket-alt"></i>
+            </div>
         </div>
     </div>
 
-    <div class="dashboard-table">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="mb-0">รายการล่าสุด</h4>
-            <a href="/tickets/" class="btn btn-link btn-sm text-decoration-none">ดูทั้งหมด</a>
-        </div>
-        <div class="table-responsive">
-            <table class="table align-middle">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Subject</th>
-                        <th>Category</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>#1001</td>
-                        <td class="fw-semibold text-dark">Internet connection issue</td>
-                        <td>Network</td>
-                        <td>24 Dec 2025</td>
-                        <td><span class="status-badge badge-pending">Pending</span></td>
-                    </tr>
-                </tbody>
-            </table>
+    <div class="card card-pending shadow-sm border-0">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <p class="text-muted small fw-bold text-uppercase mb-1">รอจัดการ</p>
+                <h3 class="fw-bold mb-0 text-warning">{{ pending }}</h3>
+            </div>
+            <div class="icon-box bg-warning-soft text-warning">
+                <i class="fas fa-clock"></i>
+            </div>
         </div>
     </div>
+
+    <div class="card card-closed shadow-sm border-0">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <p class="text-muted small fw-bold text-uppercase mb-1">ดำเนินการเสร็จสิ้น</p>
+                <h3 class="fw-bold mb-0 text-success">{{ closed }}</h3>
+            </div>
+            <div class="icon-box bg-success-soft text-success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="row mb-4">
+        <div class="col-lg-7 mb-4 mb-lg-0">
+            <div class="dashboard-table h-100">
+                <h4>สัดส่วนประเภทคำขอ (Category Distribution)</h4>
+                <div style="position: relative; height:300px; width:100%; display: flex; justify-content: center;">
+                    <canvas id="ticketChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="dashboard-table h-100">
+                <h4>ประเภทที่ถูกแจ้งมากที่สุด</h4>
+                <div class="mt-4">
+                    <div class="d-flex align-items-center mb-4 p-3 rounded-4"
+                        style="background: #eff6ff; border-left: 6px solid var(--primary-color);">
+                        <div class="me-3">
+                            <span
+                                class="badge rounded-circle bg-primary d-flex align-items-center justify-content-center"
+                                style="width: 40px; height: 40px; font-size: 1.2rem;">1</span>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-0 text-dark">{{ top_category_name|default:"Network Issue" }}</h5>
+                            <p class="mb-0 text-muted small">มีการแจ้งเข้ามาทั้งหมด {{ top_category_count|default:"45"
+                                }} รายการ</p>
+                        </div>
+                    </div>
+
+                    <div class="px-2">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-main fw-medium">2. Hardware Maintenance</span>
+                            <span class="badge bg-light text-dark border fw-bold">32</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-main fw-medium">3. Software Installation</span>
+                            <span class="badge bg-light text-dark border fw-bold">18</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-main fw-medium">4. System Access</span>
+                            <span class="badge bg-light text-dark border fw-bold">10</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('ticketChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Network', 'Hardware', 'Software', 'Access'],
+                    datasets: [{
+                        data: [45, 32, 18, 10], // นำข้อมูลจาก Backend มาใส่ที่นี่
+                        backgroundColor: [
+                            '#2563eb', // Primary Blue
+                            '#f59e0b', // Warning Orange
+                            '#10b981', // Success Green
+                            '#64748b'  // Muted Gray
+                        ],
+                        hoverOffset: 15,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                font: { size: 12, family: "'Inter', sans-serif" }
+                            }
+                        }
+                    },
+                    cutout: '70%' // ทำให้เป็นวงโดนัทเพื่อให้ดูทันสมัย
+                }
+            });
+        });
+    </script>
 </main>
 </div>
 {% endblock %}
