@@ -1,312 +1,73 @@
 {% extends "base.html" %}
 {% load static %}
-
-{% block title %}สร้างคำขอใหม่ | TICKETS{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
-
-<style>
-    :root {
-        --primary-color: #4f46e5;
-        --secondary-color: #64748b;
-        --bg-light: #f8fafc;
-        --white: #ffffff;
-    }
-
-    /* ใช้เฉพาะส่วนฟอร์ม */
-    .type-list {
-        list-style: none;
-        padding: 0;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 15px;
-        margin-bottom: 30px;
-    }
-
-    .type-list li {
-        background: var(--white);
-        padding: 20px;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        transition: all 0.3s ease;
-    }
-
-    .type-list li:hover {
-        border-color: var(--primary-color);
-        transform: translateY(-3px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    }
-
-    .type-list li.active {
-        background: var(--primary-color);
-        color: white;
-        border-color: var(--primary-color);
-    }
-
-    #ticketForm {
-        display: none;
-        background: var(--white);
-        padding: 40px;
-        border-radius: 16px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
-    }
-
-    .form-section {
-        background: #f1f5f9;
-        padding: 25px;
-        border-radius: 12px;
-        margin: 20px 0;
-        border-left: 5px solid var(--primary-color);
-    }
-
-    .dynamic-field {
-        display: none;
-    }
-
-    .dynamic-field.show {
-        display: block;
-    }
-
-    .grid-2 {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .vpn-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-        background: #fff;
-    }
-
-    .vpn-table th,
-    .vpn-table td {
-        padding: 10px;
-        border: 1px solid #e2e8f0;
-    }
-
-    .btn-add-user {
-        background: #10b981;
-        color: white;
-        border: none;
-        padding: 8px 15px;
-        border-radius: 6px;
-        cursor: pointer;
-        margin-top: 10px;
-    }
-
-    .btn-submit {
-        background: #2563eb;
-        color: white;
-        border: none;
-        padding: 15px 30px;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        width: 100%;
-        font-size: 16px;
-    }
-</style>
-{% endblock %}
+{% block title %}สร้างคำร้องใหม่{% endblock %}
 
 {% block content %}
 <main class="main-content">
 
-    <div class="d-flex justify-content-between align-items-center mb-4 pt-2">
-        <div>
-            <h2 class="fw-bold text-dark mb-1">
-                <i class="fas fa-plus-circle me-2"></i> สร้างคำร้องขอระบบ IT
-            </h2>
-            <p class="text-muted small mb-0">
-                กรุณาเลือกประเภทคำร้องก่อนกรอกแบบฟอร์ม
-            </p>
-        </div>
-    </div>
+<h3 class="fw-bold mb-4">
+    <i class="fas fa-plus-circle me-2 text-primary"></i> เลือกประเภทคำร้อง
+</h3>
 
-    <!-- TYPE LIST -->
-    <ul class="type-list">
-        <li onclick="selectType(this, 'IT-ERP-PERM')">
-            <i class="fas fa-user-lock"></i>
+<ul class="type-list">
+
+    <!-- ERP -->
+    <li>
+        <a href="{% url 'erp_perm' %}">
+            <i class="fas fa-user-lock text-primary"></i>
             <div>
-                <div class="fw-bold">ขอเปิด User / ปรับสิทธิ์ ERP</div>
-                <small>IT-ERP-001/004</small>
+                <b>ขอเปิด User / ปรับสิทธิ์ ERP</b><br>
+                <small>IT-ERP-001 / 004</small>
             </div>
-        </li>
+        </a>
+    </li>
 
-        <li onclick="selectType(this, 'IT-ADJ')">
-            <i class="fas fa-exchange-alt"></i>
+    <li>
+        <a href="#">
+            <i class="fas fa-exchange-alt text-success"></i>
             <div>
-                <div class="fw-bold">ปรับยอดสะสม (Adjust)</div>
-                <small>IT-ADJ-001 V.3</small>
+                <b>ปรับยอดสะสม (Adjust)</b><br>
+                <small>IT-ADJ-001</small>
             </div>
-        </li>
+        </a>
+    </li>
 
-        <li onclick="selectType(this, 'IT-APP')">
-            <i class="fas fa-file-invoice"></i>
+    <li>
+        <a href="#">
+            <i class="fas fa-file-invoice text-warning"></i>
             <div>
-                <div class="fw-bold">ขอ App / Report</div>
-                <small>IT-APP-001 V.3</small>
+                <b>ขอ App / Report</b>
             </div>
-        </li>
+        </a>
+    </li>
 
-        <li onclick="selectType(this, 'IT-VPN')">
-            <i class="fas fa-network-wired"></i>
+    <li>
+        <a href="#">
+            <i class="fas fa-network-wired text-info"></i>
             <div>
-                <div class="fw-bold">ขอใช้งาน VPN</div>
-                <small>IT-INFRA-002 V.1</small>
+                <b>ขอใช้งาน VPN</b>
             </div>
-        </li>
+        </a>
+    </li>
 
-        <li onclick="selectType(this, 'IT-HW')">
-            <i class="fas fa-laptop"></i>
+    <li>
+        <a href="#">
+            <i class="fas fa-laptop text-secondary"></i>
             <div>
-                <div class="fw-bold">เบิก / คืน อุปกรณ์ IT</div>
-                <small>FD-ITD-002</small>
+                <b>เบิก / คืน อุปกรณ์ IT</b>
             </div>
-        </li>
+        </a>
+    </li>
 
-        <li onclick="selectType(this, 'IT-PROMO')">
-            <i class="fas fa-ad"></i>
+    <li>
+        <a href="#">
+            <i class="fas fa-ad text-danger"></i>
             <div>
-                <div class="fw-bold">Active Promotion</div>
-                <small>IT-ERP-003</small>
+                <b>Active Promotion</b>
             </div>
-        </li>
-    </ul>
+        </a>
+    </li>
 
-    <!-- FORM -->
-    <form method="post" id="ticketForm" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="hidden" name="form_code" id="formCode">
-
-        <h4 id="formTitleDisplay" class="mb-4 text-primary fw-bold"></h4>
-
-        <div class="grid-2">
-            <div class="form-group">
-                <label>ชื่อ-นามสกุล (ผู้ร้องขอ)</label>
-                <input type="text" name="requester_name" required>
-            </div>
-            <div class="form-group">
-                <label>แผนก/ฝ่าย</label>
-                <input type="text" name="dept" required>
-            </div>
-        </div>
-
-        <!-- IT FIELD -->
-        <div class="dynamic-field" id="field-it">
-            <hr>
-            <h6 class="fw-bold mb-3">รายละเอียดระบบ IT</h6>
-
-            <div class="mb-3">
-                <label class="form-label">ประเภทระบบ</label>
-                <select class="form-select" name="it_system">
-                    <option value="">-- เลือก --</option>
-                    <option>VPN</option>
-                    <option>Email</option>
-                    <option>Program</option>
-                </select>
-            </div>
-
-            <table class="table table-bordered vpn-table">
-                <thead class="table-light">
-                    <tr>
-                        <th>IP Address</th>
-                        <th>หมายเหตุ</th>
-                        <th width="60"></th>
-                    </tr>
-                </thead>
-                <tbody id="vpnBody">
-                    <tr>
-                        <td>
-                            <input name="vpn_ip[]" class="form-control">
-                        </td>
-                        <td>
-                            <input name="vpn_note[]" class="form-control">
-                        </td>
-                        <td class="text-center">
-                            <button type="button" class="btn btn-sm btn-danger removeRow">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <button type="button" id="addVpnRow" class="btn btn-outline-primary btn-sm">
-                <i class="fa fa-plus me-1"></i>
-                เพิ่ม IP
-            </button>
-        </div>
-
-        <!-- DOCUMENT FIELD -->
-        <div class="dynamic-field" id="field-document">
-            <hr>
-            <h6 class="fw-bold mb-3">ข้อมูลเอกสาร</h6>
-
-            <div class="mb-3">
-                <label class="form-label">แนบไฟล์</label>
-                <input type="file" name="document_file" class="form-control">
-            </div>
-        </div>
-
-        <div class="text-end mt-4">
-            <button class="btn btn-primary px-4">
-                <i class="fa fa-paper-plane me-1"></i>
-                ส่งคำขอ
-            </button>
-        </div>
-
-        <button type="submit" class="btn-submit mt-4">
-            ส่งคำร้องขออนุมัติ
-        </button>
-    </form>
-
+</ul>
 </main>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    function selectType(el, code) {
-        document.querySelectorAll('.type-list li').forEach(li => li.classList.remove('active'));
-        el.classList.add('active');
-
-        document.getElementById('ticketForm').style.display = 'block';
-        document.getElementById('formCode').value = code;
-        document.getElementById('formTitleDisplay').innerText =
-            el.querySelector('.fw-bold').innerText;
-
-        document.querySelectorAll('.dynamic-field').forEach(df => df.classList.remove('show'));
-        const target = document.getElementById('fields-' + code);
-        if (target) target.classList.add('show');
-
-        window.scrollTo({ top: document.getElementById('ticketForm').offsetTop - 20, behavior: 'smooth' });
-    }
-
-    function addVpnRow() {
-        const table = document.getElementById('vpnUserTable').querySelector('tbody');
-        const rowCount = table.rows.length;
-        if (rowCount < 10) {
-            table.insertAdjacentHTML('beforeend',
-                `<tr>
-                    <td>${rowCount + 1}</td>
-                    <td><input type="text" name="vpn_name[]"></td>
-                    <td><input type="text" name="vpn_pos[]"></td>
-                </tr>`
-            );
-        } else {
-            alert("เพิ่มได้สูงสุด 10 รายชื่อ");
-        }
-    }
-</script>
 {% endblock %}

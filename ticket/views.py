@@ -44,3 +44,6 @@ def tickets_list(req):
 
 def tickets_create(req):
     return render(req,'tickets_create.html')
+
+def erp_perm(request):
+    return render(request, "form/erp_perm.html")

@@ -382,3 +382,32 @@ textarea.form-control {
 input[type="file"] {
     padding: .6rem;
 }
+.type-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.type-list li a {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    border-radius: 12px;
+    background: #fff;
+    text-decoration: none;
+    color: #333;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: all .2s ease;
+}
+
+.type-list li a:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.type-list i {
+    font-size: 28px;
+}
