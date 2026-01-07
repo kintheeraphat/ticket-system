@@ -47,3 +47,14 @@ def tickets_create(req):
 
 def erp_perm(request):
     return render(request, "form/erp_perm.html")
+
+def adjust_form(request):
+    return render(request, "tickets_form/adjust.html")
+
+
+def app_report_form(request):
+    return render(request, "tickets_form/app_report.html")
+
+
+def active_promotion_form(request):
+    return render(request, "tickets_form/active_promotion.html")
