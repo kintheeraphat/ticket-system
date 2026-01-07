@@ -1,0 +1,23 @@
+<div id="fields-IT-ADJ" class="dynamic-field">
+    <label>ประเภทการปรับยอด</label>
+    <select name="adj_type">
+        <option value="ยอดยกจากเดิม">ยอดยกจากเดิม</option>
+        <option value="แก้ไขยอด">แก้ไขยอด</option>
+        <option value="โอนระหว่างร้าน">โอนระหว่างร้าน</option>
+        <option value="โอนระหว่างโปรโมชั่น">โอนระหว่างโปรโมชั่น</option>
+    </select>
+
+    <div class="grid-2">
+        <div>
+            <label>รหัส/ชื่อลูกค้า (ต้นทาง)</label>
+            <input type="text" name="source_cust">
+        </div>
+        <div>
+            <label>รหัส/ชื่อลูกค้า (ปลายทาง)</label>
+            <input type="text" name="dest_cust">
+        </div>
+    </div>
+
+    <label>จำนวนที่ขอปรับ</label>
+    <input type="text" name="adj_amount">
+</div>

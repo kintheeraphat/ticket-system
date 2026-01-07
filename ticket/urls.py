@@ -14,4 +14,8 @@ urlpatterns = [
     path("tickets/",views.tickets_list,name="tickets"),
     path("create/",views.tickets_create,name="create"),
     path("create/erp-perm/", views.erp_perm, name="erp_perm"),
+
+    path("tickets/adjust/", views.adjust_form, name="adjust_form"),
+    path("tickets/app-report/", views.app_report_form, name="app_report_form"),
+    path("tickets/active-promotion/", views.active_promotion_form, name="active_promotion_form"),
 ]
