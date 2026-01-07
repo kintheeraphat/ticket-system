@@ -41,3 +41,6 @@ def dashboard(req):
 
 def tickets_list(req):
     return render(req,'tickets_list.html')
+
+def tickets_create(req):
+    return render(req,'tickets_create.html')

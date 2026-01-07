@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Home | Ticket System{% endblock %}
+
+{% block content %}
+<div class="container-main">
+
+{% if user.role == "user" %}
+
+    <div class="page-header">
+        <h2 class="fw-bold">หน้าแรกของคุณ</h2>
+        <p class="text-muted">ติดตามคำขอของคุณแบบเรียลไทม์</p>
+
+        <a href="/tickets/create/" class="btn btn-primary mt-3">
+            <i class="fas fa-plus me-1"></i> สร้างคำขอใหม่
+        </a>
+    </div>
+
+    <div class="dashboard-cards">
+        <div class="card card-total">
+            <p>คำขอของฉัน</p>
+            <h3>{{ total_tickets }}</h3>
+        </div>
+
+        <div class="card card-pending">
+            <p>รอดำเนินการ</p>
+            <h3>{{ pending_tickets }}</h3>
+        </div>
+
+        <div class="card card-closed">
+            <p>เสร็จสิ้น</p>
+            <h3>{{ closed_tickets }}</h3>
+        </div>
+    </div>
+
+    <div class="dashboard-table">
+        <h5 class="fw-bold mb-3">คำขอล่าสุดของคุณ</h5>
+
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>หัวข้อ</th>
+                    <th>สถานะ</th>
+                    <th class="text-end">ดู</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for ticket in recent_tickets %}
+                <tr>
+                    <td>#{{ ticket.id }}</td>
+                    <td>{{ ticket.subject }}</td>
+                    <td>
+                        {% if ticket.status == "pending" %}
+                            <span class="badge badge-pending">รอดำเนินการ</span>
+                        {% else %}
+                            <span class="badge badge-success">เสร็จสิ้น</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="#" class="btn btn-sm btn-outline-primary">
+                            ดู
+                        </a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">
+                        ยังไม่มีคำขอ
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% else %}
+<!-- ================= MANAGER HOME ================= -->
+
+    <div class="page-header">
+        <h2 class="fw-bold">แดชบอร์ดผู้จัดการ</h2>
+        <p class="text-muted">ภาพรวมคำขอทั้งหมดในระบบ</p>
+    </div>
+
+    <div class="dashboard-cards">
+        <div class="card card-total">
+            <p>คำขอทั้งหมด</p>
+            <h3>{{ total_tickets }}</h3>
+        </div>
+
+        <div class="card card-pending">
+            <p>รอดำเนินการ</p>
+            <h3>{{ pending_tickets }}</h3>
+        </div>
+
+        <div class="card card-closed">
+            <p>เสร็จสิ้นแล้ว</p>
+            <h3>{{ closed_tickets }}</h3>
+        </div>
+    </div>
+
+    <div class="dashboard-table">
+        <h5 class="fw-bold mb-3">คำขอที่ต้องจัดการ</h5>
+
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>ผู้แจ้ง</th>
+                    <th>หัวข้อ</th>
+                    <th>สถานะ</th>
+                    <th class="text-end">จัดการ</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for ticket in recent_tickets %}
+                <tr>
+                    <td>#{{ ticket.id }}</td>
+                    <td>{{ ticket.user.username }}</td>
+                    <td>{{ ticket.subject }}</td>
+                    <td>
+                        {% if ticket.status == "pending" %}
+                            <span class="badge badge-pending">รอดำเนินการ</span>
+                        {% else %}
+                            <span class="badge badge-success">เสร็จสิ้น</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="#"
+                           class="btn btn-sm btn-outline-warning">
+                            จัดการ
+                        </a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">
+                        ไม่มีคำขอ
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endif %}
+
+</div>
+{% endblock %}

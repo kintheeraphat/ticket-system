@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    {% load static %}
+    <title>สร้างคำขอใหม่ | TICKETS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #64748b;
+            --bg-light: #f8fafc;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: var(--bg-light);
+            margin: 0;
+            padding: 0;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styling - ปรับให้เหมือนหน้า Dashboard */
+        .sidebar {
+            width: 240px;
+            background: #1f2937;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            background: #111827;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar nav a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 20px;
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .sidebar nav a:hover,
+        .sidebar nav a.active {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .sidebar nav .divider {
+            height: 1px;
+            background: #374151;
+            margin: 10px 0;
+        }
+
+        .sidebar nav .logout {
+            color: #f87171;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+        }
+
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .page-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Type List Selection */
+        .type-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .type-list li {
+            background: var(--white);
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .type-list li:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .type-list li.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .type-list li i {
+            font-size: 24px;
+            width: 40px;
+            text-align: center;
+        }
+
+        /* Form Styling */
+        #ticketForm {
+            display: none;
+            background: var(--white);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+        }
+
+        .form-section {
+            background: #f1f5f9;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .dynamic-field {
+            display: none;
+        }
+
+        .dynamic-field.show {
+            display: block;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #334155;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="email"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            background: #fff;
+        }
+
+        .vpn-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: #fff;
+        }
+
+        .vpn-table th,
+        .vpn-table td {
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+        }
+
+        .btn-add-user {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-submit {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="mobile-header">
+        <button class="hamburger-btn" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="mobile-logo">
+            <i class="fas fa-ticket-alt"></i>TICKETS
+        </div>
+        <div style="width:40px;"></div>
+    </div>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-ticket-alt"></i> TICKETS
+            </div>
+
+            <nav>
+                <a href="{% url 'dashboard' %}">
+                    <i class="fas fa-chart-pie"></i> แดชบอร์ด
+                </a>
+
+                <a href="{% url 'ticket' %}">
+                    <i class="fas fa-list"></i> รายการคำขอ
+                </a>
+
+                <a href="{% url 'new_ticket' %}" class="active">
+                    <i class="fas fa-plus"></i> สร้างคำขอใหม่
+                </a>
+
+                <div class="divider"></div>
+
+                <a href="#" class="logout">
+                    <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-header">
+                <div class="page-title">
+                    <i class="fas fa-plus-circle"></i> สร้างคำร้องขอระบบ IT
+                </div>
+            </header>
+
+            <ul class="type-list">
+                <li onclick="selectType(this, 'IT-ERP-PERM')">
+                    <i class="fas fa-user-lock"></i>
+                    <div><span class="type-title">ขอเปิด User / ปรับสิทธิ์ ERP</span><span
+                            class="type-desc">IT-ERP-001/004</span></div>
+                </li>
+                <li onclick="selectType(this, 'IT-ADJ')">
+                    <i class="fas fa-exchange-alt"></i>
+                    <div><span class="type-title">ปรับยอดสะสม (Adjust)</span><span class="type-desc">IT-ADJ-001
+                            V.3</span></div>
+                </li>
+                <li onclick="selectType(this, 'IT-APP')">
+                    <i class="fas fa-file-invoice"></i>
+                    <div><span class="type-title">ขอ App / Report</span><span class="type-desc">IT-APP-001 V.3</span>
+                    </div>
+                </li>
+                <li onclick="selectType(this, 'IT-VPN')">
+                    <i class="fas fa-network-wired"></i>
+                    <div><span class="type-title">ขอใช้งาน VPN</span><span class="type-desc">IT-INFRA-002 V.1</span>
+                    </div>
+                </li>
+                <li onclick="selectType(this, 'IT-HW')">
+                    <i class="fas fa-laptop"></i>
+                    <div><span class="type-title">เบิก/คืน อุปกรณ์ IT</span><span class="type-desc">FD-ITD-002</span>
+                    </div>
+                </li>
+                <li onclick="selectType(this, 'IT-PROMO')">
+                    <i class="fas fa-ad"></i>
+                    <div><span class="type-title">Active Promotion</span><span class="type-desc">IT-ERP-003</span></div>
+                </li>
+            </ul>
+
+            <form method="post" id="ticketForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="form_code" id="formCode">
+
+                <h2 id="formTitleDisplay" style="color: var(--primary-color); margin-bottom: 25px;"></h2>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>ชื่อ-นามสกุล (ผู้ร้องขอ)</label>
+                        <input type="text" name="requester_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>แผนก/ฝ่าย</label>
+                        <input type="text" name="dept" required>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div id="fields-IT-ERP-PERM" class="dynamic-field">
+                        <label>ชื่อ-นามสกุล (ภาษาอังกฤษ)</label><input type="text" name="name_en">
+                        <label>Module ที่ต้องการเข้าถึง</label><input type="text" name="erp_module"
+                            placeholder="เช่น ระบบขาย, บัญชี">
+                        <label>วัตถุประสงค์</label>
+                        <select name="erp_purpose">
+                            <option value="ขอเปิด User ใหม่">ขอเปิด User ใหม่</option>
+                            <option value="ขอเปลี่ยนแปลงสิทธิ์">ขอเปลี่ยนแปลงสิทธิ์</option>
+                            <option value="ขอเข้าถึงข้อมูล/Report">ขอเข้าถึงข้อมูล/Report</option>
+                        </select>
+                    </div>
+
+                    <div id="fields-IT-ADJ" class="dynamic-field">
+                        <label>ประเภทการปรับยอด</label>
+                        <select name="adj_type">
+                            <option value="ยอดยกจากเดิม">ยอดยกจากเดิม</option>
+                            <option value="แก้ไขยอด">แก้ไขยอด</option>
+                            <option value="โอนระหว่างร้าน">โอนระหว่างร้าน</option>
+                            <option value="โอนระหว่างโปรโมชั่น">โอนระหว่างโปรโมชั่น</option>
+                        </select>
+                        <div class="grid-2">
+                            <div><label>รหัส/ชื่อลูกค้า (ต้นทาง)</label><input type="text" name="source_cust"></div>
+                            <div><label>รหัส/ชื่อลูกค้า (ปลายทาง)</label><input type="text" name="dest_cust"></div>
+                        </div>
+                        <label>จำนวนที่ขอปรับ</label><input type="text" name="adj_amount">
+                    </div>
+
+                    <div id="fields-IT-APP" class="dynamic-field">
+                        <label>ประเภทงาน</label>
+                        <select name="app_type">
+                            <option value="จัดทำ App ใหม่">จัดทำ Application ใหม่</option>
+                            <option value="ปรับปรุง App เดิม">ปรับปรุง Application เดิม</option>
+                            <option value="ข้อมูล/รายงาน ERP">รายงานและข้อมูลจากระบบ ERP</option>
+                        </select>
+                        <label>ข้อมูลที่ต้องการ / วัตถุประสงค์</label><textarea name="app_detail" rows="4"></textarea>
+                        <label>วันที่ต้องการแล้วเสร็จ</label><input type="date" name="app_deadline">
+                    </div>
+
+                    <div id="fields-IT-VPN" class="dynamic-field">
+                        <label>ช่วงวันที่ขอใช้งาน</label>
+                        <div class="grid-2">
+                            <input type="date" name="vpn_start">
+                            <input type="date" name="vpn_end">
+                        </div>
+                        <label>รายชื่อผู้ใช้งาน (สูงสุด 10 ท่านตามเอกสาร)</label>
+                        <table class="vpn-table" id="vpnUserTable">
+                            <thead>
+                                <tr>
+                                    <th>ลำดับ</th>
+                                    <th>ชื่อ-นามสกุล</th>
+                                    <th>ตำแหน่ง</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td><input type="text" name="vpn_name[]"></td>
+                                    <td><input type="text" name="vpn_pos[]"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn-add-user" onclick="addVpnRow()">+ เพิ่มรายชื่อ</button>
+                        <label style="margin-top:15px;">วัตถุประสงค์การใช้ VPN</label><input type="text"
+                            name="vpn_reason">
+                    </div>
+
+                    <div id="fields-IT-HW" class="dynamic-field">
+                        <label>ประเภทการขอยืม</label>
+                        <select name="hw_item">
+                            <option value="PC/NB">เครื่อง PC/NB ของบริษัท</option>
+                            <option value="Monitor">จอมอนิเตอร์</option>
+                            <option value="Other">อุปกรณ์อื่นๆ</option>
+                        </select>
+                        <label>หมายเลขทรัพย์สิน (Asset No.)</label><input type="text" name="asset_no">
+                        <label>ยืมตั้งแต่วันที่ - ถึงวันที่</label>
+                        <div class="grid-2">
+                            <input type="date" name="hw_start">
+                            <input type="date" name="hw_end">
+                        </div>
+                    </div>
+
+                    <div id="fields-IT-PROMO" class="dynamic-field">
+                        <label>หมายเลข / ชื่อ Promotion Package</label><input type="text" name="promo_info">
+                        <label>เหตุผลในการขอ Active</label><textarea name="promo_reason" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>ระดับความเร่งด่วน</label>
+                    <select name="priority">
+                        <option value="ปกติ">ปกติ</option>
+                        <option value="ด่วน">ด่วน</option>
+                        <option value="ด่วนที่สุด">ด่วนที่สุด</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>แนบไฟล์หลักฐาน (ถ้ามี)</label>
+                    <input type="file" name="attachment">
+                </div>
+
+                <button type="submit" class="btn-submit">ส่งคำร้องขออนุมัติ</button>
+            </form>
+        </main>
+    </div>
+
+    <script>
+        function selectType(el, code) {
+            document.querySelectorAll('.type-list li').forEach(li => li.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('ticketForm').style.display = 'block';
+            document.getElementById('formCode').value = code;
+            document.getElementById('formTitleDisplay').innerText = el.querySelector('.type-title').innerText;
+            document.querySelectorAll('.dynamic-field').forEach(df => df.classList.remove('show'));
+            const target = document.getElementById('fields-' + code);
+            if (target) target.classList.add('show');
+            window.scrollTo({ top: document.getElementById('ticketForm').offsetTop - 20, behavior: 'smooth' });
+        }
+
+        function addVpnRow() {
+            const table = document.getElementById('vpnUserTable').getElementsByTagName('tbody')[0];
+            const rowCount = table.rows.length;
+            if (rowCount < 10) {
+                const row = table.insertRow(rowCount);
+                row.innerHTML = `<td>${rowCount + 1}</td><td><input type="text" name="vpn_name[]"></td><td><input type="text" name="vpn_pos[]"></td>`;
+            } else {
+                alert("ระบุรายชื่อได้สูงสุด 10 ท่านตามแบบฟอร์มบริษัท (IT-INFRA-002)");
+            }
+        }
+
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('active');
+        }
+    </script>
+</body>
+
+</html>

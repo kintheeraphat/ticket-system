@@ -11,5 +11,6 @@ urlpatterns = [
     path("manager-page/", views.manager_page),
     path("user-page/", views.user_page),
     
-    path("tickets/",views.tickets_list,name="tickets")
+    path("tickets/",views.tickets_list,name="tickets"),
+    path("create/",views.tickets_create,name="create")
 ]
