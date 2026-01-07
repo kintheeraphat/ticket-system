@@ -1,59 +1,49 @@
 {% extends "base.html" %}
-{% block title %}ขอเปิด User ERP{% endblock %}
+{% load static %}
+
+{% block title %}ขอเปิด User / ปรับสิทธิ์ ERP{% endblock %}
 
 {% block content %}
 <main class="main-content">
 
-    <h3 class="fw-bold text-primary mb-4">
-        <i class="fas fa-user-lock me-2"></i> ขอเปิด User / ปรับสิทธิ์ ERP
-    </h3>
+    <div class="dashboard-table">
 
-    <form method="post">
-        {% csrf_token %}
-        <input type="hidden" name="form_code" value="IT-ERP-PERM">
+        <h4 class="fw-bold text-primary mb-4">
+            ขอเปิด User / ปรับสิทธิ์ ERP
+        </h4>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="form_code" value="IT-ERP-PERM">
+            <div class="mb-3">
+                <label class="form-label">ชื่อ-นามสกุล (ภาษาอังกฤษ)</label>
+                <input type="text"
+                       name="name_en"
+                       class="form-control">
+            </div>
 
-        <div class="mb-3">
-            <label for="requester_name">ชื่อ-นามสกุล</label>
-            <input
-                id="requester_name"
-                class="form-control"
-                name="requester_name"
-                required
-            >
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Module ที่ต้องการใช้งาน</label>
+                <input type="text"
+                       name="erp_module"
+                       class="form-control"
+                       placeholder="เช่น Sales, Accounting">
+            </div>
 
-        <div class="mb-3">
-            <label for="dept">แผนก</label>
-            <input
-                id="dept"
-                class="form-control"
-                name="dept"
-                required
-            >
-        </div>
+            <div class="mb-4">
+                <label class="form-label">วัตถุประสงค์</label>
+                <textarea name="remark"
+                          rows="3"
+                          class="form-control"></textarea>
+            </div>
 
-        <div class="mb-3">
-            <label for="erp_action">ประเภทการขอ</label>
-            <select
-                id="erp_action"
-                name="erp_action"
-                class="form-select"
-                required
-            >
-                <option value="">-- เลือกประเภท --</option>
-                <option value="new">เปิด User ใหม่</option>
-                <option value="edit">ปรับสิทธิ์</option>
-                <option value="close">ปิด User</option>
-            </select>
-        </div>
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary px-4">
+                    ส่งคำร้อง
+                </button>
+            </div>
+        </form>
 
-        <button
-            type="submit"
-            class="btn btn-primary w-100 mt-3"
-        >
-            ส่งคำร้อง
-        </button>
-    </form>
+    </div>
 
 </main>
 {% endblock %}
