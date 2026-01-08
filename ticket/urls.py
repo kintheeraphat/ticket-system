@@ -18,4 +18,5 @@ urlpatterns = [
     path("tickets/adjust/", views.adjust_form, name="adjust_form"),
     path("tickets/app-report/", views.app_report_form, name="app_report_form"),
     path("tickets/active-promotion/", views.active_promotion_form, name="active_promotion_form"),
+    path("create/vpn/", views.vpn, name="vpn"),
 ]

@@ -57,6 +57,8 @@ def erp_perm(request):
         # โดยไม่ต้องเซฟลง Database
         
     return render(request, "tickets_form/erp_perm.html", context)
+def vpn(req):
+    return render(req,'tickets_form/vpn.html')
 
 def adjust_form(request):
     return render(request, "tickets_form/adjust_form.html")
