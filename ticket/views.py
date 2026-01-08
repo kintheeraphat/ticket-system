@@ -59,12 +59,12 @@ def erp_perm(request):
     return render(request, "tickets_form/erp_perm.html", context)
 
 def adjust_form(request):
-    return render(request, "tickets_form/adjust.html")
+    return render(request, "tickets_form/adjust_form.html")
 
 
 def app_report_form(request):
-    return render(request, "tickets_form/app_report.html")
+    return render(request, "tickets_form/app_report_form.html")
 
 
 def active_promotion_form(request):
-    return render(request, "tickets_form/active_promotion.html")
+    return render(request, "tickets_form/active_promotion_form.html")
