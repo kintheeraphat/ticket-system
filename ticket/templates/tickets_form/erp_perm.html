@@ -1,39 +1,51 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}ขอเปิด User / ปรับสิทธิ์ ERP{% endblock %}
+{% block title %}ขอเปิด User / ปรับสิทธิ์ ERP & VPN{% endblock %}
 
 {% block content %}
 <main class="main-content">
-
     <div class="dashboard-table">
 
         <h4 class="fw-bold text-primary mb-4">
-            ขอเปิด User / ปรับสิทธิ์ ERP
+            ขอเปิด User / ปรับสิทธิ์ ERP / VPN
         </h4>
+
         <form method="post">
             {% csrf_token %}
-            <input type="hidden" name="form_code" value="IT-ERP-PERM">
+
+            <!-- ===== ERP USERS ===== -->
             <div class="mb-3">
-                <label class="form-label">ชื่อ-นามสกุล (ภาษาอังกฤษ)</label>
-                <input type="text"
-                       name="name_en"
-                       class="form-control">
+                <label class="fw-bold">ชื่อ-นามสกุล ERP</label>
+                <div id="nameFields">
+                    <div class="d-flex mb-2">
+                        <input type="text" name="name_en[]" class="form-control me-2" placeholder="เช่น John Doe">
+                        <button type="button" class="btn btn-danger btn-sm remove-btn">ลบ</button>
+                    </div>
+                </div>
+                <button type="button" id="addNameBtn" class="btn btn-secondary btn-sm mt-2">
+                    + เพิ่มรายชื่อ ERP
+                </button>
             </div>
 
+            <!-- ===== ERP MODULE ===== -->
             <div class="mb-3">
-                <label class="form-label">Module ที่ต้องการใช้งาน</label>
-                <input type="text"
-                       name="erp_module"
-                       class="form-control"
-                       placeholder="เช่น Sales, Accounting">
+                <label class="fw-bold">โมดูล ERP</label>
+                <div id="moduleFields">
+                    <div class="d-flex mb-2">
+                        <input type="text" name="erp_module[]" class="form-control me-2" placeholder="เช่น Sales, Accounting">
+                        <button type="button" class="btn btn-danger btn-sm remove-btn">ลบ</button>
+                    </div>
+                </div>
+                <button type="button" id="addModuleBtn" class="btn btn-secondary btn-sm mt-2">
+                    + เพิ่มโมดูล ERP
+                </button>
             </div>
 
+            <!-- ===== REMARK ===== -->
             <div class="mb-4">
-                <label class="form-label">วัตถุประสงค์</label>
-                <textarea name="remark"
-                          rows="3"
-                          class="form-control"></textarea>
+                <label class="fw-bold">วัตถุประสงค์</label>
+                <textarea name="remark" rows="3" class="form-control"></textarea>
             </div>
 
             <div class="text-end">
@@ -41,9 +53,47 @@
                     ส่งคำร้อง
                 </button>
             </div>
+
         </form>
-
     </div>
-
 </main>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+console.log("ERP/VPN JS Loaded");
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const nameContainer = document.getElementById("nameFields");
+    const moduleContainer = document.getElementById("moduleFields");
+
+    document.getElementById("addNameBtn").addEventListener("click", function () {
+        const div = document.createElement("div");
+        div.className = "d-flex mb-2";
+        div.innerHTML = `
+            <input type="text" name="name_en[]" class="form-control me-2" placeholder="เช่น John Doe">
+            <button type="button" class="btn btn-danger btn-sm remove-btn">ลบ</button>
+        `;
+        nameContainer.appendChild(div);
+    });
+
+    document.getElementById("addModuleBtn").addEventListener("click", function () {
+        const div = document.createElement("div");
+        div.className = "d-flex mb-2";
+        div.innerHTML = `
+            <input type="text" name="erp_module[]" class="form-control me-2" placeholder="เช่น Sales, Accounting">
+            <button type="button" class="btn btn-danger btn-sm remove-btn">ลบ</button>
+        `;
+        moduleContainer.appendChild(div);
+    });
+
+    // ลบแบบ event delegation (ดีที่สุด)
+    document.addEventListener("click", function (e) {
+        if (e.target.classList.contains("remove-btn")) {
+            e.target.parentElement.remove();
+        }
+    });
+});
+</script>
 {% endblock %}

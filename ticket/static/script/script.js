@@ -54,3 +54,34 @@ document.addEventListener('DOMContentLoaded', function() {
         overlay.style.display = 'none';
     });
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    // เลือกทุกปุ่ม add-btn
+    document.querySelectorAll('.add-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const wrapperSelector = btn.getAttribute('data-target');
+            const wrapper = document.querySelector(wrapperSelector);
+
+            // ถ้าเป็น names-wrapper
+            if (wrapper.classList.contains('names-wrapper')) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.name = 'name_en[]';
+                input.placeholder = 'เช่น John Doe';
+                input.classList.add('form-control', 'mb-1');
+                wrapper.appendChild(input);
+            }
+
+            // ถ้าเป็น modules-wrapper
+            if (wrapper.classList.contains('modules-wrapper')) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.name = 'erp_module[]';
+                input.placeholder = 'เช่น Sales, Accounting';
+                input.classList.add('form-control', 'mb-1');
+                wrapper.appendChild(input);
+            }
+        });
+    });
+});
+
