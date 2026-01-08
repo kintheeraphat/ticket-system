@@ -411,3 +411,11 @@ input[type="file"] {
 .type-list i {
     font-size: 28px;
 }
+    /* เพิ่ม Animation เล็กน้อยเวลาเพิ่มช่อง */
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease-in;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }

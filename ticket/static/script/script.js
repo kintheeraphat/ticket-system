@@ -84,4 +84,37 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("ERP/VPN Form Loaded");
 
+    const nameContainer = document.getElementById("nameFields");
+    const moduleContainer = document.getElementById("moduleFields");
+
+    // ฟังก์ชันช่วยสร้าง Row ใหม่
+    function createNewRow(nameAttr, placeholder) {
+        const div = document.createElement("div");
+        div.className = "d-flex mb-2 animate-fade-in";
+        div.innerHTML = `
+            <input type="text" name="${nameAttr}" class="form-control me-2" placeholder="${placeholder}">
+            <button type="button" class="btn btn-danger btn-sm remove-btn">ลบ</button>
+        `;
+        return div;
+    }
+
+    // เพิ่มชื่อ ERP
+    document.getElementById("addNameBtn").addEventListener("click", function () {
+        nameContainer.appendChild(createNewRow("name_en[]", "เช่น John Doe"));
+    });
+
+    // เพิ่มโมดูล ERP
+    document.getElementById("addModuleBtn").addEventListener("click", function () {
+        moduleContainer.appendChild(createNewRow("erp_module[]", "เช่น Sales, Accounting"));
+    });
+
+    // ลบแถว (ใช้ Event Delegation)
+    document.addEventListener("click", function (e) {
+        if (e.target && e.target.classList.contains("remove-btn")) {
+            e.target.closest('.d-flex').remove();
+        }
+    });
+});
