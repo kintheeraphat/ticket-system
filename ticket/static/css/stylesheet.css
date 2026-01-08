@@ -419,3 +419,21 @@ input[type="file"] {
         from { opacity: 0; transform: translateY(-5px); }
         to { opacity: 1; transform: translateY(0); }
     }
+    /* ===============================
+   FORM GRID (missing)
+================================ */
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+/* ===============================
+   FORM CARD
+================================ */
+.form-card {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+}

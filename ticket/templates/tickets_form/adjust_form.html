@@ -1,23 +1,126 @@
-<div id="fields-IT-ADJ" class="dynamic-field">
-    <label>ประเภทการปรับยอด</label>
-    <select name="adj_type">
-        <option value="ยอดยกจากเดิม">ยอดยกจากเดิม</option>
-        <option value="แก้ไขยอด">แก้ไขยอด</option>
-        <option value="โอนระหว่างร้าน">โอนระหว่างร้าน</option>
-        <option value="โอนระหว่างโปรโมชั่น">โอนระหว่างโปรโมชั่น</option>
-    </select>
+{% extends "base.html" %}
+{% load static %}
 
-    <div class="grid-2">
-        <div>
-            <label>รหัส/ชื่อลูกค้า (ต้นทาง)</label>
-            <input type="text" name="source_cust">
-        </div>
-        <div>
-            <label>รหัส/ชื่อลูกค้า (ปลายทาง)</label>
-            <input type="text" name="dest_cust">
-        </div>
+{% block title %}ERP Point Adjustment Request{% endblock %}
+
+{% block content %}
+<div class="dashboard-table shadow-sm p-4 bg-white rounded">
+
+    <!-- Header -->
+    <div class="mb-4">
+        <h4 class="fw-bold text-primary mb-1">
+            <i class="fas fa-sliders-h me-2"></i>ขอปรับยอดสะสมในระบบ ERP
+        </h4>
+        {% comment %} <p class="text-muted small">
+            IT-ADJ-001 V.3 : ERP Point Adjustment Request
+        </p> {% endcomment %}
     </div>
 
-    <label>จำนวนที่ขอปรับ</label>
-    <input type="text" name="adj_amount">
+    <!-- =======================
+        ประเภทการปรับยอด
+    ======================== -->
+    <div class="mb-4 p-3 bg-light rounded border">
+        <label class="fw-bold mb-2 d-block">
+            <i class="fas fa-list-ul me-2"></i>ประเภทการปรับยอด
+        </label>
+
+        <select class="form-select w-50" enabled>
+            <option selected>-- เลือกประเภทการปรับยอด --</option>
+            <option>ยอดยกจากเดิม</option>
+            <option>แก้ไขยอด</option>
+            <option>โอนระหว่างร้าน</option>
+            <option>โอนระหว่างโปรโมชั่น</option>
+        </select>
+
+    </div>
+
+    <!-- =======================
+         ต้นทาง / ปลายทาง
+    ======================== -->
+    <div class="row g-4">
+
+        <!-- ต้นทาง -->
+        <div class="col-md-6">
+            <div class="p-3 border rounded h-100">
+                <h6 class="fw-bold mb-3">
+                    <i class="fas fa-arrow-circle-right me-1 text-secondary"></i>
+                    ต้นทาง
+                </h6>
+
+                <div class="mb-3">
+                    <label class="form-label">รหัส / ชื่อลูกค้า</label>
+                    <input type="text" class="form-control" placeholder="Customer Code / Name">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">รหัส / ชื่อ Promotion</label>
+                    <input type="text" class="form-control" placeholder="Promotion Code / Name">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">ชื่อ Earn Master</label>
+                    <input type="text" class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">จำนวน</label>
+                    <input type="number" class="form-control">
+                </div>
+            </div>
+        </div>
+
+        <!-- ปลายทาง -->
+        <div class="col-md-6">
+            <div class="p-3 border rounded h-100 bg-light">
+                <h6 class="fw-bold mb-3">
+                    <i class="fas fa-arrow-circle-left me-1 text-secondary"></i>
+                    ปลายทาง
+                </h6>
+
+                <div class="mb-3">
+                    <label class="form-label">รหัส / ชื่อลูกค้า</label>
+                    <input type="text" class="form-control" placeholder="Customer Code / Name">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">รหัส / ชื่อ Promotion</label>
+                    <input type="text" class="form-control" placeholder="Promotion Code / Name">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">ชื่อ Earn Master</label>
+                    <input type="text" class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">จำนวน</label>
+                    <input type="number" class="form-control">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- =======================
+         หมายเหตุ
+    ======================== -->
+    <div class="mt-4">
+        <label class="fw-bold mb-2">หมายเหตุ</label>
+        <textarea class="form-control" rows="3"
+            placeholder="ใช้เขียนเหตุผลเพิ่มเติมสำหรับการพิจารณาอนุมัติ"></textarea>
+    </div>
+
+    <!-- =======================
+         ปุ่ม (ยังไม่ต้องกดได้)
+    ======================== -->
+    <div class="text-end mt-4 border-top pt-3">
+        <button type="button" class="btn btn-light border me-2" disabled>
+            บันทึกร่าง
+        </button>
+        <button type="button" class="btn btn-primary px-5 fw-bold" disabled>
+            ส่งคำร้อง
+        </button>
+    </div>
+
 </div>
+{% endblock %}

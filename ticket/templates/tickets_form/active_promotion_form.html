@@ -1,7 +1,85 @@
-<div id="fields-IT-PROMO" class="dynamic-field">
-    <label>หมายเลข / ชื่อ Promotion Package</label>
-    <input type="text" name="promo_info">
+{% extends "base.html" %}
+{% load static %}
 
-    <label>เหตุผลในการขอ Active</label>
-    <textarea name="promo_reason" rows="3"></textarea>
+{% block title %}ERP Temporary Promotion Activation{% endblock %}
+
+{% block content %}
+<div class="dashboard-table shadow-sm p-4 bg-white rounded">
+
+    <!-- Header -->
+    <div class="mb-4">
+        <h4 class="fw-bold text-danger mb-1">
+            <i class="fas fa-ad me-2"></i>ขอ Active Promotion Package (ชั่วคราว)
+        </h4>
+        {% comment %} <p class="text-muted small">
+            IT-ERP-003 V.1 : ERP Temporary Promotion Activation Request
+        </p> {% endcomment %}
+    </div>
+
+    <!-- =======================
+         Promotion Info
+    ======================== -->
+    <div class="mb-4 p-3 border rounded">
+        <h6 class="fw-bold mb-3 text-primary">
+            <i class="fas fa-tag me-2"></i>ข้อมูล Promotion
+        </h6>
+
+        <div class="mb-3">
+            <label class="form-label">หมายเลข / ชื่อ Promotion Package</label>
+            <input type="text" class="form-control"
+                   placeholder="เช่น PROMO2025 / Promotion VIP">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">ประเภทการ Active</label>
+            <select class="form-select w-50">
+                <option selected>Temporary (ชั่วคราว)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- =======================
+         Period
+    ======================== -->
+    <div class="mb-4 p-3 bg-light rounded border">
+        <h6 class="fw-bold mb-3 text-success">
+            <i class="fas fa-calendar-alt me-2"></i>ช่วงวันที่ขอ Active
+        </h6>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">วันที่เริ่มต้น</label>
+                <input type="date" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">วันที่สิ้นสุด</label>
+                <input type="date" class="form-control">
+            </div>
+        </div>
+    </div>
+
+    <!-- =======================
+         Reason
+    ======================== -->
+    <div class="mb-4">
+        <label class="fw-bold mb-2">
+            <i class="fas fa-comment-dots me-2"></i>เหตุผลในการขอ Active Promotion
+        </label>
+        <textarea class="form-control" rows="3"
+            placeholder="ระบุเหตุผลในการขอเปิดใช้งาน Promotion ชั่วคราว"></textarea>
+    </div>
+
+    <!-- =======================
+         Buttons (โครง)
+    ======================== -->
+    <div class="text-end border-top pt-3">
+        <button type="button" class="btn btn-light border me-2" disabled>
+            บันทึกร่าง
+        </button>
+        <button type="button" class="btn btn-danger px-5 fw-bold" disabled>
+            ส่งคำร้อง
+        </button>
+    </div>
+
 </div>
+{% endblock %}
