@@ -224,4 +224,5 @@ document.addEventListener("DOMContentLoaded", function () {
     // เรียกใช้ครั้งแรกเมื่อโหลดหน้า
     const checkedType = document.querySelector('input[name="request_type"]:checked');
     if (checkedType) updateDownloadLink(checkedType.value);
+    
 });
