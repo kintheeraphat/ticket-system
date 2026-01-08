@@ -46,7 +46,17 @@ def tickets_create(req):
     return render(req,'tickets_create.html')
 
 def erp_perm(request):
-    return render(request, "tickets_form/erp_perm.html")
+    context = {}
+    if request.method == "POST":
+        # ดึงค่าจากฟอร์มมาเก็บไว้ในตัวแปร
+        context['saved_names'] = request.POST.getlist('name_en[]')
+        context['saved_modules'] = request.POST.getlist('erp_module[]')
+        context['saved_remark'] = request.POST.get('remark')
+        
+        # ทำการประมวลผลอื่นๆ (เช่น ส่ง Line Notify หรือ Email) 
+        # โดยไม่ต้องเซฟลง Database
+        
+    return render(request, "tickets_form/erp_perm.html", context)
 
 def adjust_form(request):
     return render(request, "tickets_form/adjust.html")

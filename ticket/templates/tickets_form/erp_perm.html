@@ -4,60 +4,96 @@
 {% block title %}ขอเปิด User / ปรับสิทธิ์ ERP & VPN{% endblock %}
 
 {% block content %}
-<div class="dashboard-table">
-    <h4 class="fw-bold text-primary mb-4">
-        <i class="fas fa-user-plus me-2"></i>ขอเปิด User / ปรับสิทธิ์ ERP / VPN
-    </h4>
+<div class="dashboard-table shadow-sm p-4 bg-white rounded">
+    
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h4 class="fw-bold text-primary mb-1">
+                <i class="fas fa-user-shield me-2"></i>คำร้องระบบ ERP
+            </h4>
+            <p class="text-muted small">กรุณาเลือกประเภทและกรอกข้อมูลให้ครบถ้วน</p>
+        </div>
+        <a href="{% static 'docs/form_manual.pdf' %}" class="btn btn-outline-info btn-sm shadow-sm" download>
+            <i class="fas fa-file-download me-1"></i> ดาวน์โหลดแบบฟอร์ม/คู่มือ
+        </a>
+    </div>
 
-    <form method="post">
+    <form method="post" id="erpForm">
         {% csrf_token %}
 
+        <div class="mb-4 p-3 bg-light rounded border">
+            <label class="fw-bold mb-3 d-block"><i class="fas fa-list-ul me-2"></i>ประเภทคำร้อง</label>
+            <div class="d-flex gap-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="request_type" id="typeNew" value="open_user" checked>
+                    <label class="form-check-label fw-bold" for="typeNew">
+                        <i class="fas fa-user-plus text-success me-1"></i> ขอเปิด User ใหม่
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="request_type" id="typeAdjust" value="adjust_perm">
+                    <label class="form-check-label fw-bold" for="typeAdjust">
+                        <i class="fas fa-user-edit text-warning me-1"></i> ปรับปรุงสิทธิ์เดิม
+                    </label>
+                </div>
+            </div>
+        </div>
+
         <div class="mb-4">
-            <label class="fw-bold mb-2">ชื่อ-นามสกุล ERP (ภาษาอังกฤษ)</label>
+            <label class="fw-bold mb-2" id="labelName">ชื่อ-นามสกุล ERP (ภาษาอังกฤษ)</label>
             <div id="nameFields">
                 <div class="d-flex mb-2">
                     <input type="text" name="name_en[]" class="form-control me-2" placeholder="เช่น John Doe" required>
-                    <button type="button" class="btn btn-danger btn-sm remove-btn" style="display:none;">ลบ</button>
+                    <button type="button" class="btn btn-danger btn-sm remove-btn" style="visibility:hidden;">ลบ</button>
                 </div>
             </div>
-            <button type="button" id="addNameBtn" class="btn btn-outline-secondary btn-sm mt-2">
-                <i class="fas fa-plus me-1"></i> เพิ่มรายชื่อ ERP
+            <button type="button" id="addNameBtn" class="btn btn-outline-secondary btn-sm mt-1">
+                <i class="fas fa-plus me-1"></i> เพิ่มรายชื่อ
             </button>
         </div>
 
-        <hr>
+        <hr class="my-4">
 
         <div class="mb-4">
             <label class="fw-bold mb-2">โมดูล ERP / สิทธิ์ที่ต้องการ</label>
             <div id="moduleFields">
                 <div class="d-flex mb-2">
-                    <input type="text" name="erp_module[]" class="form-control me-2" placeholder="เช่น Sales, Accounting" required>
-                    <button type="button" class="btn btn-danger btn-sm remove-btn" style="display:none;">ลบ</button>
+                    <input type="text" name="erp_module[]" class="form-control me-2" placeholder="รายละเอียดที่ต้องการ เช่น ใช้โปรไฟล์อะไร ต้องการเพิ่มอะไร" required>
+                    <button type="button" class="btn btn-danger btn-sm remove-btn" style="visibility:hidden;">ลบ</button>
                 </div>
             </div>
-            <button type="button" id="addModuleBtn" class="btn btn-outline-secondary btn-sm mt-2">
-                <i class="fas fa-plus me-1"></i> เพิ่มโมดูล ERP
+            <button type="button" id="addModuleBtn" class="btn btn-outline-secondary btn-sm mt-1">
+                <i class="fas fa-plus me-1"></i> เพิ่มโมดูล
             </button>
         </div>
 
-        <hr>
+        <hr class="my-4">
 
         <div class="mb-4">
             <label class="fw-bold mb-2">วัตถุประสงค์ / หมายเหตุ</label>
-            <textarea name="remark" rows="3" class="form-control" placeholder="ระบุเหตุผลการขอใช้งาน..."></textarea>
+            <textarea name="remark" rows="3" class="form-control" placeholder="ระบุเหตุผล... "></textarea>
         </div>
 
         <div class="text-end border-top pt-3">
-            <button type="reset" class="btn btn-light me-2">ล้างข้อมูล</button>
-            <button type="submit" class="btn btn-primary px-5">
+            <button type="reset" class="btn btn-light me-2 border">ล้างข้อมูลใหม่</button>
+            <button type="submit" class="btn btn-primary px-5 fw-bold shadow-sm">
                 <i class="fas fa-paper-plane me-2"></i>ส่งคำร้อง
             </button>
         </div>
     </form>
 </div>
+
+<style>
+    .animate-fade-in { animation: fadeIn 0.3s ease-in; }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    /* ปรับแต่ง Radio ให้ดูเด่นขึ้น */
+    .form-check-input:checked { background-color: #0d6efd; border-color: #0d6efd; }
+</style>
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'script/script.js' %}"></script>
-
 {% endblock %}

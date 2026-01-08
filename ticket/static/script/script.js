@@ -85,36 +85,146 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 document.addEventListener("DOMContentLoaded", function () {
-    console.log("ERP/VPN Form Loaded");
-
     const nameContainer = document.getElementById("nameFields");
     const moduleContainer = document.getElementById("moduleFields");
+    const remarkField = document.querySelector('textarea[name="remark"]');
+    const labelName = document.getElementById("labelName");
 
-    // ฟังก์ชันช่วยสร้าง Row ใหม่
-    function createNewRow(nameAttr, placeholder) {
+    function createNewRow(nameAttr, placeholder, value = "") {
         const div = document.createElement("div");
         div.className = "d-flex mb-2 animate-fade-in";
         div.innerHTML = `
-            <input type="text" name="${nameAttr}" class="form-control me-2" placeholder="${placeholder}">
+            <input type="text" name="${nameAttr}" class="form-control me-2" placeholder="${placeholder}" value="${value}">
             <button type="button" class="btn btn-danger btn-sm remove-btn">ลบ</button>
         `;
         return div;
     }
 
-    // เพิ่มชื่อ ERP
-    document.getElementById("addNameBtn").addEventListener("click", function () {
-        nameContainer.appendChild(createNewRow("name_en[]", "เช่น John Doe"));
+    // --- บันทึกลง LocalStorage ---
+    function saveToLocal() {
+        const requestType = document.querySelector('input[name="request_type"]:checked').value;
+        const data = {
+            request_type: requestType,
+            names: Array.from(document.querySelectorAll('input[name="name_en[]"]')).map(input => input.value),
+            modules: Array.from(document.querySelectorAll('input[name="erp_module[]"]')).map(input => input.value),
+            remark: remarkField ? remarkField.value : ""
+        };
+        localStorage.setItem('erp_form_data', JSON.stringify(data));
+    }
+
+    // --- ดึงข้อมูลกลับมาแสดง ---
+    function loadFromLocal() {
+        const savedData = JSON.parse(localStorage.getItem('erp_form_data'));
+        if (!savedData) return;
+
+        // โหลดประเภทคำร้อง
+        if (savedData.request_type) {
+            const radio = document.querySelector(`input[name="request_type"][value="${savedData.request_type}"]`);
+            if (radio) {
+                radio.checked = true;
+                updateUI(savedData.request_type);
+            }
+        }
+
+        if (remarkField) remarkField.value = savedData.remark || "";
+
+        // โหลด Names
+        if (savedData.names && savedData.names.length > 0) {
+            nameContainer.innerHTML = "";
+            savedData.names.forEach((val, index) => {
+                const row = createNewRow("name_en[]", "ชื่อ-นามสกุล", val);
+                if (index === 0) row.querySelector('.remove-btn').style.visibility = 'hidden';
+                nameContainer.appendChild(row);
+            });
+        }
+
+        // โหลด Modules
+        if (savedData.modules && savedData.modules.length > 0) {
+            moduleContainer.innerHTML = "";
+            savedData.modules.forEach((val, index) => {
+                const row = createNewRow("erp_module[]", "โมดูล", val);
+                if (index === 0) row.querySelector('.remove-btn').style.visibility = 'hidden';
+                moduleContainer.appendChild(row);
+            });
+        }
+    }
+
+    // ฟังก์ชันเปลี่ยนข้อความตามประเภทที่เลือก
+    function updateUI(type) {
+        if (type === 'adjust_perm') {
+            labelName.innerHTML = "ชื่อ-นามสกุล / User ERP ที่ต้องการปรับสิทธิ์";
+        } else {
+            labelName.innerHTML = "ชื่อ-นามสกุล ERP (ภาษาอังกฤษ) สำหรับเปิด User ใหม่";
+        }
+    }
+
+    // --- Events ---
+    loadFromLocal();
+
+    // เปลี่ยน Radio แล้วเซฟ + อัปเดต UI
+    document.querySelectorAll('input[name="request_type"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            updateUI(e.target.value);
+            saveToLocal();
+        });
     });
 
-    // เพิ่มโมดูล ERP
-    document.getElementById("addModuleBtn").addEventListener("click", function () {
-        moduleContainer.appendChild(createNewRow("erp_module[]", "เช่น Sales, Accounting"));
+    document.getElementById("addNameBtn").addEventListener("click", () => {
+        nameContainer.appendChild(createNewRow("name_en[]", "กรอกชื่อที่นี่..."));
+        saveToLocal();
     });
 
-    // ลบแถว (ใช้ Event Delegation)
-    document.addEventListener("click", function (e) {
-        if (e.target && e.target.classList.contains("remove-btn")) {
+    document.getElementById("addModuleBtn").addEventListener("click", () => {
+        moduleContainer.appendChild(createNewRow("erp_module[]", "กรอกโมดูล..."));
+        saveToLocal();
+    });
+
+    document.addEventListener("click", (e) => {
+        if (e.target.classList.contains("remove-btn")) {
             e.target.closest('.d-flex').remove();
+            saveToLocal();
         }
     });
+
+    document.addEventListener("input", saveToLocal);
+
+    document.querySelector('button[type="reset"]').addEventListener("click", (e) => {
+        if (confirm("ต้องการล้างข้อมูลร่างทั้งหมดหรือไม่?")) {
+            localStorage.removeItem('erp_form_data');
+            setTimeout(() => location.reload(), 100);
+        } else {
+            e.preventDefault();
+        }
+    });
+});
+document.addEventListener("DOMContentLoaded", function () {
+    const downloadBtn = document.getElementById("downloadBtn");
+
+    // ฟังก์ชันเปลี่ยนลิงก์ดาวน์โหลดตามประเภทที่เลือก
+    function updateDownloadLink(type) {
+        if (!downloadBtn) return;
+
+        if (type === 'adjust_perm') {
+            // กรณีเลือก "ปรับปรุงสิทธิ์เดิม" ใช้แบบฟอร์ม IT-ERP-001 V.1 [cite: 76]
+            downloadBtn.href = "/static/docs/IT-ERP-001_V1.pdf";
+            downloadBtn.innerHTML = '<i class="fas fa-file-download me-1"></i> ดาวน์โหลดแบบฟอร์มปรับสิทธิ์ (IT-ERP-001)';
+        } else {
+            // กรณีเลือก "ขอเปิด User ใหม่" ใช้แบบฟอร์ม IT-ERP-004 V.1 [cite: 39]
+            downloadBtn.href = "/static/docs/IT-ERP-004_V1.pdf";
+            downloadBtn.innerHTML = '<i class="fas fa-file-download me-1"></i> ดาวน์โหลดแบบฟอร์มเปิด User (IT-ERP-004)';
+        }
+    }
+
+    // ตรวจจับการเปลี่ยนตัวเลือก (Radio Button)
+    document.querySelectorAll('input[name="request_type"]').forEach(radio => {
+        radio.addEventListener('change', function(e) {
+            updateDownloadLink(e.target.value);
+        });
+    });
+
+    // เรียกใช้งานครั้งแรกตอนโหลดหน้า (เผื่อกรณีมีค่าค้างจาก LocalStorage)
+    const currentType = document.querySelector('input[name="request_type"]:checked');
+    if (currentType) {
+        updateDownloadLink(currentType.value);
+    }
 });
