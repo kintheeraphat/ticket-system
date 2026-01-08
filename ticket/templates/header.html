@@ -1,3 +1,4 @@
+<!-- Sidebar Desktop (แบบเดิม) -->
 <aside class="sidebar d-none d-lg-block">
     <div class="sidebar-title mb-4">
         <span class="custom-brand-text fw-bold">
@@ -23,3 +24,148 @@
         </li>
     </ul>
 </aside>
+
+<!-- Hamburger สำหรับมือถือ -->
+<button id="mobile-sidebar-toggle" class="sidebar-toggle d-lg-none" aria-label="Toggle sidebar menu">
+    <span class="bar"></span>
+    <span class="bar"></span>
+    <span class="bar"></span>
+</button>
+
+<!-- Sidebar มือถือ -->
+<aside id="mobile-sidebar" class="sidebar d-lg-none">
+    <div class="sidebar-title mb-4">
+        <span class="custom-brand-text fw-bold">
+            <i class="fas fa-ticket-alt"></i> TICKETS
+        </span>
+    </div>
+
+    <ul class="sidebar-menu list-unstyled">
+        <li class="{% if request.path == '/' %}active{% endif %}">
+            <a href="/">Dashboard</a>
+        </li>
+
+        <li class="{% if request.path == '/tickets/' %}active{% endif %}">
+            <a href="/tickets/">Tickets</a>
+        </li>
+
+        <li class="{% if request.path == '/tickets/create/' %}active{% endif %}">
+            <a href="/create/">Create Ticket</a>
+        </li>
+
+        <li class="mt-4">
+            <a href="/logout/" class="text-danger-emphasis">Logout</a>
+        </li>
+    </ul>
+</aside>
+
+<!-- Overlay มือถือ -->
+<div id="sidebar-overlay" class="d-lg-none"></div>
+
+<!-- CSS -->
+<style>
+/* Hamburger 3 ขีด */
+.sidebar-toggle {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1100;
+    width: 35px;
+    height: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.sidebar-toggle .bar {
+    height: 4px;
+    width: 100%;
+    background-color: #333;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+/* Sidebar มือถือ */
+#mobile-sidebar {
+    position: fixed;
+    top: 0;
+    left: -250px; /* เริ่มซ่อนด้านซ้าย */
+    width: 250px;
+    height: 100%;
+    background: #fff;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+    z-index: 1000;
+    transition: left 0.3s ease;
+}
+
+#mobile-sidebar.show {
+    left: 0;
+}
+
+/* Overlay */
+#sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+}
+
+/* Hamburger X animation */
+.sidebar-toggle.open .bar:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+}
+.sidebar-toggle.open .bar:nth-child(2) {
+    opacity: 0;
+}
+.sidebar-toggle.open .bar:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Active menu item */
+.sidebar-menu li.active > a {
+    font-weight: bold;
+    color: #0d6efd;
+}
+</style>
+
+<!-- JS -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.getElementById('mobile-sidebar-toggle');
+    const sidebar = document.getElementById('mobile-sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    toggleBtn.addEventListener('click', function() {
+        sidebar.classList.toggle('show');
+        overlay.style.display = sidebar.classList.contains('show') ? 'block' : 'none';
+        toggleBtn.classList.toggle('open');
+    });
+
+    overlay.addEventListener('click', function() {
+        sidebar.classList.remove('show');
+        overlay.style.display = 'none';
+        toggleBtn.classList.remove('open');
+    });
+
+    // ปิด sidebar เมื่อคลิก menu item มือถือ
+    const menuLinks = sidebar.querySelectorAll('a');
+    menuLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            if (window.innerWidth < 992) {
+                sidebar.classList.remove('show');
+                overlay.style.display = 'none';
+                toggleBtn.classList.remove('open');
+            }
+        });
+    });
+});
+</script>

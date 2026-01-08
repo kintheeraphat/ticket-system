@@ -38,4 +38,19 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
-// TestChartหน้าDashboard
+
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.getElementById('mobile-sidebar-toggle');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    toggleBtn.addEventListener('click', function() {
+        sidebar.classList.toggle('show');
+        overlay.style.display = sidebar.classList.contains('show') ? 'block' : 'none';
+    });
+
+    overlay.addEventListener('click', function() {
+        sidebar.classList.remove('show');
+        overlay.style.display = 'none';
+    });
+});
