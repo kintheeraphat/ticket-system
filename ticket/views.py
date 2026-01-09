@@ -62,6 +62,10 @@ def vpn(req):
 def borrows(req):
     return render(req,'tickets_form/borrows.html')
 
+def tickets_detail(request):
+    return render(request, "tickets_form/tickets_detail.html")
+
+
 def adjust_form(request):
     return render(request, "tickets_form/adjust_form.html")
 

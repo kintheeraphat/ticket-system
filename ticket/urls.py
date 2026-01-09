@@ -12,6 +12,8 @@ urlpatterns = [
     path("user-page/", views.user_page),
     
     path("tickets/",views.tickets_list,name="tickets"),
+    path("tickets/detail/", views.tickets_detail, name="tickets_detail"),
+
     path("create/",views.tickets_create,name="create"),
     path("create/erp-perm/", views.erp_perm, name="erp_perm"),
 
