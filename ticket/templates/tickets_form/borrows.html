@@ -33,7 +33,8 @@
                 <div class="col-md-4">
                     <label class="fw-bold mb-1">วันที่จัดทำ</label>
                     <div class="form-control bg-white">
-                        {{ today|date:"d/m/Y" }}
+                        {{ "09/01/2026" }}
+                        <!-- {{ today|date:"d/m/Y" }} -->
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -48,7 +49,7 @@
         </div>
 
         <!-- USER INFO -->
-        <div class="mb-4">
+        <!-- <div class="mb-4">
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="fw-bold">บริษัท</label>
@@ -63,7 +64,7 @@
                     <div class="form-control bg-light">{{ user.fname }} {{ user.lname }}</div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <hr class="my-4">
 
@@ -118,7 +119,23 @@
             <label class="fw-bold mb-2">แนบไฟล์เอกสาร (ถ้ามี)</label>
             <input type="file" name="order_file[]" multiple class="form-control">
         </div>
+        <hr class="my-4">
+        <div class="mb-4">
+            <label class="fw-bold mb-2">
+                <i class="fas fa-exclamation-circle me-1 text-danger"></i>
+                ระดับความเร่งด่วน
+            </label>
 
+            <select name="priority" class="form-select" required>
+                <option value="normal">🟢 ปกติ</option>
+                <option value="urgent">🟡 เร่งด่วน</option>
+                <option value="critical">🔴 เร่งด่วนมาก (กระทบงาน)</option>
+            </select>
+
+            <small class="text-muted">
+                ใช้สำหรับจัดลำดับการดำเนินงานของเจ้าหน้าที่
+            </small>
+        </div>
         <!-- ACTION -->
         <div class="text-end border-top pt-3">
             <button type="reset" class="btn btn-light me-2 border">ล้างข้อมูล</button>

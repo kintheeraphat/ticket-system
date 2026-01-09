@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.name = 'name_en[]';
-                input.placeholder = 'เช่น John Doe';
+                input.placeholder = 'ชื่อ-นามสกุล';
                 input.classList.add('form-control', 'mb-1');
                 wrapper.appendChild(input);
             }
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.name = 'erp_module[]';
-                input.placeholder = 'เช่น Sales, Accounting';
+                input.placeholder = 'เช่น รายละเอียดที่ต้องการ เช่น ใช้โปรไฟล์อะไร ต้องการเพิ่มอะไร';
                 input.classList.add('form-control', 'mb-1');
                 wrapper.appendChild(input);
             }
