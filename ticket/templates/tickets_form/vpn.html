@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}แบบฟอร์มขอใช้งาน VPN - TECHNO-SELL{% endblock %}
+
+{% block content %}
+<div class="dashboard-table shadow-sm p-4 bg-white rounded animate-fade-in">
+
+    <!-- HEADER แบบ ERP -->
+    <div class="erp-header d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h4 class="fw-bold text-primary mb-1">
+                <i class="fas fa-user-shield me-2"></i>คำร้องขอใช้งาน VPN
+            </h4>
+            <p class="text-muted small">
+                กรุณากรอกข้อมูลเพื่อขออนุมัติใช้งาน Virtual Private Network
+            </p>
+        </div>
+
+        <a href="#" class="btn btn-outline-info btn-sm shadow-sm" download>
+            <i class="fas fa-file-download me-1"></i> ดาวน์โหลดแบบฟอร์ม
+        </a>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- วันที่ / แผนก -->
+        <div class="grid-2 mb-4">
+            <div>
+                <label class="fw-bold mb-2">วันที่ (Date)</label>
+                <input type="date" name="request_date" class="form-control" required>
+            </div>
+            <div>
+                <label class="fw-bold mb-2">ฝ่ายที่สังกัด (Department)</label>
+                <input type="text" name="department" class="form-control" placeholder="เช่น ฝ่ายขาย, ฝ่ายบัญชี"
+                    required>
+            </div>
+        </div>
+
+        <!-- เรื่อง -->
+        <div class="mb-4">
+            <label class="fw-bold mb-2">เรื่อง (Subject)</label>
+            <input type="text" class="form-control bg-light"
+                value="ขออนุมัติเปิดสิทธิ์ Virtual Private Network (VPN) (เข้าใช้งานจากภายนอกบริษัท)" readonly>
+        </div>
+
+        <!-- วันที่เริ่ม -->
+        <div class="mb-4">
+            <label class="fw-bold mb-2">ตั้งแต่วันที่ (Starting From)</label>
+            <input type="date" name="start_date" class="form-control" style="max-width: 300px;" required>
+        </div>
+
+        <!-- รายชื่อผู้ใช้งาน -->
+        <div class="mb-4 erp-section">
+            <label class="fw-bold mb-2 text-primary">
+                <i class="fas fa-users me-2"></i>รายชื่อผู้ขอใช้งาน
+            </label>
+
+            <div id="vpnUserContainer">
+                <div class="d-flex mb-2 vpn-user-row animate-fade-in">
+                    <span class="input-group-text bg-light me-2">1.</span>
+                    <input type="text" name="user_names[]" class="form-control me-2" placeholder="ชื่อ-นามสกุล"
+                        required>
+                    <button type="button" class="btn btn-danger btn-sm remove-user" style="display:none;">
+                        ลบ
+                    </button>
+                </div>
+            </div>
+            <button type="button" id="addUserBtn" class="btn btn-outline-secondary btn-sm mt-2">
+                <i class="fas fa-plus me-1"></i> เพิ่มรายชื่อ (สูงสุด 10 ท่าน)
+            </button>
+        </div>
+
+        <!-- เหตุผล -->
+        <div class="mb-4">
+            <label class="fw-bold mb-2">
+                มีความจำเป็นต้องใช้งานเพื่อ (Reason)
+            </label>
+            <textarea name="reason" class="form-control" rows="3"
+                placeholder="ระบุวัตถุประสงค์ในการขอเข้าถึงระบบจากภายนอก..."></textarea>
+        </div>
+
+        <!-- ปุ่ม -->
+        <div class="text-end border-top pt-3">
+            <button type="submit" class="btn btn-primary px-5 fw-bold shadow-sm">
+                <i class="fas fa-paper-plane me-2"></i>ส่งคำร้องขออนุมัติ
+            </button>
+        </div>
+
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'script/script.js' %}"></script>
+{% endblock %}

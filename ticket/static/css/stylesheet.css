@@ -437,3 +437,16 @@ input[type="file"] {
     border-radius: 16px;
     box-shadow: var(--card-shadow);
 }
+/* ===============================
+   ERP STYLE FOR VPN
+================================ */
+.erp-header {
+    border-bottom: none !important;
+}
+
+.erp-section {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1rem;
+}

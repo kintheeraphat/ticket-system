@@ -12,6 +12,8 @@ urlpatterns = [
     path("user-page/", views.user_page),
     
     path("tickets/",views.tickets_list,name="tickets"),
+    path("tickets/detail/", views.tickets_detail, name="tickets_detail"),
+
     path("create/",views.tickets_create,name="create"),
     path("create/erp-perm/", views.erp_perm, name="erp_perm"),
 
@@ -19,4 +21,7 @@ urlpatterns = [
     path("tickets/app/", views.app_form, name="app_form"),
     path("tickets/report/", views.report_form, name="report_form"),
     path("tickets/active-promotion/", views.active_promotion_form, name="active_promotion_form"),
+    path("create/vpn/", views.vpn, name="vpn"),
+    path("create/borrows/", views.borrows, name="borrows"),
+
 ]

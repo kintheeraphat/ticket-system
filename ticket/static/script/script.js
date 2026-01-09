@@ -142,7 +142,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (savedData.modules && savedData.modules.length > 0) {
             moduleContainer.innerHTML = "";
             savedData.modules.forEach((val, index) => {
-                const row = createNewRow("erp_module[]", "โมดูล", val);
+                const row = createNewRow("erp_module[]", "รายละเอียดที่ต้องการ เช่น ใช้โปรไฟล์อะไร ต้องการเพิ่มอะไร", val);
                 if (index === 0) row.querySelector('.remove-btn').style.visibility = 'hidden';
                 moduleContainer.appendChild(row);
             });
@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (type === 'adjust_perm') {
             labelName.innerHTML = "ชื่อ-นามสกุล / User ERP ที่ต้องการปรับสิทธิ์";
         } else {
-            labelName.innerHTML = "ชื่อ-นามสกุล ERP (ภาษาอังกฤษ) สำหรับเปิด User ใหม่";
+            labelName.innerHTML = "ชื่อ-นามสกุล สำหรับเปิด User ใหม่";
         }
     }
 
@@ -170,12 +170,12 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.getElementById("addNameBtn").addEventListener("click", () => {
-        nameContainer.appendChild(createNewRow("name_en[]", "กรอกชื่อที่นี่..."));
+        nameContainer.appendChild(createNewRow("name_en[]", "ชื่อ-นามสกุล"));
         saveToLocal();
     });
 
     document.getElementById("addModuleBtn").addEventListener("click", () => {
-        moduleContainer.appendChild(createNewRow("erp_module[]", "กรอกโมดูล..."));
+        moduleContainer.appendChild(createNewRow("erp_module[]", "รายละเอียดที่ต้องการ เช่น ใช้โปรไฟล์อะไร ต้องการเพิ่มอะไร"));
         saveToLocal();
     });
 
@@ -200,31 +200,74 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener("DOMContentLoaded", function () {
     const downloadBtn = document.getElementById("downloadBtn");
 
-    // ฟังก์ชันเปลี่ยนลิงก์ดาวน์โหลดตามประเภทที่เลือก
     function updateDownloadLink(type) {
         if (!downloadBtn) return;
 
         if (type === 'adjust_perm') {
-            // กรณีเลือก "ปรับปรุงสิทธิ์เดิม" ใช้แบบฟอร์ม IT-ERP-001 V.1 [cite: 76]
+            // ลิงก์สำหรับแบบฟอร์มขอปรับเปลี่ยนสิทธิ์ระบบ ERP [cite: 45, 76]
             downloadBtn.href = "/static/docs/IT-ERP-001_V1.pdf";
             downloadBtn.innerHTML = '<i class="fas fa-file-download me-1"></i> ดาวน์โหลดแบบฟอร์มปรับสิทธิ์ (IT-ERP-001)';
         } else {
-            // กรณีเลือก "ขอเปิด User ใหม่" ใช้แบบฟอร์ม IT-ERP-004 V.1 [cite: 39]
+            // ลิงก์สำหรับแบบฟอร์มขอเปิด User ในระบบ ERP [cite: 8, 39]
             downloadBtn.href = "/static/docs/IT-ERP-004_V1.pdf";
             downloadBtn.innerHTML = '<i class="fas fa-file-download me-1"></i> ดาวน์โหลดแบบฟอร์มเปิด User (IT-ERP-004)';
         }
     }
 
-    // ตรวจจับการเปลี่ยนตัวเลือก (Radio Button)
+    // ตรวจจับการเปลี่ยน Radio Button
     document.querySelectorAll('input[name="request_type"]').forEach(radio => {
         radio.addEventListener('change', function(e) {
             updateDownloadLink(e.target.value);
         });
     });
 
-    // เรียกใช้งานครั้งแรกตอนโหลดหน้า (เผื่อกรณีมีค่าค้างจาก LocalStorage)
-    const currentType = document.querySelector('input[name="request_type"]:checked');
-    if (currentType) {
-        updateDownloadLink(currentType.value);
+    // เรียกใช้ครั้งแรกเมื่อโหลดหน้า
+    const checkedType = document.querySelector('input[name="request_type"]:checked');
+    if (checkedType) updateDownloadLink(checkedType.value);
+
+});
+//VPN
+document.addEventListener("DOMContentLoaded", function () {
+    const container = document.getElementById("vpnUserContainer");
+    const addBtn = document.getElementById("addUserBtn");
+
+    if (!container || !addBtn) return;
+
+    const maxUsers = 10;
+
+    addBtn.addEventListener("click", function () {
+        const count = container.querySelectorAll(".vpn-user-row").length;
+        if (count >= maxUsers) {
+            alert("เพิ่มได้สูงสุด 10 รายชื่อ");
+            return;
+        }
+
+        const row = document.createElement("div");
+        row.className = "d-flex mb-2 vpn-user-row animate-fade-in";
+        row.innerHTML = `
+            <span class="input-group-text bg-light me-2">${count + 1}.</span>
+            <input type="text" name="user_names[]" class="form-control me-2"
+                   placeholder="ชื่อ-นามสกุล" required>
+            <button type="button" class="btn btn-danger btn-sm remove-user">ลบ</button>
+        `;
+        container.appendChild(row);
+        updateIndex();
+    });
+
+    container.addEventListener("click", function (e) {
+        if (e.target.classList.contains("remove-user")) {
+            e.target.closest(".vpn-user-row").remove();
+            updateIndex();
+        }
+    });
+
+    function updateIndex() {
+        container.querySelectorAll(".vpn-user-row").forEach((row, i) => {
+            row.querySelector("span").innerText = i + 1 + ".";
+            row.querySelector(".remove-user").style.display =
+                i === 0 ? "none" : "inline-block";
+        });
     }
+
+    updateIndex();
 });
