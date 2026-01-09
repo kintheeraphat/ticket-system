@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Request Report{% endblock %}
+
+{% block content %}
+<div class="dashboard-table shadow-sm p-4 bg-white rounded">
+  <div class="mb-4">
+    <h4 class="fw-bold text-primary mb-1">
+      <i class="fas fa-chart-bar me-2"></i>Request Report / ERP Data
+    </h4>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label class="form-label">รายละเอียดรายงานที่ต้องการ</label>
+      <textarea
+        name="report_detail"
+        class="form-control"
+        rows="4"
+        placeholder="เช่น รูปแบบรายงาน เงื่อนไขข้อมูล"
+      ></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">วัตถุประสงค์ของรายงาน</label>
+      <textarea
+        name="report_objective"
+        class="form-control"
+        rows="3"
+      ></textarea>
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label">ข้อมูลที่ต้องการ (Field / เงื่อนไข)</label>
+      <textarea
+        name="report_fields"
+        class="form-control"
+        rows="4"
+      ></textarea>
+    </div>
+
+    <div class="text-end border-top pt-3">
+      <button type="button" class="btn btn-light border me-2" disabled>
+        บันทึกร่าง
+      </button>
+      <button type="submit" class="btn btn-primary px-5 fw-bold">
+        ส่งคำร้อง
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

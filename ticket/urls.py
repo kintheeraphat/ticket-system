@@ -16,6 +16,7 @@ urlpatterns = [
     path("create/erp-perm/", views.erp_perm, name="erp_perm"),
 
     path("tickets/adjust/", views.adjust_form, name="adjust_form"),
-    path("tickets/app-report/", views.app_report_form, name="app_report_form"),
+    path("tickets/app/", views.app_form, name="app_form"),
+    path("tickets/report/", views.report_form, name="report_form"),
     path("tickets/active-promotion/", views.active_promotion_form, name="active_promotion_form"),
 ]

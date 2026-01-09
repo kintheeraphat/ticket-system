@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Request Application{% endblock %}
+
+{% block content %}
+<div class="dashboard-table shadow-sm p-4 bg-white rounded">
+
+    <div class="mb-4">
+        <h4 class="fw-bold text-success mb-1">
+            <i class="fas fa-laptop-code me-2"></i>Request Application
+        </h4>
+        <p class="text-muted small">
+            IT-APP-001 V.3 : User Request Application
+        </p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- ประเภทงาน -->
+        <div class="mb-4 p-3 bg-light rounded border">
+            <label class="fw-bold mb-2 d-block">ประเภทงาน</label>
+            <select class="form-select w-50">
+                <option>จัดทำ Application ใหม่</option>
+                <option>ปรับปรุง Application เดิม</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">รายละเอียด Application</label>
+            <textarea class="form-control" rows="4"
+                placeholder="อธิบายการทำงานของ Application"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">วัตถุประสงค์</label>
+            <textarea class="form-control" rows="3"></textarea>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">วันที่ต้องการแล้วเสร็จ</label>
+            <input type="date" class="form-control w-50">
+        </div>
+
+        <div class="text-end border-top pt-3">
+            <button type="submit" class="btn btn-success px-5 fw-bold">
+                ส่งคำร้อง
+            </button>
+        </div>
+    </form>
+
+</div>
+{% endblock %}
