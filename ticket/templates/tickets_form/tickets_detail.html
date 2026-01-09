@@ -1,186 +1,94 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <title>รายละเอียดคำขอ | Ticket System</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+{% extends "base.html" %}
+{% load static %}
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+{% block title %}รายละเอียดคำขอ | Ticket System{% endblock %}
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-    <style>
-        body {
-            background: #f5f7fb;
-        }
-
-        /* Workflow */
-        .workflow {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 40px;
-            position: relative;
-        }
-
-        .workflow::before {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: #dee2e6;
-            z-index: 0;
-        }
-
-        .workflow-step {
-            position: relative;
-            background: #fff;
-            padding: 20px;
-            border-radius: 16px;
-            width: 180px;
-            text-align: center;
-            z-index: 1;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-        }
-
-        .workflow-step .icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            margin: 0 auto 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 20px;
-        }
-
-        .workflow-step.done .icon {
-            background: #198754;
-        }
-
-        .workflow-step.active .icon {
-            background: #0d6efd;
-            animation: pulse 1.5s infinite;
-        }
-
-        .workflow-step.pending .icon {
-            background: #adb5bd;
-        }
-
-        .workflow-step h6 {
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .workflow-step small {
-            color: #6c757d;
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(13,110,253,.6); }
-            70% { box-shadow: 0 0 0 12px rgba(13,110,253,0); }
-            100% { box-shadow: 0 0 0 0 rgba(13,110,253,0); }
-        }
-    </style>
-</head>
-
-<body>
-
-<div class="container py-4">
+{% block content %}
+<div class="dashboard-table shadow-sm p-4 bg-white rounded">
 
     <!-- Header -->
-    <div class="mb-4">
-        <h3 class="fw-bold mb-1">รายละเอียดคำขอ #1001</h3>
-        <p class="text-muted mb-0">คอมพิวเตอร์เปิดไม่ติด</p>
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h4 class="fw-bold text-primary mb-1">
+                <i class="fas fa-project-diagram me-2"></i>รายละเอียดคำขอ #1001
+            </h4>
+            <p class="text-muted small mb-0">คอมพิวเตอร์เปิดไม่ติด</p>
+        </div>
+        <span class="badge bg-warning-subtle text-warning border px-3 py-2">
+            รอดำเนินการ
+        </span>
     </div>
 
     <!-- Summary -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-body row g-3">
-            <div class="col-md-4">
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="p-3 bg-light rounded border h-100">
                 <div class="text-muted small">ผู้แจ้ง</div>
                 <div class="fw-semibold">user01</div>
             </div>
-            <div class="col-md-4">
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 bg-light rounded border h-100">
                 <div class="text-muted small">หมวดหมู่</div>
                 <div class="fw-semibold">อุปกรณ์ IT</div>
             </div>
-            <div class="col-md-4">
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 bg-light rounded border h-100">
                 <div class="text-muted small">สถานะปัจจุบัน</div>
-                <span class="badge bg-warning-subtle text-warning border px-3 py-2">
-                    รอ CEO อนุมัติ
-                </span>
+                <div class="fw-bold text-warning">รอดำเนินการ</div>
             </div>
         </div>
     </div>
+
+    <hr class="my-4">
 
     <!-- Workflow -->
-    <div class="card shadow-sm">
-        <div class="card-header fw-bold bg-white">
-            <i class="fas fa-project-diagram me-2"></i> แผนผังการดำเนินงาน
+    <h5 class="fw-bold mb-3">
+        <i class="fas fa-stream me-2"></i>แผนผังการดำเนินงาน
+    </h5>
+
+    <div class="workflow">
+
+        <div class="workflow-step done">
+            <div class="icon"><i class="fas fa-paper-plane"></i></div>
+            <h6>ผู้ใช้ส่งคำขอ</h6>
+            <small>user01</small>
         </div>
 
-        <div class="card-body">
-
-            <div class="workflow">
-
-                <!-- Step 1 -->
-                <div class="workflow-step done">
-                    <div class="icon">
-                        <i class="fas fa-paper-plane"></i>
-                    </div>
-                    <h6>ผู้ใช้ส่งคำขอ</h6>
-                    <small>user01</small>
-                </div>
-
-                <!-- Step 2 -->
-                <div class="workflow-step done">
-                    <div class="icon">
-                        <i class="fas fa-user-shield"></i>
-                    </div>
-                    <h6>Admin ตรวจสอบ</h6>
-                    <small>admin_No.1</small>
-                </div>
-
-                <!-- Step 3 -->
-                <div class="workflow-step active">
-                    <div class="icon">
-                        <i class="fas fa-crown"></i>
-                    </div>
-                    <h6>CEO อนุมัติ</h6>
-                    <small>กำลังพิจารณา</small>
-                </div>
-
-                <!-- Step 4 -->
-                <div class="workflow-step pending">
-                    <div class="icon">
-                        <i class="fas fa-tools"></i>
-                    </div>
-                    <h6>Admin ดำเนินการ</h6>
-                    <small>รอดำเนินการ</small>
-                </div>
-
-                <!-- Step 5 -->
-                <div class="workflow-step pending">
-                    <div class="icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <h6>เสร็จสิ้น</h6>
-                    <small>ปิดงาน</small>
-                </div>
-
-            </div>
-
+        <div class="workflow-step done">
+            <div class="icon"><i class="fas fa-user-tie"></i></div>
+            <h6>หัวหน้าฝ่าย</h6>
+            <small>John Smith</small>
         </div>
+
+        <div class="workflow-step done">
+            <div class="icon"><i class="fas fa-crown"></i></div>
+            <h6>CEO อนุมัติ</h6>
+            <small>อนุมัติแล้ว</small>
+        </div>
+
+        <div class="workflow-step done">
+            <div class="icon"><i class="fas fa-user-check"></i></div>
+            <h6>แอดมินอนุมัติ</h6>
+            <small>admin_No.1</small>
+        </div>
+
+        <div class="workflow-step active">
+            <div class="icon"><i class="fas fa-hourglass-half"></i></div>
+            <h6>รอดำเนินการ</h6>
+            <small>ชื่อผู้รับงาน</small>
+        </div>
+
+        <div class="workflow-step pending">
+            <div class="icon"><i class="fas fa-check-circle"></i></div>
+            <h6>เสร็จสิ้น</h6>
+            <small>ปิดงาน</small>
+        </div>
+
     </div>
 
-    <!-- Back -->
-    <div class="mt-4">
+    <div class="text-end mt-4 border-top pt-3">
         <a href="/tickets/" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i> กลับหน้ารายการ
         </a>
@@ -188,5 +96,69 @@
 
 </div>
 
-</body>
-</html>
+<style>
+/* Workflow (ใช้ theme เดียวกับ dashboard-table) */
+.workflow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    margin-top: 30px;
+}
+
+.workflow::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #dee2e6;
+    z-index: 0;
+}
+
+.workflow-step {
+    background: #fff;
+    padding: 16px;
+    border-radius: 14px;
+    width: 160px;
+    text-align: center;
+    z-index: 1;
+    border: 1px solid #dee2e6;
+}
+
+.workflow-step .icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    margin: 0 auto 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 18px;
+}
+
+.workflow-step h6 {
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.workflow-step small {
+    color: #6c757d;
+}
+
+.done .icon { background: #198754; }
+.active .icon {
+    background: #0d6efd;
+    animation: pulse 1.4s infinite;
+}
+.pending .icon { background: #adb5bd; }
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(13,110,253,.5); }
+    70% { box-shadow: 0 0 0 10px rgba(13,110,253,0); }
+    100% { box-shadow: 0 0 0 0 rgba(13,110,253,0); }
+}
+</style>
+{% endblock %}
