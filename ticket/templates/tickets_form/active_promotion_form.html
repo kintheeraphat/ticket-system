@@ -1,85 +1,290 @@
-{% extends "base.html" %}
-{% load static %}
-
-{% block title %}ERP Temporary Promotion Activation{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% load static %} {% block title %}ERP Temporary
+Promotion Activation{% endblock %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+/>
+{% endblock %} {% block content %}
 <div class="dashboard-table shadow-sm p-4 bg-white rounded">
+  <!-- =======================
+         Header
+    ======================== -->
+  <div class="mb-4">
+    <h4 class="mb-1">
+      <i class="fas fa-bullhorn me-2"></i>ขอ Active Promotion Package
+    </h4>
+  </div>
 
-    <!-- Header -->
-    <div class="mb-4">
-        <h4 class="fw-bold text-danger mb-1">
-            <i class="fas fa-ad me-2"></i>ขอ Active Promotion Package (ชั่วคราว)
-        </h4>
-        {% comment %} <p class="text-muted small">
-            IT-ERP-003 V.1 : ERP Temporary Promotion Activation Request
-        </p> {% endcomment %}
-    </div>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
 
     <!-- =======================
-         Promotion Info
-    ======================== -->
+             Promotion Info
+        ======================== -->
     <div class="mb-4 p-3 border rounded">
-        <h6 class="fw-bold mb-3 text-primary">
-            <i class="fas fa-tag me-2"></i>ข้อมูล Promotion
-        </h6>
+      <h6 class="fw-bold mb-3 text-primary">
+        <i class="fas fa-tag me-2"></i>ข้อมูล Promotion
+      </h6>
 
-        <div class="mb-3">
-            <label class="form-label">ชื่อ Promotion Package</label>
-            <input type="text" class="form-control"
-                   placeholder="PROMO2025 / Promotion VIP">
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">ประเภทการ Active</label>
-            <select class="form-select w-50">
-                <option selected>Temporary (ชั่วคราว)</option>
-            </select>
-        </div>
+      <div class="mb-3">
+        <label class="form-label">ชื่อ Promotion Package</label>
+        <input
+          type="text"
+          class="form-control"
+          name="promo_name"
+          placeholder="PROMO2025 / Promotion VIP"
+        />
+      </div>
     </div>
 
     <!-- =======================
-         Period
-    ======================== -->
+             Period (วัน / เดือน / ปี)
+        ======================== -->
     <div class="mb-4 p-3 bg-light rounded border">
-        <h6 class="fw-bold mb-3 text-success">
-            <i class="fas fa-calendar-alt me-2"></i>ช่วงวันที่ขอ Active
-        </h6>
+      <h6 class="fw-bold mb-3 text-success">
+        <i class="fas fa-calendar-alt me-2"></i>ช่วงวันที่ขอ Active
+      </h6>
 
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label">วันที่เริ่มต้น</label>
-                <input type="date" class="form-control">
-            </div>
-            <div class="col-md-6">
-                <label class="form-label">วันที่สิ้นสุด</label>
-                <input type="date" class="form-control">
-            </div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">วันที่เริ่มต้น</label>
+          <input
+            type="text"
+            id="start_date"
+            name="start_date"
+            class="form-control"
+            placeholder="วัน / เดือน / ปี"
+          />
         </div>
+        <div class="col-md-6">
+          <label class="form-label">วันที่สิ้นสุด</label>
+          <input
+            type="text"
+            id="end_date"
+            name="end_date"
+            class="form-control"
+            placeholder="วัน / เดือน / ปี"
+          />
+        </div>
+      </div>
     </div>
 
     <!-- =======================
-         Reason
-    ======================== -->
+             Reason
+        ======================== -->
     <div class="mb-4">
-        <label class="fw-bold mb-2">
-            <i class="fas fa-comment-dots me-2"></i>เหตุผลในการขอ Active Promotion
-        </label>
-        <textarea class="form-control" rows="3"
-            placeholder="ระบุเหตุผลในการขอเปิดใช้งาน Promotion ชั่วคราว"></textarea>
+      <label class="fw-bold mb-2">
+        <i class="fas fa-comment-dots me-2"></i>เหตุผลในการขอ Active Promotion
+      </label>
+      <textarea
+        class="form-control"
+        rows="3"
+        name="reason"
+        placeholder="ระบุเหตุผลในการขอเปิดใช้งาน Promotion ชั่วคราว"
+      ></textarea>
     </div>
 
     <!-- =======================
-         Buttons (โครง)
-    ======================== -->
-    <div class="text-end border-top pt-3">
-        <button type="button" class="btn btn-light border me-2" disabled>
-            บันทึกร่าง
-        </button>
-        <button type="button" class="btn btn-danger px-5 fw-bold" disabled>
-            ส่งคำร้อง
-        </button>
+             Attachment (หลายไฟล์ + ลบได้)
+        ======================== -->
+    <div class="mb-4">
+      <label class="fw-bold mb-2 d-block">
+        <i class="fas fa-paperclip me-1"></i>เอกสารแนบ
+      </label>
+
+      <input
+        type="file"
+        id="fileInput"
+        class="form-control w-50"
+        multiple
+        onchange="handleFiles(this)"
+      />
+
+      <div id="filePreview" class="mt-3 d-flex gap-3 flex-wrap"></div>
     </div>
 
+    <!-- =======================
+             Buttons
+        ======================== -->
+    <div class="text-end border-top pt-3">
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        onclick="history.back()"
+      >
+        <i class="fas fa-arrow-left me-1"></i> กลับ
+      </button>
+      <button type="submit" class="btn btn-danger px-5 fw-bold" disabled>
+        ส่งคำร้อง
+      </button>
+    </div>
+  </form>
 </div>
+
+<!-- =======================
+     Modal Preview
+======================== -->
+<div class="modal fade" id="fileModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title">เอกสารแนบ</h6>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <iframe
+          id="previewFrame"
+          style="width: 100%; height: 80vh; border: none"
+        ></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<!-- Flatpickr -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+
+<!-- PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<script>
+  /* =======================
+   Date Picker
+======================= */
+  flatpickr("#start_date", {
+    locale: "th",
+    dateFormat: "d/m/Y",
+    allowInput: true,
+  });
+
+  flatpickr("#end_date", {
+    locale: "th",
+    dateFormat: "d/m/Y",
+    allowInput: true,
+  });
+
+  /* =======================
+   File Upload (เพิ่ม/ลบได้)
+======================= */
+  let selectedFiles = [];
+
+  function handleFiles(input) {
+    selectedFiles = selectedFiles.concat(Array.from(input.files));
+    input.value = "";
+    renderFiles();
+  }
+
+  async function renderFiles() {
+    const preview = document.getElementById("filePreview");
+    preview.innerHTML = "";
+
+    selectedFiles.forEach(async (file, index) => {
+      const url = URL.createObjectURL(file);
+
+      const thumb = document.createElement("div");
+      thumb.className = "file-thumb";
+
+      /* ปุ่มลบ */
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "remove-btn";
+      removeBtn.innerHTML = "&times;";
+      removeBtn.onclick = () => removeFile(index);
+      thumb.appendChild(removeBtn);
+
+      /* Preview */
+      if (file.type.startsWith("image/")) {
+        const img = document.createElement("img");
+        img.src = url;
+        img.onclick = () => openPreview(url);
+        thumb.appendChild(img);
+      } else if (file.type === "application/pdf") {
+        const canvas = document.createElement("canvas");
+        const pdf = await pdfjsLib.getDocument(url).promise;
+        const page = await pdf.getPage(1);
+        const viewport = page.getViewport({ scale: 0.4 });
+
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        await page.render({
+          canvasContext: canvas.getContext("2d"),
+          viewport,
+        }).promise;
+
+        canvas.onclick = () => openPreview(url);
+        thumb.appendChild(canvas);
+      }
+
+      const name = document.createElement("div");
+      name.className = "filename";
+      name.innerText = file.name;
+
+      thumb.appendChild(name);
+      preview.appendChild(thumb);
+    });
+  }
+
+  function removeFile(index) {
+    selectedFiles.splice(index, 1);
+    renderFiles();
+  }
+
+  function openPreview(url) {
+    document.getElementById("previewFrame").src = url;
+    new bootstrap.Modal(document.getElementById("fileModal")).show();
+  }
+</script>
+
+<style>
+  .file-thumb {
+    position: relative;
+    width: 120px;
+    height: 150px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 6px;
+    text-align: center;
+    background: #fff;
+  }
+
+  .file-thumb img,
+  .file-thumb canvas {
+    max-width: 100%;
+    max-height: 90px;
+    cursor: pointer;
+  }
+
+  /* ปุ่มกากบาท */
+  .remove-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: #dc3545;
+    color: #fff;
+    font-size: 14px;
+    line-height: 20px;
+    cursor: pointer;
+  }
+
+  .remove-btn:hover {
+    background: #bb2d3b;
+  }
+
+  .filename {
+    font-size: 11px;
+    margin-top: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>
 {% endblock %}

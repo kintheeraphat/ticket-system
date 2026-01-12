@@ -1,126 +1,309 @@
-{% extends "base.html" %}
-{% load static %}
+{% extends "base.html" %} {% load static %} {% block title %}ERP Point
+Adjustment Request{% endblock %} {% block content %}
+<div class="dashboard-table shadow-sm p-4 bg-white rounded" id="print-area">
+  <!-- =======================
+        Header
+  ======================== -->
+  <div class="mb-4">
+    <h4 class="fw-bold text-primary mb-1">
+      <i class="fas fa-sliders-h me-2"></i>ขอปรับยอดสะสมในระบบ
+    </h4>
+    <p class="text-muted small">
+      ใช้สำหรับขอปรับยอด แก้ไข หรือโอนคะแนนสะสมในระบบ ERP
+    </p>
+  </div>
 
-{% block title %}ERP Point Adjustment Request{% endblock %}
-
-{% block content %}
-<div class="dashboard-table shadow-sm p-4 bg-white rounded">
-
-    <!-- Header -->
-    <div class="mb-4">
-        <h4 class="fw-bold text-primary mb-1">
-            <i class="fas fa-sliders-h me-2"></i>ขอปรับยอดสะสมในระบบ ERP
-        </h4>
-        {% comment %} <p class="text-muted small">
-            IT-ADJ-001 V.3 : ERP Point Adjustment Request
-        </p> {% endcomment %}
-    </div>
-
-    <!-- =======================
+  <!-- =======================
         ประเภทการปรับยอด
-    ======================== -->
-    <div class="mb-4 p-3 bg-light rounded border">
-        <label class="fw-bold mb-2 d-block">
-            <i class="fas fa-list-ul me-2"></i>ประเภทการปรับยอด
-        </label>
+  ======================== -->
+  <div class="mb-4 p-3 bg-light rounded border">
+    <label class="fw-bold mb-2 d-block">
+      <i class="fas fa-list-ul me-2"></i>ประเภทการปรับยอด
+    </label>
 
-        <select class="form-select w-50" enabled>
-            <option selected>-- เลือกประเภทการปรับยอด --</option>
-            <option>ยอดยกจากเดิม</option>
-            <option>แก้ไขยอด</option>
-            <option>โอนระหว่างร้าน</option>
-            <option>โอนระหว่างโปรโมชั่น</option>
-        </select>
+    <select class="form-select w-50 print-input">
+      <option selected>-- เลือกประเภทการปรับยอด --</option>
+      <option>ยอดยกจากเดิม</option>
+      <option>แก้ไขยอด</option>
+      <option>โอนระหว่างร้าน</option>
+      <option>โอนระหว่างโปรโมชั่น</option>
+    </select>
+  </div>
 
-    </div>
-
-    <!-- =======================
+  <!-- =======================
          ต้นทาง / ปลายทาง
-    ======================== -->
-    <div class="row g-4">
+  ======================== -->
+  <div class="row g-4">
+    <!-- ต้นทาง -->
+    <div class="col-md-6">
+      <div class="p-3 border rounded h-100">
+        <h6 class="fw-bold mb-3">ต้นทาง</h6>
 
-        <!-- ต้นทาง -->
-        <div class="col-md-6">
-            <div class="p-3 border rounded h-100">
-                <h6 class="fw-bold mb-3">
-                    <i class="fas fa-arrow-circle-right me-1 text-secondary"></i>
-                    ต้นทาง
-                </h6>
+        <label class="form-label">รหัสลูกค้า</label>
+        <input class="form-control print-input" />
 
-                <div class="mb-3">
-                    <label class="form-label">รหัส / ชื่อลูกค้า</label>
-                    <input type="text" class="form-control" placeholder="Customer Code / Name">
-                </div>
+        <label class="form-label">ชื่อลูกค้า</label>
+        <input class="form-control print-input" />
 
-                <div class="mb-3">
-                    <label class="form-label">รหัส / ชื่อ Promotion</label>
-                    <input type="text" class="form-control" placeholder="Promotion Code / Name">
-                </div>
+        <label class="form-label mt-2">รหัส Promotion</label>
+        <input class="form-control print-input" />
 
-                <div class="mb-3">
-                    <label class="form-label">ชื่อ Earn Master</label>
-                    <input type="text" class="form-control">
-                </div>
+        <label class="form-label mt-2">ชื่อ Promotion</label>
+        <input class="form-control print-input" />
 
-                <div class="mb-3">
-                    <label class="form-label">จำนวน</label>
-                    <input type="number" class="form-control">
-                </div>
-            </div>
-        </div>
+        <label class="form-label mt-2">ชื่อ Earn Master</label>
+        <input class="form-control print-input" />
 
-        <!-- ปลายทาง -->
-        <div class="col-md-6">
-            <div class="p-3 border rounded h-100 bg-light">
-                <h6 class="fw-bold mb-3">
-                    <i class="fas fa-arrow-circle-left me-1 text-secondary"></i>
-                    ปลายทาง
-                </h6>
-
-                <div class="mb-3">
-                    <label class="form-label">รหัส / ชื่อลูกค้า</label>
-                    <input type="text" class="form-control" placeholder="Customer Code / Name">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">รหัส / ชื่อ Promotion</label>
-                    <input type="text" class="form-control" placeholder="Promotion Code / Name">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">ชื่อ Earn Master</label>
-                    <input type="text" class="form-control">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">จำนวน</label>
-                    <input type="number" class="form-control">
-                </div>
-            </div>
-        </div>
-
+        <label class="form-label mt-2">จำนวน</label>
+        <input class="form-control print-input" />
+      </div>
     </div>
 
-    <!-- =======================
+    <!-- ปลายทาง -->
+    <div class="col-md-6">
+      <div class="p-3 border rounded h-100 bg-light">
+        <h6 class="fw-bold mb-3">ปลายทาง</h6>
+
+        <label class="form-label">รหัสลูกค้า</label>
+        <input class="form-control print-input" />
+
+        <label class="form-label">ชื่อลูกค้า</label>
+        <input class="form-control print-input" />
+
+        <label class="form-label mt-2">รหัส Promotion</label>
+        <input class="form-control print-input" />
+
+        <label class="form-label mt-2">ชื่อ Promotion</label>
+        <input class="form-control print-input" />
+
+        <label class="form-label mt-2">ชื่อ Earn Master</label>
+        <input class="form-control print-input" />
+
+        <label class="form-label mt-2">จำนวน</label>
+        <input class="form-control print-input" />
+      </div>
+    </div>
+  </div>
+
+  <!-- =======================
          หมายเหตุ
-    ======================== -->
-    <div class="mt-4">
-        <label class="fw-bold mb-2">หมายเหตุ</label>
-        <textarea class="form-control" rows="3"
-            placeholder=""></textarea>
-    </div>
+  ======================== -->
+  <div class="mt-4">
+    <label class="fw-bold mb-2">หมายเหตุ</label>
+    <textarea class="form-control print-input" rows="3"></textarea>
+  </div>
 
-    <!-- =======================
-         ปุ่ม (ยังไม่ต้องกดได้)
-    ======================== -->
-    <div class="text-end mt-4 border-top pt-3">
-        <button type="button" class="btn btn-light border me-2" disabled>
-            บันทึกร่าง
-        </button>
-        <button type="button" class="btn btn-primary px-5 fw-bold" disabled>
-            ส่งคำร้อง
-        </button>
-    </div>
+  <!-- =======================
+         Attachment
+  ======================== -->
+  <div class="mb-4">
+    <label class="fw-bold mb-2 d-block">
+      <i class="fas fa-paperclip me-1"></i>เอกสารแนบ
+    </label>
 
+    <input
+      type="file"
+      class="form-control w-50"
+      multiple
+      onchange="handleFiles(this)"
+    />
+
+    <div id="filePreview" class="mt-3 d-flex gap-3 flex-wrap"></div>
+  </div>
+
+  <!-- =======================
+         ปุ่ม
+  ======================== -->
+  <div class="text-end mt-4 border-top pt-3 no-print">
+    <button
+      type="button"
+      class="btn btn-outline-secondary me-2"
+      onclick="printForm()"
+    >
+      <i class="fas fa-print me-1"></i>พิมพ์เอกสาร
+    </button>
+
+    <button
+      type="button"
+      class="btn btn-outline-secondary me-2"
+      onclick="history.back()"
+    >
+      <i class="fas fa-arrow-left me-1"></i> กลับ
+    </button>
+
+    <button type="button" class="btn btn-primary px-5 fw-bold" disabled>
+      ส่งคำร้อง
+    </button>
+  </div>
 </div>
+
+<!-- =======================
+     Modal Preview
+======================== -->
+<div class="modal fade" id="fileModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title">เอกสารแนบ</h6>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <iframe
+          id="previewFrame"
+          style="width: 100%; height: 80vh; border: none"
+        ></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<script>
+  /* =======================
+   File Preview Logic
+======================= */
+  let selectedFiles = [];
+
+  function handleFiles(input) {
+    selectedFiles = Array.from(input.files);
+    renderFiles();
+  }
+
+  async function renderFiles() {
+    const preview = document.getElementById("filePreview");
+    preview.innerHTML = "";
+
+    selectedFiles.forEach(async (file, index) => {
+      const url = URL.createObjectURL(file);
+
+      const thumb = document.createElement("div");
+      thumb.className = "file-thumb";
+
+      // ปุ่มลบ
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "remove-btn";
+      removeBtn.innerHTML = "&times;";
+      removeBtn.onclick = () => {
+        selectedFiles.splice(index, 1);
+        renderFiles();
+      };
+      thumb.appendChild(removeBtn);
+
+      // Preview
+      if (file.type.startsWith("image/")) {
+        const img = document.createElement("img");
+        img.src = url;
+        img.onclick = () => openPreview(url);
+        thumb.appendChild(img);
+      } else if (file.type === "application/pdf") {
+        const canvas = document.createElement("canvas");
+        const pdf = await pdfjsLib.getDocument(url).promise;
+        const page = await pdf.getPage(1);
+        const viewport = page.getViewport({ scale: 0.4 });
+
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        await page.render({
+          canvasContext: canvas.getContext("2d"),
+          viewport,
+        }).promise;
+
+        canvas.onclick = () => openPreview(url);
+        thumb.appendChild(canvas);
+      }
+
+      const name = document.createElement("div");
+      name.className = "filename";
+      name.innerText = file.name;
+
+      thumb.appendChild(name);
+      preview.appendChild(thumb);
+    });
+  }
+
+  function openPreview(url) {
+    document.getElementById("previewFrame").src = url;
+    new bootstrap.Modal(document.getElementById("fileModal")).show();
+  }
+
+  /* =======================
+   Print
+======================= */
+  function printForm() {
+    let html = `
+  <html>
+  <head>
+    <title>Print</title>
+    <style>
+      body { font-family: Arial; padding: 30px; }
+      h3 { text-align:center; }
+      .row { margin-bottom:10px; }
+      .label { font-weight:bold; }
+      .value { border-bottom:1px dotted #000; }
+    </style>
+  </head>
+  <body>
+    <h3>ขอปรับยอดสะสมในระบบ ERP</h3>
+  `;
+
+    document.querySelectorAll(".print-input").forEach((input) => {
+      const label = input.previousElementSibling?.innerText || "";
+      const value = input.value || "-";
+      html += `<div class="row"><div class="label">${label}</div><div class="value">${value}</div></div>`;
+    });
+
+    html += `<script>window.onload=function(){window.print();}<\/script></body></html>`;
+
+    const w = window.open("", "_blank", "width=900,height=700");
+    w.document.write(html);
+    w.document.close();
+  }
+</script>
+
+<style>
+  .file-thumb {
+    position: relative;
+    width: 120px;
+    height: 150px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 6px;
+    text-align: center;
+    background: #fff;
+  }
+
+  .file-thumb img,
+  .file-thumb canvas {
+    max-width: 100%;
+    max-height: 90px;
+    cursor: pointer;
+  }
+
+  .remove-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: #dc3545;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .filename {
+    font-size: 11px;
+    margin-top: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>
 {% endblock %}

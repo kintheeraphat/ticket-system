@@ -1,54 +1,124 @@
-{% extends "base.html" %}
-{% load static %}
-
-{% block title %}Request Application{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% load static %} {% block title %}Request
+Application{% endblock %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+/>
+{% endblock %} {% block content %}
 <div class="dashboard-table shadow-sm p-4 bg-white rounded">
+  <!-- =======================
+         Header
+    ======================== -->
+  <div class="mb-4">
+    <h4 class="fw-bold text-success mb-1">
+      <i class="fas fa-laptop-code me-2"></i>Request Application
+    </h4>
+    <p class="text-muted small">IT-APP-001 V.3 : User Request Application</p>
+  </div>
 
-    <div class="mb-4">
-        <h4 class="fw-bold text-success mb-1">
-            <i class="fas fa-laptop-code me-2"></i>Request Application
-        </h4>
-        <p class="text-muted small">
-            IT-APP-001 V.3 : User Request Application
-        </p>
+  <form method="post">
+    {% csrf_token %}
+
+    <!-- =======================
+             ประเภทงาน (Radio)
+        ======================== -->
+    <div class="mb-4 p-3 bg-light rounded border">
+      <label class="fw-bold mb-2 d-block">
+        <i class="fas fa-tasks me-1"></i>ประเภทงาน
+      </label>
+
+      <div class="form-check mb-2">
+        <input
+          class="form-check-input"
+          type="radio"
+          name="app_type"
+          id="type_new"
+          value="new"
+          checked
+        />
+        <label class="form-check-label fw-semibold" for="type_new">
+          จัดทำ Application ใหม่
+        </label>
+      </div>
+
+      <div class="form-check">
+        <input
+          class="form-check-input"
+          type="radio"
+          name="app_type"
+          id="type_update"
+          value="update"
+        />
+        <label class="form-check-label fw-semibold" for="type_update">
+          ปรับปรุง Application เดิม
+        </label>
+      </div>
     </div>
 
-    <form method="post">
-        {% csrf_token %}
+    <!-- =======================
+             วันที่ (วัน / เดือน / ปี ค.ศ.)
+        ======================== -->
+    <div class="mb-4">
+      <label class="form-label">
+        วันที่ต้องการแล้วเสร็จ (วัน / เดือน / ปี ค.ศ.)
+      </label>
+      <input
+        type="text"
+        id="deadline"
+        name="deadline"
+        class="form-control w-50"
+        placeholder="วัน / เดือน / ปี"
+      />
+    </div>
 
-        <!-- ประเภทงาน -->
-        <div class="mb-4 p-3 bg-light rounded border">
-            <label class="fw-bold mb-2 d-block">ประเภทงาน</label>
-            <select class="form-select w-50">
-                <option>จัดทำ Application ใหม่</option>
-                <option>ปรับปรุง Application เดิม</option>
-            </select>
-        </div>
+    <!-- =======================
+             รายละเอียด
+        ======================== -->
+    <div class="mb-3">
+      <label class="form-label">รายละเอียด Application</label>
+      <textarea
+        class="form-control"
+        rows="4"
+        name="app_detail"
+        placeholder="อธิบายการทำงานของ Application"
+      ></textarea>
+    </div>
 
-        <div class="mb-3">
-            <label class="form-label">รายละเอียด Application</label>
-            <textarea class="form-control" rows="4"
-                placeholder="อธิบายการทำงานของ Application"></textarea>
-        </div>
+    <div class="mb-3">
+      <label class="form-label">วัตถุประสงค์</label>
+      <textarea class="form-control" rows="3" name="objective"></textarea>
+    </div>
 
-        <div class="mb-3">
-            <label class="form-label">วัตถุประสงค์</label>
-            <textarea class="form-control" rows="3"></textarea>
-        </div>
 
-        <div class="mb-4">
-            <label class="form-label">วันที่ต้องการแล้วเสร็จ</label>
-            <input type="date" class="form-control w-50">
-        </div>
+    <!-- =======================
+     ปุ่ม
+======================== -->
+    <div class="d-flex justify-content-end gap-2 border-top pt-3">
+      <!-- ปุ่มกลับ -->
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        onclick="history.back()"
+      >
+        <i class="fas fa-arrow-left me-1"></i> กลับ
+      </button>
 
-        <div class="text-end border-top pt-3">
-            <button type="submit" class="btn btn-success px-5 fw-bold">
-                ส่งคำร้อง
-            </button>
-        </div>
-    </form>
-
+      <!-- ปุ่มส่ง -->
+      <button type="submit" class="btn btn-success px-5 fw-bold">
+        ส่งคำร้อง
+      </button>
+    </div>
+  </form>
 </div>
+{% endblock %} {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+
+<script>
+  flatpickr("#deadline", {
+    locale: "th",
+    dateFormat: "d/m/Y", // วัน / เดือน / ปี (ค.ศ.)
+    allowInput: true,
+  });
+</script>
 {% endblock %}
