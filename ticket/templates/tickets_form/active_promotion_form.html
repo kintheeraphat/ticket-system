@@ -235,7 +235,11 @@ Promotion Activation{% endblock %} {% block extra_css %}
   }
 
   function openPreview(url) {
-    document.getElementById("previewFrame").src = url;
+    const iframe = document.getElementById("previewFrame");
+
+    // ซ่อน toolbar / sidebar ของ PDF viewer
+    iframe.src = url + "#toolbar=0&navpanes=0&scrollbar=0";
+
     new bootstrap.Modal(document.getElementById("fileModal")).show();
   }
 </script>
