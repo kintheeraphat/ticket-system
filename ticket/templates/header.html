@@ -1,171 +1,208 @@
-<!-- Sidebar Desktop (แบบเดิม) -->
-<aside class="sidebar d-none d-lg-block">
-    <div class="sidebar-title mb-4">
-        <span class="custom-brand-text fw-bold">
-            <i class="fas fa-ticket-alt"></i> TICKETS
-        </span>
-    </div>
+<!-- ===============================
+     Desktop Sidebar
+================================ -->
+<aside class="sidebar d-none d-lg-flex flex-column">
+  <div class="sidebar-title mb-4">
+    <span class="custom-brand-text fw-bold">
+      <i class="fas fa-ticket-alt me-2"></i>TICKETS
+    </span>
+  </div>
 
-    <ul class="sidebar-menu list-unstyled">
-        <li class="{% if request.path == '/' %}active{% endif %}">
-            <a href="/">Dashboard</a>
-        </li>
+  <ul class="sidebar-menu list-unstyled flex-grow-1">
+    <li class="{% if request.path == '/' %}active{% endif %}">
+      <a href="/"><i class="fas fa-chart-pie me-2"></i>Dashboard</a>
+    </li>
 
-        <li class="{% if request.path == '/tickets/' %}active{% endif %}">
-            <a href="/tickets/">Tickets</a>
-        </li>
+    <li class="{% if request.path == '/tickets/' %}active{% endif %}">
+      <a href="/tickets/"><i class="fas fa-list me-2"></i>Tickets</a>
+    </li>
 
-        <li class="{% if request.path == '/tickets/create/' %}active{% endif %}">
-            <a href="/create/">Create Ticket</a>
-        </li>
+    <li class="{% if request.path == '/tickets/create/' %}active{% endif %}">
+      <a href="/create/"
+        ><i class="fas fa-plus-circle me-2"></i>Create Ticket</a
+      >
+    </li>
+  </ul>
 
-        <li class="mt-4">
-            <a href="/logout/" class="text-danger-emphasis">Logout</a>
-        </li>
-    </ul>
+  <div class="mt-auto">
+    <a href="/logout/" class="text-danger-emphasis d-block px-3 py-2">
+      <i class="fas fa-sign-out-alt me-2"></i>Logout
+    </a>
+  </div>
 </aside>
 
-<!-- Hamburger สำหรับมือถือ -->
-<button id="mobile-sidebar-toggle" class="sidebar-toggle d-lg-none" aria-label="Toggle sidebar menu">
+<!-- ===============================
+     Mobile Header
+================================ -->
+<header class="mobile-header d-lg-none">
+  <button
+    id="mobile-sidebar-toggle"
+    class="sidebar-toggle"
+    aria-label="Toggle menu"
+  >
     <span class="bar"></span>
     <span class="bar"></span>
     <span class="bar"></span>
-</button>
+  </button>
+  <span class="mobile-title">
+    <i class="fas fa-ticket-alt me-2"></i>TICKETS
+  </span>
+</header>
 
-<!-- Sidebar มือถือ -->
-<aside id="mobile-sidebar" class="sidebar d-lg-none">
-    <div class="sidebar-title mb-4">
-        <span class="custom-brand-text fw-bold">
-            <i class="fas fa-ticket-alt"></i> TICKETS
-        </span>
-    </div>
+<!-- ===============================
+     Mobile Sidebar
+================================ -->
+<aside id="mobile-sidebar" class="sidebar mobile-sidebar d-lg-none">
+  <div class="sidebar-title mb-4">
+    <span class="custom-brand-text fw-bold">
+      <i class="fas fa-ticket-alt me-2"></i>TICKETS
+    </span>
+  </div>
 
-    <ul class="sidebar-menu list-unstyled">
-        <li class="{% if request.path == '/' %}active{% endif %}">
-            <a href="/">Dashboard</a>
-        </li>
+  <ul class="sidebar-menu list-unstyled">
+    <li class="{% if request.path == '/' %}active{% endif %}">
+      <a href="/"><i class="fas fa-chart-pie me-2"></i>Dashboard</a>
+    </li>
 
-        <li class="{% if request.path == '/tickets/' %}active{% endif %}">
-            <a href="/tickets/">Tickets</a>
-        </li>
+    <li class="{% if request.path == '/tickets/' %}active{% endif %}">
+      <a href="/tickets/"><i class="fas fa-list me-2"></i>Tickets</a>
+    </li>
 
-        <li class="{% if request.path == '/tickets/create/' %}active{% endif %}">
-            <a href="/create/">Create Ticket</a>
-        </li>
+    <li class="{% if request.path == '/tickets/create/' %}active{% endif %}">
+      <a href="/create/"
+        ><i class="fas fa-plus-circle me-2"></i>Create Ticket</a
+      >
+    </li>
 
-        <li class="mt-4">
-            <a href="/logout/" class="text-danger-emphasis">Logout</a>
-        </li>
-    </ul>
+    <li class="mt-4">
+      <a href="/logout/" class="text-danger-emphasis">
+        <i class="fas fa-sign-out-alt me-2"></i>Logout
+      </a>
+    </li>
+  </ul>
 </aside>
 
-<!-- Overlay มือถือ -->
 <div id="sidebar-overlay" class="d-lg-none"></div>
 
-<!-- CSS -->
+<!-- ===============================
+     CSS
+================================ -->
 <style>
-/* Hamburger 3 ขีด */
-.sidebar-toggle {
+  /* Layout */
+  .sidebar {
+    width: 260px;
+    background: #1e293b;
+    color: #fff;
+    padding: 20px;
+  }
+
+  .sidebar-title {
+    font-size: 1.1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 12px;
+  }
+
+  .sidebar-menu li a {
+    display: block;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: #cbd5e1;
+    text-decoration: none;
+    margin-bottom: 4px;
+  }
+
+  .sidebar-menu li.active a,
+  .sidebar-menu li a:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+
+  /* Mobile Header */
+  .mobile-header {
     position: fixed;
-    top: 15px;
-    left: 15px;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: #1e293b;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
     z-index: 1100;
-    width: 35px;
-    height: 30px;
+  }
+
+  .mobile-title {
+    margin-left: 12px;
+    font-weight: 600;
+  }
+
+  /* Hamburger */
+  .sidebar-toggle {
+    width: 32px;
+    height: 24px;
+    background: none;
+    border: none;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-}
+  }
 
-.sidebar-toggle .bar {
+  .sidebar-toggle .bar {
     height: 4px;
-    width: 100%;
-    background-color: #333;
-    border-radius: 2px;
-    transition: all 0.3s ease;
-}
-
-/* Sidebar มือถือ */
-#mobile-sidebar {
-    position: fixed;
-    top: 0;
-    left: -250px; /* เริ่มซ่อนด้านซ้าย */
-    width: 250px;
-    height: 100%;
     background: #fff;
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.2);
-    z-index: 1000;
-    transition: left 0.3s ease;
-}
+    border-radius: 2px;
+  }
 
-#mobile-sidebar.show {
-    left: 0;
-}
-
-/* Overlay */
-#sidebar-overlay {
-    display: none;
+  /* Mobile Sidebar */
+  .mobile-sidebar {
     position: fixed;
     top: 0;
-    left: 0;
-    width: 100%;
+    left: -260px;
     height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 999;
-}
+    transition: left 0.3s ease;
+    z-index: 1200;
+  }
 
-/* Hamburger X animation */
-.sidebar-toggle.open .bar:nth-child(1) {
-    transform: rotate(45deg) translate(6px, 6px);
-}
-.sidebar-toggle.open .bar:nth-child(2) {
-    opacity: 0;
-}
-.sidebar-toggle.open .bar:nth-child(3) {
-    transform: rotate(-45deg) translate(6px, -6px);
-}
+  .mobile-sidebar.show {
+    left: 0;
+  }
 
-/* Active menu item */
-.sidebar-menu li.active > a {
-    font-weight: bold;
-    color: #0d6efd;
-}
+  /* Overlay */
+  #sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    z-index: 1100;
+  }
 </style>
 
-<!-- JS -->
+<!-- ===============================
+     JS
+================================ -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const toggleBtn = document.getElementById('mobile-sidebar-toggle');
-    const sidebar = document.getElementById('mobile-sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
+  document.addEventListener("DOMContentLoaded", function () {
+    const toggle = document.getElementById("mobile-sidebar-toggle");
+    const sidebar = document.getElementById("mobile-sidebar");
+    const overlay = document.getElementById("sidebar-overlay");
 
-    toggleBtn.addEventListener('click', function() {
-        sidebar.classList.toggle('show');
-        overlay.style.display = sidebar.classList.contains('show') ? 'block' : 'none';
-        toggleBtn.classList.toggle('open');
+    toggle.addEventListener("click", () => {
+      sidebar.classList.toggle("show");
+      overlay.style.display = sidebar.classList.contains("show")
+        ? "block"
+        : "none";
     });
 
-    overlay.addEventListener('click', function() {
-        sidebar.classList.remove('show');
-        overlay.style.display = 'none';
-        toggleBtn.classList.remove('open');
+    overlay.addEventListener("click", closeSidebar);
+
+    sidebar.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", closeSidebar);
     });
 
-    // ปิด sidebar เมื่อคลิก menu item มือถือ
-    const menuLinks = sidebar.querySelectorAll('a');
-    menuLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            if (window.innerWidth < 992) {
-                sidebar.classList.remove('show');
-                overlay.style.display = 'none';
-                toggleBtn.classList.remove('open');
-            }
-        });
-    });
-});
+    function closeSidebar() {
+      sidebar.classList.remove("show");
+      overlay.style.display = "none";
+    }
+  });
 </script>

@@ -1,152 +1,183 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block title %}Dashboard{% endblock %}
+
 {% block content %}
-<main class="main-content">
 
-    <div class="d-flex justify-content-between align-items-end mb-4">
+<!-- =======================
+     HEADER
+======================= -->
+<div class="d-flex justify-content-between align-items-end mb-4">
+    <div>
+        <h2 class="fw-bold mb-0">Dashboard Overview</h2>
+        <p class="text-muted mb-0">ยินดีต้อนรับกลับมา! ข้อมูลล่าสุดประจำวันนี้</p>
+    </div>
+</div>
+
+<!-- =======================
+     SUMMARY CARDS
+======================= -->
+<div class="dashboard-cards mb-4">
+
+    <div class="dashboard-card">
         <div>
-            <h2 class="fw-bold mb-0">Dashboard Overview</h2>
-            <p class="text-muted mb-0">ยินดีต้อนรับกลับมา! ข้อมูลล่าสุดประจำวันนี้</p>
+            <p class="card-label">รอจัดการ</p>
+            <h3 class="card-value text-warning">{{ pending|default:"0" }}</h3>
+        </div>
+        <div class="icon-box bg-warning-soft">
+            <i class="fas fa-clock"></i>
         </div>
     </div>
 
-    <!-- SUMMARY CARDS -->
-    <div class="dashboard-cards">
-
-
-        <div class="dashboard-card">
-            <div>
-                <p class="card-label">รอจัดการ</p>
-                <h3 class="card-value text-warning">{{ pending|default:"0" }}</h3>
-            </div>
-            <div class="icon-box bg-warning-soft">
-                <i class="fas fa-clock"></i>
-            </div>
+    <div class="dashboard-card">
+        <div>
+            <p class="card-label">เสร็จสิ้น</p>
+            <h3 class="card-value text-success">{{ closed|default:"0" }}</h3>
         </div>
-
-        <div class="dashboard-card">
-            <div>
-                <p class="card-label">เสร็จสิ้น</p>
-                <h3 class="card-value text-success">{{ closed|default:"0" }}</h3>
-            </div>
-            <div class="icon-box bg-success-soft">
-                <i class="fas fa-check-circle"></i>
-            </div>
+        <div class="icon-box bg-success-soft">
+            <i class="fas fa-check-circle"></i>
         </div>
-        <div class="dashboard-card">
-            <div>
-                <p class="card-label">ยอดรวมรายการ</p>
-                <h3 class="card-value">{{ total|default:"0" }}</h3>
+    </div>
+
+    <div class="dashboard-card">
+        <div>
+            <p class="card-label">ยอดรวมรายการ</p>
+            <h3 class="card-value">{{ total|default:"0" }}</h3>
+        </div>
+        <div class="icon-box bg-primary-soft">
+            <i class="fas fa-ticket-alt"></i>
+        </div>
+    </div>
+
+</div>
+
+<!-- =======================
+     CHART + TOP CATEGORY
+======================= -->
+<div class="row g-4">
+
+    <!-- CHART -->
+    <div class="col-lg-7">
+        <div class="dashboard-table h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0 fw-bold">สัดส่วนประเภทคำขอ</h4>
+                <i class="fas fa-chart-pie text-muted"></i>
             </div>
-            <div class="icon-box bg-primary-soft">
-                <i class="fas fa-ticket-alt"></i>
+
+            <div class="chart-container">
+                <canvas id="ticketChart"></canvas>
             </div>
         </div>
     </div>
 
-    <div class="row g-4">
-        <!-- CHART -->
-        <div class="col-lg-7">
-            <div class="dashboard-table h-100">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4 class="mb-0 fw-bold">สัดส่วนประเภทคำขอ</h4>
-                    <i class="fas fa-chart-pie text-muted"></i>
+    <!-- TOP CATEGORY -->
+    <div class="col-lg-5">
+        <div class="dashboard-table h-100 shadow-sm">
+            <h4 class="mb-4 fw-bold">ประเภทที่ถูกแจ้งมากที่สุด</h4>
+
+            <!-- TOP 1 -->
+            <div class="top-rank-card mb-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="rank-number">1</div>
+                    <div>
+                        <h5 class="fw-bold mb-0 text-white">
+                            {{ top_category_name|default:"Network Issue" }}
+                        </h5>
+                        <small class="text-white-50">
+                            แจ้งเข้ามาทั้งหมด {{ top_category_count|default:"45" }} รายการ
+                        </small>
+                    </div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="ticketChart"></canvas>
+
+                <div class="progress progress-white-alpha progress-h-8">
+                    <div class="progress-bar bg-white w-45"></div>
                 </div>
             </div>
-        </div>
 
-        <!-- TOP CATEGORY -->
-        <div class="col-lg-5">
-            <div class="dashboard-table h-100 border-0 shadow-sm">
-                <h4 class="mb-4 fw-bold">ประเภทที่ถูกแจ้งมากที่สุด</h4>
+            <!-- RANKING LIST -->
+            <div class="ranking-list px-1">
 
-                <div class="top-rank-card mb-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="rank-number-glow">1</div>
-                        <div>
-                            <h5 class="fw-bold mb-0 text-white">
-                                {{ top_category_name|default:"Network Issue" }}
-                            </h5>
-                            <small class="text-white-50">
-                                แจ้งเข้ามาทั้งหมด {{ top_category_count|default:"45" }} รายการ
-                            </small>
-                        </div>
+                <div class="ranking-item mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-semibold">2. Hardware Maintenance</span>
+                        <span class="badge bg-light-blue text-primary">32</span>
                     </div>
-
-                    <div class="progress progress-white-alpha progress-h-8">
-                        <div class="progress-bar bg-white w-45"></div>
+                    <div class="progress rounded-pill progress-h-6">
+                        <div class="progress-bar bg-primary-light w-32"></div>
                     </div>
                 </div>
 
-                <!-- RANKING LIST -->
-                <div class="ranking-list px-1">
-                    <div class="ranking-item mb-4">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <span class="fw-semibold text-main">2. Hardware Maintenance</span>
-                            <span class="badge bg-light-blue text-primary">32</span>
-                        </div>
-                        <div class="progress rounded-pill progress-h-6">
-                            <div class="progress-bar bg-primary-light w-32"></div>
-                        </div>
+                <div class="ranking-item mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-semibold">3. Software Installation</span>
+                        <span class="badge bg-light-green text-success">18</span>
                     </div>
-
-                    <div class="ranking-item mb-4">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <span class="fw-semibold text-main">3. Software Installation</span>
-                            <span class="badge bg-light-green text-success">18</span>
-                        </div>
-                        <div class="progress rounded-pill progress-h-6">
-                            <div class="progress-bar bg-success w-18"></div>
-                        </div>
+                    <div class="progress rounded-pill progress-h-6">
+                        <div class="progress-bar bg-success w-18"></div>
                     </div>
-
-                    <div class="ranking-item">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <span class="fw-semibold text-main">4. System Access</span>
-                            <span class="badge bg-light-yellow text-warning">10</span>
-                        </div>
-                        <div class="progress rounded-pill progress-h-6">
-                            <div class="progress-bar bg-warning w-10"></div>
-                        </div>
-                    </div>
-
                 </div>
+
+                <div class="ranking-item">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-semibold">4. System Access</span>
+                        <span class="badge bg-light-yellow text-warning">10</span>
+                    </div>
+                    <div class="progress rounded-pill progress-h-6">
+                        <div class="progress-bar bg-warning w-10"></div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
-</main>
+
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-    const ctx = document.getElementById('ticketChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Network', 'Hardware', 'Software', 'Access'],
-            datasets: [{
-                data: [45, 32, 18, 10],
-                backgroundColor: ['#4f46e5', '#818cf8', '#10b981', '#f59e0b'],
-                hoverOffset: 15,
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { usePointStyle: true, padding: 25 }
+const ctx = document.getElementById('ticketChart').getContext('2d');
+
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Network', 'Hardware', 'Software', 'Access'],
+        datasets: [{
+            data: [45, 32, 18, 10],
+            backgroundColor: [
+                '#4f46e5',
+                '#818cf8',
+                '#10b981',
+                '#f59e0b'
+            ],
+            borderWidth: 0,
+            hoverOffset: 12
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '70%',
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    usePointStyle: true,
+                    padding: 20
                 }
-            },
-            cutout: '75%'
+            }
         }
-    });
+    }
+});
 </script>
+
+<style>
+.chart-container {
+    height: 280px;
+}
+</style>
 {% endblock %}
