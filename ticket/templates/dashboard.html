@@ -13,15 +13,7 @@
 
     <!-- SUMMARY CARDS -->
     <div class="dashboard-cards">
-        <div class="dashboard-card">
-            <div>
-                <p class="card-label">ยอดรวมรายการ</p>
-                <h3 class="card-value">{{ total|default:"0" }}</h3>
-            </div>
-            <div class="icon-box bg-primary-soft">
-                <i class="fas fa-ticket-alt"></i>
-            </div>
-        </div>
+
 
         <div class="dashboard-card">
             <div>
@@ -40,6 +32,15 @@
             </div>
             <div class="icon-box bg-success-soft">
                 <i class="fas fa-check-circle"></i>
+            </div>
+        </div>
+        <div class="dashboard-card">
+            <div>
+                <p class="card-label">ยอดรวมรายการ</p>
+                <h3 class="card-value">{{ total|default:"0" }}</h3>
+            </div>
+            <div class="icon-box bg-primary-soft">
+                <i class="fas fa-ticket-alt"></i>
             </div>
         </div>
     </div>
@@ -123,29 +124,29 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const ctx = document.getElementById('ticketChart').getContext('2d');
-new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-        labels: ['Network', 'Hardware', 'Software', 'Access'],
-        datasets: [{
-            data: [45, 32, 18, 10],
-            backgroundColor: ['#4f46e5', '#818cf8', '#10b981', '#f59e0b'],
-            hoverOffset: 15,
-            borderWidth: 0
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom',
-                labels: { usePointStyle: true, padding: 25 }
-            }
+    const ctx = document.getElementById('ticketChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Network', 'Hardware', 'Software', 'Access'],
+            datasets: [{
+                data: [45, 32, 18, 10],
+                backgroundColor: ['#4f46e5', '#818cf8', '#10b981', '#f59e0b'],
+                hoverOffset: 15,
+                borderWidth: 0
+            }]
         },
-        cutout: '75%'
-    }
-});
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { usePointStyle: true, padding: 25 }
+                }
+            },
+            cutout: '75%'
+        }
+    });
 </script>
 {% endblock %}
