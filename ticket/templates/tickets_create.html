@@ -5,76 +5,85 @@
 {% block content %}
 <main class="main-content">
 
-<h3 class="fw-bold mb-4">
-    <i class="fas fa-plus-circle me-2 text-primary"></i> เลือกประเภทคำร้อง
-</h3>
+    <h3 class="fw-bold mb-4">
+        <i class="fas fa-plus-circle me-2 text-primary"></i> เลือกประเภทคำร้อง
+    </h3>
 
-<ul class="type-list">
+    <ul class="type-list">
 
-   
-    <li>
-        <a href="{% url 'erp_perm' %}">
-            <i class="fas fa-user-lock text-primary"></i>
-            <div>
-                <b>ขอเปิด User / ปรับสิทธิ์ ERP</b><br>
-                <small></small>
-            </div>
-        </a>
-    </li>
 
-   
-    <li>
-        <a href="{% url 'adjust_form' %}">
-            <i class="fas fa-exchange-alt text-success"></i>
-            <div>
-                <b>ปรับยอดสะสม (Adjust)</b><br>
-            </div>
-        </a>
-    </li>
+        <li>
+            <a href="{% url 'erp_perm' %}">
+                <i class="fas fa-user-lock text-primary"></i>
+                <div>
+                    <b>ขอเปิด User / ปรับสิทธิ์ ERP</b><br>
+                    <small></small>
+                </div>
+            </a>
+        </li>
 
-    <li>
-        <a href="{% url 'app_form' %}">
-            <i class="fas fa-laptop-code text-success"></i>
-            <div><b>ขอ Application</b></div>
-        </a>
-    </li>
 
-    <li>
-        <a href="{% url 'report_form' %}">
-            <i class="fas fa-chart-bar text-primary"></i>
-            <div><b>ขอ Report / ERP Data</b></div>
-        </a>
-    </li>
+        <li>
+            <a href="{% url 'adjust_form' %}">
+                <i class="fas fa-exchange-alt text-success"></i>
+                <div>
+                    <b>ปรับยอดสะสม (Adjust)</b><br>
+                </div>
+            </a>
+        </li>
 
-    <li>
-        <a href="{% url 'vpn' %}">
-            <i class="fas fa-network-wired text-info"></i>
-            <div>
-                <b>ขอใช้งาน VPN</b>
-            </div>
-        </a>
-    </li>
+        <li>
+            <a href="{% url 'app_form' %}">
+                <i class="fas fa-laptop-code text-success"></i>
+                <div><b>ขอ Application</b></div>
+            </a>
+        </li>
 
-    <li>
-        <a href="{% url 'borrows' %}">
-            <i class="fas fa-laptop text-secondary"></i>
-            <div>
-                <b>เบิก / คืน อุปกรณ์ IT</b>
-            </div>
-        </a>
-    </li>
+        <li>
+            <a href="{% url 'report_form' %}">
+                <i class="fas fa-chart-bar text-primary"></i>
+                <div><b>ขอ Report / ERP Data</b></div>
+            </a>
+        </li>
 
-    
-    
-    <li>
-        <a href="{% url 'active_promotion_form' %}">
-            <i class="fas fa-ad text-danger"></i>
-            <div>
-                <b>Active Promotion</b>
-            </div>
-        </a>
-    </li>
+        <li>
+            <a href="{% url 'vpn' %}">
+                <i class="fas fa-network-wired text-info"></i>
+                <div>
+                    <b>ขอใช้งาน VPN</b>
+                </div>
+            </a>
+        </li>
 
-</ul>
+        <li>
+            <a href="{% url 'borrows' %}">
+                <i class="fas fa-laptop text-secondary"></i>
+                <div>
+                    <b>เบิก / คืน อุปกรณ์ IT</b>
+                </div>
+            </a>
+        </li>
+
+
+
+        <li>
+            <a href="{% url 'active_promotion_form' %}">
+                <i class="fas fa-ad text-danger"></i>
+                <div>
+                    <b>Active Promotion</b>
+                </div>
+            </a>
+        </li>
+
+        <li>
+            <a href="{% url 'repairs_form' %}">
+                <i class="fas fa-tools me-2"></i>
+                <div>
+                    <b>แจ้งปัญหาซ่อมอาคาร</b>
+                </div>
+            </a>
+        </li>
+
+    </ul>
 </main>
 {% endblock %}
