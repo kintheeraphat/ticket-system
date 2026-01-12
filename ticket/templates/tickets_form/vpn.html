@@ -44,11 +44,16 @@
             <input type="text" class="form-control bg-light"
                 value="ขออนุมัติเปิดสิทธิ์ Virtual Private Network (VPN) (เข้าใช้งานจากภายนอกบริษัท)" readonly>
         </div>
+        <div class="mb-4 d-grid" style="grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+            <div>
+                <label class="fw-bold mb-2">ตั้งแต่วันที่</label>
+                <input type="date" name="start_date" class="form-control" required>
+            </div>
 
-        <!-- วันที่เริ่ม -->
-        <div class="mb-4">
-            <label class="fw-bold mb-2">ตั้งแต่วันที่ (Starting From)</label>
-            <input type="date" name="start_date" class="form-control" style="max-width: 300px;" required>
+            <div>
+                <label class="fw-bold mb-2">ถึงวันที่</label>
+                <input type="date" name="end_date" class="form-control" required>
+            </div>
         </div>
 
         <!-- รายชื่อผู้ใช้งาน -->
@@ -97,7 +102,7 @@
                 ใช้สำหรับจัดลำดับการดำเนินงานของเจ้าหน้าที่
             </small>
         </div> -->
-                <!-- FILE -->
+        <!-- FILE -->
         <div class="mb-4">
             <label class="fw-bold mb-2">แนบไฟล์เอกสาร (ถ้ามี)</label>
             <input type="file" name="order_file[]" multiple class="form-control">
