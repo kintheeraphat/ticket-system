@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}แจ้งปัญหาซ่อมอาคาร{% endblock %}
+
+{% block content %}
+<div class="dashboard-table shadow-sm p-4 bg-white rounded">
+
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h4 class="fw-bold text-primary mb-1">
+                <i class="fas fa-tools me-2"></i>แจ้งปัญหาซ่อมอาคาร
+            </h4>
+            <p class="text-muted small">
+                กรุณากรอกข้อมูลให้ครบถ้วนเพื่อความรวดเร็วในการดำเนินการ
+            </p>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <label for="building" class="fw-bold mb-2">
+            <i class="fas fa-building me-1"></i> อาคาร
+        </label>
+
+        <select id="building" name="building" class="form-select" required>
+            <option value="">-- เลือกอาคาร --</option>
+            <option value="A">อาคาร A</option>
+            <option value="B">อาคาร B</option>
+            <option value="C">อาคาร C</option>
+        </select>
+
+
+        <div class="mb-4">
+            <label class="fw-bold mb-2">
+                <i class="fas fa-sitemap me-1"></i> ฝ่าย / หน่วยงาน
+            </label>
+            <input type="text" name="department" class="form-control" placeholder="เช่น ฝ่ายไอที, ฝ่ายอาคารสถานที่"
+                required>
+        </div>
+
+        <div class="mb-4">
+            <label class="fw-bold mb-2">
+                <i class="fas fa-user me-1"></i> ผู้แจ้ง
+            </label>
+            <input type="text" class="form-control"
+                value="{{ request.user.get_full_name|default:request.user.username }}" readonly>
+            <small class="text-muted">
+                ดึงจากผู้ใช้งานที่เข้าสู่ระบบ
+            </small>
+        </div>
+
+        <div class="mb-4">
+            <label class="fw-bold mb-2">
+                <i class="fas fa-exclamation-circle me-1"></i> รายละเอียดปัญหา
+            </label>
+            <textarea name="problem_detail" rows="4" class="form-control"
+                placeholder="อธิบายปัญหาที่พบ เช่น ไฟไม่ติด น้ำรั่ว แอร์ไม่เย็น" required></textarea>
+        </div>
+
+        <div class="mb-4">
+            <label class="fw-bold mb-2">
+                <i class="fas fa-camera me-1"></i> แนบภาพถ่ายปัญหา
+            </label>
+            <input type="file" name="repair_images[]" class="form-control" accept="image/*" multiple>
+            <small class="text-muted">
+                รองรับหลายไฟล์ (jpg, png)
+            </small>
+        </div>
+
+        <div class="text-end border-top pt-3">
+            <button type="reset" class="btn btn-light me-2 border">
+                ล้างข้อมูล
+            </button>
+            <button type="submit" class="btn btn-primary px-5 fw-bold shadow-sm">
+                <i class="fas fa-paper-plane me-2"></i>ส่งแจ้งซ่อม
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<style>
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+</style>
+{% endblock %}
