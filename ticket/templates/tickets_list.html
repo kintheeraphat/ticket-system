@@ -20,7 +20,6 @@
     <!-- Filter -->
     <div class="dashboard-table mb-4 p-4">
         <form method="GET" class="row g-3 align-items-end">
-
             <!-- Search -->
             <div class="col-md-3">
                 <label class="form-label small text-muted">ค้นหา</label>
@@ -28,7 +27,8 @@
                     <span class="input-group-text bg-white text-muted">
                         <i class="fas fa-search"></i>
                     </span>
-                    <input type="text" name="search" class="form-control" placeholder="รหัส / หัวข้อเรื่อง">
+                    <input type="text" name="search" class="form-control" placeholder="รหัส / หัวข้อเรื่อง"
+                        value="{{ request.GET.search }}">
                 </div>
             </div>
 
@@ -37,10 +37,10 @@
                 <label class="form-label small text-muted">สถานะ</label>
                 <select name="status" class="form-select">
                     <option value="">ทุกสถานะ</option>
-                    <option value="pending" selected>รอดำเนินการ</option>
-                    <option value="approve">รออนุมัติ</option>
-                    <option value="draft">ดราฟ</option>
-                    <option value="closed">เสร็จสิ้นแล้ว</option>
+                    <option value="รอดำเนินการ" {% if request.GET.status == 'รอดำเนินการ' %}selected{% endif %}>รอดำเนินการ</option>
+                    <option value="รออนุมัติ" {% if request.GET.status == 'รออนุมัติ' %}selected{% endif %}>รออนุมัติ</option>
+                    <option value="ดราฟ" {% if request.GET.status == 'ดราฟ' %}selected{% endif %}>ดราฟ</option>
+                    <option value="เสร็จสิ้นแล้ว" {% if request.GET.status == 'เสร็จสิ้นแล้ว' %}selected{% endif %}>เสร็จสิ้นแล้ว</option>
                 </select>
             </div>
 
@@ -49,10 +49,13 @@
                 <label class="form-label small text-muted">ผู้รับผิดชอบงาน</label>
                 <select name="assignee" class="form-select">
                     <option value="">ทุกคน</option>
-                    <option value="admin1">admin_No.1</option>
-                    <option value="admin2">admin_No.2</option>
-                    <option value="admin3">admin_No.3</option>
-                    <option value="admin4">admin_No.4</option>
+                    {% for ticket in tickets %}
+                        {% if ticket.assignee != "ยังไม่มอบหมาย" %}
+                            <option value="{{ ticket.assignee }}" {% if request.GET.assignee == ticket.assignee %}selected{% endif %}>
+                                {{ ticket.assignee }}
+                            </option>
+                        {% endif %}
+                    {% endfor %}
                 </select>
             </div>
 
@@ -64,7 +67,7 @@
                         <i class="fas fa-calendar-alt"></i>
                     </span>
                     <input type="text" id="dateRange" name="date_range" class="form-control"
-                        placeholder="เลือกช่วงวันที่" autocomplete="off">
+                        placeholder="เลือกช่วงวันที่" autocomplete="off" value="{{ request.GET.date_range }}">
                 </div>
             </div>
 
@@ -97,122 +100,55 @@
                 </thead>
 
                 <tbody>
-
-                    <!-- ตัวอย่างรายการที่ 1 -->
-                    <tr>
-                        <td class="text-center">
-                            <span class="badge bg-light text-muted border">#1001</span>
-                        </td>
-
-                        <td>
-                            <div class="fw-bold">คอมพิวเตอร์เปิดไม่ติด</div>
-                        </td>
-
-                        <td>อุปกรณ์ IT</td>
-
-                        <td>user01</td>
-
-                        <td>
-                            <span class="fw-semibold">admin_No.1</span><br>
-                            <small class="text-muted">เจ้าหน้าที่ IT</small>
-                        </td>
-
-                        <td>08 ม.ค. 2026</td>
-
-                        <td class="text-center">
-                            <span class="badge bg-warning-subtle text-warning">
-                                รอดำเนินการ
-                            </span>
-                        </td>
-
-                        <td class="text-end pe-4">
-                            <a href="{% url 'tickets_detail' %}"
-                                class="btn btn-outline-secondary btn-sm rounded-circle">
-                                <i class="fas fa-chevron-right"></i>
-                            </a>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td class="text-center">
-                            <span class="badge bg-light text-muted border">#1002</span>
-                        </td>
-
-                        <td>
-                            <div class="fw-bold">ขอสิทธิ์เข้าใช้งานระบบ</div>
-                        </td>
-
-                        <td>ระบบงาน</td>
-
-                        <td>user02</td>
-
-                        <td>
-                            <span class="badge bg-light text-muted border">
-                                ยังไม่มอบหมาย
-                            </span>
-                        </td>
-
-                        <td>09 ม.ค. 2026</td>
-
-                        <td class="text-center">
-                            <span class="badge bg-info-subtle text-info">
-                                รออนุมัติ
-                            </span>
-                        </td>
-
-                        <td class="text-end pe-4">
-                            <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle">
-                                <i class="fas fa-chevron-right"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-center">
-                            <span class="badge bg-light text-muted border">#1003</span>
-                        </td>
-
-                        <td>
-                            <div class="fw-bold">ปรับยอดสะสม</div>
-                        </td>
-
-                        <td>ระบบงาน</td>
-
-                        <td>user02</td>
-
-                        <td>
-                            <span class="badge bg-light text-muted border">
-                                ยังไม่มอบหมาย
-                            </span>
-                        </td>
-
-                        <td>10 ม.ค. 2026</td>
-
-                        <td class="text-center">
-                            <span class="badge bg-light text-dark border border-secondary">
-                                ดราฟ
-                            </span>
-                        </td>
-
-
-                        <td class="text-end pe-4">
-                            <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle">
-                                <i class="fas fa-chevron-right"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    <!-- Empty state -->
-                    {% if false %}
-                    <tr>
-                        <td colspan="8" class="text-center py-5">
-                            <i class="fas fa-inbox fa-3x mb-3 text-muted opacity-25"></i>
-                            <h6 class="text-muted fw-bold">ไม่พบข้อมูลคำขอ</h6>
-                            <p class="text-muted small">
-                                ไม่มีรายการในช่วงวันที่ที่เลือก
-                            </p>
-                        </td>
-                    </tr>
+                    {% if tickets %}
+                        {% for t in tickets %}
+                        <tr>
+                            <td class="text-center">
+                                <span class="badge bg-light text-muted border">#{{ t.id }}</span>
+                            </td>
+                            <td>
+                                <div class="fw-bold">{{ t.title }}</div>
+                                <small>{{ t.description }}</small>
+                            </td>
+                            <td>{{ t.ticket_type }}</td>
+                            <td>{{ t.requester }}</td>
+                            <td>
+                                {% if t.assignee != "ยังไม่มอบหมาย" %}
+                                    <span class="fw-semibold">{{ t.assignee }}</span>
+                                {% else %}
+                                    <span class="badge bg-light text-muted border">ยังไม่มอบหมาย</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ t.created_at|date:"d M Y" }}</td>
+                            <td class="text-center">
+                                {% if t.status == "รอดำเนินการ" %}
+                                    <span class="badge bg-warning-subtle text-warning">{{ t.status }}</span>
+                                {% elif t.status == "รออนุมัติ" %}
+                                    <span class="badge bg-info-subtle text-info">{{ t.status }}</span>
+                                {% elif t.status == "ดราฟ" %}
+                                    <span class="badge bg-light text-dark border border-secondary">{{ t.status }}</span>
+                                {% elif t.status == "เสร็จสิ้นแล้ว" %}
+                                    <span class="badge bg-success-subtle text-success">{{ t.status }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary text-dark">{{ t.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                <a href="{% url 'tickets_detail' %}?id={{ t.id }}" class="btn btn-outline-secondary btn-sm rounded-circle">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <i class="fas fa-inbox fa-3x mb-3 text-muted opacity-25"></i>
+                                <h6 class="text-muted fw-bold">ไม่พบข้อมูลคำขอ</h6>
+                                <p class="text-muted small">ไม่มีรายการในช่วงวันที่ที่เลือก</p>
+                            </td>
+                        </tr>
                     {% endif %}
-
                 </tbody>
             </table>
         </div>
@@ -224,9 +160,7 @@
         flatpickr("#dateRange", {
             mode: "range",
             dateFormat: "d/m/Y",
-            locale: {
-                rangeSeparator: " ถึง "
-            }
+            locale: { rangeSeparator: " ถึง " }
         });
     </script>
 
