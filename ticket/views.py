@@ -56,7 +56,65 @@ def dashboard(request):
     if "user" not in request.session:
         return redirect("login")
 
-    return render(request, "dashboard.html")
+    with connection.cursor() as cursor:
+
+        # =====================
+        # SUMMARY CARDS
+        # =====================
+        cursor.execute("""
+            SELECT COUNT(*) FROM tickets.tickets t
+            JOIN tickets.status s ON s.id = t.status_id
+            WHERE s.name = 'รอดำเนินการ'
+        """)
+        pending = cursor.fetchone()[0]
+
+        cursor.execute("""
+            SELECT COUNT(*) FROM tickets.tickets t
+            JOIN tickets.status s ON s.id = t.status_id
+            WHERE s.name = 'เสร็จสิ้นแล้ว'
+        """)
+        closed = cursor.fetchone()[0]
+
+        cursor.execute("SELECT COUNT(*) FROM tickets.tickets")
+        total = cursor.fetchone()[0]
+
+        # =====================
+        # CHART : ticket_type
+        # =====================
+        cursor.execute("""
+        SELECT 
+            tt.name,
+            COUNT(t.id) AS total
+        FROM tickets.ticket_type tt
+        LEFT JOIN tickets.tickets t 
+            ON t.ticket_type_id = tt.id
+        GROUP BY tt.name
+        ORDER BY total DESC
+    """)
+        chart_rows = cursor.fetchall()
+
+        chart_labels = [row[0] for row in chart_rows]
+        chart_values = [row[1] for row in chart_rows]
+
+        # =====================
+        # TOP CATEGORY
+        # =====================
+        top_category_name = chart_labels[0] if chart_labels else ""
+        top_category_count = chart_values[0] if chart_values else 0
+
+    context = {
+        "pending": pending,
+        "closed": closed,
+        "total": total,
+
+        "chart_labels": chart_labels,
+        "chart_values": chart_values,
+
+        "top_category_name": top_category_name,
+        "top_category_count": top_category_count,
+    }
+
+    return render(request, "dashboard.html", context)
 
 
 def tickets_list(request):
