@@ -3,8 +3,9 @@ from django.db import connection
 from django.utils import timezone
 from django.contrib import messages
 # from .auth_users import USERS
-from .decorators import role_required
-import hashlib
+import os
+from django.conf import settings
+
 
 
 def login_view(request):
@@ -44,6 +45,10 @@ def login_view(request):
 
     return render(request, "login.html")
 
+# views.py
+def ticket_success(request):
+    return render(request, "tickets_form/ticket_success.html")
+
 
 def logout_view(request):
     request.session.flush()
@@ -64,39 +69,28 @@ def tickets_create(req):
 
 def erp_perm(request):
     if request.method == "POST":
+        user_id = request.session["user"]["id"]
 
-        # -----------------------------
-        # 1) INSERT INTO tickets
-        # -----------------------------
+        # 1️⃣ สร้าง Ticket
         title = "ขอเปิด User / ปรับสิทธิ์ ERP"
         description = request.POST.get("remark")
-        ticket_type_id = 1  # <-- ERP type (ปรับตาม master)
-        user_id = request.user.id  # ต้อง map กับ user_permission
+        ticket_type_id = 1  # ERP
+        status_id = 1       # Waiting for Approve
 
         with connection.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO tickets.tickets
-                (title, description, user_id, status_id, ticket_type_id, create_at)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                (title, description, user_id, status_id, ticket_type_id)
+                VALUES (%s, %s, %s, %s, %s)
                 RETURNING id
-            """, [
-                title,
-                description,
-                user_id,
-                1,  # status_id = รอดำเนินการ
-                ticket_type_id,
-                timezone.now()
-            ])
+            """, [title, description, user_id, status_id, ticket_type_id])
             ticket_id = cursor.fetchone()[0]
 
-        # -----------------------------
-        # 2) INSERT ticket_data_erp_app
-        # -----------------------------
-        module_access = True
-        perm_change = request.POST.get("request_type") == "adjust_perm"
-
+        # 2️⃣ บันทึก ERP Modules
         modules = request.POST.getlist("erp_module[]")
         module_name = ", ".join(modules)
+        perm_change = request.POST.get("request_type") == "adjust_perm"
+        module_access = True
 
         with connection.cursor() as cursor:
             cursor.execute("""
@@ -104,23 +98,16 @@ def erp_perm(request):
                 (ticket_id, module_access, perm_change, module_name)
                 VALUES (%s, %s, %s, %s)
                 RETURNING id
-            """, [
-                ticket_id,
-                module_access,
-                perm_change,
-                module_name
-            ])
+            """, [ticket_id, module_access, perm_change, module_name])
             erp_data_id = cursor.fetchone()[0]
 
-        # -----------------------------
-        # 3) UPLOAD FILES → ticket_files
-        # -----------------------------
+        # 3️⃣ Upload files
         files = request.FILES.getlist("attachments[]")
+        upload_dir = os.path.join(settings.BASE_DIR, f"uploads/erp/{ticket_id}")
+        os.makedirs(upload_dir, exist_ok=True)
 
         for f in files:
-            file_path = f"uploads/erp/{ticket_id}/{f.name}"
-
-            # save file
+            file_path = os.path.join(upload_dir, f.name)
             with open(file_path, "wb+") as destination:
                 for chunk in f.chunks():
                     destination.write(chunk)
@@ -146,7 +133,6 @@ def erp_perm(request):
         return redirect("ticket_success")
 
     return render(request, "tickets_form/erp_perm.html")
-
 def vpn(req):
     return render(req,'tickets_form/vpn.html')
 

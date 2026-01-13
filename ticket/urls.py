@@ -21,4 +21,5 @@ urlpatterns = [
     path("tickets/active-promotion/", views.active_promotion_form, name="active_promotion_form"),
     path("create/vpn/", views.vpn, name="vpn"),
     path("create/borrows/", views.borrows, name="borrows"),
+    path("ticket-success/", views.ticket_success, name="ticket_success"),
 ]
