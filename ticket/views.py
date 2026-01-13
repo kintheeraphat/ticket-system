@@ -1,43 +1,60 @@
 from django.shortcuts import render, redirect
-from .auth_users import USERS
+from django.db import connection
+from django.utils import timezone
+from django.contrib import messages
+# from .auth_users import USERS
 from .decorators import role_required
+import hashlib
 
-@role_required(["admin"])
-def admin_page(request):
-    return render(request, "admin.html")
-
-@role_required(["manager", "admin"])
-def manager_page(request):
-    return render(request, "manager.html")
-
-@role_required(["user", "manager", "admin"])
-def user_page(request):
-    return render(request, "user.html")
 
 def login_view(request):
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
 
-        user = USERS.get(username)
+        if not username or not password:
+            messages.error(request, "กรุณากรอก username และ password")
+            return render(request, "login.html")
 
-        if user and user["password"] == password:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    id,
+                    username,
+                    full_name,
+                    role
+                FROM tickets.users
+                WHERE username = %s
+                  AND password = crypt(%s, password)
+                  AND is_active = true
+            """, [username, password])
+
+            user = cursor.fetchone()
+
+        if user:
             request.session["user"] = {
-                "username": username,
-                "role": user["role"]
+                "id": user[0],
+                "username": user[1],
+                "full_name": user[2],
+                "role": user[3],
             }
             return redirect("dashboard")
 
-        return render(request, "login.html", {"error": "Login failed"})
+        messages.error(request, "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง")
 
     return render(request, "login.html")
+
 
 def logout_view(request):
     request.session.flush()
     return redirect("login")    
 
-def dashboard(req):
-    return render(req, 'dashboard.html')
+def dashboard(request):
+    if "user" not in request.session:
+        return redirect("login")
+
+    return render(request, "dashboard.html")
+
 
 def tickets_list(req):
     return render(req,'tickets_list.html')
@@ -46,17 +63,90 @@ def tickets_create(req):
     return render(req,'tickets_create.html')
 
 def erp_perm(request):
-    context = {}
     if request.method == "POST":
-        # ดึงค่าจากฟอร์มมาเก็บไว้ในตัวแปร
-        context['saved_names'] = request.POST.getlist('name_en[]')
-        context['saved_modules'] = request.POST.getlist('erp_module[]')
-        context['saved_remark'] = request.POST.get('remark')
-        
-        # ทำการประมวลผลอื่นๆ (เช่น ส่ง Line Notify หรือ Email) 
-        # โดยไม่ต้องเซฟลง Database
-        
-    return render(request, "tickets_form/erp_perm.html", context)
+
+        # -----------------------------
+        # 1) INSERT INTO tickets
+        # -----------------------------
+        title = "ขอเปิด User / ปรับสิทธิ์ ERP"
+        description = request.POST.get("remark")
+        ticket_type_id = 1  # <-- ERP type (ปรับตาม master)
+        user_id = request.user.id  # ต้อง map กับ user_permission
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO tickets.tickets
+                (title, description, user_id, status_id, ticket_type_id, create_at)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                RETURNING id
+            """, [
+                title,
+                description,
+                user_id,
+                1,  # status_id = รอดำเนินการ
+                ticket_type_id,
+                timezone.now()
+            ])
+            ticket_id = cursor.fetchone()[0]
+
+        # -----------------------------
+        # 2) INSERT ticket_data_erp_app
+        # -----------------------------
+        module_access = True
+        perm_change = request.POST.get("request_type") == "adjust_perm"
+
+        modules = request.POST.getlist("erp_module[]")
+        module_name = ", ".join(modules)
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO tickets.ticket_data_erp_app
+                (ticket_id, module_access, perm_change, module_name)
+                VALUES (%s, %s, %s, %s)
+                RETURNING id
+            """, [
+                ticket_id,
+                module_access,
+                perm_change,
+                module_name
+            ])
+            erp_data_id = cursor.fetchone()[0]
+
+        # -----------------------------
+        # 3) UPLOAD FILES → ticket_files
+        # -----------------------------
+        files = request.FILES.getlist("attachments[]")
+
+        for f in files:
+            file_path = f"uploads/erp/{ticket_id}/{f.name}"
+
+            # save file
+            with open(file_path, "wb+") as destination:
+                for chunk in f.chunks():
+                    destination.write(chunk)
+
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO tickets.ticket_files
+                    (ticket_id, ref_type, ref_id, file_name, file_path,
+                     file_type, file_size, uploaded_by, create_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, [
+                    ticket_id,
+                    "ERP_APP",
+                    erp_data_id,
+                    f.name,
+                    file_path,
+                    f.content_type,
+                    f.size,
+                    user_id,
+                    timezone.now()
+                ])
+
+        return redirect("ticket_success")
+
+    return render(request, "tickets_form/erp_perm.html")
+
 def vpn(req):
     return render(req,'tickets_form/vpn.html')
 
