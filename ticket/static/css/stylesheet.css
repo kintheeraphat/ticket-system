@@ -493,9 +493,10 @@ input[type="file"] {
   border-radius: 12px;
   padding: 1rem;
 }
-/* =======================/* =======================
-   File preview
+/* =======================
+   FILE PREVIEW
 ======================= */
+
 .file-thumb {
   position: relative;
   width: 140px;
@@ -507,32 +508,23 @@ input[type="file"] {
   text-align: center;
 }
 
-/* ✅ ปุ่มกากบาท */
-.file-thumb > .remove-btn {
+.file-thumb .remove-btn {
   position: absolute;
   top: 6px;
   right: 6px;
-
   width: 22px;
   height: 22px;
 
-  background: #dc3545;
+  background-color: #dc3545;
   color: #fff;
-
   border: none;
   border-radius: 50%;
 
-  font-size: 14px;
+  font-size: 16px;
   line-height: 22px;
   font-weight: bold;
-
   cursor: pointer;
-  z-index: 100;
-}
-
-/* hover */
-.file-thumb > .remove-btn:hover {
-  background: #bb2d3b;
+  z-index: 999;
 }
 
 .file-thumb img,
@@ -549,4 +541,5 @@ input[type="file"] {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 

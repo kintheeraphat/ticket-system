@@ -1,3 +1,9 @@
+/* =======================
+   GLOBAL FILE UPLOAD
+======================= */
+window.fileUpload = {
+  selectedFiles: []
+};
 // TestChartหน้าDashboard
 document.addEventListener("DOMContentLoaded", function () {
   const chartCanvas = document.getElementById("ticketChart");
@@ -296,9 +302,7 @@ document.addEventListener("DOMContentLoaded", function () {
   updateIndex();
 });
 
-const name = document.createElement("div");
 name.className = "filename";
-name.innerText = file.name;
 
 thumb.appendChild(name);
 preview.appendChild(thumb); // ✅ append แค่ครั้งเดียว
@@ -308,84 +312,51 @@ function openPreview(url) {
   iframe.src = url + "#toolbar=0&navpanes=0&scrollbar=0";
   new bootstrap.Modal(document.getElementById("fileModal")).show();
 }
-
-/* =======================
-   Print
-======================= */
-function printForm() {
-  let html = `
-  <html>
-  <head>
-    <title>Print</title>
-    <style>
-      body { font-family: Arial; padding: 30px; }
-      h3 { text-align:center; }
-      .row { margin-bottom:10px; }
-      .label { font-weight:bold; }
-      .value { border-bottom:1px dotted #000; }
-    </style>
-  </head>
-  <body>
-    <h3>ขอปรับยอดสะสมในระบบ ERP</h3>
-  `;
-
-  document.querySelectorAll(".print-input").forEach((input) => {
-    const label = input.previousElementSibling?.innerText || "";
-    const value = input.value || "-";
-    html += `<div class="row"><div class="label">${label}</div><div class="value">${value}</div></div>`;
-  });
-
-  html += `<script>window.onload=function(){window.print();}<\/script></body></html>`;
-
-  const w = window.open("", "_blank", "width=900,height=700");
-  w.document.write(html);
-  w.document.close();
-}
 /* =======================
    File Preview Logic
 ======================= */
-
 let selectedFiles = [];
 
-/* เมื่อเลือกไฟล์ */
 function handleFiles(input) {
-  selectedFiles = Array.from(input.files);
+  if (!input || !input.files) return;
+
+  window.fileUpload.selectedFiles = Array.from(input.files);
   renderFiles();
 }
-
-/* แสดง preview */
 async function renderFiles() {
   const preview = document.getElementById("filePreview");
+  if (!preview) return; // ✅ หน้าที่ไม่มี preview จะไม่ error
+
   preview.innerHTML = "";
 
-  for (let i = 0; i < selectedFiles.length; i++) {
-    const file = selectedFiles[i];
+  const files = window.fileUpload.selectedFiles;
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
     const url = URL.createObjectURL(file);
 
     const thumb = document.createElement("div");
     thumb.className = "file-thumb";
 
-    /* 🔴 ปุ่มลบ */
+    // ปุ่มลบ
     const removeBtn = document.createElement("button");
     removeBtn.type = "button";
     removeBtn.className = "remove-btn";
     removeBtn.innerHTML = "&times;";
-    removeBtn.addEventListener("click", () => {
-      selectedFiles.splice(i, 1);
+    removeBtn.onclick = () => {
+      files.splice(i, 1);
       renderFiles();
-    });
-
+    };
     thumb.appendChild(removeBtn);
 
-    /* Preview */
+    // Preview
     if (file.type.startsWith("image/")) {
       const img = document.createElement("img");
       img.src = url;
-      img.addEventListener("click", () => openPreview(url));
       thumb.appendChild(img);
-    } else if (file.type === "application/pdf") {
+    } 
+    else if (file.type === "application/pdf" && window.pdfjsLib) {
       const canvas = document.createElement("canvas");
-
       const pdf = await pdfjsLib.getDocument(url).promise;
       const page = await pdf.getPage(1);
       const viewport = page.getViewport({ scale: 0.4 });
@@ -395,14 +366,12 @@ async function renderFiles() {
 
       await page.render({
         canvasContext: canvas.getContext("2d"),
-        viewport: viewport,
+        viewport,
       }).promise;
 
-      canvas.addEventListener("click", () => openPreview(url));
       thumb.appendChild(canvas);
     }
 
-    /* ชื่อไฟล์ */
     const name = document.createElement("div");
     name.className = "filename";
     name.innerText = file.name;
@@ -412,9 +381,11 @@ async function renderFiles() {
   }
 }
 
-/* เปิด preview */
+
 function openPreview(url) {
   const iframe = document.getElementById("previewFrame");
+  if (!iframe) return;
+
   iframe.src = url + "#toolbar=0&navpanes=0&scrollbar=0";
   new bootstrap.Modal(document.getElementById("fileModal")).show();
 }
