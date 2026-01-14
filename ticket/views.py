@@ -226,6 +226,7 @@ def erp_perm(request):
         ticket_type_id = 1   # master ticket_type
         status_id = 1        # Waiting for Approve
         user_id = request.session["user"]["id"]
+        department = request.POST.getlist("department[]")
 
         # -----------------------------
         # INSERT tickets.tickets
@@ -233,15 +234,16 @@ def erp_perm(request):
         with connection.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO tickets.tickets
-                (title, description, user_id, status_id, ticket_type_id)
-                VALUES (%s, %s, %s, %s, %s)
+                (title, description, user_id, status_id, ticket_type_id,department)
+                VALUES (%s, %s, %s, %s, %s, %s)
                 RETURNING id
             """, [
                 title,
                 description,
                 user_id,
                 status_id,
-                ticket_type_id
+                ticket_type_id,
+                department
             ])
             ticket_id = cursor.fetchone()[0]
 

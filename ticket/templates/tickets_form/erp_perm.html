@@ -103,8 +103,10 @@
             </label>
             <input type="file" name="attachments[]" class="form-control" multiple>
         </div>
-
         <div class="text-end border-top pt-3">
+            <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                <i class="fas fa-arrow-left me-1"></i> กลับ
+            </button>
             <button type="submit" class="btn btn-primary px-5 fw-bold">
                 ส่งคำร้อง
             </button>
@@ -115,4 +117,101 @@
 
 {% block extra_js %}
 <script src="{% static 'script/script.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const nameContainer = document.getElementById("nameFields");
+        const addNameBtn = document.getElementById("addNameBtn");
+
+        // สร้างแถวใหม่ (ชื่อ + แผนก)
+        function createNewRow(nameValue = "", deptValue = "") {
+            const row = document.createElement("div");
+            row.className = "d-flex gap-2 mb-2 align-items-center name-row";
+
+            const nameInput = document.createElement("input");
+            nameInput.type = "text";
+            nameInput.name = "name_en[]";
+            nameInput.className = "form-control";
+            nameInput.placeholder = "ชื่อ - นามสกุล";
+            nameInput.required = true;
+            nameInput.value = nameValue;
+
+            const deptInput = document.createElement("input");
+            deptInput.type = "text";
+            deptInput.name = "department[]";
+            deptInput.className = "form-control";
+            deptInput.placeholder = "แผนก";
+            deptInput.required = true;
+            deptInput.value = deptValue;
+
+            const removeBtn = document.createElement("button");
+            removeBtn.type = "button";
+            removeBtn.className = "btn btn-danger btn-sm remove-btn";
+            removeBtn.textContent = "ลบ";
+
+            removeBtn.addEventListener("click", function () {
+                row.remove();
+                updateRemoveButtons();
+            });
+
+            row.appendChild(nameInput);
+            row.appendChild(deptInput);
+            row.appendChild(removeBtn);
+
+            return row;
+        }
+
+        // เพิ่มรายชื่อ
+        addNameBtn.addEventListener("click", function () {
+            nameContainer.appendChild(createNewRow());
+            updateRemoveButtons();
+        });
+
+        // ซ่อนปุ่มลบแถวแรก
+        function updateRemoveButtons() {
+            const rows = nameContainer.querySelectorAll(".name-row");
+            rows.forEach((row, index) => {
+                const btn = row.querySelector(".remove-btn");
+                btn.style.visibility = index === 0 ? "hidden" : "visible";
+            });
+        }
+
+        updateRemoveButtons();
+    });
+    const moduleContainer = document.getElementById("moduleFields");
+    const addModuleBtn = document.getElementById("addModuleBtn");
+
+    function createModuleRow() {
+        const row = document.createElement("div");
+        row.className = "d-flex gap-2 mb-2 align-items-center module-row";
+
+        row.innerHTML = `
+            <input type="text" name="erp_module[]" class="form-control"
+                   placeholder="เช่น Sales, Accounting" required>
+            <button type="button" class="btn btn-danger btn-sm remove-module">ลบ</button>
+        `;
+
+        row.querySelector(".remove-module").addEventListener("click", () => {
+            row.remove();
+            updateModuleButtons();
+        });
+
+        return row;
+    }
+
+    addModuleBtn.addEventListener("click", () => {
+        moduleContainer.appendChild(createModuleRow());
+        updateModuleButtons();
+    });
+
+    function updateModuleButtons() {
+        const rows = moduleContainer.querySelectorAll(".module-row");
+        rows.forEach((row) => {
+            row.querySelector(".remove-module").style.visibility = "visible";
+        });
+    }
+
+    updateModuleButtons();
+
+</script>
 {% endblock %}
