@@ -215,21 +215,30 @@ def erp_perm(request):
         # -----------------------------
         request_type = request.POST.get("request_type")
 
+        # -----------------------------
+        # DEFAULT VALUE (กัน NameError)
+        # -----------------------------
+        title = "คำร้อง ERP"
+        ticket_type_id = 1   # default
+        status_id = 1        # Waiting for Approve
+
         if request_type == "open_user":
             title = "ขอเปิด User ใหม่"
+            ticket_type_id = 2
+
         elif request_type == "adjust_perm":
             title = "ปรับปรุงสิทธิ์เดิม"
-        else:
-            title = "คำร้อง ERP"
+            ticket_type_id = 1
 
+        # -----------------------------
+        # OTHER DATA
+        # -----------------------------
         description = request.POST.get("remark", "")
-        ticket_type_id = 1   # master ticket_type
-        status_id = 1        # Waiting for Approve
         user_id = request.session["user"]["id"]
         department = request.POST.getlist("department[]")
 
         # -----------------------------
-        # INSERT tickets.tickets
+        # INSERT TICKET
         # -----------------------------
         with connection.cursor() as cursor:
             cursor.execute("""
@@ -317,9 +326,106 @@ def erp_perm(request):
        
     return render(request, "tickets_form/erp_perm.html")
 
-def vpn(req):
-    
-    return render(req,'tickets_form/vpn.html')
+def vpn(request):
+    if request.method == "POST":
+
+        # -----------------------------
+        # BASIC TICKET INFO
+        # -----------------------------
+        title = "ขออนุมัติใช้งาน Virtual Private Network (VPN)"
+        description = request.POST.get("reason", "")
+        ticket_type_id = 3      
+        status_id = 1           
+        user_id = request.session["user"]["id"]
+
+        # รวมแผนก (กรณีหลายคน → เก็บเป็น text)
+        departments = request.POST.getlist("department[]")
+        department_text = ", ".join([d.strip() for d in departments if d.strip()])
+
+        # -----------------------------
+        # INSERT tickets.tickets
+        # -----------------------------
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO tickets.tickets
+                (title, description, user_id, status_id, ticket_type_id, department)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                RETURNING id
+            """, [
+                title,
+                description,
+                user_id,
+                status_id,
+                ticket_type_id,
+                department_text
+            ])
+            ticket_id = cursor.fetchone()[0]
+
+        # -----------------------------
+        # PREPARE VPN DATA
+        # -----------------------------
+        start_date = request.POST.get("start_date")
+        end_date = request.POST.get("end_date")
+        vpn_reason = request.POST.get("reason", "")
+
+        # รายชื่อผู้ใช้ VPN (หลายคน)
+        names = request.POST.getlist("user_names[]")
+        uservpn = "\n".join([n.strip() for n in names if n.strip()])
+
+        # -----------------------------
+        # INSERT ticket_data_vpn
+        # -----------------------------
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO tickets.ticket_data_vpn
+                (ticket_id, start_date, end_date, vpn_reason, uservpn)
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING id
+            """, [
+                ticket_id,
+                start_date,
+                end_date,
+                vpn_reason,
+                uservpn
+            ])
+            vpn_data_id = cursor.fetchone()[0]
+
+        # -----------------------------
+        # UPLOAD FILES
+        # -----------------------------
+        files = request.FILES.getlist("order_file[]")
+        upload_dir = f"media/uploads/vpn/{ticket_id}"
+        os.makedirs(upload_dir, exist_ok=True)
+
+        for f in files:
+            file_path = f"{upload_dir}/{f.name}"
+
+            with open(file_path, "wb+") as destination:
+                for chunk in f.chunks():
+                    destination.write(chunk)
+
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO tickets.ticket_files
+                    (ticket_id, ref_type, ref_id,
+                     file_name, file_path, file_type,
+                     file_size, uploaded_by, create_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, [
+                    ticket_id,
+                    "VPN",
+                    vpn_data_id,
+                    f.name,
+                    file_path,
+                    f.content_type,
+                    f.size,
+                    user_id,
+                    timezone.now()
+                ])
+
+        return redirect("ticket_success")
+
+    return render(request, "tickets_form/vpn.html")
 
 def borrows(req):
     return render(req,'tickets_form/borrows.html')
