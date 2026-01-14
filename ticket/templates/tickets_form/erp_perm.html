@@ -101,7 +101,15 @@
             <label class="fw-bold mb-2">
                 <i class="fas fa-paperclip me-1"></i> แนบไฟล์
             </label>
-            <input type="file" name="attachments[]" class="form-control" multiple>
+            <input
+                type="file"
+                class="form-control w-50"
+                multiple
+                onchange="handleFiles(this)"
+                />
+
+                <div id="filePreview" class="mt-3 d-flex gap-3 flex-wrap"></div>
+
         </div>
         <div class="text-end border-top pt-3">
             <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
@@ -116,6 +124,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="{% static 'script/script.js' %}"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
