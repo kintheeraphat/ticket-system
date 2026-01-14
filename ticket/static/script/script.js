@@ -1,3 +1,5 @@
+console.log("script.js loaded");
+
 // TestChartหน้าDashboard
 document.addEventListener('DOMContentLoaded', function () {
     const chartCanvas = document.getElementById('ticketChart');
@@ -55,40 +57,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-document.addEventListener('DOMContentLoaded', function() {
-    // เลือกทุกปุ่ม add-btn
-    document.querySelectorAll('.add-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            const wrapperSelector = btn.getAttribute('data-target');
-            const wrapper = document.querySelector(wrapperSelector);
 
-            // ถ้าเป็น names-wrapper
-            if (wrapper.classList.contains('names-wrapper')) {
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.name = 'name_en[]';
-                input.placeholder = 'ชื่อ-นามสกุล';
-                input.classList.add('form-control', 'mb-1');
-                wrapper.appendChild(input);
-            }
-
-            // ถ้าเป็น modules-wrapper
-            if (wrapper.classList.contains('modules-wrapper')) {
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.name = 'erp_module[]';
-                input.placeholder = 'เช่น รายละเอียดที่ต้องการ เช่น ใช้โปรไฟล์อะไร ต้องการเพิ่มอะไร';
-                input.classList.add('form-control', 'mb-1');
-                wrapper.appendChild(input);
-            }
-        });
-    });
-});
 document.addEventListener("DOMContentLoaded", function () {
     const nameContainer = document.getElementById("nameFields");
     const moduleContainer = document.getElementById("moduleFields");
     const remarkField = document.querySelector('textarea[name="remark"]');
-    const labelName = document.getElementById("labelName");
 
     function createNewRow(nameAttr, placeholder, value = "") {
         const div = document.createElement("div");
@@ -149,14 +122,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // ฟังก์ชันเปลี่ยนข้อความตามประเภทที่เลือก
-    function updateUI(type) {
-        if (type === 'adjust_perm') {
-            labelName.innerHTML = "ชื่อ-นามสกุล / User ERP ที่ต้องการปรับสิทธิ์";
-        } else {
-            labelName.innerHTML = "ชื่อ-นามสกุล สำหรับเปิด User ใหม่";
-        }
-    }
+
 
     // --- Events ---
     loadFromLocal();
@@ -270,4 +236,53 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     updateIndex();
+});
+document.addEventListener("DOMContentLoaded", function () {
+
+    // ===== เพิ่มรายชื่อ =====
+    const nameContainer = document.getElementById("nameFields");
+    const addNameBtn = document.getElementById("addNameBtn");
+
+    addNameBtn.addEventListener("click", function () {
+        const row = document.createElement("div");
+        row.className = "d-flex gap-2 mb-2 align-items-center";
+
+        row.innerHTML = `
+            <input type="text" name="name_en[]" class="form-control" placeholder="ชื่อ - นามสกุล" required>
+            <input type="text" name="department[]" class="form-control" placeholder="แผนก" required>
+            <button type="button" class="btn btn-danger btn-sm remove-btn">ลบ</button>
+        `;
+
+        nameContainer.appendChild(row);
+    });
+
+    nameContainer.addEventListener("click", function (e) {
+        if (e.target.classList.contains("remove-btn")) {
+            e.target.closest(".d-flex").remove();
+        }
+    });
+
+    // ===== เพิ่ม Module =====
+    const moduleContainer = document.getElementById("moduleFields");
+    const addModuleBtn = document.getElementById("addModuleBtn");
+
+    addModuleBtn.addEventListener("click", function () {
+        const row = document.createElement("div");
+        row.className = "d-flex mb-2 align-items-center";
+
+        row.innerHTML = `
+            <input type="text" name="erp_module[]" class="form-control me-2"
+                   placeholder="เช่น Sales, Accounting" required>
+            <button type="button" class="btn btn-danger btn-sm remove-btn">ลบ</button>
+        `;
+
+        moduleContainer.appendChild(row);
+    });
+
+    moduleContainer.addEventListener("click", function (e) {
+        if (e.target.classList.contains("remove-btn")) {
+            e.target.closest(".d-flex").remove();
+        }
+    });
+
 });
