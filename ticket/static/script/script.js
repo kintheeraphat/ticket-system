@@ -256,52 +256,6 @@ document.addEventListener("DOMContentLoaded", function () {
   );
   if (checkedType) updateDownloadLink(checkedType.value);
 });
-//VPN
-document.addEventListener("DOMContentLoaded", function () {
-  const container = document.getElementById("vpnUserContainer");
-  const addBtn = document.getElementById("addUserBtn");
-
-  if (!container || !addBtn) return;
-
-  const maxUsers = 10;
-
-  addBtn.addEventListener("click", function () {
-    const count = container.querySelectorAll(".vpn-user-row").length;
-    if (count >= maxUsers) {
-      alert("เพิ่มได้สูงสุด 10 รายชื่อ");
-      return;
-    }
-
-    const row = document.createElement("div");
-    row.className = "d-flex mb-2 vpn-user-row animate-fade-in";
-    row.innerHTML = `
-            <span class="input-group-text bg-light me-2">${count + 1}.</span>
-            <input type="text" name="user_names[]" class="form-control me-2"
-                   placeholder="ชื่อ-นามสกุล" required>
-            <button type="button" class="btn btn-danger btn-sm remove-user">ลบ</button>
-        `;
-    container.appendChild(row);
-    updateIndex();
-  });
-
-  container.addEventListener("click", function (e) {
-    if (e.target.classList.contains("remove-user")) {
-      e.target.closest(".vpn-user-row").remove();
-      updateIndex();
-    }
-  });
-
-  function updateIndex() {
-    container.querySelectorAll(".vpn-user-row").forEach((row, i) => {
-      row.querySelector("span").innerText = i + 1 + ".";
-      row.querySelector(".remove-user").style.display =
-        i === 0 ? "none" : "inline-block";
-    });
-  }
-
-  updateIndex();
-});
-
 name.className = "filename";
 
 thumb.appendChild(name);

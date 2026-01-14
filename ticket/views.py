@@ -318,6 +318,7 @@ def erp_perm(request):
     return render(request, "tickets_form/erp_perm.html")
 
 def vpn(req):
+    
     return render(req,'tickets_form/vpn.html')
 
 def borrows(req):

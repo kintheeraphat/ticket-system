@@ -24,20 +24,6 @@
 
     <form method="post">
         {% csrf_token %}
-
-        <!-- วันที่ / แผนก -->
-        <!-- <div class="grid-2 mb-4">
-            <div>
-                <label class="fw-bold mb-2">วันที่ (Date)</label>
-                <input type="date" name="request_date" class="form-control" required>
-            </div>
-            <div>
-                <label class="fw-bold mb-2">ฝ่ายที่สังกัด (Department)</label>
-                <input type="text" name="department" class="form-control" placeholder="เช่น ฝ่ายขาย, ฝ่ายบัญชี"
-                    required>
-            </div>
-        </div> -->
-
         <!-- เรื่อง -->
         <div class="mb-4">
             <label class="fw-bold mb-2">เรื่อง (Subject)</label>
@@ -59,13 +45,16 @@
         <!-- รายชื่อผู้ใช้งาน -->
         <div class="mb-4 erp-section">
             <label class="fw-bold mb-2 text-primary">
-                <i class="fas fa-users me-2"></i>รายชื่อผู้ขอใช้งาน
+                <i class="fas fa-users me-2"></i>รายชื่อผู้ขอใช้งาน / แผนก
             </label>
+
 
             <div id="vpnUserContainer">
                 <div class="d-flex mb-2 vpn-user-row animate-fade-in">
                     <span class="input-group-text bg-light me-2">1.</span>
                     <input type="text" name="user_names[]" class="form-control me-2" placeholder="ชื่อ-นามสกุล"
+                        required>
+                    <input type="text" name="department[]" class="form-control me-2" placeholder="แผนก"
                         required>
                     <button type="button" class="btn btn-danger btn-sm remove-user" style="display:none;">
                         ลบ
@@ -73,7 +62,7 @@
                 </div>
             </div>
             <button type="button" id="addUserBtn" class="btn btn-outline-secondary btn-sm mt-2">
-                <i class="fas fa-plus me-1"></i> เพิ่มรายชื่อ (สูงสุด 10 ท่าน)
+                <i class="fas fa-plus me-1"></i> เพิ่มรายชื่อ
             </button>
         </div>
 
@@ -86,22 +75,6 @@
                 placeholder="ระบุวัตถุประสงค์ในการขอเข้าถึงระบบจากภายนอก..."></textarea>
         </div>
 
-        <!-- <div class="mb-4">
-            <label class="fw-bold mb-2">
-                <i class="fas fa-exclamation-circle me-1 text-danger"></i>
-                ระดับความเร่งด่วน
-            </label>
-
-            <select name="priority" class="form-select" required>
-                <option value="normal">🟢 ปกติ</option>
-                <option value="urgent">🟡 เร่งด่วน</option>
-                <option value="critical">🔴 เร่งด่วนมาก (กระทบงาน)</option>
-            </select>
-
-            <small class="text-muted">
-                ใช้สำหรับจัดลำดับการดำเนินงานของเจ้าหน้าที่
-            </small>
-        </div> -->
         <!-- FILE -->
         <div class="mb-4">
             <label class="fw-bold mb-2">แนบไฟล์เอกสาร (ถ้ามี)</label>
@@ -120,4 +93,71 @@
 
 {% block extra_js %}
 <script src="{% static 'script/script.js' %}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const container = document.getElementById("vpnUserContainer");
+    const addBtn = document.getElementById("addUserBtn");
+
+    if (!container || !addBtn) return;
+
+    const maxUsers = 10;
+
+    // สร้าง row ใหม่
+    function createUserRow(index) {
+        const row = document.createElement("div");
+        row.className = "d-flex mb-2 vpn-user-row animate-fade-in";
+
+        row.innerHTML = `
+            <span class="input-group-text bg-light me-2">${index + 1}.</span>
+
+            <input type="text" name="user_names[]" class="form-control me-2"
+                   placeholder="ชื่อ-นามสกุล" required>
+
+            <input type="text" name="department[]" class="form-control me-2"
+                   placeholder="แผนก" required>
+
+            <button type="button" class="btn btn-danger btn-sm remove-user">
+                ลบ
+            </button>
+        `;
+
+        // ปุ่มลบ
+        row.querySelector(".remove-user").addEventListener("click", function () {
+            row.remove();
+            updateIndex();
+        });
+
+        return row;
+    }
+
+    // เพิ่มรายชื่อ
+    addBtn.addEventListener("click", function () {
+        const count = container.querySelectorAll(".vpn-user-row").length;
+
+        if (count >= maxUsers) {
+            alert("เพิ่มรายชื่อได้สูงสุด 10 คน");
+            return;
+        }
+
+        container.appendChild(createUserRow(count));
+        updateIndex();
+    });
+
+    // อัปเดตลำดับ + ปุ่มลบ
+    function updateIndex() {
+        const rows = container.querySelectorAll(".vpn-user-row");
+
+        rows.forEach((row, i) => {
+            row.querySelector("span").innerText = (i + 1) + ".";
+
+            const removeBtn = row.querySelector(".remove-user");
+            removeBtn.style.display = (i === 0) ? "none" : "inline-block";
+        });
+    }
+
+    // เรียกครั้งแรก
+    updateIndex();
+});
+</script>
+
 {% endblock %}
