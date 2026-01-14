@@ -2,188 +2,212 @@
    GLOBAL VARIABLES
 ================================ */
 :root {
-    --primary-color: #2563eb;
-    --secondary-bg: #1e293b;
-    --sidebar-width: 260px;
-    --body-bg: #f8fafc;
-    --text-main: #1e293b;
-    --text-muted: #64748b;
-    --card-shadow: 0 4px 6px -1px rgba(0,0,0,.08),
-                   0 2px 4px -1px rgba(0,0,0,.04);
+  --primary-color: #2563eb;
+  --secondary-bg: #1e293b;
+  --sidebar-width: 260px;
+  --body-bg: #f8fafc;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08),
+    0 2px 4px -1px rgba(0, 0, 0, 0.04);
 }
 
 /* ===============================
    BASE
 ================================ */
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 body {
-    margin: 0;
-    background-color: var(--body-bg);
-    color: var(--text-main);
-    font-family: 'Inter', 'Segoe UI', sans-serif;
+  margin: 0;
+  background-color: var(--body-bg);
+  color: var(--text-main);
+  font-family: "Inter", "Segoe UI", sans-serif;
 }
 
 /* ===============================
    LAYOUT
 ================================ */
 .layout {
-    display: flex;
-    min-height: 100vh;
+  display: flex;
+  min-height: 100vh;
 }
 
 /* ===============================
    SIDEBAR
 ================================ */
 .sidebar {
-    width: var(--sidebar-width);
-    background: var(--secondary-bg);
-    color: #fff;
-    padding: 1.5rem 1rem;
-    position: sticky;
-    top: 0;
+  width: var(--sidebar-width);
+  background: var(--secondary-bg);
+  color: #fff;
+  padding: 1.5rem 1rem;
+  position: sticky;
+  top: 0;
 }
 
 .sidebar-title {
-    text-align: center;
-    padding-bottom: 1.5rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+  text-align: center;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.main-content {
+  padding: 24px;
+  min-height: 100vh;
+}
+
+/* เผื่อ Mobile Header */
+@media (max-width: 991.98px) {
+  .main-content {
+    padding-top: 80px;
+  }
 }
 
 .custom-brand-text {
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 .sidebar-menu a {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem 1rem;
-    color: #94a3b8;
-    text-decoration: none;
-    border-radius: 10px;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    transition: all .2s ease;
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  color: #94a3b8;
+  text-decoration: none;
+  border-radius: 10px;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 .sidebar-menu a:hover,
 .sidebar-menu li.active a {
-    background: rgba(255,255,255,0.1);
-    color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 
 /* ===============================
    MAIN CONTENT
 ================================ */
 main {
-    flex: 1;
-    padding: 2rem;
-    overflow-x: hidden;
+  flex: 1;
+  padding: 2rem;
+  overflow-x: hidden;
 }
 
 /* ===============================
    LOGIN
 ================================ */
 .login-wrapper {
-    min-height: 100vh;
-    background-color: #f4f6f8;
+  min-height: 100vh;
+  background-color: #f4f6f8;
 }
 
 .login-card {
-    width: 100%;
-    max-width: 400px;
-    background: #fff;
-    padding: 2.2rem;
-    border-radius: 12px;
-    box-shadow: var(--card-shadow);
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  padding: 2.2rem;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
 }
 
 .login-card h3 {
-    color: #1f3c88;
+  color: #1f3c88;
 }
 
 /* ===============================
    DASHBOARD CARDS
 ================================ */
 .dashboard-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .dashboard-card {
-    background: #fff;
-    padding: 1.5rem;
-    border-radius: 16px;
-    box-shadow: var(--card-shadow);
-    transition: transform .2s ease, box-shadow .2s ease;
-    border-left: 6px solid transparent;
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-left: 6px solid transparent;
 }
 
 .dashboard-card:hover {
-    transform: translateY(-4px);
+  transform: translateY(-4px);
 }
 
 .dashboard-card p {
-    color: var(--text-muted);
-    font-weight: 600;
-    font-size: .75rem;
-    text-transform: uppercase;
-    margin-bottom: .5rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
 }
 
 .dashboard-card h3 {
-    font-size: 2.2rem;
-    font-weight: 700;
-    margin: 0;
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0;
 }
 
 /* Card States */
-.card-total { border-color: #4f46e5; }
-.card-pending { border-color: #f59e0b; }
-.card-closed { border-color: #10b981; }
+.card-total {
+  border-color: #4f46e5;
+}
+.card-pending {
+  border-color: #f59e0b;
+}
+.card-closed {
+  border-color: #10b981;
+}
 
-.card-total h3 { color: #4f46e5; }
-.card-pending h3 { color: #f59e0b; }
-.card-closed h3 { color: #10b981; }
+.card-total h3 {
+  color: #4f46e5;
+}
+.card-pending h3 {
+  color: #f59e0b;
+}
+.card-closed h3 {
+  color: #10b981;
+}
 
 /* ===============================
    TABLE
 ================================ */
 .dashboard-table {
-    background: #fff;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    padding: 2rem;
-    border-radius: 16px;
-    box-shadow: var(--card-shadow);
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: var(--card-shadow);
 }
 
 .dashboard-table h4 {
-    font-size: 1.1rem;
-    color: var(--text-main);
-    letter-spacing: -0.02em;
+  font-size: 1.1rem;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
 }
 
 .table thead th {
-    background: #fcfdfe;
-    border-bottom: 2px solid #f1f5f9;
-    color: var(--text-muted);
-    font-size: .75rem;
+  background: #fcfdfe;
+  border-bottom: 2px solid #f1f5f9;
+  color: var(--text-muted);
+  font-size: 0.75rem;
 }
 
 .table tbody td {
-    padding: 1.1rem;
-    border-bottom: 1px solid #f1f5f9;
+  padding: 1.1rem;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .table-hover tbody tr:hover {
-    background-color: #fbfcfe;
+  background-color: #fbfcfe;
 }
 
 /* ===============================
@@ -191,262 +215,338 @@ main {
 ================================ */
 .form-control,
 .form-select {
-    border-radius: 10px;
-    font-size: .875rem;
-    border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  border: 1px solid #e2e8f0;
 }
 
 .form-control:focus,
 .form-select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
 /* ===============================
    BADGE
 ================================ */
 .status-badge {
-    padding: .35rem .75rem;
-    border-radius: 50px;
-    font-size: .75rem;
-    font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
-.bg-primary-soft { background: rgba(37,99,235,.1); color:#2563eb; }
-.bg-warning-soft { background: rgba(245,158,11,.1); color:#b45309; }
-.bg-success-soft { background: rgba(16,185,129,.1); color:#047857; }
+.bg-primary-soft {
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+}
+.bg-warning-soft {
+  background: rgba(245, 158, 11, 0.1);
+  color: #b45309;
+}
+.bg-success-soft {
+  background: rgba(16, 185, 129, 0.1);
+  color: #047857;
+}
 
 /* ===============================
    ICON BOX
 ================================ */
 .icon-box {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.25rem;
-    box-shadow: inset 0 -2px 4px rgba(0,0,0,0.05);
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.05);
 }
 
 /* ===============================
    FOOTER
 ================================ */
 .footer-text {
-    border-top: 1px solid #e2e8f0;
-    padding-top: 1.5rem;
-    margin-top: 2rem;
-    color: #94a3b8;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1.5rem;
+  margin-top: 2rem;
+  color: #94a3b8;
 }
 
 /* ===============================
    RESPONSIVE
 ================================ */
 @media (max-width: 992px) {
-    .layout {
-        flex-direction: column;
-    }
+  .layout {
+    flex-direction: column;
+  }
 
-    .sidebar {
-        width: 100%;
-        position: relative;
-    }
+  .sidebar {
+    width: 100%;
+    position: relative;
+  }
 }
 /* ===============================
    TOP RANKING ENHANCEMENT
 ================================ */
 .top-rank-card {
-    background: linear-gradient(135deg, var(--primary-color) 0%, #3b82f6 100%);
-    padding: 1.5rem;
-    border-radius: 1.25rem;
-    color: white;
-    margin-bottom: 1.5rem;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.3s ease;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #3b82f6 100%);
+  padding: 1.5rem;
+  border-radius: 1.25rem;
+  color: white;
+  margin-bottom: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease;
 }
 
 .top-rank-card:hover {
-    transform: scale(1.02);
+  transform: scale(1.02);
 }
 
 /* แสงเงาจางๆ ด้านหลังการ์ดอันดับ 1 */
 .top-rank-card::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 200px;
-    height: 200px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
 }
 
 .rank-number {
-    width: 42px;
-    height: 42px;
-    background: rgba(255, 255, 255, 0.2);
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 1.2rem;
-    margin-right: 1rem;
+  width: 42px;
+  height: 42px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.2rem;
+  margin-right: 1rem;
 }
 
 .hover-row {
-    padding: 0.85rem 1rem;
-    border-radius: 12px;
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
 }
 
 .hover-row:hover {
-    background: #f1f5f9;
-    border-color: #e2e8f0;
-    transform: translateX(5px);
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  transform: translateX(5px);
 }
 
 .badge.bg-light {
-    background-color: #f1f5f9 !important;
-    color: var(--text-main) !important;
-    font-weight: 700;
-    border-radius: 8px;
+  background-color: #f1f5f9 !important;
+  color: var(--text-main) !important;
+  font-weight: 700;
+  border-radius: 8px;
 }
 /* =====================
    PROGRESS HEIGHT
 ===================== */
 .progress-h-8 {
-    height: 8px;
+  height: 8px;
 }
 
 .progress-h-6 {
-    height: 6px;
+  height: 6px;
 }
 
 /* =====================
    PROGRESS WIDTH
 ===================== */
-.w-45 { width: 45%; }
-.w-32 { width: 32%; }
-.w-18 { width: 18%; }
-.w-10 { width: 10%; }
+.w-45 {
+  width: 45%;
+}
+.w-32 {
+  width: 32%;
+}
+.w-18 {
+  width: 18%;
+}
+.w-10 {
+  width: 10%;
+}
 
 /* =====================
    CUSTOM COLORS (ถ้าไม่มีใน Bootstrap)
 ===================== */
 .bg-primary-light {
-    background-color: #818cf8;
+  background-color: #818cf8;
 }
 
 .bg-light-blue {
-    background-color: #eef2ff;
+  background-color: #eef2ff;
 }
 
 .bg-light-green {
-    background-color: #ecfdf5;
+  background-color: #ecfdf5;
 }
 
 .bg-light-yellow {
-    background-color: #fffbeb;
+  background-color: #fffbeb;
 }
 
 .progress-white-alpha {
-    background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.25);
 }
-.main-content {
-    padding: 2rem;
-}
-
 .form-label {
-    font-size: .85rem;
-    color: var(--text-main);
+  font-size: 0.85rem;
+  color: var(--text-main);
 }
 
 textarea.form-control {
-    resize: none;
+  resize: none;
 }
 
 .btn-primary {
-    background: var(--primary-color);
-    border: none;
+  background: var(--primary-color);
+  border: none;
 }
 
 .btn-primary:hover {
-    background: #1d4ed8;
+  background: #1d4ed8;
 }
 
 input[type="file"] {
-    padding: .6rem;
+  padding: 0.6rem;
 }
 .type-list {
-    list-style: none;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 20px;
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
 }
 
 .type-list li a {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 20px;
-    border-radius: 12px;
-    background: #fff;
-    text-decoration: none;
-    color: #333;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    transition: all .2s ease;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  border-radius: 12px;
+  background: #fff;
+  text-decoration: none;
+  color: #333;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
 }
 
 .type-list li a:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .type-list i {
-    font-size: 28px;
+  font-size: 28px;
 }
-    /* เพิ่ม Animation เล็กน้อยเวลาเพิ่มช่อง */
-    .animate-fade-in {
-        animation: fadeIn 0.3s ease-in;
-    }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-5px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    /* ===============================
+/* เพิ่ม Animation เล็กน้อยเวลาเพิ่มช่อง */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* ===============================
    FORM GRID (missing)
 ================================ */
 .grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
 }
 
 /* ===============================
    FORM CARD
 ================================ */
 .form-card {
-    background: #fff;
-    padding: 2rem;
-    border-radius: 16px;
-    box-shadow: var(--card-shadow);
+  background: #fff;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: var(--card-shadow);
 }
 /* ===============================
    ERP STYLE FOR VPN
 ================================ */
 .erp-header {
-    border-bottom: none !important;
+  border-bottom: none !important;
 }
 
 .erp-section {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
 }
+/* =======================/* =======================
+   File preview
+======================= */
+.file-thumb {
+  position: relative;
+  width: 140px;
+  height: 170px;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  padding: 8px;
+  background: #fff;
+  text-align: center;
+}
+
+/* ✅ ปุ่มกากบาท */
+.file-thumb > .remove-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+
+  width: 22px;
+  height: 22px;
+
+  background: #dc3545;
+  color: #fff;
+
+  border: none;
+  border-radius: 50%;
+
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: bold;
+
+  cursor: pointer;
+  z-index: 100;
+}
+
+/* hover */
+.file-thumb > .remove-btn:hover {
+  background: #bb2d3b;
+}
+
+.file-thumb img,
+.file-thumb canvas {
+  max-width: 100%;
+  max-height: 95px;
+  cursor: pointer;
+}
+
+.filename {
+  font-size: 11px;
+  margin-top: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+

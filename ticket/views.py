@@ -2,8 +2,10 @@ from django.shortcuts import render, redirect
 from django.db import connection
 from django.utils import timezone
 from django.contrib import messages
-# from .auth_users import USERS
 from django.utils.dateparse import parse_date
+
+
+# views.py
 import os
 
 def login_view(request):
@@ -30,16 +32,25 @@ def login_view(request):
 
             user = cursor.fetchone()
 
-        if user:
-            request.session["user"] = {
-                "id": user[0],
-                "username": user[1],
-                "full_name": user[2],
-                "role": user[3],
-            }
-            return redirect("dashboard")
+        # ❌ ไม่พบ user
+        if not user:
+            messages.error(request, "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง")
+            return render(request, "login.html")
 
-        messages.error(request, "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง")
+        # ❌ ไม่ใช่ admin
+        if user[3] != "admin":
+            messages.error(request, "บัญชีนี้ไม่มีสิทธิ์เข้าใช้งานระบบ")
+            return render(request, "login.html")
+
+        # ✅ admin เท่านั้นถึงจะผ่าน
+        request.session["user"] = {
+            "id": user[0],
+            "username": user[1],
+            "full_name": user[2],
+            "role": user[3],
+        }
+
+        return redirect("dashboard")
 
     return render(request, "login.html")
 
