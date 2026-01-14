@@ -48,7 +48,7 @@
         <!-- USER NAMES -->
         <div class="mb-4">
             <label class="fw-bold mb-2">
-                <i class="fas fa-user me-1"></i> ชื่อ - นามสกุล (ผู้ที่ต้องการดำเนินการ)
+                <i class="fas fa-user me-1"></i> ชื่อ - นามสกุล
             </label>
 
             <div id="nameFields">
@@ -73,7 +73,7 @@
         <!-- ERP MODULES -->
         <div class="mb-4">
             <label class="fw-bold mb-2">
-                <i class="fas fa-cubes me-1"></i> Module ERP / สิทธิ์ที่ต้องการ
+                <i class="fas fa-cubes me-1"></i> Module ERP
             </label>
 
             <div id="moduleFields">
@@ -98,71 +98,31 @@
         <!-- REMARK -->
         <div class="mb-4">
             <label class="fw-bold mb-2">
-                <i class="fas fa-comment-dots me-1"></i> วัตถุประสงค์ / หมายเหตุ
+                <i class="fas fa-comment-dots me-1"></i> หมายเหตุ
             </label>
             <textarea name="remark" rows="3"
-                      class="form-control"
-                      placeholder="ระบุเหตุผลหรือรายละเอียดเพิ่มเติม"></textarea>
+                      class="form-control"></textarea>
         </div>
 
         <!-- FILE UPLOAD -->
         <div class="mb-4">
             <label class="fw-bold mb-2">
-                <i class="fas fa-paperclip me-1"></i> แนบไฟล์เอกสาร (ถ้ามี)
+                <i class="fas fa-paperclip me-1"></i> แนบไฟล์
             </label>
             <input type="file" name="attachments[]"
-                   class="form-control"
-                   multiple
-                   accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
-            <small class="text-muted">
-                รองรับไฟล์รูป / PDF / Word แนบได้หลายไฟล์
-            </small>
+                   class="form-control" multiple>
         </div>
 
-        <!-- ACTION -->
         <div class="text-end border-top pt-3">
-            <button type="reset" class="btn btn-light me-2 border">
-                ล้างข้อมูลใหม่
-            </button>
             <button type="submit"
-                    class="btn btn-primary px-5 fw-bold shadow-sm">
-                <i class="fas fa-paper-plane me-2"></i>ส่งคำร้อง
+                    class="btn btn-primary px-5 fw-bold">
+                ส่งคำร้อง
             </button>
         </div>
-
     </form>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    // เพิ่มรายชื่อ
-    document.getElementById("addNameBtn").addEventListener("click", function () {
-        const div = document.createElement("div");
-        div.className = "d-flex mb-2 align-items-center";
-        div.innerHTML = `
-            <input type="text" name="name_en[]" class="form-control me-2" required>
-            <button type="button" class="btn btn-danger btn-sm remove-btn">ลบ</button>
-        `;
-        document.getElementById("nameFields").appendChild(div);
-    });
-
-    // เพิ่ม module
-    document.getElementById("addModuleBtn").addEventListener("click", function () {
-        const div = document.createElement("div");
-        div.className = "d-flex mb-2 align-items-center";
-        div.innerHTML = `
-            <input type="text" name="erp_module[]" class="form-control me-2" required>
-            <button type="button" class="btn btn-danger btn-sm remove-btn">ลบ</button>
-        `;
-        document.getElementById("moduleFields").appendChild(div);
-    });
-
-    // ลบ field
-    document.addEventListener("click", function (e) {
-        if (e.target.classList.contains("remove-btn")) {
-            e.target.parentElement.remove();
-        }
-    });
-</script>
+<script src="{% static 'script/script.js' %}"></script>
 {% endblock %}

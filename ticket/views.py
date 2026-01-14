@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.contrib import messages
 # from .auth_users import USERS
 from django.utils.dateparse import parse_date
-
+import os
 
 def login_view(request):
     if request.method == "POST":
@@ -199,22 +199,25 @@ def tickets_create(req):
 def erp_perm(request):
     if request.method == "POST":
 
-        # ตรวจสอบ request_type
+        # -----------------------------
+        # REQUEST TYPE
+        # -----------------------------
         request_type = request.POST.get("request_type")
+
         if request_type == "open_user":
             title = "ขอเปิด User ใหม่"
         elif request_type == "adjust_perm":
             title = "ปรับปรุงสิทธิ์เดิม"
         else:
-            title = "คำร้อง ERP"  # default fallback
+            title = "คำร้อง ERP"
 
-        description = request.POST.get("remark")
-        ticket_type_id = 1  # ใช้ master ticket_type id
-        status_id = 1       # Waiting for Approve
+        description = request.POST.get("remark", "")
+        ticket_type_id = 1   # master ticket_type
+        status_id = 1        # Waiting for Approve
         user_id = request.session["user"]["id"]
 
         # -----------------------------
-        # INSERT INTO tickets
+        # INSERT tickets.tickets
         # -----------------------------
         with connection.cursor() as cursor:
             cursor.execute("""
@@ -232,39 +235,48 @@ def erp_perm(request):
             ticket_id = cursor.fetchone()[0]
 
         # -----------------------------
-        # INSERT ticket_data_erp_app
+        # PREPARE ERP DATA
         # -----------------------------
         module_access = True
-        perm_change = request_type == "adjust_perm"
+        perm_change = (request_type == "adjust_perm")
 
+        # รายชื่อผู้ขอ (หลายคน)
+        names = request.POST.getlist("name_en[]")
+        requester_names = "\n".join([n.strip() for n in names if n.strip()])
+
+        # module ERP (หลาย module)
         modules = request.POST.getlist("erp_module[]")
-        module_name = ", ".join(modules)
+        requested_modules = "\n".join([m.strip() for m in modules if m.strip()])
 
+        # -----------------------------
+        # INSERT ticket_data_erp_app
+        # -----------------------------
         with connection.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO tickets.ticket_data_erp_app
-                (ticket_id, module_access, perm_change, module_name)
-                VALUES (%s, %s, %s, %s)
+                (ticket_id, module_access, perm_change,
+                 requester_names, module_name)
+                VALUES (%s, %s, %s, %s, %s)
                 RETURNING id
             """, [
                 ticket_id,
                 module_access,
                 perm_change,
-                module_name
+                requester_names,
+                requested_modules
             ])
             erp_data_id = cursor.fetchone()[0]
 
         # -----------------------------
         # UPLOAD FILES → ticket_files
         # -----------------------------
-        import os
         files = request.FILES.getlist("attachments[]")
-        os.makedirs(f"uploads/erp/{ticket_id}", exist_ok=True)  # สร้างโฟลเดอร์ก่อน
+        upload_dir = f"uploads/erp/{ticket_id}"
+        os.makedirs(upload_dir, exist_ok=True)
 
         for f in files:
-            file_path = f"uploads/erp/{ticket_id}/{f.name}"
+            file_path = f"{upload_dir}/{f.name}"
 
-            # save file
             with open(file_path, "wb+") as destination:
                 for chunk in f.chunks():
                     destination.write(chunk)
@@ -272,8 +284,9 @@ def erp_perm(request):
             with connection.cursor() as cursor:
                 cursor.execute("""
                     INSERT INTO tickets.ticket_files
-                    (ticket_id, ref_type, ref_id, file_name, file_path,
-                     file_type, file_size, uploaded_by, create_at)
+                    (ticket_id, ref_type, ref_id,
+                     file_name, file_path, file_type,
+                     file_size, uploaded_by, create_at)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, [
                     ticket_id,
@@ -288,8 +301,9 @@ def erp_perm(request):
                 ])
 
         return redirect("ticket_success")
-
+       
     return render(request, "tickets_form/erp_perm.html")
+
 def vpn(req):
     return render(req,'tickets_form/vpn.html')
 
