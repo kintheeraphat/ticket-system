@@ -411,7 +411,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 });
-=======
+
     const name = document.createElement("div");
     name.className = "filename";
     name.innerText = file.name;
