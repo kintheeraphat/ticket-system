@@ -434,6 +434,89 @@ def tickets_detail(request):
     return render(request, "tickets_form/tickets_detail.html")
 
 def repairs_form(request):
+    if request.method == "POST":
+
+        # -----------------------------
+        # BASIC TICKET INFO
+        # -----------------------------
+        title = "แจ้งซ่อมอาคาร"
+        description = request.POST.get("problem_detail", "")
+        user_id = request.session["user"]["id"]
+
+        status_id = 1          # Waiting
+        ticket_type_id = 3     # สมมติว่า 3 = Building Repair
+
+        department = request.POST.get("department")
+        building = request.POST.get("building")
+
+        # -----------------------------
+        # INSERT tickets.tickets
+        # -----------------------------
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO tickets.tickets
+                (title, description, user_id, status_id, ticket_type_id)
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING id
+            """, [
+                title,
+                description,
+                user_id,
+                status_id,
+                ticket_type_id
+            ])
+            ticket_id = cursor.fetchone()[0]
+
+        # -----------------------------
+        # INSERT ticket_data_building_repair
+        # -----------------------------
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO tickets.ticket_data_building_repair
+                (ticket_id, user_id, problem_detail, department, building, created_at)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, [
+                ticket_id,
+                user_id,
+                description,
+                department,
+                building,
+                timezone.now()
+            ])
+
+        # -----------------------------
+        # UPLOAD FILES (optional)
+        # -----------------------------
+        files = request.FILES.getlist("attachments[]")
+        upload_dir = f"uploads/repairs/{ticket_id}"
+        os.makedirs(upload_dir, exist_ok=True)
+
+        for f in files:
+            file_path = f"{upload_dir}/{f.name}"
+
+            with open(file_path, "wb+") as destination:
+                for chunk in f.chunks():
+                    destination.write(chunk)
+
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO tickets.ticket_files
+                    (ticket_id, ref_type, file_name, file_path,
+                     file_type, file_size, uploaded_by, create_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """, [
+                    ticket_id,
+                    "BUILDING_REPAIR",
+                    f.name,
+                    file_path,
+                    f.content_type,
+                    f.size,
+                    user_id,
+                    timezone.now()
+                ])
+
+        return redirect("ticket_success")
+
     return render(request, "tickets_form/repairs_form.html")
 
 

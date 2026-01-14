@@ -19,46 +19,25 @@
 
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-
-        <label for="building" class="fw-bold mb-2">
-            <i class="fas fa-building me-1"></i> อาคาร
-        </label>
-
-        <select id="building" name="building" class="form-select" required>
-            <option value="">-- เลือกอาคาร --</option>
-            <option value="A">อาคาร A</option>
-            <option value="B">อาคาร B</option>
-            <option value="C">อาคาร C</option>
-        </select>
-
-
         <div class="mb-4">
             <label class="fw-bold mb-2">
-                <i class="fas fa-sitemap me-1"></i> ฝ่าย / หน่วยงาน
-            </label>
-            <input type="text" name="department" class="form-control" placeholder="เช่น ฝ่ายไอที, ฝ่ายอาคารสถานที่"
-                required>
-        </div>
-
-        <div class="mb-4">
-            <label class="fw-bold mb-2">
-                <i class="fas fa-user me-1"></i> ผู้แจ้ง
-            </label>
-            <input type="text" class="form-control"
-                value="{{ request.user.get_full_name|default:request.user.username }}" readonly>
-            <small class="text-muted">
-                ดึงจากผู้ใช้งานที่เข้าสู่ระบบ
-            </small>
-        </div>
-
-        <div class="mb-4">
-            <label class="fw-bold mb-2">
-                <i class="fas fa-exclamation-circle me-1"></i> รายละเอียดปัญหา
+                <i class="fas fa-exclamation-circle me-1"></i> รายละเอียดอาการเบื้องต้น
             </label>
             <textarea name="problem_detail" rows="4" class="form-control"
-                placeholder="อธิบายปัญหาที่พบ เช่น ไฟไม่ติด น้ำรั่ว แอร์ไม่เย็น" required></textarea>
+                placeholder="เช่น ไฟไม่ติด น้ำรั่ว แอร์ไม่เย็น" required></textarea>
         </div>
-
+        <div class="mb-4">
+            <label for="building" class="fw-bold mb-2">
+                <i class="fas fa-building me-1"></i> แผนก
+            </label>
+            <input type="text" name="Position" class="form-control" placeholder="เช่น  บัญชี ช่าง เป็นต้น" required>
+        </div>
+        <div class="mb-4">
+            <label for="building" class="fw-bold mb-2">
+                <i class="fas fa-building me-1"></i> ตึกที่เกิดปัญหา
+            </label>
+            <input type="text" name="Position" class="form-control" placeholder="ตึกไหน" required>
+        </div>
         <div class="mb-4">
             <label class="fw-bold mb-2">
                 <i class="fas fa-camera me-1"></i> แนบภาพถ่ายปัญหา
