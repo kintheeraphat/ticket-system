@@ -4,300 +4,263 @@
 {% block content %}
 <main class="main-content">
 
-    <!-- Flatpickr CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4 pt-2">
-        <div>
-            <h2 class="fw-bold text-dark mb-1">รายการคำขอทั้งหมด</h2>
-            <p class="text-muted small mb-0">
-                ตรวจสอบและบริหารจัดการสถานะรายการแจ้งซ่อมหรือคำร้องขอภายในระบบ
-            </p>
+<!-- ================= HEADER ================= -->
+<div class="d-flex justify-content-between align-items-center mb-4 pt-2">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">รายการคำขอทั้งหมด</h2>
+        <p class="text-muted small mb-0">
+            ตรวจสอบและบริหารจัดการสถานะรายการแจ้งซ่อมหรือคำร้องขอภายในระบบ
+        </p>
+    </div>
+</div>
+
+<!-- ================= FILTER ================= -->
+<div class="dashboard-table mb-4 p-4">
+    <form class="row g-3 align-items-end" onsubmit="return false;">
+
+        <!-- Search -->
+        <div class="col-md-3">
+            <label class="form-label small text-muted">ค้นหา</label>
+            <div class="input-group">
+                <span class="input-group-text bg-white text-muted">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" id="searchInput" class="form-control"
+                       placeholder="รหัส / หัวข้อ / ผู้แจ้ง">
+            </div>
         </div>
-    </div>
 
-    <!-- Filter -->
-    <div class="dashboard-table mb-4 p-4">
-        <form class="row g-3 align-items-end" onsubmit="return false;">
-
-            <!-- Search -->
-            <div class="col-md-3">
-                <label class="form-label small text-muted">ค้นหา</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-white text-muted">
-                        <i class="fas fa-search"></i>
-                    </span>
-                    <input type="text" id="searchInput" class="form-control" placeholder="รหัส / หัวข้อเรื่อง">
-                </div>
-            </div>
-
-            <!-- Status -->
-            <div class="col-md-2">
-                <label class="form-label small text-muted">สถานะ</label>
-                <select id="statusFilter" class="form-select">
-                    <option value="">ทุกสถานะ</option>
-                    <option value="รอดำเนินการ">รอดำเนินการ</option>
-                    <option value="รออนุมัติ">รออนุมัติ</option>
-                    <option value="ดราฟ">ดราฟ</option>
-                    <option value="เสร็จสิ้นแล้ว">เสร็จสิ้นแล้ว</option>
-                </select>
-            </div>
-
-            <!-- Assignee -->
-            <div class="col-md-3">
-                <label class="form-label small text-muted">ผู้รับผิดชอบงาน</label>
-                <select id="assigneeFilter" class="form-select">
-                    <option value="">ทุกคน</option>
-                    {% for ticket in tickets %}
-                    {% if ticket.assignee != "ยังไม่มอบหมาย" %}
-                    <option value="{{ ticket.assignee }}">{{ ticket.assignee }}</option>
-                    {% endif %}
-                    {% endfor %}
-                </select>
-            </div>
-
-            <!-- Date range -->
-            <div class="col-md-3">
-                <label class="form-label small text-muted">ช่วงวันที่</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-white text-muted">
-                        <i class="fas fa-calendar-alt"></i>
-                    </span>
-                    <input type="text" id="dateRange" class="form-control" placeholder="เลือกช่วงวันที่"
-                        autocomplete="off">
-                </div>
-            </div>
-
-        </form>
-    </div>
-
-    <!-- Table -->
-    <div class="dashboard-table overflow-hidden">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-
-                <thead>
-                    <tr>
-                        <th class="text-center" style="width:100px;">รหัสรายการ</th>
-                        <th>รายละเอียดคำขอ</th>
-                        <th>หมวดหมู่</th>
-                        <th>ผู้แจ้งเรื่อง</th>
-                        <th>ผู้รับผิดชอบงาน</th>
-                        <th>วันที่ส่งคำขอ</th>
-                        <th class="text-center">สถานะ</th>
-                        <th class="text-end pe-4">การจัดการ</th>
-                    </tr>
-                </thead>
-
-                <tbody id="ticketTableBody">
-                    {% for t in tickets %}
-                    <tr>
-                        <td class="text-center">#{{ t.id }}</td>
-                        <td>
-                            <div class="fw-bold">{{ t.title }}</div>
-                            <small>{{ t.description }}</small>
-                        </td>
-                        <td>{{ t.ticket_type }}</td>
-                        <td>{{ t.requester }}</td>
-                        <td>{{ t.assignee }}</td>
-                        <td data-date="{{ t.created_at|date:'Y-m-d' }}">
-                            {{ t.created_at|date:"d M Y" }}
-                        </td>
-                        <td class="text-center">{{ t.status }}</td>
-                        <td class="text-end pe-4">
-                            <a href="{% url 'tickets_detail' %}?id={{ t.id }}"
-                                class="btn btn-outline-secondary btn-sm rounded-circle">
-                                <i class="fas fa-chevron-right"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-
-            </table>
+        <!-- Status -->
+        <div class="col-md-2">
+            <label class="form-label small text-muted">สถานะ</label>
+            <select id="statusFilter" class="form-select">
+                <option value="">ทุกสถานะ</option>
+                <option value="รอดำเนินการ">รอดำเนินการ</option>
+                <option value="รออนุมัติ">รออนุมัติ</option>
+                <option value="ดราฟ">ดราฟ</option>
+                <option value="เสร็จสิ้นแล้ว">เสร็จสิ้นแล้ว</option>
+            </select>
         </div>
-    </div>
 
-    <!-- Pagination -->
-    <div class="d-flex justify-content-between align-items-center mt-3 px-3">
-        <div class="small text-muted" id="pageInfo"></div>
-        <nav>
-            <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
-        </nav>
-    </div>
+        <!-- Assignee -->
+        <div class="col-md-3">
+            <label class="form-label small text-muted">ผู้รับผิดชอบ</label>
+            <select id="assigneeFilter" class="form-select">
+                <option value="">ทุกคน</option>
+                {% for t in tickets %}
+                {% if t.assignee != "ยังไม่มอบหมาย" %}
+                <option value="{{ t.assignee }}">{{ t.assignee }}</option>
+                {% endif %}
+                {% endfor %}
+            </select>
+        </div>
 
-    <!-- Flatpickr -->
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <!-- Date -->
+        <div class="col-md-3">
+            <label class="form-label small text-muted">ช่วงวันที่</label>
+            <div class="input-group">
+                <span class="input-group-text bg-white text-muted">
+                    <i class="fas fa-calendar-alt"></i>
+                </span>
+                <input type="text" id="dateRange" class="form-control"
+                       placeholder="เลือกช่วงวันที่" autocomplete="off">
+            </div>
+        </div>
 
-    <!-- Filter + Pagination JS -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
+    </form>
+</div>
 
-            const searchInput = document.getElementById("searchInput");
-            const statusFilter = document.getElementById("statusFilter");
-            const assigneeFilter = document.getElementById("assigneeFilter");
-            const dateRange = document.getElementById("dateRange");
+<!-- ================= TABLE ================= -->
+<div class="dashboard-table overflow-hidden">
+<div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
 
-            const rows = Array.from(document.querySelectorAll("#ticketTableBody tr"));
-            const pagination = document.getElementById("pagination");
-            const pageInfo = document.getElementById("pageInfo");
+<thead>
+<tr>
+    <th class="text-center" style="width:90px;">รหัส</th>
+    <th>ผู้แจ้ง</th>
+    <th>หมวดหมู่</th>
+    <th>รายละเอียดคำขอ</th>
+    <th>วันที่</th>
+    <th class="text-center">สถานะ</th>
+    <th>ผู้รับผิดชอบ</th>
+    <th class="text-end pe-4"></th>
+</tr>
+</thead>
 
-            const rowsPerPage = 10;
-            let currentPage = 1;
-            let filteredRows = rows;
+<tbody id="ticketTableBody">
+{% for t in tickets %}
+<tr>
+    <!-- รหัส -->
+    <td class="text-center">
+        <span class="badge bg-light text-muted border">#{{ t.id }}</span>
+    </td>
 
-            function filterTable() {
-                const keyword = searchInput.value.toLowerCase();
-                const status = statusFilter.value;
-                const assignee = assigneeFilter.value;
+    <!-- ผู้แจ้ง -->
+    <td>{{ t.requester }}</td>
 
-                let startDate = null;
-                let endDate = null;
+    <!-- หมวดหมู่ -->
+    <td>{{ t.ticket_type }}</td>
 
-                if (dateRange.value.includes("ถึง")) {
-                    const dates = dateRange.value.split(" ถึง ");
-                    startDate = new Date(dates[0].split("/").reverse().join("-"));
-                    endDate = new Date(dates[1].split("/").reverse().join("-"));
-                }
+    <!-- รายละเอียด -->
+    <td>
+        <div class="fw-bold">{{ t.title }}</div>
+        <small class="text-muted">{{ t.description }}</small>
+    </td>
 
-                filteredRows = rows.filter(row => {
-                    const text = row.innerText.toLowerCase();
-                    let show = true;
+    <!-- วันที่ -->
+    <td data-date="{{ t.created_at|date:'Y-m-d' }}">
+        {{ t.created_at|date:"d M Y" }}
+    </td>
 
-                    if (keyword && !text.includes(keyword)) show = false;
-                    if (status && !text.includes(status)) show = false;
-                    if (assignee && !text.includes(assignee)) show = false;
+    <!-- สถานะ -->
+    <td class="text-center">
+        {% if t.status == "รอดำเนินการ" %}
+            <span class="badge bg-warning-subtle text-warning">{{ t.status }}</span>
+        {% elif t.status == "รออนุมัติ" %}
+            <span class="badge bg-info-subtle text-info">{{ t.status }}</span>
+        {% elif t.status == "ดราฟ" %}
+            <span class="badge bg-light text-dark border">{{ t.status }}</span>
+        {% elif t.status == "เสร็จสิ้นแล้ว" %}
+            <span class="badge bg-success-subtle text-success">{{ t.status }}</span>
+        {% endif %}
+    </td>
 
-                    if (startDate && endDate) {
-                        const rowDate = new Date(row.querySelector("[data-date]").dataset.date);
-                        if (rowDate < startDate || rowDate > endDate) show = false;
-                    }
+    <!-- ผู้รับผิดชอบ -->
+    <td>
+        {% if t.assignee != "ยังไม่มอบหมาย" %}
+            {{ t.assignee }}
+        {% else %}
+            <span class="badge bg-light text-muted border">ยังไม่มอบหมาย</span>
+        {% endif %}
+    </td>
 
-                    return show;
-                });
+    <!-- Action -->
+    <td class="text-end pe-4">
+        <a href="{% url 'tickets_detail' %}?id={{ t.id }}"
+           class="btn btn-outline-secondary btn-sm rounded-circle">
+            <i class="fas fa-chevron-right"></i>
+        </a>
+    </td>
+</tr>
+{% endfor %}
+</tbody>
 
-                currentPage = 1;
-                render();
-            }
+</table>
+</div>
+</div>
 
-            function render() {
-                rows.forEach(r => r.style.display = "none");
+<!-- ================= PAGINATION ================= -->
+<div class="d-flex justify-content-between align-items-center mt-3 px-3">
+    <div class="small text-muted" id="pageInfo"></div>
+    <nav>
+        <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
+    </nav>
+</div>
 
-                const start = (currentPage - 1) * rowsPerPage;
-                const end = start + rowsPerPage;
+<!-- ================= JS ================= -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-                filteredRows.slice(start, end).forEach(r => r.style.display = "");
+<script>
+document.addEventListener("DOMContentLoaded", () => {
 
-                pageInfo.innerText = `แสดง ${filteredRows.length} รายการ`;
-                renderPagination();
-            }
+const searchInput = document.getElementById("searchInput");
+const statusFilter = document.getElementById("statusFilter");
+const assigneeFilter = document.getElementById("assigneeFilter");
+const dateRange = document.getElementById("dateRange");
 
-            function renderPagination() {
-                pagination.innerHTML = "";
-                const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-                if (totalPages <= 1) return;
+const rows = [...document.querySelectorAll("#ticketTableBody tr")];
+const pagination = document.getElementById("pagination");
+const pageInfo = document.getElementById("pageInfo");
 
-                /* ===== Prev ===== */
-                const prevLi = document.createElement("li");
-                prevLi.className = "page-item" + (currentPage === 1 ? " disabled" : "");
+const rowsPerPage = 10;
+let currentPage = 1;
+let filteredRows = rows;
 
-                const prevA = document.createElement("a");
-                prevA.className = "page-link";
-                prevA.href = "#";
-                prevA.innerHTML = "&laquo;";
+flatpickr("#dateRange", {
+    mode: "range",
+    dateFormat: "d/m/Y",
+    locale: { rangeSeparator: " ถึง " }
+});
 
-                prevA.onclick = e => {
-                    e.preventDefault();
-                    if (currentPage > 1) {
-                        currentPage--;
-                        render();
-                    }
-                };
+function filterTable() {
+    const keyword = searchInput.value.toLowerCase();
+    const status = statusFilter.value;
+    const assignee = assigneeFilter.value;
 
-                prevLi.appendChild(prevA);
-                pagination.appendChild(prevLi);
+    let startDate = null, endDate = null;
+    if (dateRange.value.includes("ถึง")) {
+        const d = dateRange.value.split(" ถึง ");
+        startDate = new Date(d[0].split("/").reverse().join("-"));
+        endDate = new Date(d[1].split("/").reverse().join("-"));
+    }
 
-                /* ===== Page numbers (แบบ DataTables) ===== */
-                const maxVisible = 5;
-                let start = Math.max(1, currentPage - 2);
-                let end = Math.min(totalPages, start + maxVisible - 1);
+    filteredRows = rows.filter(row => {
+        let show = true;
+        const text = row.innerText.toLowerCase();
 
-                if (end - start < maxVisible - 1) {
-                    start = Math.max(1, end - maxVisible + 1);
-                }
+        if (keyword && !text.includes(keyword)) show = false;
+        if (status && !text.includes(status)) show = false;
+        if (assignee && !text.includes(assignee)) show = false;
 
-                if (start > 1) {
-                    pagination.appendChild(createEllipsis());
-                }
+        if (startDate && endDate) {
+            const rowDate = new Date(row.querySelector("[data-date]").dataset.date);
+            if (rowDate < startDate || rowDate > endDate) show = false;
+        }
 
-                for (let i = start; i <= end; i++) {
-                    const li = document.createElement("li");
-                    li.className = "page-item" + (i === currentPage ? " active" : "");
+        return show;
+    });
 
-                    const a = document.createElement("a");
-                    a.className = "page-link";
-                    a.href = "#";
-                    a.innerText = i;
+    currentPage = 1;
+    render();
+}
 
-                    a.onclick = e => {
-                        e.preventDefault();
-                        currentPage = i;
-                        render();
-                    };
+function render() {
+    rows.forEach(r => r.style.display = "none");
 
-                    li.appendChild(a);
-                    pagination.appendChild(li);
-                }
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
 
-                if (end < totalPages) {
-                    pagination.appendChild(createEllipsis());
-                }
+    filteredRows.slice(start, end).forEach(r => r.style.display = "");
+    pageInfo.innerText = `แสดง ${filteredRows.length} รายการ`;
+    renderPagination();
+}
 
-                /* ===== Next ===== */
-                const nextLi = document.createElement("li");
-                nextLi.className = "page-item" + (currentPage === totalPages ? " disabled" : "");
+function renderPagination() {
+    pagination.innerHTML = "";
+    const total = Math.ceil(filteredRows.length / rowsPerPage);
+    if (total <= 1) return;
 
-                const nextA = document.createElement("a");
-                nextA.className = "page-link";
-                nextA.href = "#";
-                nextA.innerHTML = "&raquo;";
+    for (let i = 1; i <= total; i++) {
+        const li = document.createElement("li");
+        li.className = "page-item" + (i === currentPage ? " active" : "");
 
-                nextA.onclick = e => {
-                    e.preventDefault();
-                    if (currentPage < totalPages) {
-                        currentPage++;
-                        render();
-                    }
-                };
+        const a = document.createElement("a");
+        a.className = "page-link";
+        a.href = "#";
+        a.innerText = i;
+        a.onclick = e => {
+            e.preventDefault();
+            currentPage = i;
+            render();
+        };
 
-                nextLi.appendChild(nextA);
-                pagination.appendChild(nextLi);
-            }
+        li.appendChild(a);
+        pagination.appendChild(li);
+    }
+}
 
-            function createEllipsis() {
-                const li = document.createElement("li");
-                li.className = "page-item disabled";
-                li.innerHTML = `<span class="page-link">…</span>`;
-                return li;
-            }
+searchInput.onkeyup = filterTable;
+statusFilter.onchange = filterTable;
+assigneeFilter.onchange = filterTable;
+dateRange.onchange = filterTable;
 
-
-
-            searchInput.onkeyup = filterTable;
-            statusFilter.onchange = filterTable;
-            assigneeFilter.onchange = filterTable;
-            dateRange.onchange = filterTable;
-
-            flatpickr("#dateRange", {
-                mode: "range",
-                dateFormat: "d/m/Y",
-                locale: { rangeSeparator: " ถึง " }
-            });
-
-            filterTable();
-        });
-    </script>
+filterTable();
+});
+</script>
 
 </main>
 {% endblock %}

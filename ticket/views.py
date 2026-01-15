@@ -444,7 +444,7 @@ def repairs_form(request):
         user_id = request.session["user"]["id"]
 
         status_id = 1          # Waiting
-        ticket_type_id = 3     # สมมติว่า 3 = Building Repair
+        ticket_type_id = 4     # สมมติว่า 3 = Building Repair
 
         department = request.POST.get("department")
         building = request.POST.get("building")
