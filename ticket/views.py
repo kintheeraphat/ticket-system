@@ -532,7 +532,118 @@ def repairs_form(request):
 
 
 def adjust_form(request):
+    if request.method == "POST":
+
+        # -----------------------------
+        # BASIC TICKET INFO
+        # -----------------------------
+        title = "ปรับยอดสะสม"
+        description = request.POST.get("remark")
+        user_id = request.session["user"]["id"]
+
+        status_id = 1
+        ticket_type_id = 5   # ERP Adjustment
+
+        # -----------------------------
+        # GET VALUE FROM DROPDOWN
+        # -----------------------------
+        adj_category = request.POST.get("adj_category")
+
+        # -----------------------------
+        # SOURCE (ต้นทาง)
+        # -----------------------------
+        source_cust = request.POST.get("source_cust")
+        promo_info = request.POST.get("promo_info")
+        earn_master = request.POST.get("earn_master")
+        amount = request.POST.get("amount")
+
+        # -----------------------------
+        # TARGET (ปลายทาง)
+        # -----------------------------
+        target_cust = request.POST.get("target_cust")
+        target_customer_name = request.POST.get("target_customer_name")
+        target_promo_code = request.POST.get("target_promo_code")
+        target_promo_name = request.POST.get("target_promo_name")
+        target_earn_master = request.POST.get("target_earn_master")
+        target_amount = request.POST.get("target_amount")
+
+        # -----------------------------
+        # VALIDATE
+        # -----------------------------
+        if not adj_category:
+            return render(request, "tickets_form/adjust_form.html", {
+                "error": "กรุณาเลือกประเภทการปรับยอด"
+            })
+
+        if not amount and not target_amount:
+            return render(request, "tickets_form/adjust_form.html", {
+                "error": "กรุณากรอกจำนวนอย่างน้อย 1 ฝั่ง"
+            })
+
+        # -----------------------------
+        # INSERT tickets.tickets
+        # -----------------------------
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO tickets.tickets
+                (title, description, user_id, status_id, ticket_type_id)
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING id
+            """, [
+                title,
+                description,
+                user_id,
+                status_id,
+                ticket_type_id
+            ])
+            ticket_id = cursor.fetchone()[0]
+
+        # -----------------------------
+        # INSERT ticket_data_adjust
+        # -----------------------------
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO tickets.ticket_data_adjust
+                (
+                    ticket_id,
+                    adj_category,
+
+                    -- SOURCE
+                    source_cust,
+                    promo_info,
+                    earn_master,
+                    amount,
+
+                    -- TARGET
+                    target_cust,
+                    target_customer_name,
+                    target_promo_code,
+                    target_promo_name,
+                    target_earn_master,
+                    target_amount
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, [
+                ticket_id,
+                adj_category,
+
+                source_cust,
+                promo_info,
+                earn_master,
+                amount,
+
+                target_cust,
+                target_customer_name,
+                target_promo_code,
+                target_promo_name,
+                target_earn_master,
+                target_amount
+            ])
+
+        return redirect("ticket_success")
+
     return render(request, "tickets_form/adjust_form.html")
+
 
 def app_form(request):
     # =========================
