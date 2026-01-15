@@ -56,15 +56,15 @@
                     <div class="form-control bg-light">Lamina Films</div>
                 </div>
                 <div class="col-md-6">
-                    <label class="fw-bold">แผนก</label>
-                    <div class="form-control bg-light">{{ user.department }}</div>
-                </div>
-                <div class="col-md-6">
                     <label class="fw-bold">ชื่อ-สกุล</label>
                     <div class="form-control bg-light">{{ user.fname }} {{ user.lname }}</div>
                 </div>
             </div>
         </div> -->
+        <div class="col-md-6">
+            <label class="fw-bold">แผนก</label>
+            <input type="text" name="department[]">
+        </div>
 
         <hr class="my-4">
 
