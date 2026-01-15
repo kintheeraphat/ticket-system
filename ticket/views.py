@@ -3,13 +3,7 @@ from django.db import connection
 from django.utils import timezone
 from django.contrib import messages
 from django.utils.dateparse import parse_date
-<<<<<<< HEAD
-=======
 from datetime import datetime
-
-
-# views.py
->>>>>>> 426bc513b6dea63bae3da27cffa56d0265c8f6cf
 import os
 
 def login_view(request):
