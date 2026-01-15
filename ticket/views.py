@@ -3,9 +3,6 @@ from django.db import connection
 from django.utils import timezone
 from django.contrib import messages
 from django.utils.dateparse import parse_date
-
-
-# views.py
 import os
 
 def login_view(request):
@@ -433,10 +430,6 @@ def borrows(req):
 def tickets_detail(request):
     return render(request, "tickets_form/tickets_detail.html")
 
-from django.shortcuts import render, redirect
-from django.db import connection
-from django.utils import timezone
-import os
 
 def repairs_form(request):
     if request.method == "POST":
