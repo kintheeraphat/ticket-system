@@ -16,7 +16,9 @@ urlpatterns = [
     path("create/repairs/", views.repairs_form, name="repairs_form"),
 
     path("tickets/adjust/", views.adjust_form, name="adjust_form"),
+    
     path("tickets/app/", views.app_form, name="app_form"),
+
     path("tickets/report/", views.report_form, name="report_form"),
     path("tickets/active-promotion/", views.active_promotion_form, name="active_promotion_form"),
     path("create/vpn/", views.vpn, name="vpn"),

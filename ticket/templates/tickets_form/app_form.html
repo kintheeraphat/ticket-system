@@ -1,14 +1,17 @@
-{% extends "base.html" %} {% load static %} {% block title %}Request
-Application{% endblock %} {% block extra_css %}
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Request Application{% endblock %}
+
+{% block extra_css %}
 <link
   rel="stylesheet"
   href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
 />
-{% endblock %} {% block content %}
+{% endblock %}
+
+{% block content %}
 <div class="dashboard-table shadow-sm p-4 bg-white rounded">
-  <!-- =======================
-         Header
-    ======================== -->
+
   <div class="mb-4">
     <h4 class="fw-bold text-success mb-1">
       <i class="fas fa-laptop-code me-2"></i>Request Application
@@ -16,12 +19,12 @@ Application{% endblock %} {% block extra_css %}
     <p class="text-muted small">IT-APP-001 V.3 : User Request Application</p>
   </div>
 
-  <form method="post">
+  <form method="post" action="{% url 'app_form' %}">
     {% csrf_token %}
 
     <!-- =======================
-             ประเภทงาน (Radio)
-        ======================== -->
+         ประเภทงาน
+    ======================== -->
     <div class="mb-4 p-3 bg-light rounded border">
       <label class="fw-bold mb-2 d-block">
         <i class="fas fa-tasks me-1"></i>ประเภทงาน
@@ -32,13 +35,10 @@ Application{% endblock %} {% block extra_css %}
           class="form-check-input"
           type="radio"
           name="app_type"
-          id="type_new"
           value="new"
           checked
         />
-        <label class="form-check-label " for="type_new">
-          จัดทำ Application ใหม่
-        </label>
+        <label class="form-check-label">จัดทำ Application ใหม่</label>
       </div>
 
       <div class="form-check">
@@ -46,55 +46,54 @@ Application{% endblock %} {% block extra_css %}
           class="form-check-input"
           type="radio"
           name="app_type"
-          id="type_update"
           value="update"
         />
-        <label class="form-check-label " for="type_update">
-          ปรับปรุง Application เดิม
-        </label>
+        <label class="form-check-label">ปรับปรุง Application เดิม</label>
       </div>
     </div>
 
     <!-- =======================
-             วันที่ (วัน / เดือน / ปี ค.ศ.)
-        ======================== -->
+         วันที่ต้องการแล้วเสร็จ
+    ======================== -->
     <div class="mb-4">
       <label class="form-label">
-        วันที่ต้องการแล้วเสร็จ (วัน / เดือน / ปี ค.ศ.)
+        วันที่ต้องการแล้วเสร็จ (วัน / เดือน / ปี ค.ศ. /เวลา)
       </label>
       <input
-        type="text"
-        id="deadline"
+        type="datetime-local"
         name="deadline"
         class="form-control w-50"
-        placeholder="วัน / เดือน / ปี"
+        required
       />
+
     </div>
 
     <!-- =======================
-             รายละเอียด
-        ======================== -->
+         รายละเอียด
+    ======================== -->
     <div class="mb-3">
       <label class="form-label">รายละเอียด Application</label>
       <textarea
         class="form-control"
         rows="4"
         name="app_detail"
-        placeholder="อธิบายการทำงานของ Application"
+        required
       ></textarea>
     </div>
 
     <div class="mb-3">
       <label class="form-label">วัตถุประสงค์</label>
-      <textarea class="form-control" rows="3" name="objective"></textarea>
+      <textarea
+        class="form-control"
+        rows="3"
+        name="objective"
+      ></textarea>
     </div>
 
-
     <!-- =======================
-     ปุ่ม
-======================== -->
+         ปุ่ม
+    ======================== -->
     <div class="d-flex justify-content-end gap-2 border-top pt-3">
-      <!-- ปุ่มกลับ -->
       <button
         type="button"
         class="btn btn-outline-secondary"
@@ -103,22 +102,24 @@ Application{% endblock %} {% block extra_css %}
         <i class="fas fa-arrow-left me-1"></i> กลับ
       </button>
 
-      <!-- ปุ่มส่ง -->
       <button type="submit" class="btn btn-success px-5 fw-bold">
         ส่งคำร้อง
       </button>
     </div>
+
   </form>
 </div>
-{% endblock %} {% block extra_js %}
+{% endblock %}
+
+{% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
 
 <script>
-  flatpickr("#deadline", {
-    locale: "th",
-    dateFormat: "d/m/Y", // วัน / เดือน / ปี (ค.ศ.)
-    allowInput: true,
-  });
+flatpickr("#deadline", {
+  locale: "th",
+  dateFormat: "d/m/Y",   // วัน / เดือน / ปี (ค.ศ.)
+  allowInput: true,
+});
 </script>
 {% endblock %}

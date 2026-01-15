@@ -3,6 +3,7 @@ from django.db import connection
 from django.utils import timezone
 from django.contrib import messages
 from django.utils.dateparse import parse_date
+from datetime import datetime
 
 
 # views.py
@@ -524,6 +525,124 @@ def adjust_form(request):
     return render(request, "tickets_form/adjust_form.html")
 
 def app_form(request):
+    # =========================
+    # CHECK LOGIN
+    # =========================
+    if "user" not in request.session:
+        return redirect("login")
+
+    # =========================
+    # GET USER_PERMISSION ID
+    # =========================
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id
+            FROM tickets.user_permission
+            WHERE erp_user_id = %s
+              AND active = true
+        """, [request.session["user"]["id"]])
+        row = cursor.fetchone()
+
+    if not row:
+        messages.error(request, "ไม่พบสิทธิ์ผู้ใช้งาน")
+        return redirect("login")
+
+    user_permission_id = row[0]
+
+    # =========================
+    # POST = SAVE DATA
+    # =========================
+    if request.method == "POST":
+
+        # -------------------------
+        # FORM DATA
+        # -------------------------
+        app_type = request.POST.get("app_type")  # new / update
+        deadline_raw = request.POST.get("deadline")
+        app_detail = request.POST.get("app_detail", "")
+        objective = request.POST.get("objective", "")
+
+        # -------------------------
+        # DATE (d/m/Y → date)
+        # -------------------------
+        due_date = None
+        if deadline_raw:
+            try:
+                deadline_raw = request.POST.get("deadline")
+                due_date = deadline_raw if deadline_raw else None
+
+            except ValueError:
+                messages.error(request, "รูปแบบวันที่ไม่ถูกต้อง (วัน/เดือน/ปี)")
+                return redirect("app_form")
+
+        # -------------------------
+        # TITLE + FLAG
+        # -------------------------
+        app_new = False
+        app_edit = False
+
+        if app_type == "new":
+            title = "Request Application (New)"
+            app_new = True
+        else:
+            title = "Request Application (Update)"
+            app_edit = True
+
+        description = f"{app_detail}\n\nวัตถุประสงค์:\n{objective}"
+
+        status_id = 1        # รอดำเนินการ
+        ticket_type_id = 2   # ⚠️ ต้องเป็น ID ที่มีจริงใน ticket_type (Application)
+
+        # =========================
+        # INSERT tickets
+        # =========================
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO tickets.tickets
+                (title, description, user_id, status_id, ticket_type_id, create_at, due_date)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+            """, [
+                title,
+                description,
+                user_permission_id,
+                status_id,
+                ticket_type_id,
+                timezone.now(),
+                due_date
+            ])
+
+            ticket_id = cursor.fetchone()[0]   # ✅ ใช้ได้
+
+
+        # =========================
+        # INSERT ticket_data_erp_app
+        # =========================
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO tickets.ticket_data_erp_app
+                (
+                    ticket_id,
+                    app_new,
+                    app_edit,
+                    old_value,
+                    new_value
+                )
+                VALUES (%s, %s, %s, %s, %s)
+            """, [
+                ticket_id,
+                app_new,
+                app_edit,
+                objective if app_edit else None,
+                app_detail
+            ])
+
+        messages.success(request, "ส่งคำร้อง Request Application เรียบร้อยแล้ว")
+        return redirect("ticket_success")
+
+    # =========================
+    # GET = SHOW FORM
+    # =========================
     return render(request, "tickets_form/app_form.html")
 
 def report_form(request):
