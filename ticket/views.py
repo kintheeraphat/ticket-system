@@ -434,6 +434,11 @@ def borrows(req):
 def tickets_detail(request):
     return render(request, "tickets_form/tickets_detail.html")
 
+from django.shortcuts import render, redirect
+from django.db import connection
+from django.utils import timezone
+import os
+
 def repairs_form(request):
     if request.method == "POST":
 
@@ -441,14 +446,20 @@ def repairs_form(request):
         # BASIC TICKET INFO
         # -----------------------------
         title = "แจ้งซ่อมอาคาร"
-        description = request.POST.get("problem_detail", "")
+        description = request.POST.get("problem_detail")
         user_id = request.session["user"]["id"]
 
-        status_id = 1          # Waiting
-        ticket_type_id = 4     # สมมติว่า 3 = Building Repair
+        status_id = 1        # Waiting
+        ticket_type_id = 4   # Building Repair
 
         department = request.POST.get("department")
         building = request.POST.get("building")
+
+        # กัน error กรณีฟอร์มไม่ครบ
+        if not department or not building:
+            return render(request, "tickets_form/repairs_form.html", {
+                "error": "กรุณากรอกข้อมูลให้ครบถ้วน"
+            })
 
         # -----------------------------
         # INSERT tickets.tickets
@@ -486,10 +497,10 @@ def repairs_form(request):
             ])
 
         # -----------------------------
-        # UPLOAD FILES (optional)
+        # UPLOAD FILES
         # -----------------------------
         files = request.FILES.getlist("attachments[]")
-        upload_dir = f"uploads/repairs/{ticket_id}"
+        upload_dir = f"media/uploads/repairs/{ticket_id}"
         os.makedirs(upload_dir, exist_ok=True)
 
         for f in files:
