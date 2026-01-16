@@ -2,195 +2,223 @@
 {% block title %}รายการคำขอทั้งหมด | Ticket System{% endblock %}
 
 {% block content %}
+<main class="main-content">
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+
+<style>
+#ticketTable tbody tr {
+    cursor: pointer;
+}
+#ticketTable tbody tr:hover {
+    background-color: #f8f9fa;
+}
+</style>
 
 <!-- ================= HEADER ================= -->
-<div class="page-header mb-4">
-  <h2 class="fw-semibold mb-1">รายการคำขอทั้งหมด</h2>
-  <p class="text-muted mb-0">ระบบจัดการ Ticket ภายในองค์กร</p>
+<div class="d-flex justify-content-between align-items-center mb-4 pt-2">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">รายการคำขอทั้งหมด</h2>
+        <p class="text-muted small mb-0">
+            ตรวจสอบและบริหารจัดการสถานะรายการแจ้งซ่อมหรือคำร้องขอภายในระบบ
+        </p>
+    </div>
 </div>
 
 <!-- ================= FILTER ================= -->
-<div class="filter-panel mb-4">
-  <div class="row g-3 align-items-end">
+<div class="dashboard-table mb-4 p-4">
+<form class="row g-3 align-items-end" onsubmit="return false;">
 
-    <!-- สถานะ -->
-    <div class="col-md-3">
-      <label class="form-label">สถานะ</label>
-      <select id="statusFilter" class="form-select">
-        <option value="">ทั้งหมด</option>
-        <option>รอดำเนินการ</option>
-        <option>รออนุมัติ</option>
-        <option>ดราฟ</option>
-        <option>เสร็จสิ้นแล้ว</option>
-      </select>
-    </div>
-
-    <!-- ผู้รับผิดชอบ -->
-    <div class="col-md-3">
-      <label class="form-label">ผู้รับผิดชอบ</label>
-      <select id="assigneeFilter" class="form-select">
-        <option value="">ทั้งหมด</option>
-        {% for t in tickets %}
-          {% if t.assignee != "ยังไม่มอบหมาย" %}
-            <option>{{ t.assignee }}</option>
-          {% endif %}
-        {% endfor %}
-      </select>
-    </div>
-
-    <!-- ช่วงวันที่ -->
-    <div class="col-md-4">
-      <label class="form-label">ช่วงวันที่</label>
-      <div class="input-group">
-        <input type="date" id="startDate" class="form-control">
-        <span class="input-group-text bg-white text-muted">ถึง</span>
-        <input type="date" id="endDate" class="form-control">
-      </div>
-    </div>
-    
-    <!-- ค้นหา -->
+    <!-- Status -->
     <div class="col-md-2">
-      <label class="form-label">ค้นหา</label>
-      <input type="search" id="globalSearch" class="form-control"
-             placeholder="รหัส / หัวข้อ / ผู้แจ้ง">
+        <label class="form-label small text-muted">สถานะ</label>
+        <select id="statusFilter" class="form-select">
+            <option value="">ทุกสถานะ</option>
+            <option value="รอดำเนินการ">รอดำเนินการ</option>
+            <option value="รออนุมัติ">รออนุมัติ</option>
+            <option value="ดราฟ">ดราฟ</option>
+            <option value="เสร็จสิ้นแล้ว">เสร็จสิ้นแล้ว</option>
+        </select>
     </div>
 
-  </div>
+    <!-- Assignee -->
+    <div class="col-md-3">
+        <label class="form-label small text-muted">ผู้รับผิดชอบ</label>
+        <select id="assigneeFilter" class="form-select">
+            <option value="">ทุกคน</option>
+            {% for t in tickets %}
+            {% if t.assignee != "ยังไม่มอบหมาย" %}
+            <option value="{{ t.assignee }}">{{ t.assignee }}</option>
+            {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Quick Date Filter -->
+    <div class="col-md-2">
+        <label class="form-label small text-muted">ช่วงเวลา</label>
+        <select id="quickDateFilter" class="form-select">
+            <option value="">เดือนปัจจุบัน</option>
+            <option value="7">7 วันที่แล้ว</option>
+            <option value="14">14 วันที่แล้ว</option>
+            <option value="last_month">เดือนที่แล้ว</option>
+        </select>
+    </div>
+
+    <!-- Custom Date -->
+    <div class="col-md-2">
+        <label class="form-label small text-muted">จากวันที่</label>
+        <input type="date" id="startDate" class="form-control">
+    </div>
+
+    <div class="col-md-2">
+        <label class="form-label small text-muted">ถึงวันที่</label>
+        <input type="date" id="endDate" class="form-control">
+    </div>
+
+    <!-- Clear -->
+    <div class="col-md-1">
+        <button id="clearFilters" class="btn btn-outline-secondary w-100">
+            ล้าง
+        </button>
+    </div>
+
+</form>
 </div>
 
 <!-- ================= TABLE ================= -->
-<div class="table-card">
-  <div class="table-responsive">
-    <table id="ticketTable" class="table table-hover align-middle w-100">
+<div class="dashboard-table overflow-hidden">
+<div class="table-responsive">
+<table id="ticketTable" class="table table-hover align-middle mb-0">
 
-      <thead>
-        <tr>
-          <th style="width:90px">รหัส</th>
-          <th>ผู้แจ้ง</th>
-          <th>หมวด</th>
-          <th>รายละเอียด</th>
-          <th>วันที่</th>
-          <th>สถานะ</th>
-          <th>ผู้รับผิดชอบ</th>
-          <th style="width:60px"></th>
-        </tr>
-      </thead>
+<thead>
+<tr>
+    <th class="text-center">รหัส</th>
+    <th>ผู้แจ้ง</th>
+    <th>หมวดหมู่</th>
+    <th>รายละเอียดคำขอ</th>
+    <th>วันที่</th>
+    <th class="text-center">สถานะ</th>
+    <th>ผู้รับผิดชอบ</th>
+    <th></th>
+</tr>
+</thead>
 
-      <tbody>
-      {% for t in tickets %}
-        <tr class="clickable-row"
-            data-href="{% url 'tickets_detail' %}?id={{ t.id }}">
+<tbody>
+{% for t in tickets %}
+<tr data-href="{% url 'tickets_detail' %}?id={{ t.id }}">
+    <td class="text-center">#{{ t.id }}</td>
+    <td>{{ t.requester }}</td>
+    <td>{{ t.ticket_type }}</td>
+    <td>
+        <div class="fw-bold">{{ t.title }}</div>
+        <small class="text-muted">{{ t.description }}</small>
+    </td>
+    <td data-date="{{ t.created_at|date:'Y-m-d' }}">
+        {{ t.created_at|date:"d M Y" }}
+    </td>
+    <td class="text-center">{{ t.status }}</td>
+    <td>{{ t.assignee }}</td>
+    <td class="text-end">
+        <a href="{% url 'tickets_detail' %}?id={{ t.id }}"
+           class="btn btn-outline-secondary btn-sm rounded-circle">
+            <i class="fas fa-chevron-right"></i>
+        </a>
+    </td>
+</tr>
+{% endfor %}
+</tbody>
 
-          <td class="text-center">
-            <span class="badge bg-light text-dark">#{{ t.id }}</span>
-          </td>
-
-          <td>{{ t.requester }}</td>
-          <td>{{ t.ticket_type }}</td>
-
-          <td>
-            <div class="fw-semibold">{{ t.title }}</div>
-            <small class="text-muted">{{ t.description }}</small>
-          </td>
-
-          <!-- ใช้ ISO date สำหรับ filter -->
-          <td data-date="{{ t.created_at|date:'Y-m-d' }}">
-            {{ t.created_at|date:"d M Y" }}
-          </td>
-
-          <td>
-            {% if t.status == "รอดำเนินการ" %}
-              <span class="badge-status status-pending">{{ t.status }}</span>
-            {% elif t.status == "รออนุมัติ" %}
-              <span class="badge-status status-approve">{{ t.status }}</span>
-            {% elif t.status == "ดราฟ" %}
-              <span class="badge-status status-draft">{{ t.status }}</span>
-            {% else %}
-              <span class="badge-status status-done">{{ t.status }}</span>
-            {% endif %}
-          </td>
-
-          <td>
-            {% if t.assignee != "ยังไม่มอบหมาย" %}
-              <span class="assignee-pill">{{ t.assignee }}</span>
-            {% else %}
-              <span class="assignee-pill text-muted">ยังไม่มอบหมาย</span>
-            {% endif %}
-          </td>
-
-          <!-- ลูกศรยังมีได้ แต่ไม่จำเป็น -->
-          <td class="text-end">
-            <a href="{% url 'tickets_detail' %}?id={{ t.id }}"
-               class="action-btn">
-              <i class="fas fa-chevron-right"></i>
-            </a>
-          </td>
-        </tr>
-      {% endfor %}
-      </tbody>
-
-    </table>
-  </div>
+</table>
+</div>
 </div>
 
-{% endblock %}
+<!-- ================= JS ================= -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 
-{% block extra_js %}
 <script>
-$(document).ready(function () {
+$(function () {
 
-  // ===== DataTable (ไม่มี search) =====
-  const table = $('#ticketTable').DataTable({
-    pageLength: 10,
-    lengthChange: false,
-    searching: false,     // ❌ ปิด search ทั้งหมด
-    order: [[4, 'desc']],
-    language: {
-      zeroRecords: "ไม่พบข้อมูล",
-      info: "แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ",
-      infoEmpty: "ไม่มีข้อมูล",
-      paginate: {
-        previous: "ก่อนหน้า",
-        next: "ถัดไป"
-      }
-    }
-  });
+    const today = new Date();
 
-  // ===== Filter: สถานะ =====
-  $('#statusFilter').on('change', function () {
-    table.column(5).search(this.value).draw();
-  });
+    $.fn.dataTable.ext.search.push(function (settings, data, index) {
 
-  // ===== Filter: ผู้รับผิดชอบ =====
-  $('#assigneeFilter').on('change', function () {
-    table.column(6).search(this.value).draw();
-  });
+        const row = $('#ticketTable tbody tr').eq(index);
+        const dateStr = row.find('[data-date]').data('date');
+        if (!dateStr) return true;
 
-  // ===== Filter: วันที่ =====
-  $.fn.dataTable.ext.search.push(function (settings, data, index) {
-    const start = $('#startDate').val();
-    const end = $('#endDate').val();
+        const rowDate = new Date(dateStr);
 
-    const row = table.row(index).node();
-    const rowDate = $('td[data-date]', row).data('date');
+        const quick = $('#quickDateFilter').val();
+        const startVal = $('#startDate').val();
+        const endVal = $('#endDate').val();
 
-    if (!start && !end) return true;
-    if (start && rowDate < start) return false;
-    if (end && rowDate > end) return false;
+        // ---- Custom date ----
+        if (startVal || endVal) {
+            const start = startVal ? new Date(startVal) : null;
+            const end = endVal ? new Date(endVal) : null;
+            if (start && rowDate < start) return false;
+            if (end && rowDate > end) return false;
+            return true;
+        }
 
-    return true;
-  });
+        // ---- Quick filter ----
+        if (quick === "7" || quick === "14") {
+            const days = parseInt(quick);
+            const from = new Date();
+            from.setDate(today.getDate() - days);
+            return rowDate >= from && rowDate <= today;
+        }
 
-  $('#startDate, #endDate').on('change', function () {
+        if (quick === "last_month") {
+            const first = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            const last = new Date(today.getFullYear(), today.getMonth(), 0);
+            return rowDate >= first && rowDate <= last;
+        }
+
+        // ---- Default = current month ----
+        return rowDate.getMonth() === today.getMonth() &&
+               rowDate.getFullYear() === today.getFullYear();
+    });
+
+    const table = $('#ticketTable').DataTable({
+        pageLength: 10,
+        order: [[4, 'desc']],
+        language: {
+            zeroRecords: "ไม่พบข้อมูล"
+        }
+    });
+
+    // Click row
+    $('#ticketTable tbody').on('click', 'tr', function (e) {
+        if ($(e.target).closest('a,button').length) return;
+        window.location = $(this).data('href');
+    });
+
+    $('#statusFilter').on('change', () => table.column(5).search($('#statusFilter').val()).draw());
+    $('#assigneeFilter').on('change', () => table.column(6).search($('#assigneeFilter').val()).draw());
+
+    $('#quickDateFilter').on('change', function () {
+        $('#startDate,#endDate').val('');
+        table.draw();
+    });
+
+    $('#startDate,#endDate').on('change', function () {
+        $('#quickDateFilter').val('');
+        table.draw();
+    });
+
+    $('#clearFilters').on('click', function () {
+        $('#statusFilter,#assigneeFilter,#quickDateFilter,#startDate,#endDate').val('');
+        table.search('').columns().search('');
+        table.draw();
+    });
+
     table.draw();
-  });
-
-  // ===== Click ทั้งแถว =====
-  $('#ticketTable tbody').on('click', 'tr.clickable-row', function (e) {
-    if ($(e.target).closest('a, button, input, select').length) return;
-    window.location = $(this).data('href');
-  });
-
 });
 </script>
+
+</main>
 {% endblock %}
