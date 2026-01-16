@@ -52,6 +52,7 @@
             name="start_date"
             class="form-control"
             placeholder="วัน / เดือน / ปี"
+            required
           />
         </div>
         <div class="col-md-6">
@@ -62,6 +63,7 @@
             name="end_date"
             class="form-control"
             placeholder="วัน / เดือน / ปี"
+            required
           />
         </div>
       </div>
@@ -105,12 +107,12 @@
       </label>
 
       <input
-        type="file"
-        id="fileInput"
-        class="form-control w-50"
-        multiple
-        onchange="handleFiles(this)"
-      />
+      type="file"
+      id="fileInput"
+      name="files"
+      class="form-control w-50"
+      multiple
+    />
 
       <div id="filePreview" class="mt-3 d-flex gap-3 flex-wrap"></div>
     </div>
@@ -158,28 +160,21 @@
 </div>
 {% endblock %} 
 {% block extra_js %}
-<!-- Flatpickr -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
 
-<!-- PDF.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="{% static 'script/script.js' %}"></script>
 <script>
-  /* =======================
-   Date Picker
-======================= */
-  flatpickr("#start_date", {
-    locale: "th",
-    dateFormat: "d/m/Y",
-    allowInput: true,
-  });
+flatpickr("#start_date", {
+  locale: "th",
+  dateFormat: "d/m/Y",
+  allowInput: true,
+});
 
-  flatpickr("#end_date", {
-    locale: "th",
-    dateFormat: "d/m/Y",
-    allowInput: true,
-  });
+flatpickr("#end_date", {
+  locale: "th",
+  dateFormat: "d/m/Y",
+  allowInput: true,
+});
 </script>
-
 {% endblock %}
+

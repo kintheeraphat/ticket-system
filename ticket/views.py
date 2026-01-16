@@ -6,6 +6,7 @@ from django.utils.dateparse import parse_date
 from datetime import timezone as dt_timezone
 from datetime import date, timedelta
 from datetime import datetime
+from django.core.files.storage import FileSystemStorage
 import os
 
 def thai_date(d):
@@ -1014,88 +1015,74 @@ def active_promotion_form(request):
     user_permission_id = row[0]
 
     if request.method == "POST":
-        promo_name = request.POST.get("promo_name", "").strip()
-        start_date = request.POST.get("start_date", "")
-        end_date = request.POST.get("end_date", "")
-        reason = request.POST.get("reason", "")
-        department = request.POST.get("department", "").strip()
-
-        if not promo_name or not start_date or not end_date or not department:
-            messages.error(request, "กรุณากรอกข้อมูลให้ครบ")
-            return render(request, "tickets_form/active_promotion_form.html")
-
-        # แปลงวันที่ d/m/Y → date
-        try:
-            start_dt = datetime.strptime(start_date, "%d/%m/%Y").date()
-            end_dt = datetime.strptime(end_date, "%d/%m/%Y").date()
-        except ValueError:
-            messages.error(request, "รูปแบบวันที่ไม่ถูกต้อง")
-            return render(request, "tickets_form/active_promotion_form.html")
+        promo_name = request.POST.get("promo_name")
+        start_date = request.POST.get("start_date")
+        end_date = request.POST.get("end_date")
+        reason = request.POST.get("reason")
 
         title = "Active Promotion Package"
-        description = (
-            f"แผนก: {department}\n"
-            f"Promotion: {promo_name}\n"
-            f"ช่วงวันที่: {start_date} - {end_date}\n\n"
-            f"เหตุผล:\n{reason}"
-        )
+        description = f"""
+Promotion: {promo_name}
+ช่วงเวลา: {start_date} - {end_date}
+
+เหตุผล:
+{reason}
+"""
 
         status_id = 1
-        ticket_type_id = 12  # Active Promotion Package
+        ticket_type_id = 12  # Active Promotion
 
         # ---------- INSERT tickets ----------
         with connection.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO tickets.tickets
-                (
-                    title,
-                    description,
-                    user_id,
-                    status_id,
-                    ticket_type_id,
-                    department,
-                    create_at
-                )
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                (title, description, user_id, status_id, ticket_type_id)
+                VALUES (%s, %s, %s, %s, %s)
                 RETURNING id
             """, [
                 title,
                 description,
                 user_permission_id,
                 status_id,
-                ticket_type_id,
-                department,
-                timezone.now()
+                ticket_type_id
             ])
             ticket_id = cursor.fetchone()[0]
 
-        # ---------- INSERT ticket_data_erp_app ----------
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                INSERT INTO tickets.ticket_data_erp_app
-                (
+        # ---------- SAVE FILES ----------
+        files = request.FILES.getlist("files")
+        fs = FileSystemStorage(location="media/tickets")
+
+        for f in files:
+            filename = fs.save(f.name, f)
+            file_path = fs.path(filename)
+
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO tickets.ticket_files
+                    (
+                        ticket_id,
+                        ref_type,
+                        file_name,
+                        file_path,
+                        file_type,
+                        file_size,
+                        uploaded_by
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, [
                     ticket_id,
-                    promo_name,
-                    target_date,
-                    app_new,
-                    app_edit,
-                    new_value
-                )
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, [
-                ticket_id,
-                promo_name,
-                end_dt,
-                True,
-                False,
-                reason
-            ])
+                    "ACTIVE_PROMOTION",
+                    f.name,
+                    file_path,
+                    f.content_type,
+                    f.size,
+                    user_permission_id
+                ])
 
         messages.success(request, "ส่งคำร้อง Active Promotion เรียบร้อยแล้ว")
         return redirect("ticket_success")
 
     return render(request, "tickets_form/active_promotion_form.html")
-
 
 def user_dashboard(request):
     return render(request, "user_dashboard.html")
