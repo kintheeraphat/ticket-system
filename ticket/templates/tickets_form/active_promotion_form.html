@@ -11,9 +11,7 @@
 
 {% block content %}
 <div class="dashboard-table shadow-sm p-4 bg-white rounded">
-  <!-- =======================
-         Header
-    ======================== -->
+
   <div class="mb-4">
     <h4 class="mb-1">
       <i class="fas fa-bullhorn me-2"></i>ขอ Active Promotion Package
@@ -23,9 +21,6 @@
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
 
-    <!-- =======================
-             Promotion Info
-        ======================== -->
     <div class="mb-4 p-3 border rounded">
       <h6 class="fw-bold mb-3 text-primary">
         <i class="fas fa-tag me-2"></i>ข้อมูล Promotion
@@ -42,9 +37,7 @@
       </div>
     </div>
 
-    <!-- =======================
-             Period (วัน / เดือน / ปี)
-        ======================== -->
+
     <div class="mb-4 p-3 bg-light rounded border">
       <h6 class="fw-bold mb-3 text-success">
         <i class="fas fa-calendar-alt me-2"></i>ช่วงวันที่ขอ Active
@@ -74,9 +67,7 @@
       </div>
     </div>
 
-    <!-- =======================
-             Reason
-        ======================== -->
+
     <div class="mb-4">
       <label class="fw-bold mb-2">
         <i class="fas fa-comment-dots me-2"></i>เหตุผลในการขอ Active Promotion
@@ -89,9 +80,7 @@
       ></textarea>
     </div>
 
-    <!-- =======================
-             Attachment (หลายไฟล์ + ลบได้)
-        ======================== -->
+
     <div class="mb-4">
       <label class="fw-bold mb-2 d-block">
         <i class="fas fa-paperclip me-1"></i>เอกสารแนบ
