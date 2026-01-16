@@ -68,62 +68,67 @@ def dashboard(request):
     with connection.cursor() as cursor:
 
         # =====================
-        # SUMMARY CARDS
+        # COUNT BY STATUS_ID
         # =====================
         cursor.execute("""
-            SELECT COUNT(*) FROM tickets.tickets t
-            JOIN tickets.status s ON s.id = t.status_id
-            WHERE s.name = 'รอดำเนินการ'
+            SELECT status_id, COUNT(*)
+            FROM tickets.tickets
+            GROUP BY status_id
         """)
-        pending = cursor.fetchone()[0]
+        rows = cursor.fetchall()
 
+        # แปลงเป็น dict {status_id: count}
+        status_counts = {status_id: count for status_id, count in rows}
+
+        # =====================
+        # MAP STATUS BY ID
+        # =====================
+        waiting_approve = status_counts.get(1, 0)   # Waiting for Approve
+        approved = status_counts.get(2, 0)          # Approved
+        rejected = status_counts.get(3, 0)          # Rejected
+        in_progress = status_counts.get(4, 0)       # In Progress
+        completed = status_counts.get(5, 0)         # Completed
+
+        total = sum(status_counts.values())
+
+        # =====================
+        # TOP CATEGORY (ticket_type)
+        # =====================
         cursor.execute("""
-            SELECT COUNT(*) FROM tickets.tickets t
-            JOIN tickets.status s ON s.id = t.status_id
-            WHERE s.name = 'เสร็จสิ้นแล้ว'
+            SELECT tt.name, COUNT(t.id) AS total
+            FROM tickets.ticket_type tt
+            LEFT JOIN tickets.tickets t
+                ON t.ticket_type_id = tt.id
+            GROUP BY tt.name
+            ORDER BY total DESC
         """)
-        closed = cursor.fetchone()[0]
+        category_rows = cursor.fetchall()
 
-        cursor.execute("SELECT COUNT(*) FROM tickets.tickets")
-        total = cursor.fetchone()[0]
+        chart_labels = [row[0] for row in category_rows]
+        chart_values = [row[1] for row in category_rows]
 
-        # =====================
-        # CHART : ticket_type
-        # =====================
-        cursor.execute("""
-        SELECT 
-            tt.name,
-            COUNT(t.id) AS total
-        FROM tickets.ticket_type tt
-        LEFT JOIN tickets.tickets t 
-            ON t.ticket_type_id = tt.id
-        GROUP BY tt.name
-        ORDER BY total DESC
-    """)
-        chart_rows = cursor.fetchall()
-
-        chart_labels = [row[0] for row in chart_rows]
-        chart_values = [row[1] for row in chart_rows]
-
-        # =====================
-        # TOP CATEGORY
-        # =====================
-        top_category_name = chart_labels[0] if chart_labels else ""
+        top_category_name = chart_labels[0] if chart_labels else "-"
         top_category_count = chart_values[0] if chart_values else 0
 
     context = {
-        "pending": pending,
-        "closed": closed,
+        # STATUS
+        "waiting_approve": waiting_approve,
+        "approved": approved,
+        "rejected": rejected,
+        "in_progress": in_progress,
+        "completed": completed,
         "total": total,
 
+        # CATEGORY
         "chart_labels": chart_labels,
         "chart_values": chart_values,
-
         "top_category_name": top_category_name,
         "top_category_count": top_category_count,
     }
 
     return render(request, "dashboard.html", context)
+
+
 
 
 def tickets_list(request):
@@ -526,22 +531,47 @@ def repairs_form(request):
 
 
 def adjust_form(request):
+
+    # -----------------------------
+    # CHECK LOGIN (แบบเดียวกับ erp_perm)
+    # -----------------------------
+    user = request.session.get("user")
+    if not user:
+        return redirect("login")
+
     if request.method == "POST":
 
         # -----------------------------
         # BASIC TICKET INFO
         # -----------------------------
         title = "ปรับยอดสะสม"
-        description = request.POST.get("remark")
-        user_id = request.session["user"]["id"]
-
-        status_id = 1
-        ticket_type_id = 5   # ERP Adjustment
+        description = request.POST.get("remark", "")
+        user_id = user["id"]
+        status_id = 1  # Waiting
 
         # -----------------------------
-        # GET VALUE FROM DROPDOWN
+        # TICKET TYPE FROM DROPDOWN (INT)
         # -----------------------------
-        adj_category = request.POST.get("adj_category")
+        ticket_type_id = request.POST.get("ticket_type_id")
+
+        if not ticket_type_id:
+            return render(request, "tickets_form/adjust_form.html", {
+                "error": "กรุณาเลือกประเภทการปรับยอด"
+            })
+
+        ticket_type_id = int(ticket_type_id)
+
+        # -----------------------------
+        # MAP TICKET TYPE → CATEGORY
+        # -----------------------------
+        CATEGORY_MAP = {
+            5: "ยอดยกจากเดิม",
+            6: "แก้ไขยอด",
+            7: "โอนระหว่างร้าน",
+            8: "โอนระหว่างโปรโมชั่น",
+        }
+
+        adj_category = CATEGORY_MAP.get(ticket_type_id, "ไม่ระบุ")
 
         # -----------------------------
         # SOURCE (ต้นทาง)
@@ -562,13 +592,8 @@ def adjust_form(request):
         target_amount = request.POST.get("target_amount")
 
         # -----------------------------
-        # VALIDATE
+        # VALIDATION
         # -----------------------------
-        if not adj_category:
-            return render(request, "tickets_form/adjust_form.html", {
-                "error": "กรุณาเลือกประเภทการปรับยอด"
-            })
-
         if not amount and not target_amount:
             return render(request, "tickets_form/adjust_form.html", {
                 "error": "กรุณากรอกจำนวนอย่างน้อย 1 ฝั่ง"
@@ -580,7 +605,13 @@ def adjust_form(request):
         with connection.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO tickets.tickets
-                (title, description, user_id, status_id, ticket_type_id)
+                (
+                    title,
+                    description,
+                    user_id,
+                    status_id,
+                    ticket_type_id
+                )
                 VALUES (%s, %s, %s, %s, %s)
                 RETURNING id
             """, [
@@ -602,13 +633,11 @@ def adjust_form(request):
                     ticket_id,
                     adj_category,
 
-                    -- SOURCE
                     source_cust,
                     promo_info,
                     earn_master,
                     amount,
 
-                    -- TARGET
                     target_cust,
                     target_customer_name,
                     target_promo_code,
@@ -633,6 +662,45 @@ def adjust_form(request):
                 target_earn_master,
                 target_amount
             ])
+
+        # -----------------------------
+        # UPLOAD FILES (เหมือน erp_perm)
+        # -----------------------------
+        files = request.FILES.getlist("attachments[]")
+        upload_dir = f"media/uploads/adjust/{ticket_id}"
+        os.makedirs(upload_dir, exist_ok=True)
+
+        for f in files:
+            file_path = f"{upload_dir}/{f.name}"
+
+            with open(file_path, "wb+") as destination:
+                for chunk in f.chunks():
+                    destination.write(chunk)
+
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO tickets.ticket_files
+                    (
+                        ticket_id,
+                        ref_type,
+                        file_name,
+                        file_path,
+                        file_type,
+                        file_size,
+                        uploaded_by,
+                        create_at
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """, [
+                    ticket_id,
+                    "ADJUST",
+                    f.name,
+                    file_path,
+                    f.content_type,
+                    f.size,
+                    user_id,
+                    timezone.now()
+                ])
 
         return redirect("ticket_success")
 
