@@ -77,21 +77,36 @@ def dashboard(request):
         """)
         rows = cursor.fetchall()
 
-        # แปลงเป็น dict {status_id: count}
         status_counts = {status_id: count for status_id, count in rows}
 
-        # =====================
-        # MAP STATUS BY ID
-        # =====================
-        waiting_approve = status_counts.get(1, 0)   # Waiting for Approve
-        approved = status_counts.get(2, 0)          # Approved
-        rejected = status_counts.get(3, 0)          # Rejected
-        in_progress = status_counts.get(4, 0)       # In Progress
-        completed = status_counts.get(5, 0)         # Completed
+        waiting_approve = status_counts.get(1, 0)
+        approved        = status_counts.get(2, 0)
+        rejected        = status_counts.get(3, 0)
+        in_progress     = status_counts.get(4, 0)
+        completed       = status_counts.get(5, 0)
 
         total = sum(status_counts.values())
 
+        # =====================
+        # TOP 1 CATEGORY (สำคัญ)
+        # =====================
+        cursor.execute("""
+            SELECT tt.name, COUNT(t.id) AS total
+            FROM tickets.ticket_type tt
+            LEFT JOIN tickets.tickets t
+                ON t.ticket_type_id = tt.id
+            GROUP BY tt.name
+            ORDER BY total DESC
+            LIMIT 1
+        """)
+        top1 = cursor.fetchone()
 
+        top_category_name  = top1[0] if top1 else "-"
+        top_category_count = top1[1] if top1 else 0
+
+        # =====================
+        # CATEGORY FOR CHART
+        # =====================
         cursor.execute("""
             SELECT tt.name, COUNT(t.id) AS total
             FROM tickets.ticket_type tt
@@ -105,9 +120,6 @@ def dashboard(request):
         chart_labels = [row[0] for row in category_rows]
         chart_values = [row[1] for row in category_rows]
 
-        top_category_name = chart_labels[0] if chart_labels else "-"
-        top_category_count = chart_values[0] if chart_values else 0
-
     context = {
         # STATUS
         "waiting_approve": waiting_approve,
@@ -117,11 +129,13 @@ def dashboard(request):
         "completed": completed,
         "total": total,
 
-        # CATEGORY
-        "chart_labels": chart_labels,
-        "chart_values": chart_values,
+        # TOP 1
         "top_category_name": top_category_name,
         "top_category_count": top_category_count,
+
+        # CHART
+        "chart_labels": chart_labels,
+        "chart_values": chart_values,
     }
 
     return render(request, "dashboard.html", context)

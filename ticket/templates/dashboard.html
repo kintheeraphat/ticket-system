@@ -82,84 +82,57 @@
         </div>
     </div>
 
-    <!-- TOP CATEGORY -->
-    <div class="col-lg-5">
-        <div class="dashboard-table h-100 shadow-sm">
-            <h4 class="mb-4 fw-bold">ประเภทที่ถูกแจ้งมากที่สุด</h4>
 
-            <div class="top-rank-card mb-4">
-                <div class="d-flex align-items-center mb-3">
-                    <div class="rank-number">1</div>
-                    <div>
-                        <h5 class="fw-bold mb-0 text-white">
-                            {{ top_category_name|default:"-" }}
-                        </h5>
-                        <small class="text-white-50">
-                            แจ้งเข้ามาทั้งหมด {{ top_category_count|default:0 }} รายการ
-                        </small>
-                    </div>
-                </div>
 
-                <div class="progress progress-white-alpha progress-h-8">
-                    <div class="progress-bar bg-white"
-                         style="width: 100%;">
-                    </div>
-                </div>
-            </div>
+    {% endblock %}
 
-        </div>
-    </div>
-</div>
+    {% block extra_js %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-{% endblock %}
+    <script>
+        const ctx = document.getElementById('ticketChart');
 
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        const chartLabels = {{ chart_labels| safe }};
+        const chartValues = {{ chart_values| safe }};
 
-<script>
-const ctx = document.getElementById('ticketChart');
-
-const chartLabels = {{ chart_labels|safe }};
-const chartValues = {{ chart_values|safe }};
-
-new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-        labels: chartLabels,
-        datasets: [{
-            data: chartValues,
-            backgroundColor: [
-                '#4f46e5',
-                '#818cf8',
-                '#10b981',
-                '#f59e0b',
-                '#ef4444',
-                '#22c55e'
-            ],
-            borderWidth: 0,
-            hoverOffset: 12
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '70%',
-        plugins: {
-            legend: {
-                position: 'bottom',
-                labels: {
-                    usePointStyle: true,
-                    padding: 16
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    data: chartValues,
+                    backgroundColor: [
+                        '#4f46e5',
+                        '#818cf8',
+                        '#10b981',
+                        '#f59e0b',
+                        '#ef4444',
+                        '#22c55e'
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 12
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 16
+                        }
+                    }
                 }
             }
-        }
-    }
-});
-</script>
+        });
+    </script>
 
-<style>
-.chart-container {
-    height: 280px;
-}
-</style>
-{% endblock %}
+    <style>
+        .chart-container {
+            height: 280px;
+        }
+    </style>
+    {% endblock %}
