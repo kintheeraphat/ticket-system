@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load tz %}
 {% block title %}รายการคำขอทั้งหมด | Ticket System{% endblock %}
 
 {% block content %}
@@ -107,24 +108,34 @@
 <tbody>
 {% for t in tickets %}
 <tr data-href="{% url 'tickets_detail' %}?id={{ t.id }}">
+
     <td class="text-center">#{{ t.id }}</td>
     <td>{{ t.requester }}</td>
     <td>{{ t.ticket_type }}</td>
+
     <td>
         <div class="fw-bold">{{ t.title }}</div>
         <small class="text-muted">{{ t.description }}</small>
     </td>
-    <td data-date="{{ t.created_at|date:'Y-m-d' }}">
-        {{ t.created_at|date:"d M Y" }}
+
+    <!-- ✅ เวลาไทย + ใช้เวลาไทยกับ filter -->
+    <td data-date="{{ t.created_at|localtime|date:'Y-m-d H:i:s' }}">
+        <div>{{ t.created_at|localtime|date:"d M Y" }}</div>
+        <small class="text-muted">
+            {{ t.created_at|localtime|date:"H:i" }} น.
+        </small>
     </td>
+
     <td class="text-center">{{ t.status }}</td>
     <td>{{ t.assignee }}</td>
+
     <td class="text-end">
         <a href="{% url 'tickets_detail' %}?id={{ t.id }}"
            class="btn btn-outline-secondary btn-sm rounded-circle">
             <i class="fas fa-chevron-right"></i>
         </a>
     </td>
+
 </tr>
 {% endfor %}
 </tbody>
@@ -143,6 +154,7 @@ $(function () {
 
     const today = new Date();
 
+    // ===== Date Filter (ใช้เวลาไทยจาก data-date) =====
     $.fn.dataTable.ext.search.push(function (settings, data, index) {
 
         const row = $('#ticketTable tbody tr').eq(index);
@@ -155,16 +167,17 @@ $(function () {
         const startVal = $('#startDate').val();
         const endVal = $('#endDate').val();
 
-        // ---- Custom date ----
+        // Custom date
         if (startVal || endVal) {
             const start = startVal ? new Date(startVal) : null;
             const end = endVal ? new Date(endVal) : null;
+
             if (start && rowDate < start) return false;
             if (end && rowDate > end) return false;
             return true;
         }
 
-        // ---- Quick filter ----
+        // Quick filter: 7 / 14 days
         if (quick === "7" || quick === "14") {
             const days = parseInt(quick);
             const from = new Date();
@@ -172,13 +185,14 @@ $(function () {
             return rowDate >= from && rowDate <= today;
         }
 
+        // Quick filter: last month
         if (quick === "last_month") {
             const first = new Date(today.getFullYear(), today.getMonth() - 1, 1);
             const last = new Date(today.getFullYear(), today.getMonth(), 0);
             return rowDate >= first && rowDate <= last;
         }
 
-        // ---- Default = current month ----
+        // Default: current month
         return rowDate.getMonth() === today.getMonth() &&
                rowDate.getFullYear() === today.getFullYear();
     });
@@ -191,14 +205,20 @@ $(function () {
         }
     });
 
-    // Click row
+    // Click row → detail
     $('#ticketTable tbody').on('click', 'tr', function (e) {
         if ($(e.target).closest('a,button').length) return;
         window.location = $(this).data('href');
     });
 
-    $('#statusFilter').on('change', () => table.column(5).search($('#statusFilter').val()).draw());
-    $('#assigneeFilter').on('change', () => table.column(6).search($('#assigneeFilter').val()).draw());
+    // Filters
+    $('#statusFilter').on('change', () =>
+        table.column(5).search($('#statusFilter').val()).draw()
+    );
+
+    $('#assigneeFilter').on('change', () =>
+        table.column(6).search($('#assigneeFilter').val()).draw()
+    );
 
     $('#quickDateFilter').on('change', function () {
         $('#startDate,#endDate').val('');

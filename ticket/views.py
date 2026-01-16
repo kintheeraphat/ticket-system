@@ -3,7 +3,7 @@ from django.db import connection
 from django.utils import timezone
 from django.contrib import messages
 from django.utils.dateparse import parse_date
-from datetime import datetime
+from datetime import timezone as dt_timezone
 import os
 
 def login_view(request):
@@ -149,7 +149,6 @@ def tickets_list(request):
     assignee = request.GET.get("assignee", "")
     date_range = request.GET.get("date_range", "")
 
-    # Base query
     query = """
         SELECT t.id,
                t.title,
@@ -169,34 +168,29 @@ def tickets_list(request):
 
     params = []
 
-    # Filter: search
     if search:
         query += " AND (t.id::text ILIKE %s OR t.title ILIKE %s)"
         params.extend([f"%{search}%", f"%{search}%"])
 
-    # Filter: status
     if status:
         query += " AND s.name = %s"
         params.append(status)
 
-    # Filter: assignee
     if assignee:
         query += " AND a.username = %s"
         params.append(assignee)
 
-    # Filter: date range
     if date_range:
         try:
             start_str, end_str = date_range.split(" ถึง ")
             start_date = parse_date("/".join(reversed(start_str.split("/"))))
             end_date = parse_date("/".join(reversed(end_str.split("/"))))
             if start_date and end_date:
-                query += " AND t.create_at::date BETWEEN %s AND %s"
+                query += " AND t.create_at BETWEEN %s AND %s"
                 params.extend([start_date, end_date])
         except ValueError:
             pass
 
-    # Order at the very end (only once)
     query += " ORDER BY t.create_at DESC"
 
     with connection.cursor() as cursor:
@@ -204,7 +198,19 @@ def tickets_list(request):
         tickets = cursor.fetchall()
 
     tickets_list = []
+
     for row in tickets:
+        created_at = row[6]
+
+        # 🔑 ขั้นตอนที่ถูกต้อง
+        if created_at:
+            # 1) บอกว่าเวลานี้คือ UTC
+            if timezone.is_naive(created_at):
+                created_at = timezone.make_aware(created_at, dt_timezone.utc)
+
+            # 2) แปลงเป็นเวลาไทย
+            created_at = timezone.localtime(created_at)
+
         tickets_list.append({
             "id": row[0],
             "title": row[1],
@@ -212,12 +218,13 @@ def tickets_list(request):
             "ticket_type": row[3],
             "requester": row[4],
             "assignee": row[5] or "ยังไม่มอบหมาย",
-            "created_at": row[6],
+            "created_at": created_at,  # ✅ เวลาไทยจริง
             "status": row[7]
         })
 
-    return render(request, "tickets_list.html", {"tickets": tickets_list})
-
+    return render(request, "tickets_list.html", {
+        "tickets": tickets_list
+    })
 
 def tickets_create(req):
     return render(req,'tickets_create.html')
@@ -763,13 +770,18 @@ def app_form(request):
         due_date = None
         if deadline_raw:
             try:
-                deadline_raw = request.POST.get("deadline")
-                due_date = deadline_raw if deadline_raw else None
+                # ถ้า input เป็น <input type="datetime-local">
+                naive_dt = datetime.strptime(deadline_raw, "%Y-%m-%dT%H:%M")
+
+                # แปลงเป็น timezone-aware (Asia/Bangkok)
+                due_date = timezone.make_aware(
+                    naive_dt,
+                    timezone.get_current_timezone()
+                )
 
             except ValueError:
-                messages.error(request, "รูปแบบวันที่ไม่ถูกต้อง (วัน/เดือน/ปี)")
+                messages.error(request, "รูปแบบวันเวลาไม่ถูกต้อง")
                 return redirect("app_form")
-
         # -------------------------
         # TITLE + FLAG
         # -------------------------
