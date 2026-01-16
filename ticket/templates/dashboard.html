@@ -21,31 +21,32 @@
 <div class="dashboard-cards mb-4">
 
     <div class="dashboard-card">
-        <p class="card-label">รอดำเนินการ</p>
-        <h3 class="card-value text-warning">{{ waiting|default:0 }}</h3>
+        <p class="card-label">รออนุมัติ</p>
+        <h3 class="card-value text-warning">{{ waiting_approve }}</h3>
     </div>
 
     <div class="dashboard-card">
-        <p class="card-label">รออนุมัติ</p>
-        <h3 class="card-value text-info">{{ waiting_approve|default:0 }}</h3>
+        <p class="card-label">อนุมัติแล้ว</p>
+        <h3 class="card-value text-success">{{ approved }}</h3>
     </div>
 
     <div class="dashboard-card">
         <p class="card-label">กำลังดำเนินการ</p>
-        <h3 class="card-value text-primary">{{ in_progress|default:0 }}</h3>
+        <h3 class="card-value text-primary">{{ in_progress }}</h3>
     </div>
 
     <div class="dashboard-card">
         <p class="card-label">เสร็จสิ้น</p>
-        <h3 class="card-value text-success">{{ completed|default:0 }}</h3>
+        <h3 class="card-value text-success">{{ completed }}</h3>
     </div>
 
     <div class="dashboard-card">
         <p class="card-label">ทั้งหมด</p>
-        <h3 class="card-value">{{ total|default:0 }}</h3>
+        <h3 class="card-value">{{ total }}</h3>
     </div>
 
 </div>
+
 
 <!-- =======================
      CHART + TOP CATEGORY

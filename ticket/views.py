@@ -68,24 +68,26 @@ def dashboard(request):
     with connection.cursor() as cursor:
 
         # =====================
-        # COUNT BY STATUS
+        # COUNT BY STATUS_ID
         # =====================
         cursor.execute("""
-            SELECT s.name, COUNT(t.id)
-            FROM tickets.status s
-            LEFT JOIN tickets.tickets t
-                ON t.status_id = s.id
-            GROUP BY s.name
+            SELECT status_id, COUNT(*)
+            FROM tickets.tickets
+            GROUP BY status_id
         """)
         rows = cursor.fetchall()
 
-        status_counts = {name: count for name, count in rows}
+        # แปลงเป็น dict {status_id: count}
+        status_counts = {status_id: count for status_id, count in rows}
 
-        waiting = status_counts.get("รอดำเนินการ", 0)
-        waiting_approve = status_counts.get("รออนุมัติ", 0)
-        in_progress = status_counts.get("กำลังดำเนินการ", 0)
-        completed = status_counts.get("เสร็จสิ้นแล้ว", 0)
-        cancelled = status_counts.get("ยกเลิก", 0)
+        # =====================
+        # MAP STATUS BY ID
+        # =====================
+        waiting_approve = status_counts.get(1, 0)   # Waiting for Approve
+        approved = status_counts.get(2, 0)          # Approved
+        rejected = status_counts.get(3, 0)          # Rejected
+        in_progress = status_counts.get(4, 0)       # In Progress
+        completed = status_counts.get(5, 0)         # Completed
 
         total = sum(status_counts.values())
 
@@ -110,11 +112,11 @@ def dashboard(request):
 
     context = {
         # STATUS
-        "waiting": waiting,
         "waiting_approve": waiting_approve,
+        "approved": approved,
+        "rejected": rejected,
         "in_progress": in_progress,
         "completed": completed,
-        "cancelled": cancelled,
         "total": total,
 
         # CATEGORY
