@@ -45,10 +45,7 @@ def login_view(request):
             messages.error(request, "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง")
             return render(request, "login.html")
 
-        if user[3] not in ["admin", "manager", "user"]:
-            messages.error(request, "บัญชีนี้ไม่มีสิทธิ์เข้าใช้งานระบบ")
-            return render(request, "login.html")
-
+        # เก็บ session
         request.session["user"] = {
             "id": user[0],
             "username": user[1],
@@ -56,7 +53,19 @@ def login_view(request):
             "role": user[3],
         }
 
-        return redirect("dashboard")
+        role = user[3]
+
+        # 🔀 redirect ตาม role
+        if role in ["admin", "manager"]:
+            return redirect("dashboard")
+
+        elif role == "user":
+            return redirect("ticket_create")  # เปลี่ยนตามชื่อ url จริง
+
+        else:
+            messages.error(request, "บัญชีนี้ไม่มีสิทธิ์เข้าใช้งานระบบ")
+            request.session.flush()
+            return render(request, "login.html")
 
     return render(request, "login.html")
 
