@@ -33,23 +33,18 @@ def login_view(request):
                     u.id,
                     u.username,
                     u.full_name,
-                    r.role_name
+                    LOWER(TRIM(r.role_name)) AS role
                 FROM tickets.users u
                 JOIN tickets.roles r ON r.id = u.role_id
                 WHERE u.username = %s
-                AND u.password = crypt(%s, u.password)
-                AND u.is_active = true
+                  AND u.password = crypt(%s, u.password)
+                  AND u.is_active = true
             """, [username, password])
 
             user = cursor.fetchone()
 
-
         if not user:
             messages.error(request, "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง")
-            return render(request, "login.html")
-
-        if user[3].strip().lower() != "admin":
-            messages.error(request, "บัญชีนี้ไม่มีสิทธิ์เข้าใช้งานระบบ")
             return render(request, "login.html")
 
         # เก็บ session
@@ -67,7 +62,7 @@ def login_view(request):
             return redirect("dashboard")
 
         elif role == "user":
-            return redirect("ticket_create")  # เปลี่ยนตามชื่อ url จริง
+            return redirect("create")  # ชื่อ url ต้องมีจริงใน urls.py
 
         else:
             messages.error(request, "บัญชีนี้ไม่มีสิทธิ์เข้าใช้งานระบบ")
@@ -1010,31 +1005,32 @@ def report_form(request):
     return render(request, "tickets_form/report_form.html")
 
 def active_promotion_form(request):
+
+    # =====================
+    # CHECK LOGIN
+    # =====================
     if "user" not in request.session:
         return redirect("login")
 
-    # หา user_permission.id
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT id
-            FROM tickets.user_permission
-            WHERE erp_user_id = %s
-              AND active = true
-        """, [request.session["user"]["id"]])
-        row = cursor.fetchone()
+    user_id = request.session["user"]["id"]
 
-    if not row:
-        messages.error(request, "ไม่พบสิทธิ์ผู้ใช้งาน")
-        return redirect("login")
-
-    user_permission_id = row[0]
-
+    # =====================
+    # SUBMIT FORM
+    # =====================
     if request.method == "POST":
+
         promo_name = request.POST.get("promo_name")
         start_date = request.POST.get("start_date")
-        end_date = request.POST.get("end_date")
-        reason = request.POST.get("reason")
+        end_date   = request.POST.get("end_date")
+        reason     = request.POST.get("reason")
 
+        if not all([promo_name, start_date, end_date, reason]):
+            messages.error(request, "กรุณากรอกข้อมูลให้ครบถ้วน")
+            return render(request, "tickets_form/active_promotion_form.html")
+
+        # =====================
+        # PREPARE DATA
+        # =====================
         title = "Active Promotion Package"
         description = f"""
 Promotion: {promo_name}
@@ -1042,12 +1038,14 @@ Promotion: {promo_name}
 
 เหตุผล:
 {reason}
-"""
+""".strip()
 
         status_id = 1
-        ticket_type_id = 12  # Active Promotion
+        ticket_type_id = 12   # Active Promotion
 
-        # ---------- INSERT tickets ----------
+        # =====================
+        # INSERT TICKET
+        # =====================
         with connection.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO tickets.tickets
@@ -1057,19 +1055,25 @@ Promotion: {promo_name}
             """, [
                 title,
                 description,
-                user_permission_id,
+                user_id,
                 status_id,
                 ticket_type_id
             ])
             ticket_id = cursor.fetchone()[0]
 
-        # ---------- SAVE FILES ----------
+        # =====================
+        # SAVE FILES
+        # =====================
         files = request.FILES.getlist("files")
-        fs = FileSystemStorage(location="media/tickets")
+        upload_dir = f"media/tickets/{ticket_id}"
+        os.makedirs(upload_dir, exist_ok=True)
 
         for f in files:
-            filename = fs.save(f.name, f)
-            file_path = fs.path(filename)
+            file_path = f"{upload_dir}/{f.name}"
+
+            with open(file_path, "wb+") as destination:
+                for chunk in f.chunks():
+                    destination.write(chunk)
 
             with connection.cursor() as cursor:
                 cursor.execute("""
@@ -1081,9 +1085,10 @@ Promotion: {promo_name}
                         file_path,
                         file_type,
                         file_size,
-                        uploaded_by
+                        uploaded_by,
+                        create_at
                     )
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 """, [
                     ticket_id,
                     "ACTIVE_PROMOTION",
@@ -1091,13 +1096,14 @@ Promotion: {promo_name}
                     file_path,
                     f.content_type,
                     f.size,
-                    user_permission_id
+                    user_id,
+                    timezone.now()
                 ])
 
         messages.success(request, "ส่งคำร้อง Active Promotion เรียบร้อยแล้ว")
         return redirect("ticket_success")
 
+    # =====================
+    # LOAD PAGE
+    # =====================
     return render(request, "tickets_form/active_promotion_form.html")
-
-def user_dashboard(request):
-    return render(request, "user_dashboard.html")
