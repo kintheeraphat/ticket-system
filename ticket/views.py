@@ -91,9 +91,7 @@ def dashboard(request):
 
         total = sum(status_counts.values())
 
-        # =====================
-        # TOP CATEGORY (ticket_type)
-        # =====================
+
         cursor.execute("""
             SELECT tt.name, COUNT(t.id) AS total
             FROM tickets.ticket_type tt
