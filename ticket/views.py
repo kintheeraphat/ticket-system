@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.utils.dateparse import parse_date
 from datetime import timezone as dt_timezone
 from datetime import date, timedelta
+from datetime import datetime
 import os
 
 def thai_date(d):
@@ -185,18 +186,21 @@ def tickets_list(request):
     date_range = request.GET.get("date_range", "")
 
     query = """
-        SELECT t.id,
-               t.title,
-               t.description,
-               tt.name AS ticket_type,
-               u.username AS requester,
-               a.username AS assignee,
-               t.create_at,
-               s.name AS status
+     SELECT t.id,
+            t.title,
+            t.description,
+            c.name AS category,
+            tt.name AS ticket_type,
+            u.username AS requester,
+            a.username AS assignee,
+            t.create_at,
+            s.name AS status
+
         FROM tickets.tickets t
         LEFT JOIN tickets.users u ON u.id = t.user_id
         LEFT JOIN tickets.users a ON a.id = t.assign_id
         LEFT JOIN tickets.ticket_type tt ON tt.id = t.ticket_type_id
+        LEFT JOIN tickets.category c ON c.id = tt.category
         LEFT JOIN tickets.status s ON s.id = t.status_id
         WHERE 1=1
     """
@@ -221,7 +225,7 @@ def tickets_list(request):
             start_date = parse_date("/".join(reversed(start_str.split("/"))))
             end_date = parse_date("/".join(reversed(end_str.split("/"))))
             if start_date and end_date:
-                query += " AND t.create_at BETWEEN %s AND %s"
+                query += " AND t.create_at::date BETWEEN %s AND %s"
                 params.extend([start_date, end_date])
         except ValueError:
             pass
@@ -230,35 +234,33 @@ def tickets_list(request):
 
     with connection.cursor() as cursor:
         cursor.execute(query, params)
-        tickets = cursor.fetchall()
+        rows = cursor.fetchall()
 
-    tickets_list = []
+    tickets_data= []
+    for row in rows:
+        created_at = row[7]
 
-    for row in tickets:
-        created_at = row[6]
-
-        # 🔑 ขั้นตอนที่ถูกต้อง
+        # UTC → Asia/Bangkok
         if created_at:
-            # 1) บอกว่าเวลานี้คือ UTC
             if timezone.is_naive(created_at):
                 created_at = timezone.make_aware(created_at, dt_timezone.utc)
-
-            # 2) แปลงเป็นเวลาไทย
             created_at = timezone.localtime(created_at)
 
-        tickets_list.append({
+        tickets_data.append({
             "id": row[0],
             "title": row[1],
             "description": row[2],
-            "ticket_type": row[3],
-            "requester": row[4],
-            "assignee": row[5] or "ยังไม่มอบหมาย",
-            "created_at": created_at,  # ✅ เวลาไทยจริง
-            "status": row[7]
+            "category": row[3],          # ✅ เพิ่ม
+            "ticket_type": row[4],       # เดิม
+            "requester": row[5],
+            "assignee": row[6] or "ยังไม่มอบหมาย",
+            "created_at": created_at,
+            "status": row[8]
         })
 
+
     return render(request, "tickets_list.html", {
-        "tickets": tickets_list
+        "tickets": tickets_data
     })
 
 def tickets_create(req):
@@ -786,7 +788,6 @@ def app_form(request):
 
     user_permission_id = row[0]
 
-    # =========================
     # POST = SAVE DATA
     # =========================
     if request.method == "POST":
@@ -800,15 +801,20 @@ def app_form(request):
         objective = request.POST.get("objective", "")
 
         # -------------------------
-        # DATE (d/m/Y → date)
+        # DESCRIPTION (🔧 สำคัญ)
+        # -------------------------
+        description = f"{app_detail}\n\nวัตถุประสงค์:\n{objective}"
+
+        # -------------------------
+        # DUE DATE (datetime-local → aware)
         # -------------------------
         due_date = None
         if deadline_raw:
             try:
-                # ถ้า input เป็น <input type="datetime-local">
+                # <input type="datetime-local">
                 naive_dt = datetime.strptime(deadline_raw, "%Y-%m-%dT%H:%M")
 
-                # แปลงเป็น timezone-aware (Asia/Bangkok)
+                # ทำให้เป็น timezone-aware (Asia/Bangkok)
                 due_date = timezone.make_aware(
                     naive_dt,
                     timezone.get_current_timezone()
@@ -817,23 +823,27 @@ def app_form(request):
             except ValueError:
                 messages.error(request, "รูปแบบวันเวลาไม่ถูกต้อง")
                 return redirect("app_form")
-        # -------------------------
-        # TITLE + FLAG
-        # -------------------------
-        app_new = False
-        app_edit = False
 
+        # -------------------------
+        # TITLE + FLAG + TICKET TYPE
+        # -------------------------
         if app_type == "new":
             title = "Request Application (New)"
             app_new = True
-        else:
+            app_edit = False
+            ticket_type_id = 9   # จัดทำ Application ใหม่
+
+        elif app_type == "update":
             title = "Request Application (Update)"
+            app_new = False
             app_edit = True
+            ticket_type_id = 10  # ปรับปรุง Application เดิม
 
-        description = f"{app_detail}\n\nวัตถุประสงค์:\n{objective}"
+        else:
+            messages.error(request, "ประเภทคำขอไม่ถูกต้อง")
+            return redirect("app_form")
 
-        status_id = 1        # รอดำเนินการ
-        ticket_type_id = 2   # ⚠️ ต้องเป็น ID ที่มีจริงใน ticket_type (Application)
+        status_id = 1  # รอดำเนินการ
 
         # =========================
         # INSERT tickets
@@ -841,7 +851,15 @@ def app_form(request):
         with connection.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO tickets.tickets
-                (title, description, user_id, status_id, ticket_type_id, create_at, due_date)
+                (
+                    title,
+                    description,
+                    user_id,
+                    status_id,
+                    ticket_type_id,
+                    create_at,
+                    due_date
+                )
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
             """, [
@@ -850,12 +868,11 @@ def app_form(request):
                 user_permission_id,
                 status_id,
                 ticket_type_id,
-                timezone.now(),
-                due_date
+                timezone.now(),   # UTC
+                due_date          # aware → UTC
             ])
 
-            ticket_id = cursor.fetchone()[0]   # ✅ ใช้ได้
-
+            ticket_id = cursor.fetchone()[0]
 
         # =========================
         # INSERT ticket_data_erp_app
@@ -888,7 +905,58 @@ def app_form(request):
     return render(request, "tickets_form/app_form.html")
 
 def report_form(request):
+    if "user" not in request.session:
+        return redirect("login")
+
+    # หา user_permission.id
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id
+            FROM tickets.user_permission
+            WHERE erp_user_id = %s
+              AND active = true
+        """, [request.session["user"]["id"]])
+        row = cursor.fetchone()
+
+    if not row:
+        messages.error(request, "ไม่พบสิทธิ์ผู้ใช้งาน")
+        return redirect("login")
+
+    user_permission_id = row[0]
+
+    if request.method == "POST":
+        report_detail = request.POST.get("report_detail", "")
+        report_objective = request.POST.get("report_objective", "")
+        report_fields = request.POST.get("report_fields", "")
+
+        title = "Request Report / ERP Data"
+        description = (
+            f"รายละเอียดรายงาน:\n{report_detail}\n\n"
+            f"วัตถุประสงค์:\n{report_objective}\n\n"
+            f"ข้อมูลที่ต้องการ:\n{report_fields}"
+        )
+
+        status_id = 1                 # รอดำเนินการ
+        ticket_type_id = 11           
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO tickets.tickets
+                (title, description, user_id, status_id, ticket_type_id)
+                VALUES (%s, %s, %s, %s, %s)
+            """, [
+                title,
+                description,
+                user_permission_id,
+                status_id,
+                ticket_type_id
+            ])
+
+        messages.success(request, "ส่งคำร้องขอรายงานเรียบร้อยแล้ว")
+        return redirect("ticket_success")
+
     return render(request, "tickets_form/report_form.html")
+
 
 def active_promotion_form(request):
     return render(request, "tickets_form/active_promotion_form.html")

@@ -97,7 +97,7 @@
     <th class="text-center">รหัส</th>
     <th>ผู้แจ้ง</th>
     <th>หมวดหมู่</th>
-    <th>รายละเอียดคำขอ</th>
+    <th>ประเภทคำขอ</th>
     <th>วันที่</th>
     <th class="text-center">สถานะ</th>
     <th>ผู้รับผิดชอบ</th>
@@ -111,11 +111,15 @@
 
     <td class="text-center">#{{ t.id }}</td>
     <td>{{ t.requester }}</td>
-    <td>{{ t.ticket_type }}</td>
+    <td>
+        <div class="fw-semibold">{{ t.category }}</div>
+        <small class="text-muted">{{ t.ticket_type }}</small>
+    </td>
+
 
     <td>
         <div class="fw-bold">{{ t.title }}</div>
-        <small class="text-muted">{{ t.description }}</small>
+        {% comment %} <small class="text-muted">{{ t.description }}</small> {% endcomment %}
     </td>
 
     <!-- ✅ เวลาไทย + ใช้เวลาไทยกับ filter -->
