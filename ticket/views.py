@@ -799,6 +799,10 @@ def app_form(request):
         deadline_raw = request.POST.get("deadline")
         app_detail = request.POST.get("app_detail", "")
         objective = request.POST.get("objective", "")
+        department = request.POST.get("department", "").strip()
+        if not department:
+            messages.error(request, "กรุณาระบุแผนก")
+            return render(request, "tickets_form/app_form.html")
 
         # -------------------------
         # DESCRIPTION (🔧 สำคัญ)
@@ -857,10 +861,11 @@ def app_form(request):
                     user_id,
                     status_id,
                     ticket_type_id,
+                    department,
                     create_at,
                     due_date
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
             """, [
                 title,
@@ -868,8 +873,9 @@ def app_form(request):
                 user_permission_id,
                 status_id,
                 ticket_type_id,
-                timezone.now(),   # UTC
-                due_date          # aware → UTC
+                department,        # ✅ เพิ่มตรงนี้
+                timezone.now(),    # create_at (UTC)
+                due_date           # due_date
             ])
 
             ticket_id = cursor.fetchone()[0]
@@ -903,8 +909,91 @@ def app_form(request):
     # GET = SHOW FORM
     # =========================
     return render(request, "tickets_form/app_form.html")
-
 def report_form(request):
+    if "user" not in request.session:
+        return redirect("login")
+
+    # =========================
+    # GET USER_PERMISSION ID
+    # =========================
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id
+            FROM tickets.user_permission
+            WHERE erp_user_id = %s
+              AND active = true
+        """, [request.session["user"]["id"]])
+        row = cursor.fetchone()
+
+    if not row:
+        messages.error(request, "ไม่พบสิทธิ์ผู้ใช้งาน")
+        return redirect("login")
+
+    user_permission_id = row[0]
+
+    # =========================
+    # POST = SAVE DATA
+    # =========================
+    if request.method == "POST":
+
+        report_detail = request.POST.get("report_detail", "")
+        report_objective = request.POST.get("report_objective", "")
+        report_fields = request.POST.get("report_fields", "")
+        department = request.POST.get("department", "").strip()
+
+        if not department:
+            messages.error(request, "กรุณาระบุแผนก")
+            return render(request, "tickets_form/report_form.html")
+
+        title = "Request Report / ERP Data"
+
+        description = (
+            f"รายละเอียดรายงาน:\n{report_detail}\n\n"
+            f"วัตถุประสงค์:\n{report_objective}\n\n"
+            f"ข้อมูลที่ต้องการ:\n{report_fields}"
+        )
+
+        status_id = 1          # รอดำเนินการ
+        ticket_type_id = 11    # คำขอรายงาน
+
+        # =========================
+        # INSERT tickets
+        # =========================
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO tickets.tickets
+                (
+                    title,
+                    description,
+                    user_id,
+                    status_id,
+                    ticket_type_id,
+                    department,
+                    create_at
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+            """, [
+                title,
+                description,
+                user_permission_id,
+                status_id,
+                ticket_type_id,
+                department,
+                timezone.now()   # UTC
+            ])
+
+            ticket_id = cursor.fetchone()[0]
+
+        messages.success(request, "ส่งคำร้องขอรายงานเรียบร้อยแล้ว")
+        return redirect("ticket_success")
+
+    # =========================
+    # GET = SHOW FORM
+    # =========================
+    return render(request, "tickets_form/report_form.html")
+
+def active_promotion_form(request):
     if "user" not in request.session:
         return redirect("login")
 
@@ -925,38 +1014,84 @@ def report_form(request):
     user_permission_id = row[0]
 
     if request.method == "POST":
-        report_detail = request.POST.get("report_detail", "")
-        report_objective = request.POST.get("report_objective", "")
-        report_fields = request.POST.get("report_fields", "")
+        promo_name = request.POST.get("promo_name", "").strip()
+        start_date = request.POST.get("start_date", "")
+        end_date = request.POST.get("end_date", "")
+        reason = request.POST.get("reason", "")
+        department = request.POST.get("department", "").strip()
 
-        title = "Request Report / ERP Data"
+        if not promo_name or not start_date or not end_date or not department:
+            messages.error(request, "กรุณากรอกข้อมูลให้ครบ")
+            return render(request, "tickets_form/active_promotion_form.html")
+
+        # แปลงวันที่ d/m/Y → date
+        try:
+            start_dt = datetime.strptime(start_date, "%d/%m/%Y").date()
+            end_dt = datetime.strptime(end_date, "%d/%m/%Y").date()
+        except ValueError:
+            messages.error(request, "รูปแบบวันที่ไม่ถูกต้อง")
+            return render(request, "tickets_form/active_promotion_form.html")
+
+        title = "Active Promotion Package"
         description = (
-            f"รายละเอียดรายงาน:\n{report_detail}\n\n"
-            f"วัตถุประสงค์:\n{report_objective}\n\n"
-            f"ข้อมูลที่ต้องการ:\n{report_fields}"
+            f"แผนก: {department}\n"
+            f"Promotion: {promo_name}\n"
+            f"ช่วงวันที่: {start_date} - {end_date}\n\n"
+            f"เหตุผล:\n{reason}"
         )
 
-        status_id = 1                 # รอดำเนินการ
-        ticket_type_id = 11           
+        status_id = 1
+        ticket_type_id = 12  # Active Promotion Package
 
+        # ---------- INSERT tickets ----------
         with connection.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO tickets.tickets
-                (title, description, user_id, status_id, ticket_type_id)
-                VALUES (%s, %s, %s, %s, %s)
+                (
+                    title,
+                    description,
+                    user_id,
+                    status_id,
+                    ticket_type_id,
+                    department,
+                    create_at
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
             """, [
                 title,
                 description,
                 user_permission_id,
                 status_id,
-                ticket_type_id
+                ticket_type_id,
+                department,
+                timezone.now()
+            ])
+            ticket_id = cursor.fetchone()[0]
+
+        # ---------- INSERT ticket_data_erp_app ----------
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO tickets.ticket_data_erp_app
+                (
+                    ticket_id,
+                    promo_name,
+                    target_date,
+                    app_new,
+                    app_edit,
+                    new_value
+                )
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, [
+                ticket_id,
+                promo_name,
+                end_dt,
+                True,
+                False,
+                reason
             ])
 
-        messages.success(request, "ส่งคำร้องขอรายงานเรียบร้อยแล้ว")
+        messages.success(request, "ส่งคำร้อง Active Promotion เรียบร้อยแล้ว")
         return redirect("ticket_success")
 
-    return render(request, "tickets_form/report_form.html")
-
-
-def active_promotion_form(request):
     return render(request, "tickets_form/active_promotion_form.html")
