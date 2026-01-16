@@ -1,7 +1,7 @@
 /* ===============================
    GLOBAL VARIABLES
 ================================ */
-:root {
+/* :root {
   --primary-color: #2563eb;
   --secondary-bg: #1e293b;
   --sidebar-width: 260px;
@@ -10,8 +10,15 @@
   --text-muted: #64748b;
   --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08),
     0 2px 4px -1px rgba(0, 0, 0, 0.04);
+} */
+:root {
+  --primary: #2563eb;        /* น้ำเงินองค์กร */
+  --bg: #f8fafc;             /* พื้นหลัง */
+  --card: #ffffff;           /* กล่อง */
+  --border: #e5e7eb;         /* เส้น */
+  --text-main: #111827;      /* ตัวหนังสือหลัก */
+  --text-muted: #6b7280;     /* ตัวหนังสือรอง */
 }
-
 /* ===============================
    BASE
 ================================ */
@@ -21,9 +28,15 @@
 
 body {
   margin: 0;
-  background-color: var(--body-bg);
+  background-color: var(--bg);
   color: var(--text-main);
   font-family: "Inter", "Segoe UI", sans-serif;
+}
+.filter-panel {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
 }
 
 /* ===============================
@@ -38,8 +51,8 @@ body {
    SIDEBAR
 ================================ */
 .sidebar {
-  width: var(--sidebar-width);
-  background: var(--secondary-bg);
+  width: 260px;
+  background: #1e293b;
   color: #fff;
   padding: 1.5rem 1rem;
   position: sticky;
@@ -82,7 +95,29 @@ body {
   font-weight: 500;
   transition: all 0.2s ease;
 }
+.assignee-pill {
+  background: #f3f4f6;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+}
 
+.action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+}
+
+.action-btn:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
 .sidebar-menu a:hover,
 .sidebar-menu li.active a {
   background: rgba(255, 255, 255, 0.1);
@@ -112,7 +147,8 @@ main {
   background: #fff;
   padding: 2.2rem;
   border-radius: 12px;
-  box-shadow: var(--card-shadow);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,.08),
+              0 2px 4px -1px rgba(0,0,0,.04);
 }
 
 .login-card h3 {
@@ -133,7 +169,8 @@ main {
   background: #fff;
   padding: 1.5rem;
   border-radius: 16px;
-  box-shadow: var(--card-shadow);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,.08),
+              0 2px 4px -1px rgba(0,0,0,.04);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   border-left: 6px solid transparent;
 }
@@ -193,17 +230,32 @@ main {
   color: var(--text-main);
   letter-spacing: -0.02em;
 }
-
-.table thead th {
-  background: #fcfdfe;
-  border-bottom: 2px solid #f1f5f9;
-  color: var(--text-muted);
+.input-group-text {
   font-size: 0.75rem;
 }
 
-.table tbody td {
-  padding: 1.1rem;
-  border-bottom: 1px solid #f1f5f9;
+input[type="search"] {
+  padding-right: 0.75rem;
+}
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:hover {
+  background: #f9fafb;
+}
+.table thead th {
+  background: #f9fafb;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: .02em;
+  color: var(--text-muted);
+}
+
+.table tbody tr:hover {
+  padding: 0.75rem 1rem;
+  background: #f9fafb;
 }
 
 .table-hover tbody tr:hover {
@@ -222,8 +274,8 @@ main {
 
 .form-control:focus,
 .form-select:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.12);
 }
 
 /* ===============================
@@ -342,6 +394,17 @@ main {
   border-color: #e2e8f0;
   transform: translateX(5px);
 }
+.badge-status {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 999px;
+}
+
+.status-pending { background:#fff7ed; color:#9a3412; }
+.status-approve { background:#eff6ff; color:#1d4ed8; }
+.status-draft   { background:#f3f4f6; color:#374151; }
+.status-done    { background:#ecfdf5; color:#047857; }
 
 .badge.bg-light {
   background-color: #f1f5f9 !important;
@@ -349,6 +412,14 @@ main {
   font-weight: 700;
   border-radius: 8px;
 }
+.assignee-pill {
+  background: #f3f4f6;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: #374151;
+}
+
 /* =====================
    PROGRESS HEIGHT
 ===================== */
@@ -408,7 +479,7 @@ textarea.form-control {
 }
 
 .btn-primary {
-  background: var(--primary-color);
+  background: var(--primary);
   border: none;
 }
 
@@ -478,7 +549,8 @@ input[type="file"] {
   background: #fff;
   padding: 2rem;
   border-radius: 16px;
-  box-shadow: var(--card-shadow);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,.08),
+              0 2px 4px -1px rgba(0,0,0,.04);
 }
 /* ===============================
    ERP STYLE FOR VPN

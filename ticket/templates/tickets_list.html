@@ -2,265 +2,195 @@
 {% block title %}รายการคำขอทั้งหมด | Ticket System{% endblock %}
 
 {% block content %}
-<main class="main-content">
-
-<!-- Flatpickr CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 <!-- ================= HEADER ================= -->
-<div class="d-flex justify-content-between align-items-center mb-4 pt-2">
-    <div>
-        <h2 class="fw-bold text-dark mb-1">รายการคำขอทั้งหมด</h2>
-        <p class="text-muted small mb-0">
-            ตรวจสอบและบริหารจัดการสถานะรายการแจ้งซ่อมหรือคำร้องขอภายในระบบ
-        </p>
-    </div>
+<div class="page-header mb-4">
+  <h2 class="fw-semibold mb-1">รายการคำขอทั้งหมด</h2>
+  <p class="text-muted mb-0">ระบบจัดการ Ticket ภายในองค์กร</p>
 </div>
 
 <!-- ================= FILTER ================= -->
-<div class="dashboard-table mb-4 p-4">
-    <form class="row g-3 align-items-end" onsubmit="return false;">
+<div class="filter-panel mb-4">
+  <div class="row g-3 align-items-end">
 
-        <!-- Search -->
-        <div class="col-md-3">
-            <label class="form-label small text-muted">ค้นหา</label>
-            <div class="input-group">
-                <span class="input-group-text bg-white text-muted">
-                    <i class="fas fa-search"></i>
-                </span>
-                <input type="text" id="searchInput" class="form-control"
-                       placeholder="รหัส / หัวข้อ / ผู้แจ้ง">
-            </div>
-        </div>
+    <!-- สถานะ -->
+    <div class="col-md-3">
+      <label class="form-label">สถานะ</label>
+      <select id="statusFilter" class="form-select">
+        <option value="">ทั้งหมด</option>
+        <option>รอดำเนินการ</option>
+        <option>รออนุมัติ</option>
+        <option>ดราฟ</option>
+        <option>เสร็จสิ้นแล้ว</option>
+      </select>
+    </div>
 
-        <!-- Status -->
-        <div class="col-md-2">
-            <label class="form-label small text-muted">สถานะ</label>
-            <select id="statusFilter" class="form-select">
-                <option value="">ทุกสถานะ</option>
-                <option value="รอดำเนินการ">รอดำเนินการ</option>
-                <option value="รออนุมัติ">รออนุมัติ</option>
-                <option value="ดราฟ">ดราฟ</option>
-                <option value="เสร็จสิ้นแล้ว">เสร็จสิ้นแล้ว</option>
-            </select>
-        </div>
+    <!-- ผู้รับผิดชอบ -->
+    <div class="col-md-3">
+      <label class="form-label">ผู้รับผิดชอบ</label>
+      <select id="assigneeFilter" class="form-select">
+        <option value="">ทั้งหมด</option>
+        {% for t in tickets %}
+          {% if t.assignee != "ยังไม่มอบหมาย" %}
+            <option>{{ t.assignee }}</option>
+          {% endif %}
+        {% endfor %}
+      </select>
+    </div>
 
-        <!-- Assignee -->
-        <div class="col-md-3">
-            <label class="form-label small text-muted">ผู้รับผิดชอบ</label>
-            <select id="assigneeFilter" class="form-select">
-                <option value="">ทุกคน</option>
-                {% for t in tickets %}
-                {% if t.assignee != "ยังไม่มอบหมาย" %}
-                <option value="{{ t.assignee }}">{{ t.assignee }}</option>
-                {% endif %}
-                {% endfor %}
-            </select>
-        </div>
+    <!-- ช่วงวันที่ -->
+    <div class="col-md-4">
+      <label class="form-label">ช่วงวันที่</label>
+      <div class="input-group">
+        <input type="date" id="startDate" class="form-control">
+        <span class="input-group-text bg-white text-muted">ถึง</span>
+        <input type="date" id="endDate" class="form-control">
+      </div>
+    </div>
+    
+    <!-- ค้นหา -->
+    <div class="col-md-2">
+      <label class="form-label">ค้นหา</label>
+      <input type="search" id="globalSearch" class="form-control"
+             placeholder="รหัส / หัวข้อ / ผู้แจ้ง">
+    </div>
 
-        <!-- Date -->
-        <div class="col-md-3">
-            <label class="form-label small text-muted">ช่วงวันที่</label>
-            <div class="input-group">
-                <span class="input-group-text bg-white text-muted">
-                    <i class="fas fa-calendar-alt"></i>
-                </span>
-                <input type="text" id="dateRange" class="form-control"
-                       placeholder="เลือกช่วงวันที่" autocomplete="off">
-            </div>
-        </div>
-
-    </form>
+  </div>
 </div>
 
 <!-- ================= TABLE ================= -->
-<div class="dashboard-table overflow-hidden">
-<div class="table-responsive">
-<table class="table table-hover align-middle mb-0">
+<div class="table-card">
+  <div class="table-responsive">
+    <table id="ticketTable" class="table table-hover align-middle w-100">
 
-<thead>
-<tr>
-    <th class="text-center" style="width:90px;">รหัส</th>
-    <th>ผู้แจ้ง</th>
-    <th>หมวดหมู่</th>
-    <th>รายละเอียดคำขอ</th>
-    <th>วันที่</th>
-    <th class="text-center">สถานะ</th>
-    <th>ผู้รับผิดชอบ</th>
-    <th class="text-end pe-4"></th>
-</tr>
-</thead>
+      <thead>
+        <tr>
+          <th style="width:90px">รหัส</th>
+          <th>ผู้แจ้ง</th>
+          <th>หมวด</th>
+          <th>รายละเอียด</th>
+          <th>วันที่</th>
+          <th>สถานะ</th>
+          <th>ผู้รับผิดชอบ</th>
+          <th style="width:60px"></th>
+        </tr>
+      </thead>
 
-<tbody id="ticketTableBody">
-{% for t in tickets %}
-<tr>
-    <!-- รหัส -->
-    <td class="text-center">
-        <span class="badge bg-light text-muted border">#{{ t.id }}</span>
-    </td>
+      <tbody>
+      {% for t in tickets %}
+        <tr class="clickable-row"
+            data-href="{% url 'tickets_detail' %}?id={{ t.id }}">
 
-    <!-- ผู้แจ้ง -->
-    <td>{{ t.requester }}</td>
+          <td class="text-center">
+            <span class="badge bg-light text-dark">#{{ t.id }}</span>
+          </td>
 
-    <!-- หมวดหมู่ -->
-    <td>{{ t.ticket_type }}</td>
+          <td>{{ t.requester }}</td>
+          <td>{{ t.ticket_type }}</td>
 
-    <!-- รายละเอียด -->
-    <td>
-        <div class="fw-bold">{{ t.title }}</div>
-        <small class="text-muted">{{ t.description }}</small>
-    </td>
+          <td>
+            <div class="fw-semibold">{{ t.title }}</div>
+            <small class="text-muted">{{ t.description }}</small>
+          </td>
 
-    <!-- วันที่ -->
-    <td data-date="{{ t.created_at|date:'Y-m-d' }}">
-        {{ t.created_at|date:"d M Y" }}
-    </td>
+          <!-- ใช้ ISO date สำหรับ filter -->
+          <td data-date="{{ t.created_at|date:'Y-m-d' }}">
+            {{ t.created_at|date:"d M Y" }}
+          </td>
 
-    <!-- สถานะ -->
-    <td class="text-center">
-        {% if t.status == "รอดำเนินการ" %}
-            <span class="badge bg-warning-subtle text-warning">{{ t.status }}</span>
-        {% elif t.status == "รออนุมัติ" %}
-            <span class="badge bg-info-subtle text-info">{{ t.status }}</span>
-        {% elif t.status == "ดราฟ" %}
-            <span class="badge bg-light text-dark border">{{ t.status }}</span>
-        {% elif t.status == "เสร็จสิ้นแล้ว" %}
-            <span class="badge bg-success-subtle text-success">{{ t.status }}</span>
-        {% endif %}
-    </td>
+          <td>
+            {% if t.status == "รอดำเนินการ" %}
+              <span class="badge-status status-pending">{{ t.status }}</span>
+            {% elif t.status == "รออนุมัติ" %}
+              <span class="badge-status status-approve">{{ t.status }}</span>
+            {% elif t.status == "ดราฟ" %}
+              <span class="badge-status status-draft">{{ t.status }}</span>
+            {% else %}
+              <span class="badge-status status-done">{{ t.status }}</span>
+            {% endif %}
+          </td>
 
-    <!-- ผู้รับผิดชอบ -->
-    <td>
-        {% if t.assignee != "ยังไม่มอบหมาย" %}
-            {{ t.assignee }}
-        {% else %}
-            <span class="badge bg-light text-muted border">ยังไม่มอบหมาย</span>
-        {% endif %}
-    </td>
+          <td>
+            {% if t.assignee != "ยังไม่มอบหมาย" %}
+              <span class="assignee-pill">{{ t.assignee }}</span>
+            {% else %}
+              <span class="assignee-pill text-muted">ยังไม่มอบหมาย</span>
+            {% endif %}
+          </td>
 
-    <!-- Action -->
-    <td class="text-end pe-4">
-        <a href="{% url 'tickets_detail' %}?id={{ t.id }}"
-           class="btn btn-outline-secondary btn-sm rounded-circle">
-            <i class="fas fa-chevron-right"></i>
-        </a>
-    </td>
-</tr>
-{% endfor %}
-</tbody>
+          <!-- ลูกศรยังมีได้ แต่ไม่จำเป็น -->
+          <td class="text-end">
+            <a href="{% url 'tickets_detail' %}?id={{ t.id }}"
+               class="action-btn">
+              <i class="fas fa-chevron-right"></i>
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
 
-</table>
-</div>
+    </table>
+  </div>
 </div>
 
-<!-- ================= PAGINATION ================= -->
-<div class="d-flex justify-content-between align-items-center mt-3 px-3">
-    <div class="small text-muted" id="pageInfo"></div>
-    <nav>
-        <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
-    </nav>
-</div>
+{% endblock %}
 
-<!-- ================= JS ================= -->
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
+{% block extra_js %}
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+$(document).ready(function () {
 
-const searchInput = document.getElementById("searchInput");
-const statusFilter = document.getElementById("statusFilter");
-const assigneeFilter = document.getElementById("assigneeFilter");
-const dateRange = document.getElementById("dateRange");
-
-const rows = [...document.querySelectorAll("#ticketTableBody tr")];
-const pagination = document.getElementById("pagination");
-const pageInfo = document.getElementById("pageInfo");
-
-const rowsPerPage = 10;
-let currentPage = 1;
-let filteredRows = rows;
-
-flatpickr("#dateRange", {
-    mode: "range",
-    dateFormat: "d/m/Y",
-    locale: { rangeSeparator: " ถึง " }
-});
-
-function filterTable() {
-    const keyword = searchInput.value.toLowerCase();
-    const status = statusFilter.value;
-    const assignee = assigneeFilter.value;
-
-    let startDate = null, endDate = null;
-    if (dateRange.value.includes("ถึง")) {
-        const d = dateRange.value.split(" ถึง ");
-        startDate = new Date(d[0].split("/").reverse().join("-"));
-        endDate = new Date(d[1].split("/").reverse().join("-"));
+  // ===== DataTable (ไม่มี search) =====
+  const table = $('#ticketTable').DataTable({
+    pageLength: 10,
+    lengthChange: false,
+    searching: false,     // ❌ ปิด search ทั้งหมด
+    order: [[4, 'desc']],
+    language: {
+      zeroRecords: "ไม่พบข้อมูล",
+      info: "แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ",
+      infoEmpty: "ไม่มีข้อมูล",
+      paginate: {
+        previous: "ก่อนหน้า",
+        next: "ถัดไป"
+      }
     }
+  });
 
-    filteredRows = rows.filter(row => {
-        let show = true;
-        const text = row.innerText.toLowerCase();
+  // ===== Filter: สถานะ =====
+  $('#statusFilter').on('change', function () {
+    table.column(5).search(this.value).draw();
+  });
 
-        if (keyword && !text.includes(keyword)) show = false;
-        if (status && !text.includes(status)) show = false;
-        if (assignee && !text.includes(assignee)) show = false;
+  // ===== Filter: ผู้รับผิดชอบ =====
+  $('#assigneeFilter').on('change', function () {
+    table.column(6).search(this.value).draw();
+  });
 
-        if (startDate && endDate) {
-            const rowDate = new Date(row.querySelector("[data-date]").dataset.date);
-            if (rowDate < startDate || rowDate > endDate) show = false;
-        }
+  // ===== Filter: วันที่ =====
+  $.fn.dataTable.ext.search.push(function (settings, data, index) {
+    const start = $('#startDate').val();
+    const end = $('#endDate').val();
 
-        return show;
-    });
+    const row = table.row(index).node();
+    const rowDate = $('td[data-date]', row).data('date');
 
-    currentPage = 1;
-    render();
-}
+    if (!start && !end) return true;
+    if (start && rowDate < start) return false;
+    if (end && rowDate > end) return false;
 
-function render() {
-    rows.forEach(r => r.style.display = "none");
+    return true;
+  });
 
-    const start = (currentPage - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
+  $('#startDate, #endDate').on('change', function () {
+    table.draw();
+  });
 
-    filteredRows.slice(start, end).forEach(r => r.style.display = "");
-    pageInfo.innerText = `แสดง ${filteredRows.length} รายการ`;
-    renderPagination();
-}
+  // ===== Click ทั้งแถว =====
+  $('#ticketTable tbody').on('click', 'tr.clickable-row', function (e) {
+    if ($(e.target).closest('a, button, input, select').length) return;
+    window.location = $(this).data('href');
+  });
 
-function renderPagination() {
-    pagination.innerHTML = "";
-    const total = Math.ceil(filteredRows.length / rowsPerPage);
-    if (total <= 1) return;
-
-    for (let i = 1; i <= total; i++) {
-        const li = document.createElement("li");
-        li.className = "page-item" + (i === currentPage ? " active" : "");
-
-        const a = document.createElement("a");
-        a.className = "page-link";
-        a.href = "#";
-        a.innerText = i;
-        a.onclick = e => {
-            e.preventDefault();
-            currentPage = i;
-            render();
-        };
-
-        li.appendChild(a);
-        pagination.appendChild(li);
-    }
-}
-
-searchInput.onkeyup = filterTable;
-statusFilter.onchange = filterTable;
-assigneeFilter.onchange = filterTable;
-dateRange.onchange = filterTable;
-
-filterTable();
 });
 </script>
-
-</main>
 {% endblock %}
