@@ -45,7 +45,7 @@ def login_view(request):
             messages.error(request, "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง")
             return render(request, "login.html")
 
-        if user[3] != "admin":
+        if user[3] not in ["admin", "manager", "user"]:
             messages.error(request, "บัญชีนี้ไม่มีสิทธิ์เข้าใช้งานระบบ")
             return render(request, "login.html")
 
