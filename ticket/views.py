@@ -30,25 +30,28 @@ def login_view(request):
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT 
-                    id,
-                    username,
-                    full_name,
-                    role
-                FROM tickets.users
-                WHERE username = %s
-                  AND password = crypt(%s, password)
-                  AND is_active = true
+                    u.id,
+                    u.username,
+                    u.full_name,
+                    r.role_name
+                FROM tickets.users u
+                JOIN tickets.roles r ON r.id = u.role_id
+                WHERE u.username = %s
+                AND u.password = crypt(%s, u.password)
+                AND u.is_active = true
             """, [username, password])
 
             user = cursor.fetchone()
+
 
         if not user:
             messages.error(request, "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง")
             return render(request, "login.html")
 
-        if user[3] not in ["admin", "manager", "user"]:
+        if user[3].strip().lower() != "admin":
             messages.error(request, "บัญชีนี้ไม่มีสิทธิ์เข้าใช้งานระบบ")
             return render(request, "login.html")
+
 
         request.session["user"] = {
             "id": user[0],
