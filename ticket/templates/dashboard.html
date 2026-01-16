@@ -5,75 +5,101 @@
 
 {% block content %}
 
-<!-- =======================
-     HEADER
-======================= -->
-<div class="d-flex justify-content-between align-items-end mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
     <div>
-        <h2 class="fw-bold mb-0">Dashboard Overview</h2>
-        <p class="text-muted mb-0">ยินดีต้อนรับกลับมา! ข้อมูลล่าสุดประจำวันนี้</p>
+        <h2 class="fw-bold mb-1">Dashboard Overview</h2>
+        <p class="text-muted mb-0">
+            <i class="far fa-calendar-alt me-1"></i> ภาพรวมคำขอในระบบ (อัปเดตตามช่วงวันที่)
+        </p>
     </div>
+
+    <form method="get" class="filter-panel d-flex gap-2 align-items-end shadow-sm">
+        <div>
+            <label class="form-label mb-1">ตั้งแต่วันที่</label>
+            <input type="date" name="start_date" value="{{ start_date }}" class="form-control">
+        </div>
+
+        <div>
+            <label class="form-label mb-1">ถึงวันที่</label>
+            <input type="date" name="end_date" value="{{ end_date }}" class="form-control">
+        </div>
+
+        <button class="btn btn-primary px-4">
+            <i class="fas fa-filter me-1"></i> ดูข้อมูล
+        </button>
+    </form>
 </div>
 
-<form method="get" class="d-flex gap-2 mb-3">
-    <div>
-        <label>ตั้งแต่วันที่</label>
-        <input type="date" name="start_date" value="{{ start_date }}" class="form-control">
-    </div>
-
-    <div>
-        <label>ถึงวันที่</label>
-        <input type="date" name="end_date" value="{{ end_date }}" class="form-control">
-    </div>
-
-    <div class="align-self-end">
-        <button class="btn btn-primary">ดูข้อมูล</button>
-    </div>
-</form>
-<!-- =======================
-     SUMMARY CARDS
-======================= -->
 <div class="dashboard-cards mb-4">
-
-    <div class="dashboard-card">
-        <p class="card-label">รออนุมัติ</p>
-        <h3 class="card-value text-warning">{{ waiting_approve }}</h3>
+    <div class="dashboard-card card-pending">
+        <div class="d-flex justify-content-between">
+            <div>
+                <p class="card-label">รออนุมัติ</p>
+                <h3 class="card-value">{{ waiting_approve }}</h3>
+            </div>
+            <div class="icon-box bg-warning-soft">
+                <i class="fas fa-clock"></i>
+            </div>
+        </div>
     </div>
 
-    <div class="dashboard-card">
-        <p class="card-label">อนุมัติแล้ว</p>
-        <h3 class="card-value text-success">{{ approved }}</h3>
+    <div class="dashboard-card card-closed">
+        <div class="d-flex justify-content-between">
+            <div>
+                <p class="card-label">อนุมัติแล้ว</p>
+                <h3 class="card-value">{{ approved }}</h3>
+            </div>
+            <div class="icon-box bg-success-soft">
+                <i class="fas fa-check-circle"></i>
+            </div>
+        </div>
     </div>
 
-    <div class="dashboard-card">
-        <p class="card-label">กำลังดำเนินการ</p>
-        <h3 class="card-value text-primary">{{ in_progress }}</h3>
+    <div class="dashboard-card" style="border-left: 6px solid var(--primary);">
+        <div class="d-flex justify-content-between">
+            <div>
+                <p class="card-label">กำลังดำเนินการ</p>
+                <h3 class="card-value text-primary">{{ in_progress }}</h3>
+            </div>
+            <div class="icon-box bg-primary-soft">
+                <i class="fas fa-spinner fa-spin"></i>
+            </div>
+        </div>
     </div>
 
-    <div class="dashboard-card">
-        <p class="card-label">เสร็จสิ้น</p>
-        <h3 class="card-value text-success">{{ completed }}</h3>
+    <div class="dashboard-card card-closed">
+        <div class="d-flex justify-content-between">
+            <div>
+                <p class="card-label">เสร็จสิ้น</p>
+                <h3 class="card-value">{{ completed }}</h3>
+            </div>
+            <div class="icon-box bg-success-soft">
+                <i class="fas fa-flag-checkered"></i>
+            </div>
+        </div>
     </div>
 
-    <div class="dashboard-card">
-        <p class="card-label">ทั้งหมด</p>
-        <h3 class="card-value">{{ total }}</h3>
+    <div class="dashboard-card card-total">
+        <div class="d-flex justify-content-between">
+            <div>
+                <p class="card-label">ทั้งหมด</p>
+                <h3 class="card-value">{{ total }}</h3>
+            </div>
+            <div class="icon-box bg-primary-soft" style="background-color: rgba(79, 70, 229, 0.1); color: #4f46e5;">
+                <i class="fas fa-list-ul"></i>
+            </div>
+        </div>
     </div>
-
 </div>
 
-
-<!-- =======================
-     CHART + TOP CATEGORY
-======================= -->
 <div class="row g-4">
-
-    <!-- CHART -->
-    <div class="col-lg-7">
-        <div class="dashboard-table h-100">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0 fw-bold">สัดส่วนประเภทคำขอ</h4>
-                <i class="fas fa-chart-pie text-muted"></i>
+    <div class="col-lg-12"> <div class="dashboard-table shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="mb-0 fw-bold">สัดส่วนประเภทคำขอ</h4>
+                    <small class="text-muted">เปรียบเทียบข้อมูลสรุปในรูปแบบแผนภูมิ</small>
+                </div>
+                <i class="fas fa-chart-pie text-muted fa-lg"></i>
             </div>
 
             <div class="chart-container">
@@ -81,19 +107,18 @@
             </div>
         </div>
     </div>
+</div>
 
+{% endblock %}
 
-
-    {% endblock %}
-
-    {% block extra_js %}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script>
-        const ctx = document.getElementById('ticketChart');
-
-        const chartLabels = {{ chart_labels| safe }};
-        const chartValues = {{ chart_values| safe }};
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('ticketChart').getContext('2d');
+        
+        const chartLabels = {{ chart_labels|safe }};
+        const chartValues = {{ chart_values|safe }};
 
         new Chart(ctx, {
             type: 'doughnut',
@@ -102,15 +127,12 @@
                 datasets: [{
                     data: chartValues,
                     backgroundColor: [
-                        '#4f46e5',
-                        '#818cf8',
-                        '#10b981',
-                        '#f59e0b',
-                        '#ef4444',
-                        '#22c55e'
+                        '#4f46e5', '#818cf8', '#10b981', 
+                        '#f59e0b', '#ef4444', '#22c55e'
                     ],
-                    borderWidth: 0,
-                    hoverOffset: 12
+                    borderWidth: 4,
+                    borderColor: '#ffffff',
+                    hoverOffset: 15
                 }]
             },
             options: {
@@ -122,17 +144,24 @@
                         position: 'bottom',
                         labels: {
                             usePointStyle: true,
-                            padding: 16
+                            padding: 25,
+                            font: { size: 14 }
                         }
+                    },
+                    tooltip: {
+                        padding: 12,
+                        cornerRadius: 8
                     }
                 }
             }
         });
-    </script>
+    });
+</script>
 
-    <style>
-        .chart-container {
-            height: 280px;
-        }
-    </style>
-    {% endblock %}
+<style>
+    .chart-container {
+        height: 350px; /* เพิ่มความสูงเพื่อให้กราฟดูเต็มจอ */
+        position: relative;
+    }
+</style>
+{% endblock %}

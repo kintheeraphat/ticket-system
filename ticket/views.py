@@ -4,7 +4,17 @@ from django.utils import timezone
 from django.contrib import messages
 from django.utils.dateparse import parse_date
 from datetime import timezone as dt_timezone
+from datetime import date, timedelta
 import os
+
+def thai_date(d):
+    """
+    แปลง date → 'วัน/เดือน/ปี (พ.ศ.)'
+    """
+    if not d:
+        return ""
+    return d.strftime("%d/%m/") + str(d.year + 543)
+
 
 def login_view(request):
     if request.method == "POST":
@@ -30,17 +40,14 @@ def login_view(request):
 
             user = cursor.fetchone()
 
-        # ❌ ไม่พบ user
         if not user:
             messages.error(request, "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง")
             return render(request, "login.html")
 
-        # ❌ ไม่ใช่ admin
         if user[3] != "admin":
             messages.error(request, "บัญชีนี้ไม่มีสิทธิ์เข้าใช้งานระบบ")
             return render(request, "login.html")
 
-        # ✅ admin เท่านั้นถึงจะผ่าน
         request.session["user"] = {
             "id": user[0],
             "username": user[1],
@@ -61,23 +68,47 @@ def logout_view(request):
     request.session.flush()
     return redirect("login")    
 
+
 def dashboard(request):
+
+    # =====================
+    # AUTH
+    # =====================
     if "user" not in request.session:
         return redirect("login")
 
+    # =====================
+    # DATE FILTER
+    # =====================
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+
+    if not start_date or not end_date:
+        end_date = date.today()
+        start_date = end_date - timedelta(days=30)
+    else:
+        start_date = date.fromisoformat(start_date)
+        end_date = date.fromisoformat(end_date)
+
+    # 👉 แปลงวันที่เป็นข้อความไทย
+    start_date_th = thai_date(start_date)
+    end_date_th = thai_date(end_date)
+
+    # =====================
+    # DB QUERY
+    # =====================
     with connection.cursor() as cursor:
 
-        # =====================
-        # COUNT BY STATUS_ID
-        # =====================
+        # ---------- COUNT BY STATUS ----------
         cursor.execute("""
             SELECT status_id, COUNT(*)
             FROM tickets.tickets
+            WHERE create_at BETWEEN %s AND %s
             GROUP BY status_id
-        """)
+        """, [start_date, end_date])
         rows = cursor.fetchall()
 
-        status_counts = {status_id: count for status_id, count in rows}
+        status_counts = {sid: cnt for sid, cnt in rows}
 
         waiting_approve = status_counts.get(1, 0)
         approved        = status_counts.get(2, 0)
@@ -87,40 +118,49 @@ def dashboard(request):
 
         total = sum(status_counts.values())
 
-        # =====================
-        # TOP 1 CATEGORY (สำคัญ)
-        # =====================
+        # ---------- TOP CATEGORY ----------
         cursor.execute("""
             SELECT tt.name, COUNT(t.id) AS total
             FROM tickets.ticket_type tt
             LEFT JOIN tickets.tickets t
                 ON t.ticket_type_id = tt.id
+               AND t.create_at BETWEEN %s AND %s
             GROUP BY tt.name
             ORDER BY total DESC
             LIMIT 1
-        """)
+        """, [start_date, end_date])
         top1 = cursor.fetchone()
 
         top_category_name  = top1[0] if top1 else "-"
         top_category_count = top1[1] if top1 else 0
 
-        # =====================
-        # CATEGORY FOR CHART
-        # =====================
+        # ---------- CATEGORY CHART ----------
         cursor.execute("""
             SELECT tt.name, COUNT(t.id) AS total
             FROM tickets.ticket_type tt
             LEFT JOIN tickets.tickets t
                 ON t.ticket_type_id = tt.id
+               AND t.create_at BETWEEN %s AND %s
             GROUP BY tt.name
             ORDER BY total DESC
-        """)
+        """, [start_date, end_date])
         category_rows = cursor.fetchall()
 
         chart_labels = [row[0] for row in category_rows]
         chart_values = [row[1] for row in category_rows]
 
+    # =====================
+    # CONTEXT
+    # =====================
     context = {
+        # DATE (ใช้กับ input)
+        "start_date": start_date,
+        "end_date": end_date,
+
+        # DATE (แสดงผลภาษาไทย)
+        "start_date_th": start_date_th,
+        "end_date_th": end_date_th,
+
         # STATUS
         "waiting_approve": waiting_approve,
         "approved": approved,
@@ -129,19 +169,14 @@ def dashboard(request):
         "completed": completed,
         "total": total,
 
-        # TOP 1
+        # CATEGORY
         "top_category_name": top_category_name,
         "top_category_count": top_category_count,
-
-        # CHART
         "chart_labels": chart_labels,
         "chart_values": chart_values,
     }
 
     return render(request, "dashboard.html", context)
-
-
-
 
 def tickets_list(request):
     search = request.GET.get("search", "")
