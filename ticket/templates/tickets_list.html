@@ -12,14 +12,17 @@
     cursor: pointer;
 }
 #ticketTable tbody tr:hover {
-    background-color: #f8f9fa;
+    background-color: #f9fafb;
+}
+.ticket-type-box small {
+    font-size: 0.75rem;
 }
 </style>
 
 <!-- ================= HEADER ================= -->
 <div class="d-flex justify-content-between align-items-center mb-4 pt-2">
     <div>
-        <h2 class="fw-bold text-dark mb-1">รายการคำขอทั้งหมด</h2>
+        <h2 class="fw-bold mb-1">รายการคำขอทั้งหมด</h2>
         <p class="text-muted small mb-0">
             ตรวจสอบและบริหารจัดการสถานะรายการแจ้งซ่อมหรือคำร้องขอภายในระบบ
         </p>
@@ -27,10 +30,9 @@
 </div>
 
 <!-- ================= FILTER ================= -->
-<div class="dashboard-table mb-4 p-4">
+<div class="dashboard-table mb-4">
 <form class="row g-3 align-items-end" onsubmit="return false;">
 
-    <!-- Status -->
     <div class="col-md-2">
         <label class="form-label small text-muted">สถานะ</label>
         <select id="statusFilter" class="form-select">
@@ -42,7 +44,6 @@
         </select>
     </div>
 
-    <!-- Assignee -->
     <div class="col-md-3">
         <label class="form-label small text-muted">ผู้รับผิดชอบ</label>
         <select id="assigneeFilter" class="form-select">
@@ -55,7 +56,6 @@
         </select>
     </div>
 
-    <!-- Quick Date Filter -->
     <div class="col-md-2">
         <label class="form-label small text-muted">ช่วงเวลา</label>
         <select id="quickDateFilter" class="form-select">
@@ -66,7 +66,6 @@
         </select>
     </div>
 
-    <!-- Custom Date -->
     <div class="col-md-2">
         <label class="form-label small text-muted">จากวันที่</label>
         <input type="date" id="startDate" class="form-control">
@@ -77,7 +76,6 @@
         <input type="date" id="endDate" class="form-control">
     </div>
 
-    <!-- Clear -->
     <div class="col-md-1">
         <button id="clearFilters" class="btn btn-outline-secondary w-100">
             ล้าง
@@ -90,14 +88,15 @@
 <!-- ================= TABLE ================= -->
 <div class="dashboard-table overflow-hidden">
 <div class="table-responsive">
+
 <table id="ticketTable" class="table table-hover align-middle mb-0">
 
 <thead>
 <tr>
-    <th class="text-center">รหัส</th>
+    <th class="text-center">#</th>
     <th>ผู้แจ้ง</th>
     <th>หมวดหมู่</th>
-    <th>ประเภทคำขอ</th>
+    <th>รายละเอียดคำขอ</th>
     <th>วันที่</th>
     <th class="text-center">สถานะ</th>
     <th>ผู้รับผิดชอบ</th>
@@ -109,20 +108,26 @@
 {% for t in tickets %}
 <tr data-href="{% url 'tickets_detail' %}?id={{ t.id }}">
 
-    <td class="text-center">#{{ t.id }}</td>
-    <td>{{ t.requester }}</td>
+    <td class="text-center fw-bold text-muted">#{{ t.id }}</td>
+
     <td>
-        <div class="fw-semibold">{{ t.category }}</div>
-        <small class="text-muted">{{ t.ticket_type }}</small>
+        <div class="fw-semibold">{{ t.requester }}</div>
+        {% if t.department %}
+        <small class="text-muted">{{ t.department }}</small>
+        {% endif %}
     </td>
 
+    <td>
+        <div class="ticket-type-box">
+            <div class="fw-semibold">{{ t.category }}</div>
+            <small class="text-muted">{{ t.ticket_type }}</small>
+        </div>
+    </td>
 
     <td>
         <div class="fw-bold">{{ t.title }}</div>
-        {% comment %} <small class="text-muted">{{ t.description }}</small> {% endcomment %}
     </td>
 
-    <!-- ✅ เวลาไทย + ใช้เวลาไทยกับ filter -->
     <td data-date="{{ t.created_at|localtime|date:'Y-m-d H:i:s' }}">
         <div>{{ t.created_at|localtime|date:"d M Y" }}</div>
         <small class="text-muted">
@@ -130,12 +135,27 @@
         </small>
     </td>
 
-    <td class="text-center">{{ t.status }}</td>
-    <td>{{ t.assignee }}</td>
+    <td class="text-center">
+        <span class="badge-status
+            {% if t.status == 'รอดำเนินการ' %}status-pending
+            {% elif t.status == 'รออนุมัติ' %}status-approve
+            {% elif t.status == 'ดราฟ' %}status-draft
+            {% else %}status-done{% endif %}">
+            {{ t.status }}
+        </span>
+    </td>
+
+    <td>
+        {% if t.assignee %}
+        <span class="assignee-pill">{{ t.assignee }}</span>
+        {% else %}
+        <small class="text-muted">ยังไม่มอบหมาย</small>
+        {% endif %}
+    </td>
 
     <td class="text-end">
         <a href="{% url 'tickets_detail' %}?id={{ t.id }}"
-           class="btn btn-outline-secondary btn-sm rounded-circle">
+           class="action-btn">
             <i class="fas fa-chevron-right"></i>
         </a>
     </td>
@@ -148,7 +168,7 @@
 </div>
 </div>
 
-<!-- ================= JS ================= -->
+<!-- ================= JS (เดิม ไม่แตะ) ================= -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
@@ -158,30 +178,24 @@ $(function () {
 
     const today = new Date();
 
-    // ===== Date Filter (ใช้เวลาไทยจาก data-date) =====
     $.fn.dataTable.ext.search.push(function (settings, data, index) {
-
         const row = $('#ticketTable tbody tr').eq(index);
         const dateStr = row.find('[data-date]').data('date');
         if (!dateStr) return true;
 
         const rowDate = new Date(dateStr);
-
         const quick = $('#quickDateFilter').val();
         const startVal = $('#startDate').val();
         const endVal = $('#endDate').val();
 
-        // Custom date
         if (startVal || endVal) {
             const start = startVal ? new Date(startVal) : null;
             const end = endVal ? new Date(endVal) : null;
-
             if (start && rowDate < start) return false;
             if (end && rowDate > end) return false;
             return true;
         }
 
-        // Quick filter: 7 / 14 days
         if (quick === "7" || quick === "14") {
             const days = parseInt(quick);
             const from = new Date();
@@ -189,40 +203,35 @@ $(function () {
             return rowDate >= from && rowDate <= today;
         }
 
-        // Quick filter: last month
         if (quick === "last_month") {
-            const first = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-            const last = new Date(today.getFullYear(), today.getMonth(), 0);
-            return rowDate >= first && rowDate <= last;
-        }
+            const lastMonth = today.getMonth() - 1;
+            const lastMonthYear = lastMonth < 0
+                ? today.getFullYear() - 1
+                : today.getFullYear();
 
-        // Default: current month
-        return rowDate.getMonth() === today.getMonth() &&
-               rowDate.getFullYear() === today.getFullYear();
+            const normalizedMonth = (lastMonth + 12) % 12;
+
+            return (
+                rowDate.getMonth() === normalizedMonth &&
+                rowDate.getFullYear() === lastMonthYear
+            );
+        }
+         return true;
     });
 
     const table = $('#ticketTable').DataTable({
         pageLength: 10,
         order: [[4, 'desc']],
-        language: {
-            zeroRecords: "ไม่พบข้อมูล"
-        }
+        language: { zeroRecords: "ไม่พบข้อมูล" }
     });
 
-    // Click row → detail
     $('#ticketTable tbody').on('click', 'tr', function (e) {
         if ($(e.target).closest('a,button').length) return;
         window.location = $(this).data('href');
     });
 
-    // Filters
-    $('#statusFilter').on('change', () =>
-        table.column(5).search($('#statusFilter').val()).draw()
-    );
-
-    $('#assigneeFilter').on('change', () =>
-        table.column(6).search($('#assigneeFilter').val()).draw()
-    );
+    $('#statusFilter').on('change', () => table.column(5).search($('#statusFilter').val()).draw());
+    $('#assigneeFilter').on('change', () => table.column(6).search($('#assigneeFilter').val()).draw());
 
     $('#quickDateFilter').on('change', function () {
         $('#startDate,#endDate').val('');
