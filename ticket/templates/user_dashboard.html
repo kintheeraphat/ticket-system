@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div>
+        <h2 class="fw-bold mb-1">หน้าหลักของฉัน</h2>
+        <p class="text-muted mb-0">ติดตามสถานะคำขอและบริการต่างๆ</p>
+    </div>
+    
+    <a href="{% url 'create_menu' %}" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm fw-bold">
+        <i class="fas fa-plus-circle me-2"></i> สร้างคำขอใหม่
+    </a>
+</div>
+
+<div class="dashboard-cards mb-4">
+
+    <div class="dashboard-card card-total">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <p class="card-label">ส่งคำขอแล้ว</p>
+                <h3 class="card-value">{{ total_my_requests }}</h3>
+            </div>
+            <div class="icon-box bg-primary-soft">
+                <i class="fas fa-file-alt text-primary"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-card card-pending">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <p class="card-label">กำลังดำเนินการ</p>
+                <h3 class="card-value">{{ in_progress_count }}</h3>
+            </div>
+            <div class="icon-box bg-warning-soft">
+                <i class="fas fa-hourglass-half text-warning"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-card card-closed">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <p class="card-label">เสร็จสิ้น</p>
+                <h3 class="card-value">{{ completed_count }}</h3>
+            </div>
+            <div class="icon-box bg-success-soft">
+                <i class="fas fa-check-double text-success"></i>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="dashboard-table shadow-sm">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0 fw-bold">รายการล่าสุดของคุณ</h4>
+        <a href="{% url 'ticket_history' %}" class="btn btn-sm btn-light border px-3 rounded-pill">ดูทั้งหมด</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>เลขที่คำขอ</th>
+                    <th>ประเภท</th>
+                    <th>วันที่ส่ง</th>
+                    <th>สถานะ</th>
+                    <th class="text-center">จัดการ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in recent_tickets %}
+                <tr class="clickable-row" onclick="window.location='{% url 'ticket_detail' ticket.id %}'">
+                    <td><strong>#{{ ticket.id }}</strong></td>
+                    <td><span class="assignee-pill">{{ ticket.module_name }}</span></td>
+                    <td>{{ ticket.created_at|date:"d/m/Y" }}</td>
+                    <td>
+                        {% if ticket.status == 'waiting' %}
+                            <span class="badge-status status-pending">รอพิจารณา</span>
+                        {% elif ticket.status == 'approved' %}
+                            <span class="badge-status status-done">เสร็จสิ้น</span>
+                        {% else %}
+                            <span class="badge-status status-approve">กำลังดำเนินการ</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <a href="{% url 'ticket_detail' ticket.id %}" class="action-btn">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">ยังไม่มีรายการคำขอในขณะนี้</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
