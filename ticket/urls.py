@@ -24,4 +24,7 @@ urlpatterns = [
     path("create/vpn/", views.vpn, name="vpn"),
     path("create/borrows/", views.borrows, name="borrows"),
     path("ticket-success/", views.ticket_success, name="ticket_success"),
+    
+    # USER นะจ๊ะ
+    path("dashboard/", views.user_dashboard, name="user_dashboard"),
 ]

@@ -1095,3 +1095,7 @@ def active_promotion_form(request):
         return redirect("ticket_success")
 
     return render(request, "tickets_form/active_promotion_form.html")
+
+
+def user_dashboard(request):
+    return render(request, "user_dashboard.html")
