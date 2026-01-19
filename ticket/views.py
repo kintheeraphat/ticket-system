@@ -500,8 +500,177 @@ def vpn(request):
 def borrows(req):
     return render(req,'tickets_form/borrows.html')
 
-def tickets_detail(request):
-    return render(request, "tickets_form/tickets_detail.html")
+from django.shortcuts import render, redirect
+from django.db import connection
+from django.utils import timezone
+
+
+def tickets_detail(request, ticket_id):
+
+    if "user" not in request.session:
+        return redirect("login")
+
+    with connection.cursor() as cursor:
+
+        # =========================
+        # TICKET MASTER
+        # =========================
+        cursor.execute("""
+            SELECT
+                t.id,
+                t.title,
+                t.description,
+                t.department,
+                t.create_at,
+                t.due_date,
+                t.ticket_type_id,
+                tt.name
+            FROM tickets.tickets t
+            LEFT JOIN tickets.ticket_type tt
+                ON tt.id = t.ticket_type_id
+            WHERE t.id = %s
+        """, [ticket_id])
+
+        row = cursor.fetchone()
+        if not row:
+            return redirect("tickets_list")
+
+        ticket = {
+            "id": row[0],
+            "title": row[1],
+            "description": row[2],
+            "department": row[3],
+            "create_at": row[4],
+            "due_date": row[5],
+            "ticket_type_id": row[6],
+            "ticket_type_name": row[7],
+        }
+
+        detail = None
+        detail_type = None
+
+        # =========================
+        # ERP / APP / REPORT
+        # =========================
+        if ticket["ticket_type_id"] in [1, 2, 9, 10, 11]:
+            cursor.execute("""
+                SELECT
+                    app_new,
+                    app_edit,
+                    report_access,
+                    old_value,
+                    new_value,
+                    requester_names,
+                    target_date,
+                    module_name
+                FROM tickets.ticket_data_erp_app
+                WHERE ticket_id = %s
+            """, [ticket_id])
+
+            r = cursor.fetchone()
+            if r:
+                detail = {
+                    "app_new": r[0],
+                    "app_edit": r[1],
+                    "report_access": r[2],
+                    "old_value": r[3],
+                    "new_value": r[4],
+                    "requester_names": r[5],
+                    "target_date": r[6],
+                    "module_name": r[7],
+                }
+                detail_type = "erp"
+
+        # =========================
+        # VPN
+        # =========================
+        elif ticket["ticket_type_id"] == 3:
+            cursor.execute("""
+                SELECT
+                    start_date,
+                    end_date,
+                    vpn_reason,
+                    uservpn
+                FROM tickets.ticket_data_vpn
+                WHERE ticket_id = %s
+            """, [ticket_id])
+
+            r = cursor.fetchone()
+            if r:
+                detail = {
+                    "start_date": r[0],
+                    "end_date": r[1],
+                    "vpn_reason": r[2],
+                    "uservpn": r[3],
+                }
+                detail_type = "vpn"
+
+        # =========================
+        # BUILDING REPAIR
+        # =========================
+        elif ticket["ticket_type_id"] == 4:
+            cursor.execute("""
+                SELECT
+                    problem_detail,
+                    department,
+                    building
+                FROM tickets.ticket_data_building_repair
+                WHERE ticket_id = %s
+            """, [ticket_id])
+
+            r = cursor.fetchone()
+            if r:
+                detail = {
+                    "problem_detail": r[0],
+                    "department": r[1],
+                    "building": r[2],
+                }
+                detail_type = "building"
+
+        # =========================
+        # ADJUST
+        # =========================
+        elif ticket["ticket_type_id"] in [5, 6, 7, 8]:
+            cursor.execute("""
+                SELECT
+                    adj_category,
+                    source_cust,
+                    promo_info,
+                    earn_master,
+                    amount,
+                    target_cust,
+                    target_customer_name,
+                    target_promo_code,
+                    target_promo_name,
+                    target_earn_master,
+                    target_amount
+                FROM tickets.ticket_data_adjust
+                WHERE ticket_id = %s
+            """, [ticket_id])
+
+            r = cursor.fetchone()
+            if r:
+                detail = {
+                    "adj_category": r[0],
+                    "source_cust": r[1],
+                    "promo_info": r[2],
+                    "earn_master": r[3],
+                    "amount": r[4],
+                    "target_cust": r[5],
+                    "target_customer_name": r[6],
+                    "target_promo_code": r[7],
+                    "target_promo_name": r[8],
+                    "target_earn_master": r[9],
+                    "target_amount": r[10],
+                }
+                detail_type = "adjust"
+
+    return render(request, "tickets_form/tickets_detail.html", {
+        "ticket": ticket,
+        "detail": detail,
+        "detail_type": detail_type
+    })
+
 
 
 def repairs_form(request):

@@ -6,192 +6,181 @@
 {% block content %}
 <div class="dashboard-table shadow-sm p-4 bg-white rounded">
 
-    <!-- Header -->
+    <!-- ================= HEADER ================= -->
     <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap">
         <div>
             <h4 class="fw-bold text-primary mb-1">
-                <i class="fas fa-project-diagram me-2"></i>รายละเอียดคำขอ #1001
+                <i class="fas fa-ticket-alt me-2"></i>
+                รายละเอียดคำขอ #{{ ticket.id }}
             </h4>
-            <p class="text-muted small mb-0">คอมพิวเตอร์เปิดไม่ติด</p>
+            <p class="text-muted mb-0">{{ ticket.title }}</p>
         </div>
-        <span class="badge bg-warning-subtle text-warning border px-3 py-2 mt-2 mt-lg-0">
-            รอดำเนินการ
+
+        <span class="badge px-3 py-2
+            {% if ticket.status == 'รอดำเนินการ' %} bg-warning-subtle text-warning
+            {% elif ticket.status == 'อนุมัติแล้ว' %} bg-success-subtle text-success
+            {% elif ticket.status == 'ไม่อนุมัติ' %} bg-danger-subtle text-danger
+            {% else %} bg-secondary-subtle text-secondary {% endif %}
+        ">
+            {{ ticket.status }}
         </span>
     </div>
 
-    <!-- Summary -->
+    <!-- ================= SUMMARY ================= -->
     <div class="row g-3 mb-4">
-        <div class="col-md-4 col-12">
+        <div class="col-md-3">
             <div class="p-3 bg-light rounded border h-100">
                 <div class="text-muted small">ผู้แจ้ง</div>
-                <div class="fw-semibold">user01</div>
+                <div class="fw-semibold">{{ ticket.requester }}</div>
             </div>
         </div>
-        <div class="col-md-4 col-12">
+
+        <div class="col-md-3">
             <div class="p-3 bg-light rounded border h-100">
-                <div class="text-muted small">หมวดหมู่</div>
-                <div class="fw-semibold">อุปกรณ์ IT</div>
+                <div class="text-muted small">ประเภท</div>
+                <div class="fw-semibold">{{ ticket.ticket_type }}</div>
             </div>
         </div>
-        <div class="col-md-4 col-12">
+
+        <div class="col-md-3">
             <div class="p-3 bg-light rounded border h-100">
-                <div class="text-muted small">สถานะปัจจุบัน</div>
-                <div class="fw-bold text-warning">รอดำเนินการ</div>
+                <div class="text-muted small">แผนก</div>
+                <div class="fw-semibold">{{ ticket.department|default:"-" }}</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="p-3 bg-light rounded border h-100">
+                <div class="text-muted small">วันที่สร้าง</div>
+                <div class="fw-semibold">{{ ticket.create_at }}</div>
             </div>
         </div>
     </div>
 
-    <hr class="my-4">
+    <hr>
 
-    <!-- Workflow -->
+    <!-- ================= COMMON DESCRIPTION ================= -->
     <h5 class="fw-bold mb-3">
-        <i class="fas fa-stream me-2"></i>แผนผังการดำเนินงาน
+        <i class="fas fa-align-left me-2"></i>รายละเอียดคำขอ
     </h5>
 
-    <div class="workflow">
-
-        <div class="workflow-step draft">
-            <div class="icon"><i class="fas fa-pen"></i></div>
-            <h6>ดราฟ</h6>
-            <small>_</small>
-        </div>
-
-        <div class="workflow-step done">
-            <div class="icon"><i class="fas fa-paper-plane"></i></div>
-            <h6>ผู้ใช้ส่งคำขอ</h6>
-            <small>user01</small>
-        </div>
-
-        <div class="workflow-step done">
-            <div class="icon"><i class="fas fa-user-tie"></i></div>
-            <h6>หัวหน้าฝ่าย</h6>
-            <small>John Smith</small>
-        </div>
-
-        <div class="workflow-step done">
-            <div class="icon"><i class="fas fa-crown"></i></div>
-            <h6>CEO อนุมัติ</h6>
-            <small>อนุมัติแล้ว</small>
-        </div>
-
-        <div class="workflow-step done">
-            <div class="icon"><i class="fas fa-user-check"></i></div>
-            <h6>แอดมินอนุมัติ</h6>
-            <small>admin_No.1</small>
-        </div>
-
-        <div class="workflow-step active">
-            <div class="icon"><i class="fas fa-hourglass-half"></i></div>
-            <h6>รอดำเนินการ</h6>
-            <small>ชื่อผู้รับงาน</small>
-        </div>
-
-        <div class="workflow-step pending">
-            <div class="icon"><i class="fas fa-check-circle"></i></div>
-            <h6>เสร็จสิ้น</h6>
-            <small>ปิดงาน</small>
-        </div>
-
+    <div class="p-3 bg-light rounded border mb-4">
+        {{ ticket.description|linebreaksbr }}
     </div>
 
+    <!-- ===================================================== -->
+    <!-- ================= DETAIL BY TYPE =================== -->
+    <!-- ===================================================== -->
+
+    {% if detail_type == "ERP_APP" %}
+    <h5 class="fw-bold mb-3"><i class="fas fa-database me-2"></i>ข้อมูล ERP</h5>
+
+    <table class="table table-bordered">
+        <tr>
+            <th width="30%">ชื่อผู้ขอ</th>
+            <td>{{ detail.requester_names|linebreaksbr }}</td>
+        </tr>
+
+        {% if detail.module_name %}
+        <tr>
+            <th>Module ที่ขอ</th>
+            <td>{{ detail.module_name|linebreaksbr }}</td>
+        </tr>
+        {% endif %}
+
+        {% if detail.report_access %}
+        <tr>
+            <th>ข้อมูลรายงาน</th>
+            <td>{{ detail.new_value|linebreaksbr }}</td>
+        </tr>
+        {% endif %}
+
+        {% if detail.app_new %}
+        <tr>
+            <th>ประเภท</th>
+            <td>ขอพัฒนา Application ใหม่</td>
+        </tr>
+        {% endif %}
+
+        {% if detail.app_edit %}
+        <tr>
+            <th>เหตุผล / Objective</th>
+            <td>{{ detail.new_value|linebreaksbr }}</td>
+        </tr>
+        {% endif %}
+    </table>
+    {% endif %}
+
+    {% if detail_type == "VPN" %}
+    <h5 class="fw-bold mb-3"><i class="fas fa-network-wired me-2"></i>ข้อมูล VPN</h5>
+
+    <table class="table table-bordered">
+        <tr>
+            <th width="30%">ช่วงเวลาใช้งาน</th>
+            <td>{{ detail.start_date }} - {{ detail.end_date }}</td>
+        </tr>
+        <tr>
+            <th>ผู้ใช้งาน VPN</th>
+            <td>{{ detail.uservpn|linebreaksbr }}</td>
+        </tr>
+        <tr>
+            <th>เหตุผล</th>
+            <td>{{ detail.vpn_reason|linebreaksbr }}</td>
+        </tr>
+    </table>
+    {% endif %}
+
+    {% if detail_type == "BUILDING_REPAIR" %}
+    <h5 class="fw-bold mb-3"><i class="fas fa-tools me-2"></i>แจ้งซ่อมอาคาร</h5>
+
+    <table class="table table-bordered">
+        <tr>
+            <th width="30%">อาคาร</th>
+            <td>{{ detail.building }}</td>
+        </tr>
+        <tr>
+            <th>แผนก</th>
+            <td>{{ detail.department }}</td>
+        </tr>
+        <tr>
+            <th>ปัญหา</th>
+            <td>{{ detail.problem_detail|linebreaksbr }}</td>
+        </tr>
+    </table>
+    {% endif %}
+
+    {% if detail_type == "ADJUST" %}
+    <h5 class="fw-bold mb-3"><i class="fas fa-coins me-2"></i>ข้อมูลการปรับยอด</h5>
+
+    <table class="table table-bordered">
+        <tr>
+            <th width="30%">ประเภท</th>
+            <td>{{ detail.adj_category }}</td>
+        </tr>
+        <tr>
+            <th>ลูกค้าต้นทาง</th>
+            <td>{{ detail.source_cust }}</td>
+        </tr>
+        <tr>
+            <th>จำนวน</th>
+            <td>{{ detail.amount }}</td>
+        </tr>
+
+        {% if detail.target_cust %}
+        <tr>
+            <th>ลูกค้าปลายทาง</th>
+            <td>{{ detail.target_cust }}</td>
+        </tr>
+        {% endif %}
+    </table>
+    {% endif %}
+
+    <!-- ================= FOOTER ================= -->
     <div class="text-end mt-4 border-top pt-3">
-        <a href="/tickets/" class="btn btn-outline-secondary">
+        <a href="/tickets" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i> กลับหน้ารายการ
         </a>
     </div>
 
 </div>
-
-<style>
-/* Workflow container */
-.workflow {
-    display: flex;
-    flex-wrap: wrap; /* ให้ wrap บน tablet / mobile */
-    justify-content: space-between;
-    position: relative;
-    margin-top: 30px;
-}
-
-/* เส้น workflow แนวนอน (desktop) */
-.workflow::before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: #dee2e6;
-    z-index: 0;
-}
-
-/* Workflow step */
-.workflow-step {
-    background: #fff;
-    padding: 16px;
-    border-radius: 14px;
-    width: 155px;
-    text-align: center;
-    z-index: 1;
-    border: 1px solid #dee2e6;
-    margin-bottom: 16px;
-    position: relative;
-}
-
-/* Icon */
-.workflow-step .icon {
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    margin: 0 auto 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 18px;
-}
-
-/* Status colors */
-.draft { border-style: dashed; }
-.draft .icon { background: #ced4da; color: #495057; }
-.done .icon { background: #198754; }
-.active .icon { background: #0d6efd; animation: pulse 1.4s infinite; }
-.pending .icon { background: #adb5bd; }
-
-/* Pulse animation */
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(13,110,253,.5); }
-    70% { box-shadow: 0 0 0 10px rgba(13,110,253,0); }
-    100% { box-shadow: 0 0 0 0 rgba(13,110,253,0); }
-}
-
-/* ------------------ RESPONSIVE ------------------ */
-
-/* iPad Portrait & Mini/Air/Pro (768px – 1024px) */
-@media (min-width: 768px) and (max-width: 1024px) {
-    .workflow-step { width: 48%; }
-}
-
-/* iPad Landscape / Pro (1025px – 1366px) */
-@media (min-width: 1025px) and (max-width: 1366px) {
-    .workflow-step { width: 20%; }
-}
-
-/* Mobile (<768px) */
-@media (max-width: 767px) {
-    .workflow-step { width: 100%; }
-    .workflow::before { display: none; }
-    .workflow-step::after {
-        content: "";
-        position: absolute;
-        width: 4px;
-        height: calc(100% + 16px);
-        background: #dee2e6;
-        top: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 0;
-    }
-    .workflow-step:last-child::after { display: none; }
-}
-</style>
 {% endblock %}
