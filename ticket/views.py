@@ -1054,7 +1054,7 @@ def app_form(request):
                     new_value,
                     target_date
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s)
             """, [
                 ticket_id,
                 app_new,
