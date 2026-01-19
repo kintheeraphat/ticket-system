@@ -179,23 +179,33 @@ $(function () {
     const today = new Date();
 
     $.fn.dataTable.ext.search.push(function (settings, data, index) {
-        const row = $('#ticketTable tbody tr').eq(index);
-        const dateStr = row.find('[data-date]').data('date');
+
+        const row = settings.aoData[index].nTr;
+        const dateStr = $(row).find('[data-date]').data('date');
         if (!dateStr) return true;
 
-        const rowDate = new Date(dateStr);
+        const rowDate = new Date(dateStr.replace(' ', 'T'));
         const quick = $('#quickDateFilter').val();
         const startVal = $('#startDate').val();
         const endVal = $('#endDate').val();
 
+        // เลือกช่วงวันที่เอง
         if (startVal || endVal) {
-            const start = startVal ? new Date(startVal) : null;
-            const end = endVal ? new Date(endVal) : null;
+            const start = startVal ? new Date(startVal + ' 00:00:00') : null;
+            const end = endVal ? new Date(endVal + ' 23:59:59') : null;
             if (start && rowDate < start) return false;
             if (end && rowDate > end) return false;
             return true;
         }
 
+        // เดือนปัจจุบัน
+        if (quick === "") {
+            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
+            return rowDate >= startOfMonth && rowDate <= endOfMonth;
+        }
+
+        // 7 / 14 วัน
         if (quick === "7" || quick === "14") {
             const days = parseInt(quick);
             const from = new Date();
@@ -203,20 +213,14 @@ $(function () {
             return rowDate >= from && rowDate <= today;
         }
 
+        // เดือนที่แล้ว
         if (quick === "last_month") {
-            const lastMonth = today.getMonth() - 1;
-            const lastMonthYear = lastMonth < 0
-                ? today.getFullYear() - 1
-                : today.getFullYear();
-
-            const normalizedMonth = (lastMonth + 12) % 12;
-
-            return (
-                rowDate.getMonth() === normalizedMonth &&
-                rowDate.getFullYear() === lastMonthYear
-            );
+            const startOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0, 23, 59, 59);
+            return rowDate >= startOfLastMonth && rowDate <= endOfLastMonth;
         }
-         return true;
+
+        return true;
     });
 
     const table = $('#ticketTable').DataTable({
