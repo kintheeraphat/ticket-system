@@ -500,11 +500,6 @@ def vpn(request):
 def borrows(req):
     return render(req,'tickets_form/borrows.html')
 
-from django.shortcuts import render, redirect
-from django.db import connection
-from django.utils import timezone
-
-
 def tickets_detail(request, ticket_id):
 
     if "user" not in request.session:
@@ -1053,7 +1048,6 @@ def app_form(request):
                     app_edit,
                     old_value,
                     new_value,
-                    requester_names,
                     target_date
                 )
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
@@ -1063,7 +1057,6 @@ def app_form(request):
                 app_edit,
                 None,                 # ❌ ไม่ใช้ old_value
                 objective or None,    # ✅ เก็บ objective ไว้ใน new_value
-                requester_name,
                 timezone.now().date()
             ])
 
@@ -1151,16 +1144,14 @@ def report_form(request):
                     report_access,
                     old_value,
                     new_value,
-                    requester_names,
                     target_date
                 )
-                VALUES (%s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s)
             """, [
                 ticket_id,
                 True,                       # report_access
                 report_fields or None,      # old_value
                 report_detail or None,      # new_value
-                requester_name,
                 timezone.now().date()
             ])
 
