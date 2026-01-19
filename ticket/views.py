@@ -1004,6 +1004,14 @@ def report_form(request):
     return render(request, "tickets_form/report_form.html")
 
 
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.db import connection
+from django.utils import timezone
+from datetime import datetime
+import os
+
+
 def active_promotion_form(request):
 
     # =====================
@@ -1019,22 +1027,34 @@ def active_promotion_form(request):
     # =====================
     if request.method == "POST":
 
-        promo_name = request.POST.get("promo_name")
-        start_date = request.POST.get("start_date")
-        end_date   = request.POST.get("end_date")
-        reason     = request.POST.get("reason")
+        promo_name  = request.POST.get("promo_name", "").strip()
+        start_raw  = request.POST.get("start_date")
+        end_raw    = request.POST.get("end_date")
+        department = request.POST.get("department", "").strip()
+        reason     = request.POST.get("reason", "").strip()
 
-        if not all([promo_name, start_date, end_date, reason]):
+        if not all([promo_name, start_raw, end_raw, department, reason]):
             messages.error(request, "กรุณากรอกข้อมูลให้ครบถ้วน")
             return render(request, "tickets_form/active_promotion_form.html")
 
         # =====================
-        # PREPARE DATA
+        # PARSE DATE (d/m/Y)
+        # =====================
+        try:
+            start_date = datetime.strptime(start_raw, "%d/%m/%Y").date()
+            end_date   = datetime.strptime(end_raw, "%d/%m/%Y").date()
+        except ValueError:
+            messages.error(request, "รูปแบบวันที่ไม่ถูกต้อง")
+            return render(request, "tickets_form/active_promotion_form.html")
+
+        # =====================
+        # PREPARE TICKET
         # =====================
         title = "Active Promotion Package"
         description = f"""
 Promotion: {promo_name}
-ช่วงเวลา: {start_date} - {end_date}
+แผนก: {department}
+ช่วงเวลา: {start_raw} - {end_raw}
 
 เหตุผล:
 {reason}
@@ -1044,22 +1064,50 @@ Promotion: {promo_name}
         ticket_type_id = 12   # Active Promotion
 
         # =====================
-        # INSERT TICKET
+        # INSERT tickets
         # =====================
         with connection.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO tickets.tickets
-                (title, description, user_id, status_id, ticket_type_id)
-                VALUES (%s, %s, %s, %s, %s)
+                (
+                    title,
+                    description,
+                    user_id,
+                    status_id,
+                    ticket_type_id,
+                    create_at
+                )
+                VALUES (%s, %s, %s, %s, %s, %s)
                 RETURNING id
             """, [
                 title,
                 description,
                 user_id,
                 status_id,
-                ticket_type_id
+                ticket_type_id,
+                timezone.now()
             ])
             ticket_id = cursor.fetchone()[0]
+
+        # =====================
+        # INSERT ticket_data_erp_app
+        # =====================
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO tickets.ticket_data_erp_app
+                (
+                    ticket_id,
+                    promo_name,
+                    start_date,
+                    end_date
+                )
+                VALUES (%s, %s, %s, %s)
+            """, [
+                ticket_id,
+                promo_name,
+                start_date,
+                end_date
+            ])
 
         # =====================
         # SAVE FILES
