@@ -775,95 +775,77 @@ def adjust_form(request):
 
 
 def app_form(request):
+
     # =========================
     # CHECK LOGIN
     # =========================
     if "user" not in request.session:
         return redirect("login")
 
+    user = request.session["user"]
+    user_id = user["id"]
+    requester_name = user.get("full_name") or user.get("username", "")
+
     # =========================
-    # GET USER_PERMISSION ID
-    # =========================
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT id
-            FROM tickets.user_permission
-            WHERE erp_user_id = %s
-              AND active = true
-        """, [request.session["user"]["id"]])
-        row = cursor.fetchone()
-
-    if not row:
-        messages.error(request, "ไม่พบสิทธิ์ผู้ใช้งาน")
-        return redirect("login")
-
-    user_permission_id = row[0]
-
-    # POST = SAVE DATA
+    # POST
     # =========================
     if request.method == "POST":
 
-        # -------------------------
-        # FORM DATA
-        # -------------------------
-        app_type = request.POST.get("app_type")  # new / update
-        deadline_raw = request.POST.get("deadline")
-        app_detail = request.POST.get("app_detail", "")
-        objective = request.POST.get("objective", "")
+        app_type = request.POST.get("app_type")           # new / update
         department = request.POST.get("department", "").strip()
+        app_detail = request.POST.get("app_detail", "").strip()
+        objective = request.POST.get("objective", "").strip()
+        deadline_raw = request.POST.get("deadline")
+
         if not department:
             messages.error(request, "กรุณาระบุแผนก")
             return render(request, "tickets_form/app_form.html")
 
-        # -------------------------
-        # DESCRIPTION (🔧 สำคัญ)
-        # -------------------------
-        description = f"{app_detail}\n\nวัตถุประสงค์:\n{objective}"
-
-        # -------------------------
-        # DUE DATE (datetime-local → aware)
-        # -------------------------
-        due_date = None
-        if deadline_raw:
-            try:
-                # <input type="datetime-local">
-                naive_dt = datetime.strptime(deadline_raw, "%Y-%m-%dT%H:%M")
-
-                # ทำให้เป็น timezone-aware (Asia/Bangkok)
-                due_date = timezone.make_aware(
-                    naive_dt,
-                    timezone.get_current_timezone()
-                )
-
-            except ValueError:
-                messages.error(request, "รูปแบบวันเวลาไม่ถูกต้อง")
-                return redirect("app_form")
-
-        # -------------------------
-        # TITLE + FLAG + TICKET TYPE
-        # -------------------------
+        # =========================
+        # TITLE + TYPE
+        # =========================
         if app_type == "new":
             title = "Request Application (New)"
             app_new = True
             app_edit = False
-            ticket_type_id = 9   # จัดทำ Application ใหม่
-
+            ticket_type_id = 9
         elif app_type == "update":
             title = "Request Application (Update)"
             app_new = False
             app_edit = True
-            ticket_type_id = 10  # ปรับปรุง Application เดิม
-
+            ticket_type_id = 10
         else:
             messages.error(request, "ประเภทคำขอไม่ถูกต้อง")
-            return redirect("app_form")
+            return render(request, "tickets_form/app_form.html")
 
-        status_id = 1  # รอดำเนินการ
+        status_id = 1  # Waiting
 
         # =========================
-        # INSERT tickets
+        # DESCRIPTION
         # =========================
+        # เก็บเฉพาะรายละเอียด application
+        description = app_detail
+
+        # =========================
+        # DUE DATE
+        # =========================
+        due_date = None
+        if deadline_raw:
+            try:
+                naive_dt = datetime.strptime(deadline_raw, "%Y-%m-%dT%H:%M")
+                due_date = timezone.make_aware(
+                    naive_dt,
+                    timezone.get_current_timezone()
+                )
+            except ValueError:
+                messages.error(request, "รูปแบบวันเวลาไม่ถูกต้อง")
+                return render(request, "tickets_form/app_form.html")
+
         with connection.cursor() as cursor:
+
+            # =========================
+            # 1) INSERT tickets.tickets
+            # =========================
             cursor.execute("""
                 INSERT INTO tickets.tickets
                 (
@@ -881,20 +863,19 @@ def app_form(request):
             """, [
                 title,
                 description,
-                user_permission_id,
+                user_id,          # ✅ user จริง
                 status_id,
                 ticket_type_id,
-                department,        # ✅ เพิ่มตรงนี้
-                timezone.now(),    # create_at (UTC)
-                due_date           # due_date
+                department,
+                timezone.now(),
+                due_date
             ])
 
             ticket_id = cursor.fetchone()[0]
 
-        # =========================
-        # INSERT ticket_data_erp_app
-        # =========================
-        with connection.cursor() as cursor:
+            # =========================
+            # 2) INSERT ticket_data_erp_app
+            # =========================
             cursor.execute("""
                 INSERT INTO tickets.ticket_data_erp_app
                 (
@@ -902,22 +883,26 @@ def app_form(request):
                     app_new,
                     app_edit,
                     old_value,
-                    new_value
+                    new_value,
+                    requester_names,
+                    target_date
                 )
-                VALUES (%s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, [
                 ticket_id,
                 app_new,
                 app_edit,
-                objective if app_edit else None,
-                app_detail
+                None,                 # ❌ ไม่ใช้ old_value
+                objective or None,    # ✅ เก็บ objective ไว้ใน new_value
+                requester_name,
+                timezone.now().date()
             ])
 
         messages.success(request, "ส่งคำร้อง Request Application เรียบร้อยแล้ว")
         return redirect("ticket_success")
 
     # =========================
-    # GET = SHOW FORM
+    # GET
     # =========================
     return render(request, "tickets_form/app_form.html")
 
