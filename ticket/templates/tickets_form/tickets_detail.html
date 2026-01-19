@@ -1,70 +1,186 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}รายการคำขอ{% endblock %}
+{% block title %}รายละเอียดคำขอ | Ticket System{% endblock %}
 
 {% block content %}
-
 <div class="dashboard-table shadow-sm p-4 bg-white rounded">
 
-    <h4 class="fw-bold mb-3">
-        <i class="fas fa-ticket-alt me-2"></i> รายการคำขอทั้งหมด
-    </h4>
+    <!-- ================= HEADER ================= -->
+    <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap">
+        <div>
+            <h4 class="fw-bold text-primary mb-1">
+                <i class="fas fa-ticket-alt me-2"></i>
+                รายละเอียดคำขอ #{{ ticket.id }}
+            </h4>
+            <p class="text-muted mb-0">{{ ticket.title }}</p>
+        </div>
 
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th class="text-center" style="width:90px;">รหัส</th>
-                    <th>หัวข้อ</th>
-                    <th>ประเภท</th>
-                    <th>แผนก</th>
-                    <th>วันที่</th>
-                    <th class="text-center">สถานะ</th>
-                    <th>ผู้รับผิดชอบ</th>
-                    <th class="text-end">การทำงาน</th>
-                </tr>
-            </thead>
-
-            <tbody>
-            {% for t in tickets %}
-                <tr data-href="{% url 'tickets_detail' t.id %}" style="cursor:pointer;">
-                    <td class="text-center">{{ t.id }}</td>
-                    <td>{{ t.title }}</td>
-                    <td>{{ t.ticket_type_name }}</td>
-                    <td>{{ t.department }}</td>
-                    <td>{{ t.create_at|date:"d/m/Y H:i" }}</td>
-                    <td class="text-center">
-                        <span class="badge bg-info">{{ t.status_name }}</span>
-                    </td>
-                    <td>{{ t.assigned_to|default:"-" }}</td>
-                    <td class="text-end">
-                        <a href="{% url 'tickets_detail' t.id %}"
-                           class="btn btn-sm btn-primary">
-                            ดูรายละเอียด
-                        </a>
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="8" class="text-center text-muted py-4">
-                        ไม่มีข้อมูลคำขอ
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+        <span class="badge px-3 py-2
+            {% if ticket.status == 'รอดำเนินการ' %} bg-warning-subtle text-warning
+            {% elif ticket.status == 'อนุมัติแล้ว' %} bg-success-subtle text-success
+            {% elif ticket.status == 'ไม่อนุมัติ' %} bg-danger-subtle text-danger
+            {% else %} bg-secondary-subtle text-secondary {% endif %}
+        ">
+            {{ ticket.status }}
+        </span>
     </div>
+
+    <!-- ================= SUMMARY ================= -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="p-3 bg-light rounded border h-100">
+                <div class="text-muted small">ผู้แจ้ง</div>
+                <div class="fw-semibold">{{ ticket.requester }}</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="p-3 bg-light rounded border h-100">
+                <div class="text-muted small">ประเภท</div>
+                <div class="fw-semibold">{{ ticket.ticket_type }}</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="p-3 bg-light rounded border h-100">
+                <div class="text-muted small">แผนก</div>
+                <div class="fw-semibold">{{ ticket.department|default:"-" }}</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="p-3 bg-light rounded border h-100">
+                <div class="text-muted small">วันที่สร้าง</div>
+                <div class="fw-semibold">{{ ticket.create_at }}</div>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ================= COMMON DESCRIPTION ================= -->
+    <h5 class="fw-bold mb-3">
+        <i class="fas fa-align-left me-2"></i>รายละเอียดคำขอ
+    </h5>
+
+    <div class="p-3 bg-light rounded border mb-4">
+        {{ ticket.description|linebreaksbr }}
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- ================= DETAIL BY TYPE =================== -->
+    <!-- ===================================================== -->
+
+    {% if detail_type == "ERP_APP" %}
+    <h5 class="fw-bold mb-3"><i class="fas fa-database me-2"></i>ข้อมูล ERP</h5>
+
+    <table class="table table-bordered">
+        <tr>
+            <th width="30%">ชื่อผู้ขอ</th>
+            <td>{{ detail.requester_names|linebreaksbr }}</td>
+        </tr>
+
+        {% if detail.module_name %}
+        <tr>
+            <th>Module ที่ขอ</th>
+            <td>{{ detail.module_name|linebreaksbr }}</td>
+        </tr>
+        {% endif %}
+
+        {% if detail.report_access %}
+        <tr>
+            <th>ข้อมูลรายงาน</th>
+            <td>{{ detail.new_value|linebreaksbr }}</td>
+        </tr>
+        {% endif %}
+
+        {% if detail.app_new %}
+        <tr>
+            <th>ประเภท</th>
+            <td>ขอพัฒนา Application ใหม่</td>
+        </tr>
+        {% endif %}
+
+        {% if detail.app_edit %}
+        <tr>
+            <th>เหตุผล / Objective</th>
+            <td>{{ detail.new_value|linebreaksbr }}</td>
+        </tr>
+        {% endif %}
+    </table>
+    {% endif %}
+
+    {% if detail_type == "VPN" %}
+    <h5 class="fw-bold mb-3"><i class="fas fa-network-wired me-2"></i>ข้อมูล VPN</h5>
+
+    <table class="table table-bordered">
+        <tr>
+            <th width="30%">ช่วงเวลาใช้งาน</th>
+            <td>{{ detail.start_date }} - {{ detail.end_date }}</td>
+        </tr>
+        <tr>
+            <th>ผู้ใช้งาน VPN</th>
+            <td>{{ detail.uservpn|linebreaksbr }}</td>
+        </tr>
+        <tr>
+            <th>เหตุผล</th>
+            <td>{{ detail.vpn_reason|linebreaksbr }}</td>
+        </tr>
+    </table>
+    {% endif %}
+
+    {% if detail_type == "BUILDING_REPAIR" %}
+    <h5 class="fw-bold mb-3"><i class="fas fa-tools me-2"></i>แจ้งซ่อมอาคาร</h5>
+
+    <table class="table table-bordered">
+        <tr>
+            <th width="30%">อาคาร</th>
+            <td>{{ detail.building }}</td>
+        </tr>
+        <tr>
+            <th>แผนก</th>
+            <td>{{ detail.department }}</td>
+        </tr>
+        <tr>
+            <th>ปัญหา</th>
+            <td>{{ detail.problem_detail|linebreaksbr }}</td>
+        </tr>
+    </table>
+    {% endif %}
+
+    {% if detail_type == "ADJUST" %}
+    <h5 class="fw-bold mb-3"><i class="fas fa-coins me-2"></i>ข้อมูลการปรับยอด</h5>
+
+    <table class="table table-bordered">
+        <tr>
+            <th width="30%">ประเภท</th>
+            <td>{{ detail.adj_category }}</td>
+        </tr>
+        <tr>
+            <th>ลูกค้าต้นทาง</th>
+            <td>{{ detail.source_cust }}</td>
+        </tr>
+        <tr>
+            <th>จำนวน</th>
+            <td>{{ detail.amount }}</td>
+        </tr>
+
+        {% if detail.target_cust %}
+        <tr>
+            <th>ลูกค้าปลายทาง</th>
+            <td>{{ detail.target_cust }}</td>
+        </tr>
+        {% endif %}
+    </table>
+    {% endif %}
+
+    <!-- ================= FOOTER ================= -->
+    <div class="text-end mt-4 border-top pt-3">
+        <a href="/tickets" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> กลับหน้ารายการ
+        </a>
+    </div>
+
 </div>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll("tr[data-href]").forEach(row => {
-        row.addEventListener("click", function () {
-            window.location.href = this.dataset.href;
-        });
-    });
-});
-</script>
-
 {% endblock %}

@@ -106,7 +106,8 @@
 
 <tbody>
 {% for t in tickets %}
-<tr data-href="{% url 'tickets_detail' %}?id={{ t.id }}">
+<tr data-href="{% url 'tickets_detail' t.id %}">
+
 
     <td class="text-center fw-bold text-muted">#{{ t.id }}</td>
 
@@ -154,7 +155,9 @@
     </td>
 
     <td class="text-end">
-        <a href="{% url 'tickets_detail' %}?id={{ t.id }}"
+        <tr data-href="{% url 'tickets_detail' t.id %}">
+
+
            class="action-btn">
             <i class="fas fa-chevron-right"></i>
         </a>

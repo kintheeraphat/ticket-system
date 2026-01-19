@@ -501,7 +501,11 @@ def borrows(req):
     return render(req,'tickets_form/borrows.html')
 
 def tickets_detail(request, ticket_id):
-
+    
+    if ticket_id is None:
+        ticket_id = request.GET.get("id")
+        if not ticket_id:
+            return redirect("tickets_list")
     if "user" not in request.session:
         return redirect("login")
 
