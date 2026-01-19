@@ -568,50 +568,52 @@ input[type="file"] {
 /* =======================
    FILE PREVIEW
 ======================= */
-
 .file-thumb {
   position: relative;
-  width: 140px;
-  height: 170px;
-  border: 1px solid #dee2e6;
-  border-radius: 10px;
-  padding: 8px;
-  background: #fff;
-  text-align: center;
-}
-
-.file-thumb .remove-btn {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 22px;
-  height: 22px;
-
-  background-color: #dc3545;
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-
-  font-size: 16px;
-  line-height: 22px;
-  font-weight: bold;
+  width: 120px;
+  height: 120px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
   cursor: pointer;
-  z-index: 999;
+  background: #f8f9fa;
 }
 
 .file-thumb img,
 .file-thumb canvas {
-  max-width: 100%;
-  max-height: 95px;
-  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.filename {
+.file-thumb .filename {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   font-size: 11px;
-  margin-top: 6px;
+  background: rgba(0,0,0,.6);
+  color: #fff;
+  padding: 2px 4px;
+  text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.file-thumb .remove-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 12px;
+  line-height: 18px;
+  cursor: pointer;
 }
 
 

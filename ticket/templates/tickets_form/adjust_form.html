@@ -3,32 +3,26 @@
 {% block title %}ERP Point Adjustment Request{% endblock %}
 
 {% block content %}
-<form method="post" enctype="multipart/form-data">
+<form method="post" enctype="multipart/form-data" id="adjustForm">
 {% csrf_token %}
 
-<div class="dashboard-table shadow-sm p-4 bg-white rounded" id="print-area">
-  <!-- =======================
-        Header
-  ======================== -->
+<div class="dashboard-table shadow-sm p-4 bg-white rounded">
+
+  <!-- HEADER -->
   <div class="mb-4">
     <h4 class="fw-bold text-primary mb-1">
-      <i class="fas fa-sliders-h me-2"></i>ขอปรับยอดสะสมในระบบ
+      <i class="fas fa-sliders-h me-2"></i>ขอปรับยอดสะสมในระบบ ERP
     </h4>
     <p class="text-muted small">
-      ใช้สำหรับขอปรับยอด แก้ไข หรือโอนคะแนนสะสมในระบบ ERP
+      ใช้สำหรับขอปรับยอด แก้ไข หรือโอนคะแนนสะสม
     </p>
   </div>
 
-  <!-- =======================
-        ประเภทการปรับยอด
-  ======================== -->
+  <!-- TYPE -->
   <div class="mb-4 p-3 bg-light rounded border">
-    <label class="fw-bold mb-2 d-block">
-      <i class="fas fa-list-ul me-2"></i>ประเภทการปรับยอด
-    </label>
-
-    <select class="form-select w-50 print-input" name="adj_category" required>
-      <option value="">-- เลือกประเภทการปรับยอด --</option>
+    <label class="fw-bold mb-2 d-block">ประเภทการปรับยอด</label>
+    <select class="form-select w-50" name="adj_category" required>
+      <option value="">-- เลือกประเภท --</option>
       <option value="5">ยอดยกจากเดิม</option>
       <option value="6">แก้ไขยอด</option>
       <option value="7">โอนระหว่างร้าน</option>
@@ -36,137 +30,106 @@
     </select>
   </div>
 
-  <!-- =======================
-         ต้นทาง / ปลายทาง
-  ======================== -->
-  <div class="row g-4">
-    <!-- ต้นทาง -->
-    <div class="col-md-6">
-      <div class="p-3 border rounded h-100">
-        <h6 class="fw-bold mb-3">ต้นทาง</h6>
-
-        <label class="form-label">รหัสลูกค้า</label>
-        <input class="form-control print-input" name="source_cust" />
-
-        <label class="form-label">ชื่อลูกค้า</label>
-        <input class="form-control print-input" />
-
-        <label class="form-label mt-2">รหัส Promotion</label>
-        <input class="form-control print-input" />
-
-        <label class="form-label mt-2">ชื่อ Promotion</label>
-        <input class="form-control print-input" name="promo_info" />
-
-        <label class="form-label mt-2">ชื่อ Earn Master</label>
-        <input class="form-control print-input" name="earn_master" />
-
-        <label class="form-label mt-2">จำนวน</label>
-        <input class="form-control print-input"
-               type="number"
-               step="0.01"
-               name="amount"
-               required />
-      </div>
-    </div>
-
-    <!-- ปลายทาง -->
-    <div class="col-md-6">
-      <div class="p-3 border rounded h-100 bg-light">
-        <h6 class="fw-bold mb-3">ปลายทาง</h6>
-
-        <label class="form-label">รหัสลูกค้า</label>
-        <input class="form-control print-input" name="target_cust" />
-
-        <label class="form-label">ชื่อลูกค้า</label>
-        <input class="form-control print-input" name="target_customer_name"/>
-
-        <label class="form-label mt-2">รหัส Promotion</label>
-        <input class="form-control print-input" name="target_promo_code"/>
-
-        <label class="form-label mt-2">ชื่อ Promotion</label>
-        <input class="form-control print-input" name="target_promo_name"/>
-
-        <label class="form-label mt-2">ชื่อ Earn Master</label>
-        <input class="form-control print-input" name="target_earn_master"/>
-
-        <label class="form-label mt-2">จำนวน</label>
-        <input class="form-control print-input" name="target_amount"/>
-      </div>
-    </div>
+  <!-- SOURCE -->
+  <h6 class="fw-bold mb-2">รายการปรับยอด : ต้นทาง</h6>
+  <div class="table-responsive mb-4">
+    <table class="table table-bordered text-center" id="sourceTable">
+      <thead class="table-light">
+        <tr>
+          <th>รหัสลูกค้า</th>
+          <th>ชื่อลูกค้า</th>
+          <th>Promotion</th>
+          <th>Earn Master</th>
+          <th>จำนวน</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input class="form-control" name="source_cust[]" /></td>
+          <td><input class="form-control" name="source_customer_name[]" /></td>
+          <td><input class="form-control" name="promo_info[]" /></td>
+          <td><input class="form-control" name="earn_master[]" /></td>
+          <td><input class="form-control" type="number" step="0.01" name="amount[]" /></td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
-  <!-- =======================
-         หมายเหตุ
-  ======================== -->
-  <div class="mt-4">
+  <!-- TARGET -->
+  <h6 class="fw-bold mb-2">รายการปรับยอด : ปลายทาง</h6>
+  <div class="table-responsive">
+    <table class="table table-bordered text-center" id="targetTable">
+      <thead class="table-light">
+        <tr>
+          <th>รหัสลูกค้า</th>
+          <th>ชื่อลูกค้า</th>
+          <th>Promotion</th>
+          <th>Earn Master</th>
+          <th>จำนวน</th>
+          <th width="60"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input class="form-control" name="target_cust[]" /></td>
+          <td><input class="form-control" name="target_customer_name[]" /></td>
+          <td><input class="form-control" name="target_promo_name[]" /></td>
+          <td><input class="form-control" name="target_earn_master[]" /></td>
+          <td><input class="form-control" type="number" step="0.01" name="target_amount[]" /></td>
+          <td>
+            <button type="button" class="btn btn-outline-danger btn-sm remove-row">&times;</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <button type="button" class="btn btn-outline-primary btn-sm my-3" id="addRow">
+    <i class="fas fa-plus me-1"></i> เพิ่มรายการ
+  </button>
+
+  <!-- REMARK -->
+  <div class="mb-4">
     <label class="fw-bold mb-2">หมายเหตุ</label>
-    <textarea class="form-control print-input" rows="3" name="remark"></textarea>
+    <textarea class="form-control" rows="3" name="remark"></textarea>
   </div>
 
-  <!-- =======================
-         Attachment
-  ======================== -->
+  <!-- FILE -->
   <div class="mb-4">
     <label class="fw-bold mb-2 d-block">
-      <i class="fas fa-paperclip me-1"></i>เอกสารแนบ(ต้องแนบไฟล์ที่เกี่ยวข้อง เช่น ใบแจ้งยอดสะสม ฯลฯ)
+      <i class="fas fa-paperclip me-1"></i>เอกสารแนบ (ไม่เกิน 3 ไฟล์)
     </label>
 
     <input
       type="file"
-      class="form-control w-50"
-      name="attachments[]"
+      class="form-control"
       multiple
+      accept="image/*,application/pdf"
+      onchange="handleFiles(this)"
     />
 
     <div id="filePreview" class="mt-3 d-flex gap-3 flex-wrap"></div>
   </div>
 
-  <!-- =======================
-         ปุ่ม
-  ======================== -->
-  <div class="text-end mt-4 border-top pt-3 no-print">
-    <button
-      type="button"
-      class="btn btn-outline-secondary me-2"
-      onclick="printForm()"
-    >
-      <i class="fas fa-print me-1"></i>พิมพ์เอกสาร
-    </button>
-
-    <button
-      type="button"
-      class="btn btn-outline-secondary me-2"
-      onclick="history.back()"
-    >
-      <i class="fas fa-arrow-left me-1"></i> กลับ
-    </button>
-
-    <button type="submit" class="btn btn-primary px-5 fw-bold">
-      ส่งคำร้อง
-    </button>
+  <!-- BUTTON -->
+  <div class="text-end border-top pt-3">
+    <button type="button" class="btn btn-outline-secondary me-2" onclick="saveDraft()">💾 บันทึกร่าง</button>
+    <button type="submit" class="btn btn-primary px-5 fw-bold">ส่งคำร้อง</button>
   </div>
+
 </div>
 </form>
 
-<!-- =======================
-     Modal Preview
-======================== -->
+<!-- MODAL -->
 <div class="modal fade" id="fileModal" tabindex="-1">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h6 class="modal-title">เอกสารแนบ</h6>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-        ></button>
+        <h6 class="modal-title">ดูเอกสารแนบ</h6>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body">
-        <iframe
-          id="previewFrame"
-          style="width: 100%; height: 80vh; border: none"
-        ></iframe>
+      <div class="modal-body p-0">
+        <iframe id="previewFrame" style="width:100%;height:80vh;border:none"></iframe>
       </div>
     </div>
   </div>
@@ -175,5 +138,10 @@
 
 {% block extra_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="{% static 'script/script.js' %}"></script>
+<script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+</script>
+<script src="{% static 'script/adjust_form.js' %}"></script>
 {% endblock %}
+ 
