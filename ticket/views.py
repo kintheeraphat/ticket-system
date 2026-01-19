@@ -920,57 +920,48 @@ def app_form(request):
     # GET = SHOW FORM
     # =========================
     return render(request, "tickets_form/app_form.html")
+
 def report_form(request):
+
+    # =========================
+    # CHECK LOGIN
+    # =========================
     if "user" not in request.session:
         return redirect("login")
 
-    # =========================
-    # GET USER_PERMISSION ID
-    # =========================
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT id
-            FROM tickets.user_permission
-            WHERE erp_user_id = %s
-              AND active = true
-        """, [request.session["user"]["id"]])
-        row = cursor.fetchone()
-
-    if not row:
-        messages.error(request, "ไม่พบสิทธิ์ผู้ใช้งาน")
-        return redirect("login")
-
-    user_permission_id = row[0]
+    user = request.session["user"]
+    user_id = user["id"]
+    requester_name = user.get("full_name") or user.get("username", "")
 
     # =========================
-    # POST = SAVE DATA
+    # POST
     # =========================
     if request.method == "POST":
 
-        report_detail = request.POST.get("report_detail", "")
-        report_objective = request.POST.get("report_objective", "")
-        report_fields = request.POST.get("report_fields", "")
         department = request.POST.get("department", "").strip()
+        report_detail = request.POST.get("report_detail", "").strip()
+        report_objective = request.POST.get("report_objective", "").strip()
+        report_fields = request.POST.get("report_fields", "").strip()
 
         if not department:
             messages.error(request, "กรุณาระบุแผนก")
             return render(request, "tickets_form/report_form.html")
 
+        # =========================
+        # BASIC TICKET INFO
+        # =========================
         title = "Request Report / ERP Data"
+        status_id = 1        # Waiting
+        ticket_type_id = 11  # Report
 
-        description = (
-            f"รายละเอียดรายงาน:\n{report_detail}\n\n"
-            f"วัตถุประสงค์:\n{report_objective}\n\n"
-            f"ข้อมูลที่ต้องการ:\n{report_fields}"
-        )
+        # description เก็บเฉพาะ report_detail
+        description = report_detail
 
-        status_id = 1          # รอดำเนินการ
-        ticket_type_id = 11    # คำขอรายงาน
-
-        # =========================
-        # INSERT tickets
-        # =========================
         with connection.cursor() as cursor:
+
+            # =========================
+            # 1) INSERT tickets.tickets
+            # =========================
             cursor.execute("""
                 INSERT INTO tickets.tickets
                 (
@@ -987,22 +978,46 @@ def report_form(request):
             """, [
                 title,
                 description,
-                user_permission_id,
+                user_id,
                 status_id,
                 ticket_type_id,
                 department,
-                timezone.now()   # UTC
+                timezone.now()
             ])
 
             ticket_id = cursor.fetchone()[0]
+
+            # =========================
+            # 2) INSERT ticket_data_erp_app
+            # =========================
+            cursor.execute("""
+                INSERT INTO tickets.ticket_data_erp_app
+                (
+                    ticket_id,
+                    report_access,
+                    old_value,
+                    new_value,
+                    requester_names,
+                    target_date
+                )
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, [
+                ticket_id,
+                True,                       # report_access
+                report_fields or None,      # old_value
+                report_detail or None,      # new_value
+                requester_name,
+                timezone.now().date()
+            ])
 
         messages.success(request, "ส่งคำร้องขอรายงานเรียบร้อยแล้ว")
         return redirect("ticket_success")
 
     # =========================
-    # GET = SHOW FORM
+    # GET
     # =========================
     return render(request, "tickets_form/report_form.html")
+
 
 def active_promotion_form(request):
 

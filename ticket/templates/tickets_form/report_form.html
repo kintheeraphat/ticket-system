@@ -14,6 +14,7 @@
   <form method="post">
     {% csrf_token %}
 
+    <!-- Department -->
     <div class="mb-3">
       <label class="form-label">แผนก</label>
       <input
@@ -25,7 +26,7 @@
       >
     </div>
 
-
+    <!-- Report Detail (ใช้เป็น description) -->
     <div class="mb-3">
       <label class="form-label">รายละเอียดรายงานที่ต้องการ</label>
       <textarea
@@ -36,6 +37,7 @@
       ></textarea>
     </div>
 
+    <!-- Objective (ไม่เก็บใน tickets) -->
     <div class="mb-3">
       <label class="form-label">วัตถุประสงค์ของรายงาน</label>
       <textarea
@@ -45,6 +47,7 @@
       ></textarea>
     </div>
 
+    <!-- Fields / Condition -->
     <div class="mb-4">
       <label class="form-label">ข้อมูลที่ต้องการ (Field / เงื่อนไข)</label>
       <textarea
