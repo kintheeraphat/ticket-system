@@ -203,6 +203,7 @@ def tickets_list(request):
             t.description,
             c.name AS category,
             tt.name AS ticket_type,
+            t.ticket_type_id,
             u.username AS requester,
             a.username AS assignee,
             t.create_at,
@@ -264,10 +265,11 @@ def tickets_list(request):
             "description": row[2],
             "category": row[3],          # ✅ เพิ่ม
             "ticket_type": row[4],       # เดิม
-            "requester": row[5],
-            "assignee": row[6] or "ยังไม่มอบหมาย",
+            "ticket_type_id": row[5],
+            "requester": row[6],
+            "assignee": row[7] or "ยังไม่มอบหมาย",
             "created_at": created_at,
-            "status": row[8]
+            "status": row[9]
         })
 
 
@@ -652,6 +654,142 @@ def tickets_detail_vpn(request, ticket_id):
         }
     })
 
+def tickets_detail_repairs(request, ticket_id):
+    query = """
+        SELECT
+            t.id,
+            t.title,
+            t.description,
+            t.create_at,
+            u.full_name,
+            b.department,
+            t.ticket_type_id,
+            b.problem_detail,
+            b.building
+        FROM tickets.ticket_data_building_repair b
+        JOIN tickets.tickets t ON t.id = b.ticket_id
+        JOIN tickets.users u ON u.erp_user_id = t.user_id
+        WHERE t.id = %s
+    """
+
+    with connection.cursor() as cursor:
+        cursor.execute(query, [ticket_id])
+        row = cursor.fetchone()
+
+    if not row:
+        return render(request, "404.html", status=404)
+
+    created_at = row[3]
+    if created_at and timezone.is_naive(created_at):
+        created_at = timezone.make_aware(created_at, dt_timezone.utc)
+    created_at = timezone.localtime(created_at)
+
+    detail = {
+        "id": row[0],
+        "title": row[1],
+        "description": row[2],
+        "created_at": created_at,
+        "full_name": row[4],
+        "department": row[5],
+        "ticket_type_id": row[6],
+        "problem_detail": row[7],
+        "building": row[8],
+    }
+
+    return render(request, "tickets_form/tickets_detail_repairs.html", {
+        "detail": detail
+    })
+
+def tickets_detail_report(request, ticket_id):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                t.id            AS ticket_id,
+                t.title,
+                t.description,
+                t.create_at     AS ticket_create_at,
+                u.full_name,
+                t.department,
+                t.ticket_type_id,
+                e.old_value,
+                e.new_value
+            FROM tickets.ticket_data_erp_app e
+            JOIN tickets.tickets t ON t.id = e.ticket_id
+            JOIN tickets.users u ON u.erp_user_id = t.user_id
+            WHERE e.report_access IS TRUE
+              AND t.id = %s
+        """, [ticket_id])
+
+        data = dictfetchone(cursor)
+
+        if not data:
+            raise Http404("Report ticket not found")
+
+    # เวลา
+    created_at = data["ticket_create_at"]
+    if created_at and timezone.is_naive(created_at):
+        created_at = timezone.make_aware(created_at, dt_timezone.utc)
+    created_at = timezone.localtime(created_at)
+
+    return render(request, "tickets_form/tickets_detail_report.html", {
+        "ticket": {
+            "id": data["ticket_id"],
+            "title": data["title"],
+            "description": data["description"],
+            "create_at": created_at,
+            "user_name": data["full_name"],
+            "department": data["department"],
+        },
+        "detail": {
+            "old_value": data["old_value"],
+            "new_value": data["new_value"],
+        }
+    })
+def tickets_detail_newapp(request, ticket_id):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                t.id            AS ticket_id,
+                t.title,
+                t.description,
+                t.create_at     AS ticket_create_at,
+                u.full_name,
+                t.department,
+                t.ticket_type_id,
+                n.new_value 
+            FROM tickets.ticket_data_erp_app n
+            JOIN tickets.tickets t ON t.id = n.ticket_id
+            JOIN tickets.users u ON u.erp_user_id = t.user_id
+            WHERE t.id = %s
+        """, [ticket_id])
+
+        data = dictfetchone(cursor)
+
+        if not data:
+            raise Http404("New App ticket not found")
+
+    # timezone
+    created_at = data["ticket_create_at"]
+    if created_at and timezone.is_naive(created_at):
+        created_at = timezone.make_aware(created_at, dt_timezone.utc)
+    created_at = timezone.localtime(created_at)
+
+    return render(request, "tickets_form/tickets_detail_newapp.html", {
+        "ticket": {
+            "id": data["ticket_id"],
+            "title": data["title"],
+            "description": data["description"],
+            "create_at": created_at,
+            "user_name": data["full_name"],
+            "department": data["department"],
+        },
+        "detail": {
+            "new_value": data["new_value"],
+        }
+    })
+    
+    
+    
 def repairs_form(request):
     if request.method == "POST":
 
@@ -698,7 +836,7 @@ def repairs_form(request):
         with connection.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO tickets.ticket_data_building_repair
-                (ticket_id, user_id, problem_detail, department, building, create_at)
+                (ticket_id, user_id, problem_detail, department, building, created_at)
                 VALUES (%s, %s, %s, %s, %s, %s)
             """, [
                 ticket_id,
@@ -967,7 +1105,7 @@ def app_form(request):
                     app_edit,
                     old_value,
                     new_value,
-                    target_date
+                    end_date
                 )
                 VALUES (%s, %s, %s, %s, %s, %s)
             """, [

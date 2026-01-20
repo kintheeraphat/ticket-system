@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load tz %}
+
+{% block title %}รายละเอียดแจ้งซ่อมอาคาร{% endblock %}
+
+{% block content %}
+<main class="main-content">
+
+    <div class="container mt-4">
+
+        <h3 class="fw-bold mb-3">รายละเอียดแจ้งซ่อมอาคาร</h3>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>เลขที่คำขอ</strong><br>
+                        #{{ detail.id }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>วันที่แจ้ง</strong><br>
+                        {{ detail.created_at|localtime|date:"d M Y H:i" }} น.
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="mb-3">
+                    <strong>ผู้แจ้ง</strong><br>
+                    {{ detail.full_name }}
+                </div>
+
+                <div class="mb-3">
+                    <strong>แผนก</strong><br>
+                    {{ detail.department }}
+                </div>
+
+                <div class="mb-3">
+                    <strong>อาคาร</strong><br>
+                    {{ detail.building }}
+                </div>
+
+                <div class="mb-3">
+                    <strong>หัวข้อ</strong><br>
+                    {{ detail.title }}
+                </div>
+
+                <div class="mb-3">
+                    <strong>รายละเอียดปัญหา</strong>
+                    <div class="border rounded p-3 bg-light mt-1">
+                        {{ detail.problem_detail|linebreaksbr }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <a href="{% url 'tickets' %}" class="btn btn-outline-secondary">
+            ← กลับหน้ารายการ
+        </a>
+
+    </div>
+
+</main>
+{% endblock %}

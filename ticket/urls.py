@@ -12,9 +12,9 @@ urlpatterns = [
     # path("tickets/detail/", views.tickets_detail),
     path("tickets/detail/erp/<int:ticket_id>/", views.tickets_detail_erp, name="tickets_detail_erp"),
     path("tickets/detail/vpn/<int:ticket_id>/", views.tickets_detail_vpn, name="tickets_detail_vpn"),
-
-
-
+    path("tickets/detail/repairs/<int:ticket_id>/",views.tickets_detail_repairs,name="tickets_detail_repairs"),
+    path("tickets/detail/report/<int:ticket_id>/",views.tickets_detail_report,name="tickets_detail_report"),
+    path("tickets/detail/app/<int:ticket_id>/",views.tickets_detail_newapp,name="tickets_detail_newapp"),
     path("create/", views.tickets_create, name="create"),
     path("create/erp-perm/", views.erp_perm, name="erp_perm"),
     path("create/repairs/", views.repairs_form, name="repairs_form"),

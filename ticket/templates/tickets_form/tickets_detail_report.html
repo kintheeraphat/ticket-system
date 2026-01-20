@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load tz %}
+
+{% block title %}รายละเอียดคำขอรายงาน{% endblock %}
+
+{% block content %}
+<main class="main-content">
+
+    <div class="dashboard-card">
+
+        <h3 class="fw-bold mb-3">
+            {{ ticket.title }}
+        </h3>
+
+        <p class="text-muted mb-4">
+            แจ้งโดย {{ ticket.user_name }}
+            {% if ticket.department %}
+                | แผนก {{ ticket.department }}
+            {% endif %}
+            <br>
+            วันที่ {{ ticket.create_at|localtime|date:"d M Y H:i" }} น.
+        </p>
+
+        <hr>
+
+        <div class="mb-4">
+            <h6 class="fw-semibold">รายละเอียดคำขอ</h6>
+            <p>{{ ticket.description|linebreaksbr }}</p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header fw-semibold">
+                        ค่าเดิม (Old Value)
+                    </div>
+                    <div class="card-body">
+                        <pre class="mb-0">{{ detail.old_value }}</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header fw-semibold">
+                        ค่าใหม่ (New Value)
+                    </div>
+                    <div class="card-body">
+                        <pre class="mb-0">{{ detail.new_value }}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <a href="{% url 'tickets' %}" class="btn btn-outline-secondary">
+                ← กลับหน้ารายการ
+            </a>
+        </div>
+
+    </div>
+
+</main>
+{% endblock %}

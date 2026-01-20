@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load tz %}
+{% block title %}รายละเอียดคำขอ New App{% endblock %}
+
+{% block content %}
+<main class="main-content">
+
+    <div class="dashboard-card">
+
+        <h3 class="fw-bold mb-3">{{ ticket.title }}</h3>
+
+        <div class="mb-2">
+            <strong>ผู้แจ้ง:</strong> {{ ticket.user_name }}
+        </div>
+
+        <div class="mb-2">
+            <strong>แผนก:</strong> {{ ticket.department }}
+        </div>
+
+        <div class="mb-2">
+            <strong>วันที่แจ้ง:</strong>
+            {{ ticket.create_at|localtime|date:"d M Y H:i" }} น.
+        </div>
+
+        <hr>
+
+        <div class="mb-3">
+            <strong>รายละเอียดคำขอ</strong>
+            <p class="mt-1">{{ ticket.description }}</p>
+        </div>
+        <div class="mb-3">
+            <strong>วัตถุประสงค์การใช้งาน</strong>
+            <p class="mt-1">{{ detail.new_value }}</p>
+        </div>
+
+        <a href="{% url 'tickets' %}" class="btn btn-secondary">
+            ← กลับหน้ารายการ
+        </a>
+
+    </div>
+
+</main>
+{% endblock %}
