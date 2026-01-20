@@ -7,7 +7,7 @@ from datetime import timezone as dt_timezone
 from datetime import date, timedelta
 from datetime import datetime
 from django.core.files.storage import FileSystemStorage
-import os
+import os,json
 from django.http import Http404
 
 def thai_date(d):
@@ -745,191 +745,104 @@ def repairs_form(request):
 
 
 def adjust_form(request):
-
-    # -----------------------------
-    # CHECK LOGIN (แบบเดียวกับ erp_perm)
-    # -----------------------------
     user = request.session.get("user")
     if not user:
         return redirect("login")
 
     if request.method == "POST":
 
-        # -----------------------------
-        # BASIC TICKET INFO
-        # -----------------------------
+        # ---------------- BASIC TICKET ----------------
         title = "ปรับยอดสะสม"
         description = request.POST.get("remark", "")
         user_id = user["id"]
         status_id = 1  # Waiting
+        ticket_type_id = int(request.POST.get("adj_category"))
 
-        # -----------------------------
-        # TICKET TYPE FROM DROPDOWN (INT)
-        # -----------------------------
-        ticket_type_id = request.POST.get("ticket_type_id")
-
-        if not ticket_type_id:
-            return render(request, "tickets_form/adjust_form.html", {
-                "error": "กรุณาเลือกประเภทการปรับยอด"
-            })
-
-        ticket_type_id = int(ticket_type_id)
-
-        # -----------------------------
-        # MAP TICKET TYPE → CATEGORY
-        # -----------------------------
         CATEGORY_MAP = {
             5: "ยอดยกจากเดิม",
             6: "แก้ไขยอด",
             7: "โอนระหว่างร้าน",
             8: "โอนระหว่างโปรโมชั่น",
         }
-
         adj_category = CATEGORY_MAP.get(ticket_type_id, "ไม่ระบุ")
 
-        source_cust_list = request.POST.getlist("source_cust[]")
-        promo_info_list = request.POST.getlist("promo_info[]")
-        earn_master_list = request.POST.getlist("earn_master[]")
-        amount_list = request.POST.getlist("amount[]")
+        # ---------------- GET LIST ----------------
+        source_cust = request.POST.getlist("source_cust[]")
+        source_name = request.POST.getlist("source_customer_name[]")
+        promo_info = request.POST.getlist("promo_info[]")
+        earn_master = request.POST.getlist("earn_master[]")
+        amount = request.POST.getlist("amount[]")
 
-        target_cust_list = request.POST.getlist("target_cust[]")
-        target_promo_name_list = request.POST.getlist("target_promo_name[]")
-        target_earn_master_list = request.POST.getlist("target_earn_master[]")
-        target_amount_list = request.POST.getlist("target_amount[]")
+        target_cust = request.POST.getlist("target_cust[]")
+        target_name = request.POST.getlist("target_customer_name[]")
+        target_promo = request.POST.getlist("target_promo_name[]")
+        target_earn = request.POST.getlist("target_earn_master[]")
+        target_amount = request.POST.getlist("target_amount[]")
 
+        # ---------------- BUILD ITEMS ----------------
+        items = []
+        for i in range(len(source_cust)):
+            if not (amount[i] or target_amount[i]):
+                continue
 
-        # -----------------------------
-        # VALIDATION
-        # -----------------------------
-        has_value = False
-        for a, ta in zip(amount_list, target_amount_list):
-            if (a and float(a) != 0) or (ta and float(ta) != 0):
-                has_value = True
-                break
-
-        if not has_value:
-            return render(request, "tickets_form/adjust_form.html", {
-                "error": "กรุณากรอกจำนวนอย่างน้อย 1 รายการ"
+            items.append({
+                "source": {
+                    "cust": source_cust[i],
+                    "name": source_name[i],
+                    "promo": promo_info[i],
+                    "earn_master": earn_master[i],
+                    "amount": float(amount[i] or 0),
+                },
+                "target": {
+                    "cust": target_cust[i],
+                    "name": target_name[i],
+                    "promo": target_promo[i],
+                    "earn_master": target_earn[i],
+                    "amount": float(target_amount[i] or 0),
+                }
             })
 
+        if not items:
+            return render(request, "tickets_form/adjust_form.html", {
+                "error": "กรุณากรอกอย่างน้อย 1 รายการ"
+            })
 
-        # -----------------------------
-        # INSERT tickets.tickets
-        # -----------------------------
+        # ---------------- INSERT TICKET ----------------
         with connection.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO tickets.tickets
-                (
-                    title,
-                    description,
-                    user_id,
-                    status_id,
-                    ticket_type_id
-                )
+                (title, description, user_id, status_id, ticket_type_id)
                 VALUES (%s, %s, %s, %s, %s)
                 RETURNING id
-            """, [
-                title,
-                description,
-                user_id,
-                status_id,
-                ticket_type_id
-            ])
+            """, [title, description, user_id, status_id, ticket_type_id])
             ticket_id = cursor.fetchone()[0]
 
-       # -----------------------------
-            # INSERT ticket_data_adjust (MULTI ROW)
-            # -----------------------------
-            with connection.cursor() as cursor:
-                for (
-                    source_cust,
-                    promo_info,
-                    earn_master,
-                    amount,
-                    target_cust,
-                    target_promo_name,
-                    target_earn_master,
-                    target_amount
-                ) in zip(
-                    source_cust_list,
-                    promo_info_list,
-                    earn_master_list,
-                    amount_list,
-                    target_cust_list,
-                    target_promo_name_list,
-                    target_earn_master_list,
-                    target_amount_list
-                ):
+        # ---------------- INSERT ADJUST DATA ----------------
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO tickets.ticket_data_adjust
+                (ticket_id, adj_category, items)
+                VALUES (%s, %s, %s)
+            """, [ticket_id, adj_category, json.dumps(items)])
 
-                    # ข้ามแถวที่ว่างทั้งหมด
-                    if not any([source_cust, promo_info, earn_master, amount,
-                                target_cust, target_promo_name, target_earn_master, target_amount]):
-                        continue
-
-                    cursor.execute("""
-                        INSERT INTO tickets.ticket_data_adjust
-                        (
-                            ticket_id,
-                            adj_category,
-
-                            source_cust,
-                            promo_info,
-                            earn_master,
-                            amount,
-
-                            target_cust,
-                            target_promo_name,
-                            target_earn_master,
-                            target_amount
-                        )
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    """, [
-                        ticket_id,
-                        adj_category,
-
-                        source_cust,
-                        promo_info,
-                        earn_master,
-                        amount or 0,
-
-                        target_cust,
-                        target_promo_name,
-                        target_earn_master,
-                        target_amount or 0
-                    ])
-
-
-        # -----------------------------
-        # UPLOAD FILES (เหมือน erp_perm)
-        # -----------------------------
+        # ---------------- FILE UPLOAD ----------------
         files = request.FILES.getlist("attachments[]")
         upload_dir = f"media/uploads/adjust/{ticket_id}"
         os.makedirs(upload_dir, exist_ok=True)
 
         for f in files:
             file_path = f"{upload_dir}/{f.name}"
-
-            with open(file_path, "wb+") as destination:
+            with open(file_path, "wb+") as dest:
                 for chunk in f.chunks():
-                    destination.write(chunk)
+                    dest.write(chunk)
 
             with connection.cursor() as cursor:
                 cursor.execute("""
                     INSERT INTO tickets.ticket_files
-                    (
-                        ticket_id,
-                        ref_type,
-                        file_name,
-                        file_path,
-                        file_type,
-                        file_size,
-                        uploaded_by,
-                        create_at
-                    )
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    (ticket_id, ref_type, file_name, file_path, file_type, file_size, uploaded_by, create_at)
+                    VALUES (%s,'ADJUST',%s,%s,%s,%s,%s,%s)
                 """, [
                     ticket_id,
-                    "ADJUST",
                     f.name,
                     file_path,
                     f.content_type,
