@@ -787,31 +787,31 @@ def adjust_form(request):
 
         adj_category = CATEGORY_MAP.get(ticket_type_id, "ไม่ระบุ")
 
-        # -----------------------------
-        # SOURCE (ต้นทาง)
-        # -----------------------------
-        source_cust = request.POST.get("source_cust")
-        promo_info = request.POST.get("promo_info")
-        earn_master = request.POST.get("earn_master")
-        amount = request.POST.get("amount")
+        source_cust_list = request.POST.getlist("source_cust[]")
+        promo_info_list = request.POST.getlist("promo_info[]")
+        earn_master_list = request.POST.getlist("earn_master[]")
+        amount_list = request.POST.getlist("amount[]")
 
-        # -----------------------------
-        # TARGET (ปลายทาง)
-        # -----------------------------
-        target_cust = request.POST.get("target_cust")
-        target_customer_name = request.POST.get("target_customer_name")
-        target_promo_code = request.POST.get("target_promo_code")
-        target_promo_name = request.POST.get("target_promo_name")
-        target_earn_master = request.POST.get("target_earn_master")
-        target_amount = request.POST.get("target_amount")
+        target_cust_list = request.POST.getlist("target_cust[]")
+        target_promo_name_list = request.POST.getlist("target_promo_name[]")
+        target_earn_master_list = request.POST.getlist("target_earn_master[]")
+        target_amount_list = request.POST.getlist("target_amount[]")
+
 
         # -----------------------------
         # VALIDATION
         # -----------------------------
-        if not amount and not target_amount:
+        has_value = False
+        for a, ta in zip(amount_list, target_amount_list):
+            if (a and float(a) != 0) or (ta and float(ta) != 0):
+                has_value = True
+                break
+
+        if not has_value:
             return render(request, "tickets_form/adjust_form.html", {
-                "error": "กรุณากรอกจำนวนอย่างน้อย 1 ฝั่ง"
+                "error": "กรุณากรอกจำนวนอย่างน้อย 1 รายการ"
             })
+
 
         # -----------------------------
         # INSERT tickets.tickets
@@ -837,45 +837,67 @@ def adjust_form(request):
             ])
             ticket_id = cursor.fetchone()[0]
 
-        # -----------------------------
-        # INSERT ticket_data_adjust
-        # -----------------------------
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                INSERT INTO tickets.ticket_data_adjust
-                (
-                    ticket_id,
-                    adj_category,
-
+       # -----------------------------
+            # INSERT ticket_data_adjust (MULTI ROW)
+            # -----------------------------
+            with connection.cursor() as cursor:
+                for (
                     source_cust,
                     promo_info,
                     earn_master,
                     amount,
-
                     target_cust,
-                    target_customer_name,
-                    target_promo_code,
                     target_promo_name,
                     target_earn_master,
                     target_amount
-                )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, [
-                ticket_id,
-                adj_category,
+                ) in zip(
+                    source_cust_list,
+                    promo_info_list,
+                    earn_master_list,
+                    amount_list,
+                    target_cust_list,
+                    target_promo_name_list,
+                    target_earn_master_list,
+                    target_amount_list
+                ):
 
-                source_cust,
-                promo_info,
-                earn_master,
-                amount,
+                    # ข้ามแถวที่ว่างทั้งหมด
+                    if not any([source_cust, promo_info, earn_master, amount,
+                                target_cust, target_promo_name, target_earn_master, target_amount]):
+                        continue
 
-                target_cust,
-                target_customer_name,
-                target_promo_code,
-                target_promo_name,
-                target_earn_master,
-                target_amount
-            ])
+                    cursor.execute("""
+                        INSERT INTO tickets.ticket_data_adjust
+                        (
+                            ticket_id,
+                            adj_category,
+
+                            source_cust,
+                            promo_info,
+                            earn_master,
+                            amount,
+
+                            target_cust,
+                            target_promo_name,
+                            target_earn_master,
+                            target_amount
+                        )
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """, [
+                        ticket_id,
+                        adj_category,
+
+                        source_cust,
+                        promo_info,
+                        earn_master,
+                        amount or 0,
+
+                        target_cust,
+                        target_promo_name,
+                        target_earn_master,
+                        target_amount or 0
+                    ])
+
 
         # -----------------------------
         # UPLOAD FILES (เหมือน erp_perm)
