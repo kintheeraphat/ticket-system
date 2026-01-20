@@ -108,7 +108,7 @@
 
                 <tbody>
                     {% for t in tickets %}
-                    <tr data-href="{% url 'tickets_detail' t.id %}">
+                    <tr data-href="{% url 'tickets_detail_erp' t.id %}">
 
 
                         <td class="text-center fw-bold text-muted">#{{ t.id }}</td>
@@ -157,10 +157,19 @@
                         </td>
 
                         <td class="text-end">
-                            <a href="{% url 'tickets_detail' t.id %}" class="action-btn">
+                            <a href="
+        {% if t.ticket_category == 1 %}
+            {% url 'tickets_detail_erp' t.id %}
+        {% elif t.ticket_category == 2 %}
+            {% url 'tickets_detail_vpn' t.id %}
+        {% else %}
+            {% url 'tickets' t.id %}
+        {% endif %}
+    " class="action-btn">
                                 <i class="fas fa-chevron-right"></i>
                             </a>
                         </td>
+
 
                     </tr>
                     {% endfor %}

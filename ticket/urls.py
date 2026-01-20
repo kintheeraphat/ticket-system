@@ -9,8 +9,9 @@ urlpatterns = [
 
     # tickets
     path("tickets/", views.tickets_list, name="tickets"),
-    path("tickets/detail/", views.tickets_detail),
-    path("tickets/detail/<int:ticket_id>/", views.tickets_detail, name="tickets_detail"),
+    # path("tickets/detail/", views.tickets_detail),
+    path("tickets/detail/erp/<int:ticket_id>/", views.tickets_detail_erp, name="tickets_detail_erp"),
+    path("tickets/detail/vpn/<int:ticket_id>/", views.tickets_detail_vpn, name="tickets_detail_vpn"),
 
 
 
