@@ -590,7 +590,7 @@ def tickets_detail_vpn(request, ticket_id):
                 t.create_at     AS ticket_create_at,
                 u.full_name,
                 t.department,
-
+                t.ticket_type_id,
                 v.uservpn,
                 v.vpn_reason
             FROM tickets.ticket_data_vpn v
@@ -644,6 +644,7 @@ def tickets_detail_vpn(request, ticket_id):
             "description": data["description"],
             "create_at": data["ticket_create_at"],
             "user_name": data["full_name"],
+            "ticket_type_id": data["ticket_type_id"],
         },
         "detail": {
             "vpn_users": vpn_users_with_department,

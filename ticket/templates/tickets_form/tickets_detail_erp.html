@@ -42,16 +42,7 @@
         </div>
     </div>
 
-    <!-- ================= DESCRIPTION ================= -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-light fw-semibold">
-            รายละเอียดคำขอ
-        </div>
-        <div class="card-body">
-            {{ ticket.description|linebreaksbr }}
-        </div>
-    </div>
-
+    
     <!-- ================= ERP DETAIL ================= -->
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white fw-semibold">
@@ -60,7 +51,7 @@
 
         <div class="table-responsive">
             <table class="table table-bordered table-sm align-middle mb-0">
-
+                
                 <!-- User Request -->
                 {% if detail.requesters %}
                 <tr>
@@ -75,8 +66,8 @@
                                     <span class="text-muted">
                                         ({{ r.department }})
                                     </span>
-                                {% endif %}
-                            </div>
+                                    {% endif %}
+                                </div>
                         {% endfor %}
                     </td>
                 </tr>
@@ -91,10 +82,19 @@
                     </td>
                 </tr>
                 {% endif %}
-
+                
             </table>
         </div>
+        <!-- ================= DESCRIPTION ================= -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light fw-semibold">
+                รายละเอียดคำขอ
+            </div>
+            <div class="card-body">
+                {{ ticket.description|linebreaksbr }}
+            </div>
+        </div>
     </div>
-
+    
 </div>
 {% endblock %}
