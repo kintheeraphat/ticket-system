@@ -1,15 +1,28 @@
 from django.shortcuts import redirect
+from django.http import HttpResponseForbidden
+from functools import wraps
 
-def role_required(allowed_roles=[]):
+def login_required_custom(view_func):
+    @wraps(view_func)
+    def _wrapped(request, *args, **kwargs):
+        if "user" not in request.session:
+            return redirect("login")
+        return view_func(request, *args, **kwargs)
+    return _wrapped
+
+
+def role_required(allow_roles):
     def decorator(view_func):
-        def wrapper(request, *args, **kwargs):
+        @wraps(view_func)
+        def _wrapped(request, *args, **kwargs):
             user = request.session.get("user")
             if not user:
                 return redirect("login")
 
-            if user["role"] not in allowed_roles:
-                return redirect("dashboard")
+            if user.get("role") not in allow_roles:
+                return HttpResponseForbidden("คุณไม่มีสิทธิ์เข้าใช้งานหน้านี้")
 
             return view_func(request, *args, **kwargs)
-        return wrapper
+        return _wrapped
     return decorator
+    

@@ -9,6 +9,8 @@ from datetime import datetime
 from django.core.files.storage import FileSystemStorage
 import os,json
 from django.http import Http404
+from .decorators import login_required_custom, role_required
+
 
 def thai_date(d):
     """
@@ -72,7 +74,8 @@ def login_view(request):
 
     return render(request, "login.html")
 
-# views.py
+@login_required_custom
+@role_required(["user","admin", "manager"])
 def ticket_success(request):
     return render(request, "tickets_form/ticket_success.html")
 
@@ -82,6 +85,8 @@ def logout_view(request):
     return redirect("login")    
 
 
+@login_required_custom
+@role_required(["admin", "manager"])
 def dashboard(request):
 
     # =====================
@@ -191,6 +196,9 @@ def dashboard(request):
 
     return render(request, "dashboard.html", context)
 
+
+@login_required_custom
+@role_required(["admin", "manager"])
 def tickets_list(request):
     search = request.GET.get("search", "")
     status = request.GET.get("status", "")
@@ -277,6 +285,8 @@ def tickets_list(request):
         "tickets": tickets_data
     })
 
+@login_required_custom
+@role_required(["user","admin", "manager"])
 def tickets_create(req):
     return render(req,'tickets_create.html')
 
@@ -398,6 +408,24 @@ def erp_perm(request):
         return redirect("ticket_success")
        
     return render(request, "tickets_form/erp_perm.html")
+@login_required_custom
+@role_required(["user"])
+def my_tickets(request):
+    user_id = request.session["user"]["id"]
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id, title, create_at
+            FROM tickets.tickets
+            WHERE user_id = %s
+            ORDER BY create_at DESC
+        """, [user_id])
+
+        rows = cursor.fetchall()
+
+    return render(request, "tickets_history.html", {
+        "tickets": rows
+    })
 
 def vpn(request):
     if request.method == "POST":

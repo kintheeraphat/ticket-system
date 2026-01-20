@@ -8,7 +8,7 @@ urlpatterns = [
     path("logout/", views.logout_view, name="logout"),
 
     # tickets
-    path("tickets/", views.tickets_list, name="tickets"),
+    path("tickets/", views.tickets_list, name="tickets_list"),
     # path("tickets/detail/", views.tickets_detail),
     path("tickets/detail/erp/<int:ticket_id>/", views.tickets_detail_erp, name="tickets_detail_erp"),
     path("tickets/detail/vpn/<int:ticket_id>/", views.tickets_detail_vpn, name="tickets_detail_vpn"),

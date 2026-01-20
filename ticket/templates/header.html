@@ -1,3 +1,4 @@
+{% if request.session.user %}
 <!-- ===============================
      DESKTOP SIDEBAR
 ================================ -->
@@ -21,38 +22,52 @@
 
   <!-- Menu -->
   <ul class="sidebar-menu list-unstyled flex-grow-1">
+
+    <!-- ================= ADMIN / MANAGER ================= -->
+    {% if request.session.user.role != "user" %}
     <li class="{% if request.path == '/' %}active{% endif %}">
-      <a href="/">
+      <a href="{% url 'dashboard' %}">
         <i class="fas fa-gauge-high"></i>
         <span>Dashboard</span>
       </a>
     </li>
 
     <li class="{% if request.path == '/tickets/' %}active{% endif %}">
-      <a href="/tickets/">
+      <a href="{% url 'tickets_list' %}">
         <i class="fas fa-ticket"></i>
         <span>Tickets</span>
       </a>
     </li>
+    {% endif %}
 
+    <!-- ================= USER + ADMIN ================= -->
     <li class="{% if request.path == '/create/' %}active{% endif %}">
-      <a href="/create/">
+      <a href="{% url 'create' %}">
         <i class="fas fa-file-circle-plus"></i>
         <span>Create Ticket</span>
       </a>
     </li>
+
+    <!-- USER HISTORY -->
+    {% comment %} {% if request.session.user.role == "user" %}
+    <li class="{% if request.path == '/my-tickets/' %}active{% endif %}">
+      <a href="{% url 'my_tickets' %}">
+        <i class="fas fa-list"></i>
+        <span>My Tickets</span>
+      </a>
+    </li>
+    {% endif %} {% endcomment %}
       <!-- Logout -->
     <div class="sidebar-footer">
-      <a href="/logout/" class="logout-btn">
+      <a href="{% url 'logout' %}" class="logout-btn">
         <i class="fas fa-right-from-bracket"></i>
         <span>Logout</span>
       </a>
     </div>
   </ul>
-
-  
-
 </aside>
+{% endif %}
+
 
 <!-- ===============================
      MOBILE HEADER
