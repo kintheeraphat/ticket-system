@@ -8,7 +8,7 @@
 
 <div class="dashboard-table shadow-sm p-4 bg-white rounded">
 
-  <!-- ================= HEADER ================= -->
+  <!-- HEADER -->
   <div class="mb-4">
     <h4 class="fw-bold text-primary mb-1">
       <i class="fas fa-sliders-h me-2"></i>ขอปรับยอดสะสมในระบบ ERP
@@ -18,9 +18,9 @@
     </p>
   </div>
 
-  <!-- ================= TYPE ================= -->
+  <!-- TYPE -->
   <div class="mb-4 p-3 bg-light rounded border">
-    <label class="fw-bold mb-2 d-block">ประเภทการปรับยอด</label>
+    <label class="fw-bold mb-2">ประเภทการปรับยอด</label>
     <select class="form-select w-50" name="adj_category" required>
       <option value="">-- เลือกประเภท --</option>
       <option value="5">ยอดยกจากเดิม</option>
@@ -30,7 +30,7 @@
     </select>
   </div>
 
-  <!-- ================= SOURCE TABLE ================= -->
+  <!-- SOURCE -->
   <h6 class="fw-bold mb-2">รายการปรับยอด : ต้นทาง</h6>
   <div class="table-responsive mb-4">
     <table class="table table-bordered text-center" id="sourceTable">
@@ -49,15 +49,13 @@
           <td><input class="form-control" name="source_customer_name[]" /></td>
           <td><input class="form-control" name="promo_info[]" /></td>
           <td><input class="form-control" name="earn_master[]" /></td>
-          <td>
-            <input class="form-control" type="number" step="0.01" name="amount[]" />
-          </td>
+          <td><input class="form-control" type="text" step="0.01" name="amount[]" /></td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <!-- ================= TARGET TABLE ================= -->
+  <!-- TARGET -->
   <h6 class="fw-bold mb-2">รายการปรับยอด : ปลายทาง</h6>
   <div class="table-responsive">
     <table class="table table-bordered text-center" id="targetTable">
@@ -77,33 +75,42 @@
           <td><input class="form-control" name="target_customer_name[]" /></td>
           <td><input class="form-control" name="target_promo_name[]" /></td>
           <td><input class="form-control" name="target_earn_master[]" /></td>
+          <td><input class="form-control" type="text" step="0.01" name="target_amount[]" /></td>
           <td>
-            <input class="form-control" type="number" step="0.01" name="target_amount[]" />
-          </td>
-          <td>
-            <button type="button" class="btn btn-outline-danger btn-sm remove-row">
-              &times;
-            </button>
+            <button type="button" class="btn btn-outline-danger btn-sm remove-row">&times;</button>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <!-- ================= ADD ROW ================= -->
   <button type="button" class="btn btn-outline-primary btn-sm my-3" id="addRow">
     <i class="fas fa-plus me-1"></i> เพิ่มรายการ
   </button>
 
-  <!-- ================= REMARK ================= -->
+<!-- =======================
+      แผนก
+  ======================== -->
+  <div class="mb-3">
+    <label class="form-label">แผนก</label>
+    <input
+      type="text"
+      name="department"
+      class="form-control w-50"
+      placeholder="เช่น IT, Accounting, HR"
+      required
+    />
+  </div>
+
+  <!-- REMARK -->
   <div class="mb-4">
     <label class="fw-bold mb-2">หมายเหตุ</label>
     <textarea class="form-control" rows="3" name="remark"></textarea>
   </div>
 
-  <!-- ================= FILE UPLOAD ================= -->
+  <!-- FILE -->
   <div class="mb-4">
-    <label class="fw-bold mb-2 d-block">
+    <label class="fw-bold mb-2">
       <i class="fas fa-paperclip me-1"></i>เอกสารแนบ (ไม่เกิน 3 ไฟล์)
     </label>
 
@@ -118,23 +125,16 @@
     <div id="filePreview" class="mt-3 d-flex gap-3 flex-wrap"></div>
   </div>
 
-  <!-- ================= BUTTON ================= -->
+  <!-- BUTTON -->
   <div class="text-end border-top pt-3">
-    <button type="button"
-            class="btn btn-outline-secondary me-2"
-            onclick="saveDraft()">
-      💾 บันทึกร่าง
-    </button>
-
-    <button type="submit" class="btn btn-primary px-5 fw-bold">
-      ส่งคำร้อง
-    </button>
+    <button type="button" class="btn btn-outline-secondary me-2" onclick="saveDraft()">💾 บันทึกร่าง</button>
+    <button type="submit" class="btn btn-primary px-5 fw-bold">ส่งคำร้อง</button>
   </div>
 
 </div>
 </form>
 
-<!-- ================= FILE PREVIEW MODAL ================= -->
+<!-- FILE MODAL -->
 <div class="modal fade" id="fileModal" tabindex="-1">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content">
@@ -143,10 +143,7 @@
         <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body p-0">
-        <iframe
-          id="previewFrame"
-          style="width:100%;height:80vh;border:none">
-        </iframe>
+        <iframe id="previewFrame" style="width:100%;height:80vh;border:none"></iframe>
       </div>
     </div>
   </div>
