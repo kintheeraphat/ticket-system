@@ -743,7 +743,9 @@ def tickets_detail_repairs(request, ticket_id):
     return render(request, "tickets_form/tickets_detail_repairs.html", {
         "detail": detail
     })
-
+    
+@login_required_custom
+@role_required(["user", "admin", "manager"])
 def tickets_detail_report(request, ticket_id):
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -752,16 +754,20 @@ def tickets_detail_report(request, ticket_id):
                 t.title,
                 t.description,
                 t.create_at     AS ticket_create_at,
-                u.full_name,
+                COALESCE(u.full_name, '-') AS full_name,
                 t.department,
                 t.ticket_type_id,
                 e.old_value,
                 e.new_value
             FROM tickets.ticket_data_erp_app e
-            JOIN tickets.tickets t ON t.id = e.ticket_id
-            JOIN tickets.users u ON u.erp_user_id = t.user_id
+            JOIN tickets.tickets t 
+                ON t.id = e.ticket_id
+            LEFT JOIN tickets.users u 
+                ON u.id = t.user_id      -- ✅ แก้ตรงนี้
             WHERE e.report_access IS TRUE
               AND t.id = %s
+            ORDER BY e.id DESC
+            LIMIT 1
         """, [ticket_id])
 
         data = dictfetchone(cursor)
@@ -769,26 +775,29 @@ def tickets_detail_report(request, ticket_id):
         if not data:
             raise Http404("Report ticket not found")
 
-    # เวลา
     created_at = data["ticket_create_at"]
     if created_at and timezone.is_naive(created_at):
         created_at = timezone.make_aware(created_at, dt_timezone.utc)
     created_at = timezone.localtime(created_at)
 
-    return render(request, "tickets_form/tickets_detail_report.html", {
-        "ticket": {
-            "id": data["ticket_id"],
-            "title": data["title"],
-            "description": data["description"],
-            "create_at": created_at,
-            "user_name": data["full_name"],
-            "department": data["department"],
-        },
-        "detail": {
-            "old_value": data["old_value"],
-            "new_value": data["new_value"],
+    return render(
+        request,
+        "tickets_form/tickets_detail_report.html",
+        {
+            "ticket": {
+                "id": data["ticket_id"],
+                "title": data["title"],
+                "description": data["description"],
+                "create_at": created_at,
+                "user_name": data["full_name"],
+                "department": data["department"],
+            },
+            "detail": {
+                "old_value": data["old_value"],
+                "new_value": data["new_value"],
+            }
         }
-    })
+    )
 def tickets_detail_newapp(request, ticket_id):
     with connection.cursor() as cursor:
         cursor.execute("""
