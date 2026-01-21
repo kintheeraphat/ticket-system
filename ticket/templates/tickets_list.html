@@ -125,6 +125,8 @@
     {% url 'tickets_detail_repairs' t.id %}
 {% elif t.ticket_type_id == 11 %}
     {% url 'tickets_detail_report' t.id %}
+{% elif t.ticket_type_id == 9 or t.ticket_type_id == 10 %}
+    {% url 'tickets_detail_newapp' t.id %}
 {% else %}
     {% url 'tickets_detail_erp' t.id %}
 {% endif %}
