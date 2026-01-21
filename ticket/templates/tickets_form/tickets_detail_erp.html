@@ -42,7 +42,7 @@
         </div>
     </div>
 
-    
+
     <!-- ================= ERP DETAIL ================= -->
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white fw-semibold">
@@ -51,7 +51,7 @@
 
         <div class="table-responsive">
             <table class="table table-bordered table-sm align-middle mb-0">
-                
+
                 <!-- User Request -->
                 {% if detail.requesters %}
                 <tr>
@@ -60,14 +60,14 @@
                     </th>
                     <td>
                         {% for r in detail.requesters %}
-                            <div>
-                                {{ r.name }}
-                                {% if r.department %}
-                                    <span class="text-muted">
-                                        ({{ r.department }})
-                                    </span>
-                                    {% endif %}
-                                </div>
+                        <div>
+                            {{ r.name }}
+                            {% if r.department %}
+                            <span class="text-muted">
+                                ({{ r.department }})
+                            </span>
+                            {% endif %}
+                        </div>
                         {% endfor %}
                     </td>
                 </tr>
@@ -82,7 +82,7 @@
                     </td>
                 </tr>
                 {% endif %}
-                
+
             </table>
         </div>
         <!-- ================= DESCRIPTION ================= -->
@@ -95,6 +95,10 @@
             </div>
         </div>
     </div>
-    
+    <div class="mt-4">
+        <a href="/tickets" class="btn btn-secondary">
+            ← กลับหน้ารายการ
+        </a>
+    </div>
 </div>
-{% endblock %}
+{% endblock %} 

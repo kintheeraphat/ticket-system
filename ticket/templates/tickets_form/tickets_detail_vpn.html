@@ -69,14 +69,14 @@
                     </th>
                     <td>
                         {% for u in detail.vpn_users %}
-                            <div>
-                                {{ u.name }}
-                                {% if u.department %}
-                                    <span class="text-muted">
-                                        ({{ u.department }})
-                                    </span>
-                                {% endif %}
-                            </div>
+                        <div>
+                            {{ u.name }}
+                            {% if u.department %}
+                            <span class="text-muted">
+                                ({{ u.department }})
+                            </span>
+                            {% endif %}
+                        </div>
                         {% endfor %}
                     </td>
                 </tr>
@@ -93,6 +93,10 @@
             </table>
         </div>
     </div>
-
+    <div class="mt-4">
+        <a href="/tickets" class="btn btn-secondary">
+            ← กลับหน้ารายการ
+        </a>
+    </div>
 </div>
 {% endblock %}

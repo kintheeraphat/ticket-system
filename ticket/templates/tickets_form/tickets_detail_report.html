@@ -15,7 +15,7 @@
         <p class="text-muted mb-4">
             แจ้งโดย {{ ticket.user_name }}
             {% if ticket.department %}
-                | แผนก {{ ticket.department }}
+            | แผนก {{ ticket.department }}
             {% endif %}
             <br>
             วันที่ {{ ticket.create_at|localtime|date:"d M Y H:i" }} น.
@@ -53,7 +53,7 @@
         </div>
 
         <div class="mt-4">
-            <a href="{% url 'tickets' %}" class="btn btn-outline-secondary">
+            <a href="/tickets" class="btn btn-secondary">
                 ← กลับหน้ารายการ
             </a>
         </div>
