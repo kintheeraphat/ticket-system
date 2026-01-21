@@ -11,6 +11,17 @@ import os,json
 from django.http import Http404
 from .decorators import login_required_custom, role_required
 
+def index(request):
+    user = request.session.get("user")
+
+    if not user:
+        return redirect("/login/")
+
+    role = user.get("role")
+    if role in ["admin", "manager"]:
+        return redirect("/dashboard/")
+
+    return redirect("/tickets/")
 
 def thai_date(d):
     """
@@ -22,62 +33,55 @@ def thai_date(d):
 
 
 def login_view(request):
+
+    if request.session.get("user"):
+        role = request.session["user"]["role"]
+        if role in ["admin", "manager"]:
+            return redirect("/dashboard/")
+        return redirect("/tickets/")
+
     if request.method == "POST":
-        username = request.POST.get("username")
-        password = request.POST.get("password")
+        username = request.POST.get("username", "").strip()
+        password = request.POST.get("password", "").strip()
 
         if not username or not password:
-            messages.error(request, "กรุณากรอก username และ password")
+            messages.error(request, "กรุณากรอกชื่อผู้ใช้และรหัสผ่าน")
             return render(request, "login.html")
 
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT
-                    u.id                AS user_id,
-                    up.id               AS user_permission_id,
+                    u.id,
                     u.username,
                     u.full_name,
                     LOWER(TRIM(r.role_name)) AS role
                 FROM tickets.users u
                 JOIN tickets.roles r ON r.id = u.role_id
-                JOIN tickets.user_permission up ON up.user_id = u.id
                 WHERE u.username = %s
-                AND u.password = crypt(%s, u.password)
-                AND u.is_active = true
-
+                  AND u.password = crypt(%s, u.password)
+                  AND u.is_active = TRUE
             """, [username, password])
 
-            user = cursor.fetchone()
+            row = cursor.fetchone()
 
-        if not user:
+        if not row:
             messages.error(request, "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง")
             return render(request, "login.html")
 
-        # เก็บ session
         request.session["user"] = {
-        "id": user[0],                     # users.id
-        "permission_id": user[1],          # user_permission.id ✅
-        "username": user[2],
-        "full_name": user[3],
-        "role": user[4],
-    }
+            "id": row[0],
+            "username": row[1],
+            "full_name": row[2],
+            "role": row[3],
+        }
 
-
-        role = user[3]
-
-        # 🔀 redirect ตาม role
-        if role in ["admin", "manager"]:
-            return redirect("dashboard")
-
-        elif role == "user":
-            return redirect("create")  # ชื่อ url ต้องมีจริงใน urls.py
-
-        else:
-            messages.error(request, "บัญชีนี้ไม่มีสิทธิ์เข้าใช้งานระบบ")
-            request.session.flush()
-            return render(request, "login.html")
+        if row[3] in ["admin", "manager"]:
+            return redirect("/dashboard/")
+        return redirect("/tickets/")
 
     return render(request, "login.html")
+
+
 
 @login_required_custom
 @role_required(["user","admin", "manager"])
