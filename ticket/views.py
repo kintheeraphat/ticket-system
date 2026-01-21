@@ -32,16 +32,19 @@ def login_view(request):
 
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT 
-                    u.id,
+                SELECT
+                    u.id                AS user_id,
+                    up.id               AS user_permission_id,
                     u.username,
                     u.full_name,
                     LOWER(TRIM(r.role_name)) AS role
                 FROM tickets.users u
                 JOIN tickets.roles r ON r.id = u.role_id
+                JOIN tickets.user_permission up ON up.user_id = u.id
                 WHERE u.username = %s
-                  AND u.password = crypt(%s, u.password)
-                  AND u.is_active = true
+                AND u.password = crypt(%s, u.password)
+                AND u.is_active = true
+
             """, [username, password])
 
             user = cursor.fetchone()
@@ -52,11 +55,13 @@ def login_view(request):
 
         # เก็บ session
         request.session["user"] = {
-            "id": user[0],
-            "username": user[1],
-            "full_name": user[2],
-            "role": user[3],
-        }
+        "id": user[0],                     # users.id
+        "permission_id": user[1],          # user_permission.id ✅
+        "username": user[2],
+        "full_name": user[3],
+        "role": user[4],
+    }
+
 
         role = user[3]
 
@@ -196,27 +201,30 @@ def dashboard(request):
 
     return render(request, "dashboard.html", context)
 
-
 @login_required_custom
-@role_required(["admin", "manager"])
+@role_required(["admin", "manager", "user"])
 def tickets_list(request):
+
+    user = request.session["user"]
+    role = user["role"]
+    user_id = user["id"]
+
     search = request.GET.get("search", "")
     status = request.GET.get("status", "")
     assignee = request.GET.get("assignee", "")
     date_range = request.GET.get("date_range", "")
 
     query = """
-     SELECT t.id,
-            t.title,
-            t.description,
-            c.name AS category,
-            tt.name AS ticket_type,
-            t.ticket_type_id,
-            u.username AS requester,
-            a.username AS assignee,
-            t.create_at,
-            s.name AS status
-
+        SELECT t.id,
+               t.title,
+               t.description,
+               c.name AS category,
+               tt.name AS ticket_type,
+               t.ticket_type_id,
+               u.username AS requester,
+               a.username AS assignee,
+               t.create_at,
+               s.name AS status
         FROM tickets.tickets t
         LEFT JOIN tickets.users u ON u.id = t.user_id
         LEFT JOIN tickets.users a ON a.id = t.assign_id
@@ -228,6 +236,11 @@ def tickets_list(request):
 
     params = []
 
+    # 🔒 user เห็นเฉพาะของตัวเอง
+    if role == "user":
+        query += " AND t.user_id = %s"
+        params.append(user_id)
+
     if search:
         query += " AND (t.id::text ILIKE %s OR t.title ILIKE %s)"
         params.extend([f"%{search}%", f"%{search}%"])
@@ -236,7 +249,7 @@ def tickets_list(request):
         query += " AND s.name = %s"
         params.append(status)
 
-    if assignee:
+    if assignee and role != "user":
         query += " AND a.username = %s"
         params.append(assignee)
 
@@ -257,32 +270,31 @@ def tickets_list(request):
         cursor.execute(query, params)
         rows = cursor.fetchall()
 
-    tickets_data= []
+    tickets_data = []
     for row in rows:
-        created_at = row[7]
+        created_at = row[8]  # ✅ index ถูกแล้ว
 
-        # UTC → Asia/Bangkok
+        if created_at and timezone.is_naive(created_at):
+            created_at = timezone.make_aware(created_at, dt_timezone.utc)
         if created_at:
-            if timezone.is_naive(created_at):
-                created_at = timezone.make_aware(created_at, dt_timezone.utc)
             created_at = timezone.localtime(created_at)
 
         tickets_data.append({
             "id": row[0],
             "title": row[1],
             "description": row[2],
-            "category": row[3],          # ✅ เพิ่ม
-            "ticket_type": row[4],       # เดิม
+            "category": row[3],
+            "ticket_type": row[4],
             "ticket_type_id": row[5],
             "requester": row[6],
             "assignee": row[7] or "ยังไม่มอบหมาย",
             "created_at": created_at,
-            "status": row[9]
+            "status": row[9],
         })
 
-
     return render(request, "tickets_list.html", {
-        "tickets": tickets_data
+        "tickets": tickets_data,
+        "is_user": role == "user",   # ✅ ส่งให้ template
     })
 
 @login_required_custom

@@ -31,14 +31,14 @@
         <span>Dashboard</span>
       </a>
     </li>
-
+    {% endif %}
     <li class="{% if request.path == '/tickets/' %}active{% endif %}">
       <a href="{% url 'tickets_list' %}">
         <i class="fas fa-ticket"></i>
         <span>Tickets</span>
       </a>
     </li>
-    {% endif %}
+    
 
     <!-- ================= USER + ADMIN ================= -->
     <li class="{% if request.path == '/create/' %}active{% endif %}">
