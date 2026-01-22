@@ -3,88 +3,122 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h3>ตั้งค่าทีมอนุมัติ | Approval Team Setup</h3>
 
-    <div class="card">
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold">ตั้งค่าทีม <small class="text-muted fs-6">| Team Setup</small></h3>
+    </div>
 
-                <!-- Department -->
-                <div class="mb-3">
-                    <label class="form-label">แผนก | Department</label>
-                    <select name="department_id" class="form-select" required>
-                        <option value="">-- เลือกแผนก --</option>
-                        {% for d in departments %}
-                        <option value="{{ d.id }}">{{ d.dept_name }}</option>
-                        {% endfor %}
-                    </select>
+    <div class="row">
+
+        <!-- ===== Left : Form ===== -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <strong>➕ สร้างทีมอนุมัติใหม่</strong>
                 </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
 
-                <!-- Team Name -->
-                <div class="mb-3">
-                    <label class="form-label">ชื่อทีมอนุมัติ | Team Name</label>
-                    <input type="text" name="team_name" class="form-control"
-                           placeholder="เช่น Manager IT / HR Approver" required>
+                        <!-- Department -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">แผนก | Department</label>
+                            <select name="department_id" class="form-select" required>
+                                <option value="">-- เลือกแผนก --</option>
+                                {% for d in departments %}
+                                <option value="{{ d.id }}">{{ d.dept_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Team Name -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">ชื่อทีมอนุมัติ | Team Name</label>
+                            <input type="text" name="team_name" class="form-control"
+                                   placeholder="เช่น Manager IT / HR Approver" required>
+                        </div>
+
+                        <!-- Approver User -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">ผู้อนุมัติ | Approver</label>
+                            <select name="user_id" class="form-select" required>
+                                <option value="">-- เลือกผู้ใช้งาน --</option>
+                                {% for u in users %}
+                                <option value="{{ u.id }}">
+                                    {{ u.full_name }} ({{ u.username }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text text-muted">
+                                1 ทีม = 1 ผู้อนุมัติ (โครงสร้างปัจจุบัน)
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                💾 บันทึกทีมอนุมัติ
+                            </button>
+                        </div>
+                    </form>
                 </div>
+            </div>
+        </div>
 
-                <!-- Approver User -->
-                <div class="mb-3">
-                    <label class="form-label">ผู้อนุมัติ | Approver</label>
-                    <select name="user_id" class="form-select" required>
-                        <option value="">-- เลือกผู้ใช้งาน --</option>
-                        {% for u in users %}
-                        <option value="{{ u.id }}">
-                            {{ u.full_name }} ({{ u.username }})
-                        </option>
-                        {% endfor %}
-                    </select>
-                    <div class="form-text">
-                        ทีม 1 ทีม = ผู้อนุมัติ 1 คน (ตาม schema ปัจจุบัน)
+        <!-- ===== Right : Team List ===== -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <strong>📋 ทีมอนุมัติที่ตั้งค่าแล้ว</strong>
+                </div>
+                <div class="card-body">
+
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr class="text-center">
+                                    <th style="width: 25%">Team</th>
+                                    <th style="width: 25%">Department</th>
+                                    <th style="width: 30%">Approver</th>
+                                    <th style="width: 20%">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for t in teams %}
+                                <tr>
+                                    <td class="fw-semibold">{{ t.team_name }}</td>
+                                    <td>
+                                        <span class="badge bg-info text-dark">
+                                            {{ t.dept_name }}
+                                        </span>
+                                    </td>
+                                    <td>{{ t.full_name }}</td>
+                                    <td class="text-center">
+                                        <a href="#" class="btn btn-sm btn-outline-primary">
+                                            ➕ เพิ่มคนในทีม
+                                        </a>
+                                        <!-- ต่ออนาคต -->
+                                        <!--
+                                        <a href="#" class="btn btn-sm btn-outline-warning">แก้ไข</a>
+                                        <a href="#" class="btn btn-sm btn-outline-danger">ลบ</a>
+                                        -->
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">
+                                        ยังไม่มีทีมอนุมัติในระบบ
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
+
                 </div>
-
-                <button type="submit" class="btn btn-primary">
-                    บันทึกทีมอนุมัติ
-                </button>
-            </form>
+            </div>
         </div>
-    </div>
 
-    <!-- List Existing Teams -->
-    <div class="card mt-4">
-        <div class="card-body">
-            <h5>ทีมที่ตั้งค่าแล้ว</h5>
-            <table class="table table-bordered mt-2">
-                <thead>
-                    <tr>
-                        <th>Team</th>
-                        <th>Department</th>
-                        <th>Approver</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for t in teams %}
-                    <tr>
-                        <td>{{ t.team_name }}</td>
-                        <td>{{ t.dept_name }}</td>
-                        <td>{{ t.full_name }}</td>
-                        <td>
-                            <a href="#" class="btn btn-sm btn-outline-primary">
-                                เพิ่มคนในทีม
-                            </a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="3" class="text-center">ยังไม่มีทีม</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
     </div>
-
 </div>
 {% endblock %}

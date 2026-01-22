@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}เพิ่มสมาชิกทีมอนุมัติ | Add User to Approval Team{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>เพิ่มสมาชิกทีมอนุมัติ | Add User to Approval Team</h3>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- Select Team -->
+                <div class="mb-3">
+                    <label class="form-label">ทีมอนุมัติ | Approval Team</label>
+                    <select name="team_id" id="teamSelect" class="form-select" required>
+                        <option value="">-- เลือกทีมอนุมัติ --</option>
+                        {% for t in teams %}
+                        <option value="{{ t.id }}"
+                                data-dept="{{ t.dept_name }}">
+                            {{ t.team_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Show Department (readonly) -->
+                <div class="mb-3">
+                    <label class="form-label">แผนก | Department</label>
+                    <input type="text" id="deptDisplay"
+                           class="form-control"
+                           readonly
+                           placeholder="เลือกทีมเพื่อแสดงแผนก">
+                </div>
+
+                <!-- Select User -->
+                <div class="mb-3">
+                    <label class="form-label">ผู้ใช้งาน | User</label>
+                    <select name="user_id" class="form-select" required>
+                        <option value="">-- เลือกผู้ใช้งาน --</option>
+                        {% for u in users %}
+                        <option value="{{ u.id }}">
+                            {{ u.full_name }} ({{ u.username }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    เพิ่มสมาชิกทีมอนุมัติ
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JS -->
+<script>
+document.getElementById("teamSelect").addEventListener("change", function () {
+    const dept = this.options[this.selectedIndex].dataset.dept || "";
+    document.getElementById("deptDisplay").value = dept;
+});
+</script>
+
+{% endblock %}
