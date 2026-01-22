@@ -38,6 +38,14 @@
         <span>Tickets</span>
       </a>
     </li>
+    {% if request.session.user.role != "user" %}
+    <li class="{% if request.path == '/' %}active{% endif %}">
+      <a href="{% url 'setting_team' %}">
+        <i class="fas fa-gauge-high"></i>
+        <span>Setting</span>
+      </a>
+    </li>
+    {% endif %}
     
 
     <!-- ================= USER + ADMIN ================= -->
@@ -67,6 +75,7 @@
   </ul>
 </aside>
 {% endif %}
+
 
 
 <!-- ===============================

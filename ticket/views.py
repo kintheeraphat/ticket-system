@@ -1425,3 +1425,65 @@ Promotion: {promo_name}
     # LOAD PAGE
     # =====================
     return render(request, "tickets_form/active_promotion_form.html")
+
+def setting_team(request):
+    with connection.cursor() as cursor:
+        # ===== Departments =====
+        cursor.execute("""
+            SELECT id, dept_name
+            FROM tickets.department
+            ORDER BY dept_name
+        """)
+        departments = dictfetchall(cursor)
+
+        # ===== Active Users =====
+        cursor.execute("""
+            SELECT id, username, full_name
+            FROM tickets.users
+            WHERE is_active = true
+            ORDER BY full_name
+        """)
+        users = dictfetchall(cursor)
+
+        # ===== Existing Teams =====
+        cursor.execute("""
+            SELECT 
+                t.id,
+                t.name AS team_name,
+                d.dept_name,
+                u.full_name
+            FROM tickets.team t
+            JOIN tickets.users u ON u.id = t.users
+            LEFT JOIN tickets.department d ON d.id = t.department_id
+            ORDER BY d.dept_name, t.name
+        """)
+        teams = dictfetchall(cursor)
+
+    # ===== Handle POST =====
+    if request.method == "POST":
+        team_name = request.POST.get("team_name")
+        user_id = request.POST.get("user_id")
+        department_id = request.POST.get("department_id")
+
+        if not team_name or not user_id or not department_id:
+            messages.error(request, "กรุณากรอกข้อมูลให้ครบ")
+            return redirect("setting_team")
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO tickets.team (name, users, department_id)
+                VALUES (%s, %s, %s)
+            """, [team_name, user_id, department_id])
+
+        messages.success(request, "สร้างทีมอนุมัติเรียบร้อยแล้ว")
+        return redirect("setting_team")
+
+    return render(request, "setting_team.html", {
+        "departments": departments,
+        "users": users,
+        "teams": teams
+    })
+    
+def dictfetchall(cursor):
+    columns = [col[0] for col in cursor.description]
+    return [dict(zip(columns, row)) for row in cursor.fetchall()]

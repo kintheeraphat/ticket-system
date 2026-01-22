@@ -30,5 +30,5 @@ urlpatterns = [
     path("create/borrows/", views.borrows, name="borrows"),
     path("ticket-success/", views.ticket_success, name="ticket_success"),
     
-
+    path("settingline/", views.setting_team, name="setting_team"),
 ]
