@@ -10,6 +10,7 @@ from django.core.files.storage import FileSystemStorage
 import os,json
 from django.http import Http404
 from .decorators import login_required_custom, role_required
+from django.conf import settings
 
 def index(request):
     user = request.session.get("user")
@@ -1273,15 +1274,6 @@ def report_form(request):
     # =========================
     return render(request, "tickets_form/report_form.html")
 
-
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.db import connection
-from django.utils import timezone
-from datetime import datetime
-import os
-
-
 def active_promotion_form(request):
 
     # =====================
@@ -1298,8 +1290,8 @@ def active_promotion_form(request):
     if request.method == "POST":
 
         promo_name  = request.POST.get("promo_name", "").strip()
-        start_raw  = request.POST.get("start_date")
-        end_raw    = request.POST.get("end_date")
+        start_raw   = request.POST.get("start_date")
+        end_raw     = request.POST.get("end_date")
         department = request.POST.get("department", "").strip()
         reason     = request.POST.get("reason", "").strip()
 
@@ -1380,18 +1372,27 @@ Promotion: {promo_name}
             ])
 
         # =====================
-        # SAVE FILES
+        # SAVE FILES (FIXED)
         # =====================
         files = request.FILES.getlist("files")
-        upload_dir = f"media/tickets/{ticket_id}"
+
+        # path สำหรับเก็บไฟล์จริง
+        upload_dir = os.path.join(
+            settings.MEDIA_ROOT,
+            "tickets",
+            str(ticket_id)
+        )
         os.makedirs(upload_dir, exist_ok=True)
 
         for f in files:
-            file_path = f"{upload_dir}/{f.name}"
+            real_path = os.path.join(upload_dir, f.name)
 
-            with open(file_path, "wb+") as destination:
+            with open(real_path, "wb+") as destination:
                 for chunk in f.chunks():
                     destination.write(chunk)
+
+            # path สำหรับเก็บลง DB (relative only)
+            db_file_path = f"tickets/{ticket_id}/{f.name}"
 
             with connection.cursor() as cursor:
                 cursor.execute("""
@@ -1411,10 +1412,10 @@ Promotion: {promo_name}
                     ticket_id,
                     "ACTIVE_PROMOTION",
                     f.name,
-                    file_path,
+                    db_file_path,
                     f.content_type,
                     f.size,
-                    user_id,
+                    user_id,              # users.id (ไม่มี FK แล้ว)
                     timezone.now()
                 ])
 

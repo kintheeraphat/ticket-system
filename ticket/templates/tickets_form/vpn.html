@@ -75,10 +75,20 @@
                 placeholder="ระบุวัตถุประสงค์ในการขอเข้าถึงระบบจากภายนอก..."></textarea>
         </div>
 
-        <!-- FILE -->
+        <!-- FILE UPLOAD -->
         <div class="mb-4">
-            <label class="fw-bold mb-2">แนบไฟล์เอกสาร (ถ้ามี)</label>
-            <input type="file" name="order_file[]" multiple class="form-control">
+            <label class="fw-bold mb-2">
+                <i class="fas fa-paperclip me-1"></i> แนบไฟล์
+            </label>
+            <input
+                type="file"
+                class="form-control w-50"
+                multiple
+                onchange="handleFiles(this)"
+                />
+
+                <div id="filePreview" class="mt-3 d-flex gap-3 flex-wrap"></div>
+
         </div>
         <!-- ปุ่ม -->
         <div class="text-end border-top pt-3">
@@ -88,10 +98,29 @@
         </div>
 
     </form>
+    <!-- FILE MODAL -->
+    <div class="modal fade" id="fileModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h6 class="modal-title">ดูเอกสารแนบ</h6>
+            <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+            <iframe id="previewFrame" style="width:100%;height:80vh;border:none"></iframe>
+            </div>
+        </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+</script>
 <script src="{% static 'script/script.js' %}"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
