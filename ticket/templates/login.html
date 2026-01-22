@@ -6,56 +6,142 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
     <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --bg: #f8fafc;
+            --card-bg: rgba(255,255,255,.92);
+            --border: #e5e7eb;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f4f6f8;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 10% 10%, #eef2ff, transparent 40%),
+                radial-gradient(circle at 90% 20%, #e0f2fe, transparent 40%),
+                radial-gradient(circle at 50% 90%, #f1f5f9, transparent 40%),
+                #f8fafc;
         }
+
+        /* ================= LAYOUT ================= */
         .login-wrapper {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 24px;
         }
+
         .login-card {
             width: 100%;
-            max-width: 380px;
-            background: #ffffff;
-            padding: 2.2rem;
-            border-radius: 12px;
+            max-width: 420px;
+            background: var(--card-bg);
+            backdrop-filter: blur(14px);
+            border-radius: 22px;
+            padding: 2.5rem;
+            border: 1px solid var(--border);
+            box-shadow:
+                0 30px 60px rgba(0,0,0,.15),
+                0 12px 24px rgba(0,0,0,.08);
+            animation: fadeUp .6s ease;
         }
-        .login-card h3 {
-            color: #1f3c88;
-            font-weight: 700;
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .login-card p {
-            font-size: 0.9rem;
+
+        /* ================= HEADER ================= */
+        .brand-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.8rem;
+            margin: 0 auto 1rem;
+            box-shadow: 0 12px 24px rgba(37,99,235,.45);
         }
+
+        h3 {
+            font-weight: 800;
+            margin-bottom: .25rem;
+        }
+
+        p.subtitle {
+            font-size: .9rem;
+            color: var(--text-muted);
+        }
+
+        /* ================= FORM ================= */
         .form-label {
-            font-weight: 500;
-            font-size: 0.9rem;
+            font-weight: 600;
+            font-size: .85rem;
         }
+
         .form-control {
-            padding: 0.6rem 0.75rem;
-            border-radius: 8px;
+            padding: .65rem .75rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            font-size: .9rem;
         }
-        .btn-primary {
-            background-color: #1f3c88;
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37,99,235,.15);
+        }
+
+        .input-group-text {
+            background: transparent;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            border-right: none;
+            color: var(--text-muted);
+        }
+
+        .toggle-password {
+            border-left: none;
+            cursor: pointer;
+        }
+
+        /* ================= BUTTON ================= */
+        .btn-login {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             border: none;
-            padding: 0.6rem;
-            font-weight: 500;
+            padding: .75rem;
+            font-weight: 600;
+            border-radius: 14px;
+            color: #fff;
+            transition: all .2s ease;
+            box-shadow: 0 14px 28px rgba(37,99,235,.4);
         }
-        .btn-primary:hover {
-            background-color: #162c63;
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 36px rgba(37,99,235,.5);
         }
+
+        /* ================= FOOTER ================= */
         .footer-text {
-            font-size: 0.75rem;
-            color: #6c757d;
+            font-size: .75rem;
+            color: var(--text-muted);
+            margin-top: 1.5rem;
+            text-align: center;
         }
     </style>
 </head>
@@ -63,56 +149,79 @@
 <body>
 
 <div class="login-wrapper">
-    <div class="login-card shadow-sm">
 
+    <div class="login-card">
+
+        <!-- HEADER -->
         <div class="text-center mb-4">
+            <div class="brand-icon">
+                <i class="fas fa-ticket-alt"></i>
+            </div>
             <h3>Ticket System</h3>
-            <p class="text-muted">เข้าสู่ระบบสำหรับพนักงาน</p>
+            <p class="subtitle">Sign in to continue</p>
         </div>
 
-        <!-- 🔴 แสดง error message -->
+        <!-- ERROR -->
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-danger py-2 small">
+                <div class="alert alert-danger py-2 text-center small">
                     {{ message }}
                 </div>
             {% endfor %}
         {% endif %}
 
+        <!-- FORM -->
         <form method="post" action="{% url 'login' %}">
             {% csrf_token %}
 
+            <!-- Username -->
             <div class="mb-3">
-                <label class="form-label">ชื่อผู้ใช้</label>
-                <input type="text"
-                       name="username"
-                       class="form-control"
-                       autocomplete="username"
-                       autofocus
-                       required>
+                <label class="form-label">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    <input type="text" name="username" class="form-control" required>
+                </div>
             </div>
 
-            <div class="mb-4">
-                <label class="form-label">รหัสผ่าน</label>
-                <input type="password"
-                       name="password"
-                       class="form-control"
-                       autocomplete="current-password"
-                       required>
+            <!-- Password -->
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                    <input type="password" id="password" name="password" class="form-control" required>
+                    <span class="input-group-text toggle-password" id="togglePassword">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                </div>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100">
-                เข้าสู่ระบบ
+            <button type="submit" class="btn btn-login w-100">
+                <i class="fas fa-sign-in-alt me-1"></i>
+                Sign in
             </button>
         </form>
 
-        <div class="text-center mt-4 footer-text">
-            © 2025 Your Company · Internal Use Only
+        <div class="footer-text">
+            © 2026 Ticket System · All rights reserved
         </div>
 
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- JS -->
+<script>
+    const toggle = document.getElementById('togglePassword');
+    const password = document.getElementById('password');
+
+    toggle.addEventListener('click', () => {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        toggle.innerHTML = type === 'password'
+            ? '<i class="fas fa-eye"></i>'
+            : '<i class="fas fa-eye-slash"></i>';
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
