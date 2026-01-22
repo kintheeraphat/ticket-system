@@ -571,7 +571,7 @@ def tickets_detail_erp(request, ticket_id):
             JOIN tickets.users u ON u.id = t.user_id
             LEFT JOIN tickets.ticket_data_erp_app e
                 ON e.ticket_id = t.id
-              AND t.ticket_type_id = 12
+              AND t.ticket_type_id = %s
         """, [ticket_id])
 
         data = dictfetchone(cursor)
