@@ -642,8 +642,9 @@ def tickets_detail_vpn(request, ticket_id):
                 v.vpn_reason
             FROM tickets.ticket_data_vpn v
             JOIN tickets.tickets t ON t.id = v.ticket_id
-            JOIN tickets.users u ON u.erp_user_id = t.user_id
-            WHERE t.id = %s
+            JOIN tickets.users u on u.id = t.user_id 
+            where t.id = %s 
+        
         """, [ticket_id])
 
         data = dictfetchone(cursor)
