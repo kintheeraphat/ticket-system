@@ -1488,3 +1488,74 @@ def setting_team(request):
 def dictfetchall(cursor):
     columns = [col[0] for col in cursor.description]
     return [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+def team_adduser(request, team_id):
+
+    with connection.cursor() as cursor:
+        # ===== Team Info =====
+        cursor.execute("""
+            SELECT 
+                t.id,
+                t.name AS team_name,
+                d.dept_name,
+                u.full_name AS leader_name
+            FROM tickets.team t
+            JOIN tickets.users u ON u.id = t.users
+            LEFT JOIN tickets.department d ON d.id = t.department_id
+            WHERE t.id = %s
+        """, [team_id])
+        team = cursor.fetchone()
+
+        if not team:
+            messages.error(request, "ไม่พบทีม")
+            return redirect("setting_team")
+
+        team_data = {
+            "id": team[0],
+            "team_name": team[1],
+            "dept_name": team[2],
+            "leader_name": team[3],
+        }
+
+        # ===== Team Members =====
+        cursor.execute("""
+            SELECT u.id, u.full_name, u.username
+            FROM tickets.team_members tm
+            JOIN tickets.users u ON u.id = tm.user_id
+            WHERE tm.team_id = %s
+            ORDER BY u.full_name
+        """, [team_id])
+        members = dictfetchall(cursor)
+
+        # ===== All Users =====
+        cursor.execute("""
+            SELECT id, full_name, username
+            FROM tickets.users
+            WHERE is_active = true
+            ORDER BY full_name
+        """)
+        users = dictfetchall(cursor)
+
+    # ===== Handle Add User =====
+    if request.method == "POST":
+        user_id = request.POST.get("user_id")
+
+        if not user_id:
+            messages.error(request, "กรุณาเลือกผู้ใช้งาน")
+            return redirect("team_adduser", team_id=team_id)
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO tickets.team_members (team_id, user_id)
+                VALUES (%s, %s)
+                ON CONFLICT DO NOTHING
+            """, [team_id, user_id])
+
+        messages.success(request, "เพิ่มสมาชิกเข้าทีมเรียบร้อยแล้ว")
+        return redirect("team_adduser", team_id=team_id)
+
+    return render(request, "team_adduser.html", {
+        "team": team_data,
+        "members": members,
+        "users": users
+    })

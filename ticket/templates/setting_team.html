@@ -36,7 +36,7 @@
                         <div class="mb-3">
                             <label class="form-label fw-semibold">ชื่อทีมอนุมัติ | Team Name</label>
                             <input type="text" name="team_name" class="form-control"
-                                   placeholder="เช่น Manager IT / HR Approver" required>
+                                placeholder="เช่น Manager IT / HR Approver" required>
                         </div>
 
                         <!-- Approver User -->
@@ -94,9 +94,10 @@
                                     </td>
                                     <td>{{ t.full_name }}</td>
                                     <td class="text-center">
-                                        <a href="#" class="btn btn-sm btn-outline-primary">
-                                            ➕ เพิ่มคนในทีม
+                                        <a href="{% url 'team_adduser' t.id %}" class="btn btn-sm btn-primary">
+                                            เพิ่มคนในทีม
                                         </a>
+
                                         <!-- ต่ออนาคต -->
                                         <!--
                                         <a href="#" class="btn btn-sm btn-outline-warning">แก้ไข</a>

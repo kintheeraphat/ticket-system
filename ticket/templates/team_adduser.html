@@ -1,65 +1,76 @@
 {% extends "base.html" %}
-{% block title %}เพิ่มสมาชิกทีมอนุมัติ | Add User to Approval Team{% endblock %}
+{% block title %}เพิ่มสมาชิกในทีม | {{ team.team_name }}{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h3>เพิ่มสมาชิกทีมอนุมัติ | Add User to Approval Team</h3>
 
-    <div class="card">
+    <a href="{% url 'setting_team' %}" class="btn btn-secondary mb-3">
+        ⬅ กลับหน้าตั้งค่าทีม
+    </a>
+
+    <!-- ===== Team Info ===== -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <b>รายละเอียดทีม</b>
+        </div>
+        <div class="card-body">
+            <p><b>ชื่อทีม:</b> {{ team.team_name }}</p>
+            <p><b>แผนก:</b> {{ team.dept_name }}</p>
+            <p><b>หัวหน้าทีม:</b> {{ team.leader_name }}</p>
+        </div>
+    </div>
+
+    <!-- ===== Add User ===== -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <b>เพิ่มสมาชิกเข้าทีม</b>
+        </div>
         <div class="card-body">
             <form method="post">
                 {% csrf_token %}
-
-                <!-- Select Team -->
-                <div class="mb-3">
-                    <label class="form-label">ทีมอนุมัติ | Approval Team</label>
-                    <select name="team_id" id="teamSelect" class="form-select" required>
-                        <option value="">-- เลือกทีมอนุมัติ --</option>
-                        {% for t in teams %}
-                        <option value="{{ t.id }}"
-                                data-dept="{{ t.dept_name }}">
-                            {{ t.team_name }}
-                        </option>
-                        {% endfor %}
-                    </select>
+                <div class="row">
+                    <div class="col-md-8">
+                        <select name="user_id" class="form-select" required>
+                            <option value="">-- เลือกผู้ใช้งาน --</option>
+                            {% for u in users %}
+                                <option value="{{ u.id }}">
+                                    {{ u.full_name }} ({{ u.username }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-success w-100">
+                            ➕ เพิ่มเข้าทีม
+                        </button>
+                    </div>
                 </div>
-
-                <!-- Show Department (readonly) -->
-                <div class="mb-3">
-                    <label class="form-label">แผนก | Department</label>
-                    <input type="text" id="deptDisplay"
-                           class="form-control"
-                           readonly
-                           placeholder="เลือกทีมเพื่อแสดงแผนก">
-                </div>
-
-                <!-- Select User -->
-                <div class="mb-3">
-                    <label class="form-label">ผู้ใช้งาน | User</label>
-                    <select name="user_id" class="form-select" required>
-                        <option value="">-- เลือกผู้ใช้งาน --</option>
-                        {% for u in users %}
-                        <option value="{{ u.id }}">
-                            {{ u.full_name }} ({{ u.username }})
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <button type="submit" class="btn btn-primary">
-                    เพิ่มสมาชิกทีมอนุมัติ
-                </button>
             </form>
         </div>
     </div>
+
+    <!-- ===== Members List ===== -->
+    <div class="card">
+        <div class="card-header">
+            <b>สมาชิกในทีม</b>
+        </div>
+        <div class="card-body">
+            {% if members %}
+                <ul class="list-group">
+                    {% for m in members %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                {{ m.full_name }} ({{ m.username }})
+                            </div>
+                            <span class="badge bg-primary">สมาชิก</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">ยังไม่มีสมาชิกในทีม</p>
+            {% endif %}
+        </div>
+    </div>
+
 </div>
-
-<!-- JS -->
-<script>
-document.getElementById("teamSelect").addEventListener("change", function () {
-    const dept = this.options[this.selectedIndex].dataset.dept || "";
-    document.getElementById("deptDisplay").value = dept;
-});
-</script>
-
 {% endblock %}

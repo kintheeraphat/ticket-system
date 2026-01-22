@@ -31,4 +31,6 @@ urlpatterns = [
     path("ticket-success/", views.ticket_success, name="ticket_success"),
     
     path("settingline/", views.setting_team, name="setting_team"),
+    path("team/<int:team_id>/add-user/", views.team_adduser, name="team_adduser"),
+
 ]
