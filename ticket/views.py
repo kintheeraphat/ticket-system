@@ -936,6 +936,86 @@ def repairs_form(request):
 
     return render(request, "tickets_form/repairs_form.html")
 
+def active_promotion_detail(request, ticket_id):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                t.id                AS ticket_id,
+                t.title,
+                t.description,
+                t.create_at         AS ticket_create_at,
+                u.full_name         AS requester_name,
+                t.department,
+
+                e.promo_name,
+                e.start_date,
+                e.end_date,
+                e.requester_names,
+                e.module_name,
+                e.old_value,
+                e.new_value
+
+            FROM tickets.ticket_data_erp_app e
+            JOIN tickets.tickets t ON t.id = e.ticket_id
+            JOIN tickets.users u   ON u.id = t.user_id
+            WHERE t.id = %s
+        """, [ticket_id])
+
+        data = dictfetchone(cursor)
+
+    if not data:
+        raise Http404("Active Promotion Ticket not found")
+
+    # -----------------------------
+    # requester_names → list
+    # -----------------------------
+    requester_list = []
+    if data.get("requester_names"):
+        requester_list = [
+            r.strip()
+            for r in data["requester_names"].splitlines()
+            if r.strip()
+        ]
+
+    # -----------------------------
+    # department → list
+    # -----------------------------
+    department_list = []
+    if data.get("department"):
+        department_list = [
+            d.strip()
+            for d in data["department"].split(",")
+            if d.strip()
+        ]
+
+    requester_with_department = []
+    for i, name in enumerate(requester_list):
+        dept = department_list[i] if i < len(department_list) else ""
+        requester_with_department.append({
+            "name": name,
+            "department": dept
+        })
+
+    return render(request, "tickets_form/active_promotion_detail.html", {
+        "ticket": {
+            "id": data["ticket_id"],
+            "title": data["title"],
+            "description": data["description"],
+            "create_at": data["ticket_create_at"],
+            "user_name": data["requester_name"],
+        },
+        "promotion": {
+            "promo_name": data["promo_name"],
+            "start_date": data["start_date"],
+            "end_date": data["end_date"],
+            "module_name": data["module_name"],
+        },
+        "detail": {
+            "requesters": requester_with_department,
+            "old_value": data["old_value"],
+            "new_value": data["new_value"],
+        }
+    })
 
 def adjust_form(request):
     user = request.session.get("user")

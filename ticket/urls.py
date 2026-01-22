@@ -16,6 +16,9 @@ urlpatterns = [
     path("tickets/detail/repairs/<int:ticket_id>/",views.tickets_detail_repairs,name="tickets_detail_repairs"),
     path("tickets/detail/report/<int:ticket_id>/",views.tickets_detail_report,name="tickets_detail_report"),
     path("tickets/detail/app/<int:ticket_id>/",views.tickets_detail_newapp,name="tickets_detail_newapp"),
+    path("tickets/detail/promotion/<int:ticket_id>/", views.active_promotion_detail, name="active_promotion_detail"),
+
+    
     path("create/", views.tickets_create, name="create"),
     path("create/erp-perm/", views.erp_perm, name="erp_perm"),
     path("create/repairs/", views.repairs_form, name="repairs_form"),

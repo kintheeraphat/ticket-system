@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Active Promotion Detail{% endblock %}
+
+{% block content %}
+<div class="dashboard-table shadow-sm p-4 bg-white rounded">
+
+  <h4 class="mb-4">
+    <i class="fas fa-bullhorn me-2"></i>รายละเอียดคำขอ Active Promotion
+  </h4>
+
+  <!-- ================= Ticket Info ================= -->
+  <div class="mb-4 p-3 border rounded">
+    <h6 class="fw-bold text-primary">ข้อมูล Ticket</h6>
+    <p><b>ผู้ร้องขอ:</b> {{ ticket.user_name }}</p>
+    <p><b>วันที่สร้าง:</b> {{ ticket.create_at }}</p>
+    <p><b>หัวข้อ:</b> {{ ticket.title }}</p>
+    <p><b>รายละเอียด:</b> {{ ticket.description }}</p>
+  </div>
+
+  <!-- ================= Promotion ================= -->
+  <div class="mb-4 p-3 border rounded">
+    <h6 class="fw-bold text-danger">ข้อมูล Promotion</h6>
+    <p><b>ชื่อ Promotion:</b> {{ promotion.promo_name }}</p>
+    <p><b>วันที่เริ่ม:</b> {{ promotion.start_date }}</p>
+    <p><b>วันที่สิ้นสุด:</b> {{ promotion.end_date }}</p>
+  </div>
+
+  <!-- ================= Requesters ================= -->
+  <div class="mb-4 p-3 border rounded">
+    <h6 class="fw-bold text-success">ผู้เกี่ยวข้อง</h6>
+    <table class="table table-sm table-bordered">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>ชื่อ</th>
+          <th>แผนก</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in detail.requesters %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ r.name }}</td>
+          <td>{{ r.department }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ================= Change Info ================= -->
+  {% if detail.old_value or detail.new_value %}
+  <div class="mb-4 p-3 border rounded">
+    <h6 class="fw-bold text-warning">ข้อมูลการเปลี่ยนแปลง</h6>
+    <p><b>ค่าเดิม:</b></p>
+    <pre>{{ detail.old_value }}</pre>
+    <p><b>ค่าใหม่:</b></p>
+    <pre>{{ detail.new_value }}</pre>
+  </div>
+  {% endif %}
+
+  <!-- ================= Buttons ================= -->
+  <div class="text-end border-top pt-3">
+    <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+      <i class="fas fa-arrow-left me-1"></i> กลับ
+    </button>
+  </div>
+
+</div>
+{% endblock %}
