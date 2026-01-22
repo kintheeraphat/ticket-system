@@ -1559,3 +1559,66 @@ def team_adduser(request, team_id):
         "members": members,
         "users": users
     })
+
+
+def add_approve_line(request):
+    with connection.cursor() as cursor:
+        # ticket types
+        cursor.execute("""
+            SELECT id, name
+            FROM tickets.ticket_type
+            ORDER BY name
+        """)
+        ticket_types = dictfetchall(cursor)
+
+        # teams
+        cursor.execute("""
+            SELECT t.id, t.name, d.dept_name
+            FROM tickets.team t
+            LEFT JOIN tickets.department d ON d.id = t.department_id
+            ORDER BY d.dept_name, t.name
+        """)
+        teams = dictfetchall(cursor)
+
+        # users
+        cursor.execute("""
+            SELECT id, full_name, username
+            FROM tickets.users
+            WHERE is_active = true
+            ORDER BY full_name
+        """)
+        users = dictfetchall(cursor)
+
+    # ===== POST =====
+    if request.method == "POST":
+        ticket_type_id = request.POST.get("ticket_type_id")
+        team_id = request.POST.get("team_id")
+        user_ids = request.POST.getlist("user_ids[]")  # หลายคน
+
+        if not ticket_type_id or not team_id or not user_ids:
+            messages.error(request, "กรุณากรอกข้อมูลให้ครบ")
+            return redirect("add_approve_line")
+
+        with connection.cursor() as cursor:
+            level = 1
+            for uid in user_ids:
+                cursor.execute("""
+                    INSERT INTO tickets.approve_line
+                    (name, team2_id, level, user_id)
+                    VALUES (%s, %s, %s, %s)
+                """, [
+                    ticket_type_id,
+                    team_id,
+                    level,
+                    uid
+                ])
+                level += 1
+
+        messages.success(request, "ตั้งค่าสายอนุมัติเรียบร้อยแล้ว")
+        return redirect("add_approve_line")
+
+    return render(request, "add_approve_line.html", {
+        "ticket_types": ticket_types,
+        "teams": teams,
+        "users": users
+    })

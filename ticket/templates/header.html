@@ -46,6 +46,14 @@
       </a>
     </li>
     {% endif %}
+        {% if request.session.user.role != "user" %}
+    <li class="{% if request.path == '/' %}active{% endif %}">
+      <a href="{% url 'add_approve_line' %}">
+        <i class="fas fa-gauge-high"></i>
+        <span>Approve Line</span>
+      </a>
+    </li>
+    {% endif %}
     
 
     <!-- ================= USER + ADMIN ================= -->
