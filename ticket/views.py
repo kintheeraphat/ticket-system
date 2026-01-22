@@ -966,7 +966,6 @@ def active_promotion_detail(request, ticket_id):
             LEFT JOIN tickets.ticket_data_erp_app e  -- ✅ FIX
                 ON e.ticket_id = t.id
             WHERE t.id = %s
-              AND t.ticket_type_id = 2                -- 🔴 ปรับให้ตรงกับ Promotion จริง
         """, [ticket_id])
 
         data = dictfetchone(cursor)
