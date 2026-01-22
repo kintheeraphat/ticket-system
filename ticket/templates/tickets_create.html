@@ -5,85 +5,135 @@
 {% block content %}
 <main class="main-content">
 
-    <h3 class="fw-bold mb-4">
-        <i class="fas fa-plus-circle me-2 text-primary"></i> เลือกประเภทคำร้อง
-    </h3>
+  <!-- ================= HEADER ================= -->
+  <div class="mb-5">
+    <h2 class="fw-bold mb-1 d-flex align-items-center gap-2">
+      <span class="icon-box bg-primary-soft text-primary">
+        <i class="fas fa-plus"></i>
+      </span>
+      สร้างคำร้องใหม่
+    </h2>
+    <p class="text-muted mb-0">
+      เลือกประเภทคำร้องที่ต้องการแจ้ง เพื่อให้ระบบดำเนินการได้อย่างถูกต้อง
+    </p>
+  </div>
 
-    <ul class="type-list">
+  <!-- ================= SYSTEM / SOFTWARE ================= -->
+  <h6 class="text-muted mb-3">ระบบ / ซอฟต์แวร์</h6>
 
+  <ul class="type-list">
 
-        <li>
-            <a href="{% url 'erp_perm' %}">
-                <i class="fas fa-user-lock text-primary"></i>
-                <div>
-                    <b>ขอเปิด User / ปรับสิทธิ์ ERP</b><br>
-                    <small></small>
-                </div>
-            </a>
-        </li>
+    <li>
+      <a href="{% url 'erp_perm' %}">
+        <i class="fas fa-user-lock text-primary"></i>
+        <div>
+          <b>ขอเปิด User / ปรับสิทธิ์ ERP</b>
+          <small class="text-muted d-block">
+            เพิ่ม แก้ไข ยกเลิกสิทธิ์การใช้งาน
+          </small>
+        </div>
+      </a>
+    </li>
 
+    <li>
+      <a href="{% url 'adjust_form' %}">
+        <i class="fas fa-exchange-alt text-success"></i>
+        <div>
+          <b>ปรับยอดสะสม (Adjust)</b>
+          <small class="text-muted d-block">
+            แก้ไขข้อมูลยอดสะสมในระบบ
+          </small>
+        </div>
+      </a>
+    </li>
 
-        <li>
-            <a href="{% url 'adjust_form' %}">
-                <i class="fas fa-exchange-alt text-success"></i>
-                <div>
-                    <b>ปรับยอดสะสม (Adjust)</b><br>
-                </div>
-            </a>
-        </li>
+    <li>
+      <a href="{% url 'app_form' %}">
+        <i class="fas fa-laptop-code text-success"></i>
+        <div>
+          <b>ขอ Application</b>
+          <small class="text-muted d-block">
+            ขอพัฒนา หรือเพิ่มระบบใหม่
+          </small>
+        </div>
+      </a>
+    </li>
 
-        <li>
-            <a href="{% url 'app_form' %}">
-                <i class="fas fa-laptop-code text-success"></i>
-                <div><b>ขอ Application</b></div>
-            </a>
-        </li>
+    <li>
+      <a href="{% url 'report_form' %}">
+        <i class="fas fa-chart-bar text-primary"></i>
+        <div>
+          <b>ขอ Report / ERP Data</b>
+          <small class="text-muted d-block">
+            ขอรายงานหรือข้อมูลจากระบบ ERP
+          </small>
+        </div>
+      </a>
+    </li>
 
-        <li>
-            <a href="{% url 'report_form' %}">
-                <i class="fas fa-chart-bar text-primary"></i>
-                <div><b>ขอ Report / ERP Data</b></div>
-            </a>
-        </li>
+    <li>
+      <a href="{% url 'vpn' %}">
+        <i class="fas fa-network-wired text-info"></i>
+        <div>
+          <b>ขอใช้งาน VPN</b>
+          <small class="text-muted d-block">
+            ขอเชื่อมต่อระบบจากภายนอก
+          </small>
+        </div>
+      </a>
+    </li>
 
-        <li>
-            <a href="{% url 'vpn' %}">
-                <i class="fas fa-network-wired text-info"></i>
-                <div>
-                    <b>ขอใช้งาน VPN</b>
-                </div>
-            </a>
-        </li>
+  </ul>
 
-        <li>
-            <a href="{% url 'borrows' %}">
-                <i class="fas fa-laptop text-secondary"></i>
-                <div>
-                    <b>เบิก / คืน อุปกรณ์ IT</b>
-                </div>
-            </a>
-        </li>
+  <!-- ================= HARDWARE / FACILITY ================= -->
+  <h6 class="text-muted mt-5 mb-3">อุปกรณ์ / อาคาร</h6>
 
+  <ul class="type-list">
 
+    <li>
+      <a href="{% url 'borrows' %}">
+        <i class="fas fa-laptop text-secondary"></i>
+        <div>
+          <b>เบิก / คืน อุปกรณ์ IT</b>
+          <small class="text-muted d-block">
+            ยืม คืน หรือแจ้งสถานะอุปกรณ์
+          </small>
+        </div>
+      </a>
+    </li>
 
-        <li>
-            <a href="{% url 'active_promotion_form' %}">
-                <i class="fas fa-ad text-danger"></i>
-                <div>
-                    <b>Active Promotion</b>
-                </div>
-            </a>
-        </li>
+    <li>
+      <a href="{% url 'repairs_form' %}">
+        <i class="fas fa-tools text-warning"></i>
+        <div>
+          <b>แจ้งปัญหาซ่อมอาคาร</b>
+          <small class="text-muted d-block">
+            แจ้งซ่อมแซมอุปกรณ์หรือสถานที่
+          </small>
+        </div>
+      </a>
+    </li>
 
-        <li>
-            <a href="{% url 'repairs_form' %}">
-                <i class="fas fa-tools me-2"></i>
-                <div>
-                    <b>แจ้งปัญหาซ่อมอาคาร</b>
-                </div>
-            </a>
-        </li>
+  </ul>
 
-    </ul>
+  <!-- ================= MARKETING ================= -->
+  <h6 class="text-muted mt-5 mb-3">การตลาด / โปรโมชั่น</h6>
+
+  <ul class="type-list">
+
+    <li>
+      <a href="{% url 'active_promotion_form' %}">
+        <i class="fas fa-ad text-danger"></i>
+        <div>
+          <b>Active Promotion</b>
+          <small class="text-muted d-block">
+            ขอเปิดหรือปรับปรุงโปรโมชั่น
+          </small>
+        </div>
+      </a>
+    </li>
+
+  </ul>
+
 </main>
 {% endblock %}

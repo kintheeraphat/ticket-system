@@ -931,9 +931,7 @@ def repairs_form(request):
                     user_id,
                     timezone.now()
                 ])
-
         return redirect("ticket_success")
-
     return render(request, "tickets_form/repairs_form.html")
 
 def active_promotion_detail(request, ticket_id):
@@ -948,7 +946,7 @@ def active_promotion_detail(request, ticket_id):
                 t.department,
 
                 tt.name             AS type,
-                s."name"            AS status,
+                s.name              AS status,
 
                 e.promo_name,
                 e.start_date,
@@ -959,16 +957,16 @@ def active_promotion_detail(request, ticket_id):
                 e.new_value
 
             FROM tickets.tickets t
-            JOIN tickets.users u 
-                ON u.erp_user_id = t.user_id
+            JOIN tickets.users u
+                ON u.id = t.user_id                  -- ✅ FIX
             JOIN tickets.ticket_type tt 
                 ON t.ticket_type_id = tt.id
             JOIN tickets.status s 
                 ON t.status_id = s.id
-            JOIN tickets.ticket_data_erp_app e 
+            LEFT JOIN tickets.ticket_data_erp_app e  -- ✅ FIX
                 ON e.ticket_id = t.id
             WHERE t.id = %s
-              AND e.promo_name IS NOT NULL
+              AND t.ticket_type_id = 2                -- 🔴 ปรับให้ตรงกับ Promotion จริง
         """, [ticket_id])
 
         data = dictfetchone(cursor)
@@ -992,14 +990,11 @@ def active_promotion_detail(request, ticket_id):
     # -----------------------------
     department_list = []
     if data.get("department"):
-        if isinstance(data["department"], list):
-            department_list = data["department"]
-        else:
-            department_list = [
-                d.strip()
-                for d in str(data["department"]).replace("{","").replace("}","").split(",")
-                if d.strip()
-            ]
+        department_list = [
+            d.strip()
+            for d in str(data["department"]).replace("{","").replace("}","").split(",")
+            if d.strip()
+        ]
 
     requester_with_department = []
     for i, name in enumerate(requester_list):
@@ -1140,12 +1135,9 @@ def adjust_form(request):
                 ])
 
         return redirect("ticket_success")
-
     return render(request, "tickets_form/adjust_form.html")
 
-
 def app_form(request):
-
     # =========================
     # CHECK LOGIN
     # =========================
