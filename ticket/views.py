@@ -567,17 +567,18 @@ def tickets_detail_erp(request, ticket_id):
                 t.department,
                 e.requester_names,
                 e.module_name
-            FROM tickets.ticket_data_erp_app e
-            JOIN tickets.tickets t ON t.id = e.ticket_id
+            FROM tickets.tickets t
             JOIN tickets.users u ON u.id = t.user_id
-            WHERE e.module_access IS TRUE
-              AND t.id = %s
+            LEFT JOIN tickets.ticket_data_erp_app e
+                ON e.ticket_id = t.id
+            WHERE t.id = %s
+              AND t.ticket_type_id = 12
         """, [ticket_id])
 
         data = dictfetchone(cursor)
 
-        if not data:
-            raise Http404("ERP Ticket not found")
+    if not data:
+        raise Http404("ERP Ticket not found")
 
     # -----------------------------
     # แยก requester_names (ขึ้นบรรทัด)
@@ -601,9 +602,6 @@ def tickets_detail_erp(request, ticket_id):
             if d.strip()
         ]
 
-    # -----------------------------
-    # จับคู่ user + department
-    # -----------------------------
     requester_with_department = []
     for i, name in enumerate(requester_list):
         dept = department_list[i] if i < len(department_list) else ""
@@ -622,7 +620,7 @@ def tickets_detail_erp(request, ticket_id):
         },
         "detail": {
             "requesters": requester_with_department,
-            "module_name": data["module_name"],
+            "module_name": data["module_name"] or "-",
         }
     })
 
