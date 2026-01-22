@@ -939,13 +939,16 @@ def repairs_form(request):
 def active_promotion_detail(request, ticket_id):
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT
+            SELECT 
                 t.id                AS ticket_id,
                 t.title,
                 t.description,
                 t.create_at         AS ticket_create_at,
                 u.full_name         AS requester_name,
                 t.department,
+
+                tt.name             AS type,
+                s."name"            AS status,
 
                 e.promo_name,
                 e.start_date,
@@ -955,10 +958,17 @@ def active_promotion_detail(request, ticket_id):
                 e.old_value,
                 e.new_value
 
-            FROM tickets.ticket_data_erp_app e
-            JOIN tickets.tickets t ON t.id = e.ticket_id
-            JOIN tickets.users u   ON u.id = t.user_id
+            FROM tickets.tickets t
+            JOIN tickets.users u 
+                ON u.erp_user_id = t.user_id
+            JOIN tickets.ticket_type tt 
+                ON t.ticket_type_id = tt.id
+            JOIN tickets.status s 
+                ON t.status_id = s.id
+            JOIN tickets.ticket_data_erp_app e 
+                ON e.ticket_id = t.id
             WHERE t.id = %s
+              AND e.promo_name IS NOT NULL
         """, [ticket_id])
 
         data = dictfetchone(cursor)
@@ -982,11 +992,14 @@ def active_promotion_detail(request, ticket_id):
     # -----------------------------
     department_list = []
     if data.get("department"):
-        department_list = [
-            d.strip()
-            for d in data["department"].split(",")
-            if d.strip()
-        ]
+        if isinstance(data["department"], list):
+            department_list = data["department"]
+        else:
+            department_list = [
+                d.strip()
+                for d in str(data["department"]).replace("{","").replace("}","").split(",")
+                if d.strip()
+            ]
 
     requester_with_department = []
     for i, name in enumerate(requester_list):
@@ -1003,6 +1016,8 @@ def active_promotion_detail(request, ticket_id):
             "description": data["description"],
             "create_at": data["ticket_create_at"],
             "user_name": data["requester_name"],
+            "type": data["type"],
+            "status": data["status"],
         },
         "promotion": {
             "promo_name": data["promo_name"],
