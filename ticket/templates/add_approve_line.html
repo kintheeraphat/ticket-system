@@ -1,130 +1,170 @@
 {% extends "base.html" %}
-{% block title %}ตั้งค่าสายอนุมัติ | Approval Flow{% endblock %}
+{% load static %}
+
+{% block title %}Add Approve Line{% endblock %}
 
 {% block content %}
-<main class="main-content container-fluid py-3">
 
-<h4 class="fw-bold mb-3">ตั้งค่าสายอนุมัติ (Approval Flow)</h4>
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">ตั้งค่าสายอนุมัติ (Approval Flow)</h5>
+        </div>
 
-<div class="card shadow-sm">
-<div class="card-body">
+        <div class="card-body">
 
-<form method="post">
-{% csrf_token %}
+            <!-- ===== messages ===== -->
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
 
-<!-- ================= Ticket Type ================= -->
-<div class="mb-3">
-    <label class="form-label fw-semibold">ประเภทคำขอ</label>
-    <select name="ticket_type_id" id="ticketType" class="form-select" required onchange="renderFlow()">
-        <option value="">-- เลือกประเภทคำขอ --</option>
-        {% for t in ticket_types %}
-        <option value="{{ t.id }}" data-category="{{ t.category }}">{{ t.name }}</option>
-        {% endfor %}
-    </select>
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- ================= CATEGORY ================= -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Category</label>
+                    <select name="category_id" id="categorySelect" class="form-select" required>
+                        <option value="">-- เลือก Category --</option>
+                        {% for c in categories %}
+                        <option value="{{ c.id }}">{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- ================= TEAM ================= -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Team</label>
+                    <select name="team_id" class="form-select" required>
+                        <option value="">-- เลือก Team --</option>
+                        {% for t in teams %}
+                        <option value="{{ t.id }}">
+                            {{ t.dept_name }} - {{ t.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <hr>
+
+                <!-- ================= APPROVE LEVELS ================= -->
+                <div id="approveLevels" style="display:none;">
+
+                    <!-- Level 1 -->
+                    <div class="mb-3 level-box" data-level="1">
+                        <label class="form-label fw-bold">Level 1 : หัวหน้า</label>
+                        <select name="user_ids[]" class="form-select level-input">
+                            <option value="">-- เลือกหัวหน้า --</option>
+                            {% for u in users %}
+                            <option value="{{ u.id }}">{{ u.full_name }} ({{ u.username }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Level 2 -->
+                    <div class="mb-3 level-box" data-level="2">
+                        <label class="form-label fw-bold">Level 2 : บัญชี</label>
+                        <select name="user_ids[]" class="form-select level-input">
+                            <option value="">-- เลือกบัญชี --</option>
+                            {% for u in users %}
+                            <option value="{{ u.id }}">{{ u.full_name }} ({{ u.username }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Level 3 -->
+                    <div class="mb-3 level-box" data-level="3">
+                        <label class="form-label fw-bold">
+                            Level 3 : CEO / CFO 
+                            <span class="text-muted small">(ไม่จำเป็น)</span>
+                        </label>
+                        <select name="user_ids[]" class="form-select level-input">
+                            <option value="">-- ข้ามได้ --</option>
+                            {% for u in users %}
+                            <option value="{{ u.id }}">{{ u.full_name }} ({{ u.username }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Level 4 -->
+                    <div class="mb-3 level-box" data-level="4">
+                        <label class="form-label fw-bold">Level 4 : IT / Admin</label>
+                        <select name="user_ids[]" class="form-select level-input">
+                            <option value="">-- เลือก IT / Admin --</option>
+                            {% for u in users %}
+                            <option value="{{ u.id }}">{{ u.full_name }} ({{ u.username }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary px-4">
+                        บันทึกสายอนุมัติ
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
 </div>
-
-<!-- ================= Team ================= -->
-<div class="mb-3">
-    <label class="form-label fw-semibold">ทีมที่เกี่ยวข้อง</label>
-    <select name="team_id" class="form-select" required>
-        <option value="">-- เลือกทีม --</option>
-        {% for t in teams %}
-        <option value="{{ t.id }}">{{ t.name }} ({{ t.dept_name }})</option>
-        {% endfor %}
-    </select>
-</div>
-
-<hr>
-
-<!-- ================= Approval Flow ================= -->
-<h6 class="fw-bold mb-2">สายอนุมัติ</h6>
-<div id="flow-container"></div>
-
-<div class="mt-4 text-end">
-    <button class="btn btn-primary px-4">บันทึกสายอนุมัติ</button>
-</div>
-
-</form>
-
-</div>
-</div>
-</main>
-
-<!-- ================= STYLE ================= -->
-<style>
-.flow-box{
-    border:1px solid #e0e0e0;
-    border-radius:10px;
-    padding:15px;
-    margin-bottom:12px;
-    background:#fafafa;
-}
-.flow-title{
-    font-weight:600;
-    margin-bottom:6px;
-}
-</style>
 
 <!-- ================= SCRIPT ================= -->
 <script>
-/* ===== USERS ===== */
-const USERS = [
-{% for u in users %}
-{ id:"{{u.id}}", name:"{{u.full_name}}", username:"{{u.username}}", role:"{{u.role}}" },
-{% endfor %}
-];
+    const categorySelect = document.getElementById("categorySelect");
+    const approveLevels = document.getElementById("approveLevels");
+    const levelBoxes = document.querySelectorAll(".level-box");
 
-/* ===== CATEGORY FLOW MAP ===== */
-const CATEGORY_FLOW = {
-  1: ["USER","HEAD","ACCOUNT","CEO","CFO","IT"],        // ERP
-  2: ["USER","HEAD","IT"],                             // VPN
-  3: ["USER","HEAD","IT"],                             // Building
-  4: ["USER","HEAD","ACCOUNT","CEO","CFO","IT"],       // Finance
-  5: ["USER","HEAD","ACCOUNT","STAKEHOLDER","IT"],     // Application
-  6: ["USER","HEAD","ACCOUNT","CEO","CFO","IT"],       // Promotion
-};
+    // category rule map
+    const CATEGORY_RULES = {
+        "1": { levels: 4, optional: [] },     // ERP
+        "4": { levels: 4, optional: [] },     // Adjust
+        "5": { levels: 4, optional: [3] },    // Application
+        "2": { levels: 4, optional: [3] },    // VPN
+        "6": { levels: 3, optional: [] },     // Active Promotion
+        "3": { levels: 2, optional: [] },     // Building
+    };
 
-/* ===== Render Flow ===== */
-function renderFlow(){
-    const select = document.getElementById("ticketType");
-    const category = select.options[select.selectedIndex].dataset.category;
-    const container = document.getElementById("flow-container");
+    categorySelect.addEventListener("change", function () {
+        const val = this.value;
 
-    container.innerHTML = "";
+        if (!CATEGORY_RULES[val]) {
+            approveLevels.style.display = "none";
+            return;
+        }
 
-    if(!CATEGORY_FLOW[category]) return;
+        const rule = CATEGORY_RULES[val];
+        const maxLevels = rule.levels;
 
-    CATEGORY_FLOW[category].forEach((role, idx)=>{
-        const div = document.createElement("div");
-        div.className = "flow-box";
+        approveLevels.style.display = "block";
 
-        div.innerHTML = `
-            <div class="flow-title">Level ${idx+1} : ${role}</div>
-            <select name="flow_users[]" class="form-select" required>
-                <option value="">-- เลือกผู้อนุมัติ --</option>
-                ${
-                    USERS.filter(u=>filterRole(u,role))
-                         .map(u=>`<option value="${u.id}">${u.name} (${u.username})</option>`)
-                         .join("")
-                }
-            </select>
-        `;
-        container.appendChild(div);
+        levelBoxes.forEach(box => {
+            const lvl = parseInt(box.dataset.level);
+            const select = box.querySelector("select");
+
+            if (lvl <= maxLevels) {
+                box.style.display = "block";
+            } else {
+                box.style.display = "none";
+                select.value = ""; // clear hidden
+            }
+
+            // optional handling
+            if (rule.optional.includes(lvl)) {
+                select.required = false;
+            } else {
+                select.required = true;
+            }
+        });
     });
-}
-
-/* ===== Role Filter ===== */
-function filterRole(user, role){
-    if(role === "USER") return true;
-    if(role === "HEAD") return user.role === "manager";
-    if(role === "ACCOUNT") return user.role === "account";
-    if(role === "CEO") return user.role === "ceo";
-    if(role === "CFO") return user.role === "cfo";
-    if(role === "IT") return user.role === "it";
-    if(role === "SECURITY") return user.role === "security";
-    if(role === "STAKEHOLDER") return true;
-    return true;
-}
 </script>
 
 {% endblock %}

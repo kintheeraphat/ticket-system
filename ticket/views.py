@@ -1716,17 +1716,19 @@ def team_removeuser(request, team_id, member_id):
     messages.success(request, "ลบสมาชิกออกจากทีมเรียบร้อยแล้ว")
     return redirect("team_adduser", team_id=team_id)
 
+
 def add_approve_line(request):
 
     # ===== GET DATA =====
     with connection.cursor() as cursor:
-        # ticket types
+
+        # categories
         cursor.execute("""
             SELECT id, name
-            FROM tickets.ticket_type
+            FROM tickets.category
             ORDER BY name
         """)
-        ticket_types = dictfetchall(cursor)
+        categories = dictfetchall(cursor)
 
         # teams
         cursor.execute("""
@@ -1748,61 +1750,62 @@ def add_approve_line(request):
 
     # ===== POST =====
     if request.method == "POST":
-        ticket_type_id = request.POST.get("ticket_type_id")
+        category_id = request.POST.get("category_id")
         team_id = request.POST.get("team_id")
-        user_ids = request.POST.getlist("user_ids[]")  # หลายคน
+        user_ids = request.POST.getlist("user_ids[]")  # fixed 4 levels
 
         # ---- validation ----
-        if not ticket_type_id or not team_id or not user_ids:
-            messages.error(request, "กรุณากรอกข้อมูลให้ครบ")
+        if not category_id or not team_id:
+            messages.error(request, "กรุณาเลือก Category และ Team")
             return redirect("add_approve_line")
 
-        # ---- remove empty values ----
+        # remove empty
         user_ids = [u for u in user_ids if u]
 
-        if len(user_ids) == 0:
-            messages.error(request, "กรุณาเลือกผู้อนุมัติอย่างน้อย 1 คน")
+        # category == 1 ต้องมี 4 level
+        if str(category_id) == "1" and len(user_ids) != 4:
+            messages.error(request, "Category นี้ต้องมีผู้อนุมัติครบ 4 ระดับ (หัวหน้า/บัญชี/CEO/CFO/IT)")
             return redirect("add_approve_line")
 
-        # ---- check duplicate user ----
+        # duplicate user check
         if len(user_ids) != len(set(user_ids)):
             messages.error(request, "ห้ามเลือกผู้อนุมัติซ้ำ")
             return redirect("add_approve_line")
 
         with connection.cursor() as cursor:
 
-            # ---- check duplicate flow (ticket_type + team) ----
+            # ---- check duplicate flow (category + team) ----
             cursor.execute("""
-                SELECT COUNT(*) 
+                SELECT COUNT(*)
                 FROM tickets.approve_line
-                WHERE ticket_type_id = %s
-                  AND team2_id = %s
-            """, [ticket_type_id, team_id])
+                WHERE category_id = %s
+                  AND team_id = %s
+            """, [category_id, team_id])
 
             if cursor.fetchone()[0] > 0:
-                messages.error(request, "มีสายอนุมัติของประเภทคำขอ + ทีมนี้อยู่แล้ว")
+                messages.error(request, "มีสายอนุมัติของ Category + Team นี้อยู่แล้ว")
                 return redirect("add_approve_line")
 
-            # ---- insert ----
+            # ---- insert fixed levels ----
             level = 1
             for uid in user_ids:
                 cursor.execute("""
                     INSERT INTO tickets.approve_line
-                    (ticket_type_id, team2_id, "level", user_id)
+                    (team_id, "level", user_id, category_id)
                     VALUES (%s, %s, %s, %s)
                 """, [
-                    ticket_type_id,
                     team_id,
                     level,
-                    uid
+                    uid,
+                    category_id
                 ])
                 level += 1
 
-        messages.success(request, "ตั้งค่าสายอนุมัติเรียบร้อยแล้ว")
+        messages.success(request, "ตั้งค่าสายอนุมัติสำเร็จ")
         return redirect("add_approve_line")
 
     return render(request, "add_approve_line.html", {
-        "ticket_types": ticket_types,
+        "categories": categories,
         "teams": teams,
         "users": users
     })
