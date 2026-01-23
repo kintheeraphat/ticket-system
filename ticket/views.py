@@ -1556,7 +1556,7 @@ def setting_team(request):
 
             FROM tickets.team t
             LEFT JOIN tickets.department d ON d.id = t.department_id
-            LEFT JOIN tickets.approve_line al ON al.team2_id = t.id
+            LEFT JOIN tickets.approve_line al ON al.team_id = t.id
             LEFT JOIN tickets.users u ON u.id = al.user_id
 
             GROUP BY t.id, t.name, d.dept_name
@@ -1597,7 +1597,7 @@ def setting_team(request):
             # 2) approver level 1
             cursor.execute("""
                 INSERT INTO tickets.approve_line
-                (ticket_type_id, team2_id, level, user_id)
+                (ticket_type_id, team_id, level, user_id)
                 VALUES (%s, %s, 1, %s)
             """, [1, team_id, approver_lv1])
 
@@ -1605,7 +1605,7 @@ def setting_team(request):
             if approver_lv2:
                 cursor.execute("""
                     INSERT INTO tickets.approve_line
-                    (ticket_type_id, team2_id, level, user_id)
+                    (ticket_type_id, team_id, level, user_id)
                     VALUES (%s, %s, 2, %s)
                 """, [1, team_id, approver_lv2])
 
@@ -1776,7 +1776,7 @@ def add_approve_line(request):
                 SELECT COUNT(*) 
                 FROM tickets.approve_line
                 WHERE ticket_type_id = %s
-                  AND team2_id = %s
+                  AND team_id = %s
             """, [ticket_type_id, team_id])
 
             if cursor.fetchone()[0] > 0:
@@ -1788,7 +1788,7 @@ def add_approve_line(request):
             for uid in user_ids:
                 cursor.execute("""
                     INSERT INTO tickets.approve_line
-                    (ticket_type_id, team2_id, "level", user_id)
+                    (ticket_type_id, team_id, "level", user_id)
                     VALUES (%s, %s, %s, %s)
                 """, [
                     ticket_type_id,
