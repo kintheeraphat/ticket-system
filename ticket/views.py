@@ -1647,8 +1647,9 @@ def team_adduser(request, team_id):
         "users": users
     })
 
-
 def add_approve_line(request):
+
+    # ===== GET DATA =====
     with connection.cursor() as cursor:
         # ticket types
         cursor.execute("""
@@ -1682,16 +1683,43 @@ def add_approve_line(request):
         team_id = request.POST.get("team_id")
         user_ids = request.POST.getlist("user_ids[]")  # หลายคน
 
+        # ---- validation ----
         if not ticket_type_id or not team_id or not user_ids:
             messages.error(request, "กรุณากรอกข้อมูลให้ครบ")
             return redirect("add_approve_line")
 
+        # ---- remove empty values ----
+        user_ids = [u for u in user_ids if u]
+
+        if len(user_ids) == 0:
+            messages.error(request, "กรุณาเลือกผู้อนุมัติอย่างน้อย 1 คน")
+            return redirect("add_approve_line")
+
+        # ---- check duplicate user ----
+        if len(user_ids) != len(set(user_ids)):
+            messages.error(request, "ห้ามเลือกผู้อนุมัติซ้ำ")
+            return redirect("add_approve_line")
+
         with connection.cursor() as cursor:
+
+            # ---- check duplicate flow (ticket_type + team) ----
+            cursor.execute("""
+                SELECT COUNT(*) 
+                FROM tickets.approve_line
+                WHERE ticket_type_id = %s
+                  AND team2_id = %s
+            """, [ticket_type_id, team_id])
+
+            if cursor.fetchone()[0] > 0:
+                messages.error(request, "มีสายอนุมัติของประเภทคำขอ + ทีมนี้อยู่แล้ว")
+                return redirect("add_approve_line")
+
+            # ---- insert ----
             level = 1
             for uid in user_ids:
                 cursor.execute("""
                     INSERT INTO tickets.approve_line
-                    (name, team2_id, level, user_id)
+                    (ticket_type_id, team2_id, "level", user_id)
                     VALUES (%s, %s, %s, %s)
                 """, [
                     ticket_type_id,

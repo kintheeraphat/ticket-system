@@ -41,15 +41,15 @@
     {% if request.session.user.role != "user" %}
     <li class="{% if request.path == '/' %}active{% endif %}">
       <a href="{% url 'setting_team' %}">
-        <i class="fas fa-gauge-high"></i>
-        <span>Setting</span>
+        <i class="fa-solid fa-people-group"></i>
+        <span>Teams</span>
       </a>
     </li>
     {% endif %}
         {% if request.session.user.role != "user" %}
     <li class="{% if request.path == '/' %}active{% endif %}">
       <a href="{% url 'add_approve_line' %}">
-        <i class="fas fa-gauge-high"></i>
+        <i class="fa-solid fa-arrow-down-up-lock"></i>
         <span>Approve Line</span>
       </a>
     </li>
