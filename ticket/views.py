@@ -1556,7 +1556,7 @@ def setting_team(request):
 
             FROM tickets.team t
             LEFT JOIN tickets.department d ON d.id = t.department_id
-            LEFT JOIN tickets.approve_line al ON al.team2_id = t.id
+            LEFT JOIN tickets.approve_line al ON al.team_id = t.id
             LEFT JOIN tickets.users u ON u.id = al.user_id
 
             GROUP BY t.id, t.name, d.dept_name
@@ -1597,7 +1597,7 @@ def setting_team(request):
             # 2) approver level 1
             cursor.execute("""
                 INSERT INTO tickets.approve_line
-                (ticket_type_id, team2_id, level, user_id)
+                (ticket_type_id, team_id, level, user_id)
                 VALUES (%s, %s, 1, %s)
             """, [1, team_id, approver_lv1])
 
@@ -1605,7 +1605,7 @@ def setting_team(request):
             if approver_lv2:
                 cursor.execute("""
                     INSERT INTO tickets.approve_line
-                    (ticket_type_id, team2_id, level, user_id)
+                    (ticket_type_id, team_id, level, user_id)
                     VALUES (%s, %s, 2, %s)
                 """, [1, team_id, approver_lv2])
 
@@ -1716,19 +1716,17 @@ def team_removeuser(request, team_id, member_id):
     messages.success(request, "ลบสมาชิกออกจากทีมเรียบร้อยแล้ว")
     return redirect("team_adduser", team_id=team_id)
 
-
 def add_approve_line(request):
 
     # ===== GET DATA =====
     with connection.cursor() as cursor:
-
-        # categories
+        # ticket types
         cursor.execute("""
             SELECT id, name
-            FROM tickets.category
+            FROM tickets.ticket_type
             ORDER BY name
         """)
-        categories = dictfetchall(cursor)
+        ticket_types = dictfetchall(cursor)
 
         # teams
         cursor.execute("""
@@ -1750,62 +1748,61 @@ def add_approve_line(request):
 
     # ===== POST =====
     if request.method == "POST":
-        category_id = request.POST.get("category_id")
+        ticket_type_id = request.POST.get("ticket_type_id")
         team_id = request.POST.get("team_id")
-        user_ids = request.POST.getlist("user_ids[]")  # fixed 4 levels
+        user_ids = request.POST.getlist("user_ids[]")  # หลายคน
 
         # ---- validation ----
-        if not category_id or not team_id:
-            messages.error(request, "กรุณาเลือก Category และ Team")
+        if not ticket_type_id or not team_id or not user_ids:
+            messages.error(request, "กรุณากรอกข้อมูลให้ครบ")
             return redirect("add_approve_line")
 
-        # remove empty
+        # ---- remove empty values ----
         user_ids = [u for u in user_ids if u]
 
-        # category == 1 ต้องมี 4 level
-        if str(category_id) == "1" and len(user_ids) != 4:
-            messages.error(request, "Category นี้ต้องมีผู้อนุมัติครบ 4 ระดับ (หัวหน้า/บัญชี/CEO/CFO/IT)")
+        if len(user_ids) == 0:
+            messages.error(request, "กรุณาเลือกผู้อนุมัติอย่างน้อย 1 คน")
             return redirect("add_approve_line")
 
-        # duplicate user check
+        # ---- check duplicate user ----
         if len(user_ids) != len(set(user_ids)):
             messages.error(request, "ห้ามเลือกผู้อนุมัติซ้ำ")
             return redirect("add_approve_line")
 
         with connection.cursor() as cursor:
 
-            # ---- check duplicate flow (category + team) ----
+            # ---- check duplicate flow (ticket_type + team) ----
             cursor.execute("""
-                SELECT COUNT(*)
+                SELECT COUNT(*) 
                 FROM tickets.approve_line
-                WHERE category_id = %s
+                WHERE ticket_type_id = %s
                   AND team_id = %s
-            """, [category_id, team_id])
+            """, [ticket_type_id, team_id])
 
             if cursor.fetchone()[0] > 0:
-                messages.error(request, "มีสายอนุมัติของ Category + Team นี้อยู่แล้ว")
+                messages.error(request, "มีสายอนุมัติของประเภทคำขอ + ทีมนี้อยู่แล้ว")
                 return redirect("add_approve_line")
 
-            # ---- insert fixed levels ----
+            # ---- insert ----
             level = 1
             for uid in user_ids:
                 cursor.execute("""
                     INSERT INTO tickets.approve_line
-                    (team_id, "level", user_id, category_id)
+                    (ticket_type_id, team_id, "level", user_id)
                     VALUES (%s, %s, %s, %s)
                 """, [
+                    ticket_type_id,
                     team_id,
                     level,
-                    uid,
-                    category_id
+                    uid
                 ])
                 level += 1
 
-        messages.success(request, "ตั้งค่าสายอนุมัติสำเร็จ")
+        messages.success(request, "ตั้งค่าสายอนุมัติเรียบร้อยแล้ว")
         return redirect("add_approve_line")
 
     return render(request, "add_approve_line.html", {
-        "categories": categories,
+        "ticket_types": ticket_types,
         "teams": teams,
         "users": users
     })
