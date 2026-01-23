@@ -15,24 +15,30 @@
 <!-- ================= Ticket Type ================= -->
 <div class="mb-3">
     <label class="form-label fw-semibold">ประเภทคำขอ</label>
-    <select name="ticket_type_id" class="form-select" required>
+    <select name="ticket_type_id" id="ticketType" class="form-select" required onchange="renderFlow()">
         <option value="">-- เลือกประเภทคำขอ --</option>
         {% for t in ticket_types %}
-        <option value="{{ t.id }}">{{ t.name }}</option>
+        <option value="{{ t.id }}" data-category="{{ t.category }}">{{ t.name }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<!-- ================= Team ================= -->
+<div class="mb-3">
+    <label class="form-label fw-semibold">ทีมที่เกี่ยวข้อง</label>
+    <select name="team_id" class="form-select" required>
+        <option value="">-- เลือกทีม --</option>
+        {% for t in teams %}
+        <option value="{{ t.id }}">{{ t.name }} ({{ t.dept_name }})</option>
         {% endfor %}
     </select>
 </div>
 
 <hr>
 
-<!-- ================= Teams Container ================= -->
-<h6 class="fw-semibold mb-2">ทีมที่เกี่ยวข้องกับคำขอ</h6>
-
-<div id="team-container"></div>
-
-<button type="button" class="btn btn-outline-primary mb-3" onclick="addTeam()">
-➕ เพิ่มทีม
-</button>
+<!-- ================= Approval Flow ================= -->
+<h6 class="fw-bold mb-2">สายอนุมัติ</h6>
+<div id="flow-container"></div>
 
 <div class="mt-4 text-end">
     <button class="btn btn-primary px-4">บันทึกสายอนุมัติ</button>
@@ -46,162 +52,79 @@
 
 <!-- ================= STYLE ================= -->
 <style>
-.team-card{
+.flow-box{
     border:1px solid #e0e0e0;
     border-radius:10px;
     padding:15px;
-    margin-bottom:15px;
+    margin-bottom:12px;
     background:#fafafa;
 }
-.suggest-box{
-    position:absolute;
-    top:100%;
-    left:0;
-    right:0;
-    background:#fff;
-    border:1px solid #ddd;
-    border-radius:6px;
-    max-height:240px;
-    overflow-y:auto;
-    z-index:2000;
-    display:none;
+.flow-title{
+    font-weight:600;
+    margin-bottom:6px;
 }
-.suggest-item{
-    padding:10px 14px;
-    cursor:pointer;
-    font-size:14px;
-    border-bottom:1px solid #f1f1f1;
-}
-.suggest-item:hover{background:#f1f3f5;}
 </style>
 
 <!-- ================= SCRIPT ================= -->
 <script>
+/* ===== USERS ===== */
 const USERS = [
 {% for u in users %}
-{ id:"{{ u.id }}", name:"{{ u.full_name }}", username:"{{ u.username }}" },
+{ id:"{{u.id}}", name:"{{u.full_name}}", username:"{{u.username}}", role:"{{u.role}}" },
 {% endfor %}
 ];
 
-const TEAMS = [
-{% for t in teams %}
-{ id:"{{ t.id }}", name:"{{ t.name }}", dept:"{{ t.dept_name }}" },
-{% endfor %}
-];
+/* ===== CATEGORY FLOW MAP ===== */
+const CATEGORY_FLOW = {
+  1: ["USER","HEAD","ACCOUNT","CEO","CFO","IT"],        // ERP
+  2: ["USER","HEAD","IT"],                             // VPN
+  3: ["USER","HEAD","IT"],                             // Building
+  4: ["USER","HEAD","ACCOUNT","CEO","CFO","IT"],       // Finance
+  5: ["USER","HEAD","ACCOUNT","STAKEHOLDER","IT"],     // Application
+  6: ["USER","HEAD","ACCOUNT","CEO","CFO","IT"],       // Promotion
+};
 
-function addTeam(){
-    const container = document.getElementById("team-container");
+/* ===== Render Flow ===== */
+function renderFlow(){
+    const select = document.getElementById("ticketType");
+    const category = select.options[select.selectedIndex].dataset.category;
+    const container = document.getElementById("flow-container");
 
-    const teamCard = document.createElement("div");
-    teamCard.className = "team-card";
+    container.innerHTML = "";
 
-    teamCard.innerHTML = `
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <h6 class="fw-bold mb-0">ทีมอนุมัติ</h6>
-            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.team-card').remove()">ลบทีม</button>
-        </div>
+    if(!CATEGORY_FLOW[category]) return;
 
-        <div class="mb-2">
-            <select name="team_ids[]" class="form-select" required>
-                <option value="">-- เลือกทีม --</option>
-                ${TEAMS.map(t=>`<option value="${t.id}">${t.name} (${t.dept})</option>`).join("")}
-            </select>
-        </div>
-
-        <div class="approver-list"></div>
-
-        <button type="button" class="btn btn-sm btn-success" onclick="addLevel(this)">
-            ➕ เพิ่ม Level
-        </button>
-    `;
-
-    container.appendChild(teamCard);
-    addLevel(teamCard.querySelector("button"));
-}
-
-function addLevel(btn){
-    const teamCard = btn.closest(".team-card");
-    const list = teamCard.querySelector(".approver-list");
-    const count = list.children.length + 1;
-
-    if(count > 5){
-        alert("สูงสุด 5 Level");
-        return;
-    }
-
-    const row = document.createElement("div");
-    row.className = "row g-2 mb-2 position-relative";
-
-    row.innerHTML = `
-        <div class="col-md-1 d-flex align-items-center fw-bold">L${count}</div>
-
-        <div class="col-md-9 position-relative">
-            <input type="text"
-                   class="form-control user-search"
-                   placeholder="พิมพ์ชื่อผู้อนุมัติ..."
-                   oninput="showSuggestions(this)"
-                   autocomplete="off">
-
-            <select name="user_ids[${Date.now()}][]" class="d-none user-select" required>
-                <option value="">-- เลือกผู้อนุมัติ --</option>
-                ${USERS.map(u=>`<option value="${u.id}">${u.name} (${u.username})</option>`).join("")}
-            </select>
-
-            <div class="suggest-box shadow-sm"></div>
-        </div>
-
-        <div class="col-md-2">
-            <button type="button" class="btn btn-danger w-100" onclick="this.closest('.row').remove()">ลบ</button>
-        </div>
-    `;
-
-    list.appendChild(row);
-}
-
-function showSuggestions(input){
-    const keyword = input.value.toLowerCase().trim();
-    const row = input.closest(".row");
-    const box = row.querySelector(".suggest-box");
-    const hiddenSelect = row.querySelector(".user-select");
-
-    box.innerHTML = "";
-
-    if(!keyword){
-        box.style.display = "none";
-        hiddenSelect.value = "";
-        return;
-    }
-
-    const matches = USERS.filter(u =>
-        u.name.toLowerCase().includes(keyword) ||
-        u.username.toLowerCase().includes(keyword)
-    );
-
-    if(matches.length === 0){
-        box.style.display = "none";
-        return;
-    }
-
-    matches.forEach(u=>{
+    CATEGORY_FLOW[category].forEach((role, idx)=>{
         const div = document.createElement("div");
-        div.className = "suggest-item";
-        div.innerHTML = `<b>${u.name}</b> <span class="text-muted">(${u.username})</span>`;
-        div.onclick = ()=>{
-            input.value = `${u.name} (${u.username})`;
-            hiddenSelect.value = u.id;
-            box.style.display = "none";
-        };
-        box.appendChild(div);
-    });
+        div.className = "flow-box";
 
-    box.style.display = "block";
+        div.innerHTML = `
+            <div class="flow-title">Level ${idx+1} : ${role}</div>
+            <select name="flow_users[]" class="form-select" required>
+                <option value="">-- เลือกผู้อนุมัติ --</option>
+                ${
+                    USERS.filter(u=>filterRole(u,role))
+                         .map(u=>`<option value="${u.id}">${u.name} (${u.username})</option>`)
+                         .join("")
+                }
+            </select>
+        `;
+        container.appendChild(div);
+    });
 }
 
-document.addEventListener("click", function(e){
-    if(!e.target.closest(".row")){
-        document.querySelectorAll(".suggest-box").forEach(b=>b.style.display="none");
-    }
-});
+/* ===== Role Filter ===== */
+function filterRole(user, role){
+    if(role === "USER") return true;
+    if(role === "HEAD") return user.role === "manager";
+    if(role === "ACCOUNT") return user.role === "account";
+    if(role === "CEO") return user.role === "ceo";
+    if(role === "CFO") return user.role === "cfo";
+    if(role === "IT") return user.role === "it";
+    if(role === "SECURITY") return user.role === "security";
+    if(role === "STAKEHOLDER") return true;
+    return true;
+}
 </script>
 
 {% endblock %}
