@@ -1514,9 +1514,20 @@ Promotion: {promo_name}
     # =====================
     return render(request, "tickets_form/active_promotion_form.html")
 
+    
+def dictfetchall(cursor):
+    columns = [col[0] for col in cursor.description]
+    return [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+
 def setting_team(request):
+
+    # =========================
+    # GET DATA
+    # =========================
     with connection.cursor() as cursor:
-        # ===== Departments =====
+
+        # departments
         cursor.execute("""
             SELECT id, dept_name
             FROM tickets.department
@@ -1524,44 +1535,79 @@ def setting_team(request):
         """)
         departments = dictfetchall(cursor)
 
-        # ===== Active Users =====
+        # users
         cursor.execute("""
-            SELECT id, username, full_name
+            SELECT id, full_name, username
             FROM tickets.users
             WHERE is_active = true
             ORDER BY full_name
         """)
         users = dictfetchall(cursor)
 
-        # ===== Existing Teams =====
+        # teams + approver level
         cursor.execute("""
-            SELECT 
+            SELECT
                 t.id,
                 t.name AS team_name,
                 d.dept_name,
-                u.full_name
+
+                MAX(CASE WHEN al.level = 1 THEN u.full_name END) AS approver_lv1,
+                MAX(CASE WHEN al.level = 2 THEN u.full_name END) AS approver_lv2
+
             FROM tickets.team t
-            JOIN tickets.users u ON u.id = t.users
             LEFT JOIN tickets.department d ON d.id = t.department_id
+            LEFT JOIN tickets.approve_line al ON al.team2_id = t.id
+            LEFT JOIN tickets.users u ON u.id = al.user_id
+
+            GROUP BY t.id, t.name, d.dept_name
             ORDER BY d.dept_name, t.name
         """)
         teams = dictfetchall(cursor)
 
-    # ===== Handle POST =====
+    # =========================
+    # POST
+    # =========================
     if request.method == "POST":
-        team_name = request.POST.get("team_name")
-        user_id = request.POST.get("user_id")
-        department_id = request.POST.get("department_id")
 
-        if not team_name or not user_id or not department_id:
+        team_name = request.POST.get("team_name")
+        department_id = request.POST.get("department_id")
+        approver_lv1 = request.POST.get("approver_lv1")
+        approver_lv2 = request.POST.get("approver_lv2")
+
+        # validation
+        if not team_name or not department_id or not approver_lv1:
             messages.error(request, "กรุณากรอกข้อมูลให้ครบ")
             return redirect("setting_team")
 
+        if approver_lv2 and approver_lv1 == approver_lv2:
+            messages.error(request, "ไม่สามารถเลือกผู้อนุมัติซ้ำกันได้")
+            return redirect("setting_team")
+
         with connection.cursor() as cursor:
+
+            # 1) create team
             cursor.execute("""
-                INSERT INTO tickets.team (name, users, department_id)
+                INSERT INTO tickets.team (name, department_id, users)
                 VALUES (%s, %s, %s)
-            """, [team_name, user_id, department_id])
+                RETURNING id
+            """, [team_name, department_id, approver_lv1])
+
+            team_id = cursor.fetchone()[0]
+
+            # 2) approver level 1
+            cursor.execute("""
+                INSERT INTO tickets.approve_line
+                (ticket_type_id, team2_id, level, user_id)
+                VALUES (%s, %s, 1, %s)
+            """, [1, team_id, approver_lv1])
+
+            # 3) approver level 2 (optional)
+            if approver_lv2:
+                cursor.execute("""
+                    INSERT INTO tickets.approve_line
+                    (ticket_type_id, team2_id, level, user_id)
+                    VALUES (%s, %s, 2, %s)
+                """, [1, team_id, approver_lv2])
 
         messages.success(request, "สร้างทีมอนุมัติเรียบร้อยแล้ว")
         return redirect("setting_team")
@@ -1571,28 +1617,25 @@ def setting_team(request):
         "users": users,
         "teams": teams
     })
-    
-def dictfetchall(cursor):
-    columns = [col[0] for col in cursor.description]
-    return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 def team_adduser(request, team_id):
 
     with connection.cursor() as cursor:
-        # ===== Team Info =====
+
+        # =========================
+        # TEAM INFO
+        # =========================
         cursor.execute("""
-            SELECT 
+            SELECT
                 t.id,
                 t.name AS team_name,
-                d.dept_name,
-                u.full_name AS leader_name
+                d.dept_name
             FROM tickets.team t
-            JOIN tickets.users u ON u.id = t.users
             LEFT JOIN tickets.department d ON d.id = t.department_id
             WHERE t.id = %s
         """, [team_id])
-        team = cursor.fetchone()
 
+        team = cursor.fetchone()
         if not team:
             messages.error(request, "ไม่พบทีม")
             return redirect("setting_team")
@@ -1601,12 +1644,17 @@ def team_adduser(request, team_id):
             "id": team[0],
             "team_name": team[1],
             "dept_name": team[2],
-            "leader_name": team[3],
         }
 
-        # ===== Team Members =====
+        # =========================
+        # TEAM MEMBERS
+        # =========================
         cursor.execute("""
-            SELECT u.id, u.full_name, u.username
+            SELECT
+                tm.id,
+                u.id AS user_id,
+                u.full_name,
+                u.username
             FROM tickets.team_members tm
             JOIN tickets.users u ON u.id = tm.user_id
             WHERE tm.team_id = %s
@@ -1614,16 +1662,25 @@ def team_adduser(request, team_id):
         """, [team_id])
         members = dictfetchall(cursor)
 
-        # ===== All Users =====
+        # =========================
+        # USERS (NOT IN TEAM)
+        # =========================
         cursor.execute("""
             SELECT id, full_name, username
             FROM tickets.users
             WHERE is_active = true
+              AND id NOT IN (
+                SELECT user_id
+                FROM tickets.team_members
+                WHERE team_id = %s
+              )
             ORDER BY full_name
-        """)
+        """, [team_id])
         users = dictfetchall(cursor)
 
-    # ===== Handle Add User =====
+    # =========================
+    # ADD MEMBER
+    # =========================
     if request.method == "POST":
         user_id = request.POST.get("user_id")
 
@@ -1646,6 +1703,18 @@ def team_adduser(request, team_id):
         "members": members,
         "users": users
     })
+
+
+def team_removeuser(request, team_id, member_id):
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            DELETE FROM tickets.team_members
+            WHERE team_id = %s AND user_id = %s
+        """, [team_id, member_id])
+
+    messages.success(request, "ลบสมาชิกออกจากทีมเรียบร้อยแล้ว")
+    return redirect("team_adduser", team_id=team_id)
 
 def add_approve_line(request):
 
