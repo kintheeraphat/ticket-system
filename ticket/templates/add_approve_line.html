@@ -13,7 +13,6 @@
 
         <div class="card-body">
 
-            <!-- ===== messages ===== -->
             {% if messages %}
             {% for message in messages %}
             <div class="alert alert-{{ message.tags }}">
@@ -25,7 +24,7 @@
             <form method="post">
                 {% csrf_token %}
 
-                <!-- ================= CATEGORY ================= -->
+                <!-- CATEGORY -->
                 <div class="mb-3">
                     <label class="form-label fw-bold">Category</label>
                     <select name="category_id" id="categorySelect" class="form-select" required>
@@ -36,9 +35,9 @@
                     </select>
                 </div>
 
-                <!-- ================= TEAM ================= -->
+                <!-- TEAM -->
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Team</label>
+                    <label class="form-label fw-bold">Team (หัวหน้าแผนก)</label>
                     <select name="team_id" class="form-select" required>
                         <option value="">-- เลือก Team --</option>
                         {% for t in teams %}
@@ -51,54 +50,27 @@
 
                 <hr>
 
-                <!-- ================= APPROVE LEVELS ================= -->
+                <!-- APPROVE LEVELS -->
                 <div id="approveLevels" style="display:none;">
 
-                    <!-- Level 1 -->
                     <div class="mb-3 level-box" data-level="1">
-                        <label class="form-label fw-bold">Level 1 : หัวหน้า</label>
-                        <select name="user_ids[]" class="form-select level-input">
-                            <option value="">-- เลือกหัวหน้า --</option>
-                            {% for u in users %}
-                            <option value="{{ u.id }}">{{ u.full_name }} ({{ u.username }})</option>
-                            {% endfor %}
-                        </select>
+                        <label class="form-label fw-bold">Level 1 : หัวหน้าแผนก</label>
+                        <input class="form-control" value="Auto from Team" disabled>
                     </div>
 
-                    <!-- Level 2 -->
                     <div class="mb-3 level-box" data-level="2">
-                        <label class="form-label fw-bold">Level 2 : บัญชี</label>
-                        <select name="user_ids[]" class="form-select level-input">
-                            <option value="">-- เลือกบัญชี --</option>
-                            {% for u in users %}
-                            <option value="{{ u.id }}">{{ u.full_name }} ({{ u.username }})</option>
-                            {% endfor %}
-                        </select>
+                        <label class="form-label fw-bold" id="lv2-label">Level 2</label>
+                        <input class="form-control" value="Auto from Team" disabled>
                     </div>
 
-                    <!-- Level 3 -->
                     <div class="mb-3 level-box" data-level="3">
-                        <label class="form-label fw-bold">
-                            Level 3 : CEO / CFO 
-                            <span class="text-muted small">(ไม่จำเป็น)</span>
-                        </label>
-                        <select name="user_ids[]" class="form-select level-input">
-                            <option value="">-- ข้ามได้ --</option>
-                            {% for u in users %}
-                            <option value="{{ u.id }}">{{ u.full_name }} ({{ u.username }})</option>
-                            {% endfor %}
-                        </select>
+                        <label class="form-label fw-bold" id="lv3-label">Level 3</label>
+                        <input class="form-control" value="Auto from Team" disabled>
                     </div>
 
-                    <!-- Level 4 -->
                     <div class="mb-3 level-box" data-level="4">
-                        <label class="form-label fw-bold">Level 4 : IT / Admin</label>
-                        <select name="user_ids[]" class="form-select level-input">
-                            <option value="">-- เลือก IT / Admin --</option>
-                            {% for u in users %}
-                            <option value="{{ u.id }}">{{ u.full_name }} ({{ u.username }})</option>
-                            {% endfor %}
-                        </select>
+                        <label class="form-label fw-bold" id="lv4-label">Level 4</label>
+                        <input class="form-control" value="Auto from Team" disabled>
                     </div>
 
                 </div>
@@ -117,54 +89,58 @@
     </div>
 </div>
 
-<!-- ================= SCRIPT ================= -->
 <script>
-    const categorySelect = document.getElementById("categorySelect");
-    const approveLevels = document.getElementById("approveLevels");
-    const levelBoxes = document.querySelectorAll(".level-box");
+const categorySelect = document.getElementById("categorySelect");
+const approveLevels = document.getElementById("approveLevels");
+const levelBoxes = document.querySelectorAll(".level-box");
 
-    // category rule map
-    const CATEGORY_RULES = {
-        "1": { levels: 4, optional: [] },     // ERP
-        "4": { levels: 4, optional: [] },     // Adjust
-        "5": { levels: 4, optional: [3] },    // Application
-        "2": { levels: 4, optional: [3] },    // VPN
-        "6": { levels: 3, optional: [] },     // Active Promotion
-        "3": { levels: 2, optional: [] },     // Building
-    };
+const lv2Label = document.getElementById("lv2-label");
+const lv3Label = document.getElementById("lv3-label");
+const lv4Label = document.getElementById("lv4-label");
 
-    categorySelect.addEventListener("change", function () {
-        const val = this.value;
+/* category → use_accounting */
+const CATEGORY_ACCOUNTING = {
+    "1": true,   // ERP
+    "4": true,   // Adjust
+    "5": true,   // Application
+    "2": false,  // VPN
+    "3": false,  // Building
+    "6": false   // Active Promotion
+};
 
-        if (!CATEGORY_RULES[val]) {
-            approveLevels.style.display = "none";
-            return;
+categorySelect.addEventListener("change", function () {
+    const val = this.value;
+
+    if (!CATEGORY_ACCOUNTING.hasOwnProperty(val)) {
+        approveLevels.style.display = "none";
+        return;
+    }
+
+    const useAccounting = CATEGORY_ACCOUNTING[val];
+    approveLevels.style.display = "block";
+
+    levelBoxes.forEach(box => box.style.display = "none");
+
+    if (useAccounting){
+        showLevels([1,2,3,4]);
+        lv2Label.innerText = "Level 2 : บัญชี";
+        lv3Label.innerText = "Level 3 : CEO";
+        lv4Label.innerText = "Level 4 : IT";
+    }else{
+        showLevels([1,2,3]);
+        lv2Label.innerText = "Level 2 : CEO";
+        lv3Label.innerText = "Level 3 : IT";
+    }
+});
+
+function showLevels(levelArr){
+    levelBoxes.forEach(box=>{
+        const lvl = parseInt(box.dataset.level);
+        if(levelArr.includes(lvl)){
+            box.style.display = "block";
         }
-
-        const rule = CATEGORY_RULES[val];
-        const maxLevels = rule.levels;
-
-        approveLevels.style.display = "block";
-
-        levelBoxes.forEach(box => {
-            const lvl = parseInt(box.dataset.level);
-            const select = box.querySelector("select");
-
-            if (lvl <= maxLevels) {
-                box.style.display = "block";
-            } else {
-                box.style.display = "none";
-                select.value = ""; // clear hidden
-            }
-
-            // optional handling
-            if (rule.optional.includes(lvl)) {
-                select.required = false;
-            } else {
-                select.required = true;
-            }
-        });
     });
+}
 </script>
 
 {% endblock %}
