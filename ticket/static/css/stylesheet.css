@@ -619,3 +619,27 @@ input[type="file"] {
 }
 
 
+.card {
+  border-radius: 16px;
+}
+
+.form-control,
+.form-select {
+  border-radius: 12px;
+}
+
+.list-group-item {
+  border-radius: 14px !important;
+  transition: all .2s ease;
+}
+
+.list-group-item:hover {
+  background-color: #f8fafc;
+  transform: translateY(-1px);
+}
+
+.badge {
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 10px;
+}

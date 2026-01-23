@@ -1,214 +1,150 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}ตั้งค่าทีมอนุมัติ | Team Setup{% endblock %}
 
 {% block content %}
-<main class="main-content">
+<main class="main-content container-fluid">
 
-  <!-- ================= HEADER ================= -->
-  <div class="mb-4">
-    <h3 class="fw-bold mb-1">
-      ตั้งค่าทีมอนุมัติ
-      <span class="text-muted fs-6">| Team Setup</span>
-    </h3>
-    <p class="text-muted mb-0">
-      กำหนดทีมและลำดับผู้อนุมัติสำหรับระบบ Workflow
-    </p>
+  <!-- HEADER -->
+  <div class="mb-5">
+    <h2 class="fw-bold mb-1">ตั้งค่าทีมอนุมัติ</h2>
+    <p class="text-muted">จัดการทีมและผู้อนุมัติสำหรับระบบ Workflow ภายในองค์กร</p>
   </div>
 
   <div class="row g-4">
 
-    <!-- ================= LEFT : FORM ================= -->
-    <div class="col-lg-5">
-      <div class="dashboard-table">
+    <!-- ================= CREATE TEAM ================= -->
+    <div class="col-xl-5 col-lg-6">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-header bg-white border-0 pb-0">
+          <h5 class="fw-semibold mb-0">สร้างทีมอนุมัติใหม่</h5>
+          <small class="text-muted">กำหนดแผนกและลำดับผู้อนุมัติ</small>
+        </div>
 
-        <h4 class="mb-4">
-          สร้างทีมอนุมัติใหม่
-        </h4>
+        <div class="card-body pt-4">
+          <form method="post">
+            {% csrf_token %}
 
-        <form method="post">
-          {% csrf_token %}
-
-          <!-- Department -->
-          <div class="mb-3">
-            <label class="form-label fw-semibold">
-              แผนก | Department
-            </label>
-            <select name="department_id" class="form-select" required>
-              <option value="">-- เลือกแผนก --</option>
-              {% for d in departments %}
-              <option value="{{ d.id }}">{{ d.dept_name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-
-          <!-- Team Name -->
-          <div class="mb-4">
-            <label class="form-label fw-semibold">
-              ชื่อทีมอนุมัติ | Team Name
-            </label>
-            <input
-              type="text"
-              name="team_name"
-              class="form-control"
-              placeholder="เช่น IT Manager / HR Approver"
-              required
-            >
-          </div>
-
-          <!-- Divider -->
-          <hr class="my-4">
-
-          <!-- Approver Section -->
-          <h6 class="fw-bold mb-3">
-            ลำดับผู้อนุมัติ
-          </h6>
-
-          <!-- Level 1 -->
-          <div class="mb-3">
-            <label class="form-label fw-semibold">
-              ผู้อนุมัติลำดับที่ 1
-            </label>
-            <select name="approver_lv1" class="form-select" required>
-              <option value="">-- เลือกผู้อนุมัติ (จำเป็น) --</option>
-              {% for u in users %}
-              <option value="{{ u.id }}">
-                {{ u.full_name }} ({{ u.username }})
-              </option>
-              {% endfor %}
-            </select>
-            <div class="form-text text-muted">
-              ผู้อนุมัติหลัก (ต้องอนุมัติก่อน)
+            <!-- Department -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold">แผนก (Department)</label>
+              <select name="department_id" class="form-select form-select-lg" required>
+                <option value="">-- เลือกแผนก --</option>
+                {% for d in departments %}
+                <option value="{{ d.id }}">{{ d.dept_name }}</option>
+                {% endfor %}
+              </select>
             </div>
-          </div>
 
-          <!-- Level 2 -->
-          <div class="mb-4">
-            <label class="form-label fw-semibold">
-              ผู้อนุมัติลำดับที่ 2
-            </label>
-            <select name="approver_lv2" class="form-select">
-              <option value="">-- ไม่จำเป็นต้องเลือก --</option>
-              {% for u in users %}
-              <option value="{{ u.id }}">
-                {{ u.full_name }} ({{ u.username }})
-              </option>
-              {% endfor %}
-            </select>
-            <div class="form-text text-muted">
-              ระบบจะส่งต่อเมื่อ Level 1 อนุมัติแล้ว
+            <!-- Team name -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold">ชื่อทีมอนุมัติ</label>
+              <input
+                type="text"
+                name="team_name"
+                class="form-control form-control-lg"
+                placeholder="เช่น IT Manager Approval"
+                required
+              >
             </div>
-          </div>
 
-          <div class="d-grid">
-            <button type="submit" class="btn btn-primary">
-              บันทึกทีมอนุมัติ
-            </button>
-          </div>
+            <!-- Approver Lv1 -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold">
+                ผู้อนุมัติระดับที่ 1
+              </label>
+              <select name="approver_lv1" class="form-select form-select-lg" required>
+                <option value="">-- เลือกผู้อนุมัติ --</option>
+                {% for u in users %}
+                <option value="{{ u.id }}">
+                  {{ u.full_name }} ({{ u.username }})
+                </option>
+                {% endfor %}
+              </select>
+            </div>
 
-        </form>
+            <!-- Approver Lv2 -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold">
+                ผู้อนุมัติระดับที่ 2 <span class="text-muted">(ไม่บังคับ)</span>
+              </label>
+              <select name="approver_lv2" class="form-select form-select-lg">
+                <option value="">-- ไม่จำเป็น --</option>
+                {% for u in users %}
+                <option value="{{ u.id }}">
+                  {{ u.full_name }} ({{ u.username }})
+                </option>
+                {% endfor %}
+              </select>
+              <small class="text-muted">
+                ระบบจะส่งงานต่อให้ Level 2 หลังจาก Level 1 อนุมัติ
+              </small>
+            </div>
+
+            <div class="d-grid">
+              <button class="btn btn-primary btn-lg">
+                บันทึกทีมอนุมัติ
+              </button>
+            </div>
+
+          </form>
+        </div>
       </div>
     </div>
 
-    <!-- ================= RIGHT : TEAM LIST ================= -->
-    <div class="col-lg-7">
-      <div class="dashboard-table">
+    <!-- ================= TEAM LIST ================= -->
+    <div class="col-xl-7 col-lg-6">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-header bg-white border-0 pb-0">
+          <h5 class="fw-semibold mb-0">ทีมอนุมัติที่ตั้งค่าแล้ว</h5>
+          <small class="text-muted">คลิกที่แถวเพื่อจัดการสมาชิก</small>
+        </div>
 
-        <h4 class="mb-4">
-          ทีมอนุมัติที่ตั้งค่าแล้ว
-        </h4>
+        <div class="card-body pt-4">
 
-        <div class="table-responsive">
-          <table class="table table-hover align-middle">
-            <thead>
-              <tr class="text-center">
-                <th>Team</th>
-                <th>Department</th>
-                <th>Approver</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
+          {% if teams %}
+          <div class="list-group list-group-flush">
 
-              {% for t in teams %}
-              <tr class="clickable-row"
-                  data-href="{% url 'team_adduser' t.id %}">
+            {% for t in teams %}
+            <a href="{% url 'team_adduser' t.id %}"
+               class="list-group-item list-group-item-action py-3 px-3 rounded mb-2 shadow-sm border">
 
-                <td class="fw-semibold">
-                  {{ t.team_name }}
-                </td>
+              <div class="d-flex justify-content-between align-items-start">
 
-                <td>
-                  <span class="badge bg-light">
-                    {{ t.dept_name }}
-                  </span>
-                </td>
+                <div>
+                  <h6 class="fw-semibold mb-1">{{ t.team_name }}</h6>
+                  <div class="text-muted small">{{ t.dept_name }}</div>
+                </div>
 
-                <td>
+                <div class="text-end">
                   {% if t.approver_lv1 %}
-                    <div class="assignee-pill mb-1">
-                      Lv1: {{ t.approver_lv1 }}
-                    </div>
-                  {% else %}
-                    <span class="text-muted">ยังไม่ตั้งค่า</span>
+                  <span class="badge bg-light text-dark d-block mb-1">
+                    Lv1: {{ t.approver_lv1 }}
+                  </span>
                   {% endif %}
 
                   {% if t.approver_lv2 %}
-                    <div class="assignee-pill">
-                      Lv2: {{ t.approver_lv2 }}
-                    </div>
+                  <span class="badge bg-light text-dark">
+                    Lv2: {{ t.approver_lv2 }}
+                  </span>
                   {% endif %}
-                </td>
+                </div>
 
-                <td class="text-center">
-                  <a href="{% url 'team_adduser' t.id %}"
-                     class="btn btn-sm btn-primary">
-                    จัดการทีม
-                  </a>
-                </td>
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="4"
-                    class="text-center text-muted py-4">
-                  ยังไม่มีทีมอนุมัติ
-                </td>
-              </tr>
-              {% endfor %}
+              </div>
+            </a>
+            {% endfor %}
 
-            </tbody>
-          </table>
+          </div>
+          {% else %}
+            <p class="text-muted text-center py-5">
+              ยังไม่มีทีมอนุมัติ
+            </p>
+          {% endif %}
+
         </div>
-
       </div>
     </div>
 
   </div>
 </main>
-
-<!-- ================= SCRIPT ================= -->
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-  const lv1 = document.querySelector('[name="approver_lv1"]');
-  const lv2 = document.querySelector('[name="approver_lv2"]');
-
-  function preventDuplicate() {
-    if (lv1.value && lv2.value && lv1.value === lv2.value) {
-      alert("ไม่สามารถเลือกผู้อนุมัติซ้ำกันได้");
-      lv2.value = "";
-    }
-  }
-
-  lv1.addEventListener("change", preventDuplicate);
-  lv2.addEventListener("change", preventDuplicate);
-
-  document.querySelectorAll(".clickable-row").forEach(row => {
-    row.addEventListener("click", function (e) {
-      if (e.target.closest("a") || e.target.closest("button")) return;
-      window.location = row.dataset.href;
-    });
-  });
-
-});
-</script>
 {% endblock %}
