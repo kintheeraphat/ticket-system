@@ -1678,17 +1678,16 @@ def team_adduser(request, team_id):
         "users": users
     })
 
-def team_removeuser(request, team_id, user_id):
+def team_removeuser(request, team_id, member_id):
 
     with connection.cursor() as cursor:
         cursor.execute("""
             DELETE FROM tickets.team_members
             WHERE team_id = %s AND user_id = %s
-        """, [team_id, user_id])
+        """, [team_id, member_id])
 
     messages.success(request, "ลบสมาชิกออกจากทีมเรียบร้อยแล้ว")
     return redirect("team_adduser", team_id=team_id)
-
 
 def add_approve_line(request):
 
