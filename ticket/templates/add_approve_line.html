@@ -4,91 +4,55 @@
 {% block content %}
 <main class="main-content container-fluid py-3">
 
-    <h4 class="fw-bold mb-3">ตั้งค่าสายอนุมัติ (Approval Flow)</h4>
+<h4 class="fw-bold mb-3">ตั้งค่าสายอนุมัติ (Approval Flow)</h4>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
+<div class="card shadow-sm">
+<div class="card-body">
 
-            <form method="post">
-                {% csrf_token %}
+<form method="post">
+{% csrf_token %}
 
-                <!-- ================= Ticket Type ================= -->
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">ประเภทคำขอ</label>
-                    <select name="ticket_type_id" class="form-select" required>
-                        <option value="">-- เลือกประเภทคำขอ --</option>
-                        {% for t in ticket_types %}
-                        <option value="{{ t.id }}">{{ t.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+<!-- ================= Ticket Type ================= -->
+<div class="mb-3">
+    <label class="form-label fw-semibold">ประเภทคำขอ</label>
+    <select name="ticket_type_id" class="form-select" required>
+        <option value="">-- เลือกประเภทคำขอ --</option>
+        {% for t in ticket_types %}
+        <option value="{{ t.id }}">{{ t.name }}</option>
+        {% endfor %}
+    </select>
+</div>
 
-                <!-- ================= Team ================= -->
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">ทีมอนุมัติ</label>
-                    <select name="team_id" class="form-select" required>
-                        <option value="">-- เลือกทีม --</option>
-                        {% for t in teams %}
-                        <option value="{{ t.id }}">
-                            {{ t.name }} ({{ t.dept_name }})
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
+<hr>
 
-                <hr>
+<!-- ================= Teams Container ================= -->
+<h6 class="fw-semibold mb-2">ทีมที่เกี่ยวข้องกับคำขอ</h6>
 
-                <!-- ================= Levels ================= -->
-                <h6 class="fw-semibold mb-3">ลำดับผู้อนุมัติ (Level 1 → 5)</h6>
+<div id="team-container"></div>
 
-                <div id="approver-list">
+<button type="button" class="btn btn-outline-primary mb-3" onclick="addTeam()">
+➕ เพิ่มทีม
+</button>
 
-                    <!-- ===== Level 1 ===== -->
-                    <div class="row g-2 mb-2 approver-row">
-                        <div class="col-md-10 position-relative">
+<div class="mt-4 text-end">
+    <button class="btn btn-primary px-4">บันทึกสายอนุมัติ</button>
+</div>
 
-                            <input type="text"
-                                   class="form-control user-search"
-                                   placeholder="พิมพ์ชื่อ user..."
-                                   oninput="showSuggestions(this)"
-                                   autocomplete="off">
+</form>
 
-                            <!-- hidden select -->
-                            <select name="user_ids[]" class="d-none user-select" required>
-                                <option value="">-- เลือกผู้อนุมัติ --</option>
-                                {% for u in users %}
-                                <option value="{{ u.id }}">{{ u.full_name }} ({{ u.username }})</option>
-                                {% endfor %}
-                            </select>
-
-                            <div class="suggest-box shadow-sm"></div>
-
-                        </div>
-
-                        <div class="col-md-2">
-                            <button type="button"
-                                    class="btn btn-success w-100"
-                                    onclick="addRow()">+</button>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="mt-4 text-end">
-                    <button class="btn btn-primary px-4">
-                        บันทึกสายอนุมัติ
-                    </button>
-                </div>
-
-            </form>
-
-        </div>
-    </div>
-
+</div>
+</div>
 </main>
 
 <!-- ================= STYLE ================= -->
 <style>
+.team-card{
+    border:1px solid #e0e0e0;
+    border-radius:10px;
+    padding:15px;
+    margin-bottom:15px;
+    background:#fafafa;
+}
 .suggest-box{
     position:absolute;
     top:100%;
@@ -102,49 +66,83 @@
     z-index:2000;
     display:none;
 }
-
 .suggest-item{
     padding:10px 14px;
     cursor:pointer;
     font-size:14px;
     border-bottom:1px solid #f1f1f1;
 }
-.suggest-item:last-child{border-bottom:none;}
 .suggest-item:hover{background:#f1f3f5;}
 </style>
 
 <!-- ================= SCRIPT ================= -->
 <script>
 const USERS = [
-    {% for u in users %}
-    {
-        id: "{{ u.id }}",
-        name: "{{ u.full_name }}",
-        username: "{{ u.username }}"
-    },
-    {% endfor %}
+{% for u in users %}
+{ id:"{{ u.id }}", name:"{{ u.full_name }}", username:"{{ u.username }}" },
+{% endfor %}
 ];
 
-function addRow(){
-    const container = document.getElementById("approver-list");
-    const count = container.children.length + 1;
+const TEAMS = [
+{% for t in teams %}
+{ id:"{{ t.id }}", name:"{{ t.name }}", dept:"{{ t.dept_name }}" },
+{% endfor %}
+];
+
+function addTeam(){
+    const container = document.getElementById("team-container");
+
+    const teamCard = document.createElement("div");
+    teamCard.className = "team-card";
+
+    teamCard.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="fw-bold mb-0">ทีมอนุมัติ</h6>
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.team-card').remove()">ลบทีม</button>
+        </div>
+
+        <div class="mb-2">
+            <select name="team_ids[]" class="form-select" required>
+                <option value="">-- เลือกทีม --</option>
+                ${TEAMS.map(t=>`<option value="${t.id}">${t.name} (${t.dept})</option>`).join("")}
+            </select>
+        </div>
+
+        <div class="approver-list"></div>
+
+        <button type="button" class="btn btn-sm btn-success" onclick="addLevel(this)">
+            ➕ เพิ่ม Level
+        </button>
+    `;
+
+    container.appendChild(teamCard);
+    addLevel(teamCard.querySelector("button"));
+}
+
+function addLevel(btn){
+    const teamCard = btn.closest(".team-card");
+    const list = teamCard.querySelector(".approver-list");
+    const count = list.children.length + 1;
 
     if(count > 5){
-        alert("สูงสุด 5 Level เท่านั้น");
+        alert("สูงสุด 5 Level");
         return;
     }
 
     const row = document.createElement("div");
-    row.className = "row g-2 mb-2 approver-row";
+    row.className = "row g-2 mb-2 position-relative";
+
     row.innerHTML = `
-        <div class="col-md-10 position-relative">
+        <div class="col-md-1 d-flex align-items-center fw-bold">L${count}</div>
+
+        <div class="col-md-9 position-relative">
             <input type="text"
                    class="form-control user-search"
-                   placeholder="พิมพ์ชื่อ user..."
+                   placeholder="พิมพ์ชื่อผู้อนุมัติ..."
                    oninput="showSuggestions(this)"
                    autocomplete="off">
 
-            <select name="user_ids[]" class="d-none user-select" required>
+            <select name="user_ids[${Date.now()}][]" class="d-none user-select" required>
                 <option value="">-- เลือกผู้อนุมัติ --</option>
                 ${USERS.map(u=>`<option value="${u.id}">${u.name} (${u.username})</option>`).join("")}
             </select>
@@ -153,23 +151,22 @@ function addRow(){
         </div>
 
         <div class="col-md-2">
-            <button type="button"
-                    class="btn btn-danger w-100"
-                    onclick="this.closest('.approver-row').remove()">ลบ</button>
+            <button type="button" class="btn btn-danger w-100" onclick="this.closest('.row').remove()">ลบ</button>
         </div>
     `;
-    container.appendChild(row);
+
+    list.appendChild(row);
 }
 
 function showSuggestions(input){
     const keyword = input.value.toLowerCase().trim();
-    const row = input.closest(".approver-row");
+    const row = input.closest(".row");
     const box = row.querySelector(".suggest-box");
     const hiddenSelect = row.querySelector(".user-select");
 
     box.innerHTML = "";
 
-    if(keyword.length === 0){
+    if(!keyword){
         box.style.display = "none";
         hiddenSelect.value = "";
         return;
@@ -201,10 +198,8 @@ function showSuggestions(input){
 }
 
 document.addEventListener("click", function(e){
-    if(!e.target.closest(".approver-row")){
-        document.querySelectorAll(".suggest-box").forEach(b=>{
-            b.style.display = "none";
-        });
+    if(!e.target.closest(".row")){
+        document.querySelectorAll(".suggest-box").forEach(b=>b.style.display="none");
     }
 });
 </script>
