@@ -14,3 +14,25 @@ DB_PASSWORD=1234
 DB_HOST=localhost
 DB_PORT=5432
 DB_SCHEMA=tickets
+
+
+-- 1) ลบ Foreign Key ก่อน
+ALTER TABLE tickets.approve_line
+DROP CONSTRAINT fk_approve_line_ticket_type;
+
+-- 2) ลบ column ticket_type_id
+ALTER TABLE tickets.approve_line
+DROP COLUMN ticket_type_id;
+
+-- 1) เพิ่ม column category_id
+ALTER TABLE tickets.approve_line
+ADD COLUMN category_id int4 NULL;
+
+-- 2) เพิ่ม Foreign Key constraint
+ALTER TABLE tickets.approve_line
+ADD CONSTRAINT fk_approve_line_category
+FOREIGN KEY (category_id)
+REFERENCES tickets.category(id);
+
+
+
