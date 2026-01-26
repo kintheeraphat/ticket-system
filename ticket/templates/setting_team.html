@@ -1,34 +1,30 @@
 {% extends "base.html" %}
-{% load static %}
 {% block title %}ตั้งค่าทีมอนุมัติ | Team Setup{% endblock %}
 
 {% block content %}
 <main class="main-content container-fluid">
 
   <!-- HEADER -->
-  <div class="mb-5">
+  <div class="mb-4">
     <h2 class="fw-bold mb-1">ตั้งค่าทีมอนุมัติ</h2>
-    <p class="text-muted">จัดการทีมและผู้อนุมัติสำหรับระบบ Workflow ภายในองค์กร</p>
+    <p class="text-muted">จัดการทีมและผู้อนุมัติสำหรับระบบ Workflow</p>
   </div>
 
   <div class="row g-4">
 
     <!-- ================= CREATE TEAM ================= -->
-    <div class="col-xl-5 col-lg-6">
-      <div class="card shadow-sm border-0 h-100">
-        <div class="card-header bg-white border-0 pb-0">
-          <h5 class="fw-semibold mb-0">สร้างทีมอนุมัติใหม่</h5>
-          <small class="text-muted">กำหนดแผนกและลำดับผู้อนุมัติ</small>
-        </div>
+    <div class="col-xl-4 col-lg-5">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
 
-        <div class="card-body pt-4">
+          <h5 class="fw-semibold mb-3">สร้างทีมอนุมัติใหม่</h5>
+
           <form method="post">
             {% csrf_token %}
 
-            <!-- Department -->
-            <div class="mb-4">
-              <label class="form-label fw-semibold">แผนก (Department)</label>
-              <select name="department_id" class="form-select form-select-lg" required>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">แผนก</label>
+              <select name="department_id" class="form-select" required>
                 <option value="">-- เลือกแผนก --</option>
                 {% for d in departments %}
                 <option value="{{ d.id }}">{{ d.dept_name }}</option>
@@ -36,110 +32,104 @@
               </select>
             </div>
 
-            <!-- Team name -->
-            <div class="mb-4">
+            <div class="mb-3">
               <label class="form-label fw-semibold">ชื่อทีมอนุมัติ</label>
-              <input
-                type="text"
-                name="team_name"
-                class="form-control form-control-lg"
-                placeholder="เช่น IT Manager Approval"
-                required
-              >
+              <input type="text"
+                     name="team_name"
+                     class="form-control"
+                     placeholder="เช่น IT Manager Approval"
+                     required>
             </div>
 
-            <!-- Approver Lv1 -->
-            <div class="mb-4">
-              <label class="form-label fw-semibold">
-                ผู้อนุมัติระดับที่ 1
-              </label>
-              <select name="approver_lv1" class="form-select form-select-lg" required>
-                <option value="">-- เลือกผู้อนุมัติ --</option>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">ผู้อนุมัติ Level 1</label>
+              <select name="approver_lv1" class="form-select" required>
+                <option value="">-- เลือก --</option>
                 {% for u in users %}
-                <option value="{{ u.id }}">
-                  {{ u.full_name }} ({{ u.username }})
-                </option>
+                <option value="{{ u.id }}">{{ u.full_name }}</option>
                 {% endfor %}
               </select>
             </div>
 
-            <!-- Approver Lv2 -->
             <div class="mb-4">
               <label class="form-label fw-semibold">
-                ผู้อนุมัติระดับที่ 2 <span class="text-muted">(ไม่บังคับ)</span>
+                ผู้อนุมัติ Level 2 <span class="text-muted">(ไม่บังคับ)</span>
               </label>
-              <select name="approver_lv2" class="form-select form-select-lg">
-                <option value="">-- ไม่จำเป็น --</option>
+              <select name="approver_lv2" class="form-select">
+                <option value="">-- ไม่เลือก --</option>
                 {% for u in users %}
-                <option value="{{ u.id }}">
-                  {{ u.full_name }} ({{ u.username }})
-                </option>
+                <option value="{{ u.id }}">{{ u.full_name }}</option>
                 {% endfor %}
               </select>
-              <small class="text-muted">
-                ระบบจะส่งงานต่อให้ Level 2 หลังจาก Level 1 อนุมัติ
-              </small>
             </div>
 
-            <div class="d-grid">
-              <button class="btn btn-primary btn-lg">
-                บันทึกทีมอนุมัติ
-              </button>
-            </div>
-
+            <button class="btn btn-primary w-100">
+              บันทึกทีมอนุมัติ
+            </button>
           </form>
+
         </div>
       </div>
     </div>
 
     <!-- ================= TEAM LIST ================= -->
-    <div class="col-xl-7 col-lg-6">
+    <div class="col-xl-8 col-lg-7">
       <div class="card shadow-sm border-0 h-100">
-        <div class="card-header bg-white border-0 pb-0">
-          <h5 class="fw-semibold mb-0">ทีมอนุมัติที่ตั้งค่าแล้ว</h5>
-          <small class="text-muted">คลิกที่แถวเพื่อจัดการสมาชิก</small>
-        </div>
+        <div class="card-body">
 
-        <div class="card-body pt-4">
+          <h5 class="fw-semibold mb-3">ทีมอนุมัติ</h5>
 
-          {% if teams %}
-          <div class="list-group list-group-flush">
+          <!-- Search & Filter -->
+          <div class="row g-2 mb-3">
+            <div class="col-md-7">
+              <input type="text"
+                     id="teamSearch"
+                     class="form-control"
+                     placeholder="ค้นหาชื่อทีม">
+            </div>
+            <div class="col-md-5">
+              <select id="deptFilter" class="form-select">
+                <option value="">ทุกแผนก</option>
+                {% for d in departments %}
+                <option value="{{ d.dept_name }}">{{ d.dept_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
 
+          <!-- LIST -->
+          <div class="list-group team-scroll">
             {% for t in teams %}
             <a href="{% url 'team_adduser' t.id %}"
-               class="list-group-item list-group-item-action py-3 px-3 rounded mb-2 shadow-sm border">
+               class="list-group-item list-group-item-action team-item"
+               data-team="{{ t.team_name|lower }}"
+               data-dept="{{ t.dept_name }}">
 
-              <div class="d-flex justify-content-between align-items-start">
-
+              <div class="d-flex justify-content-between">
                 <div>
-                  <h6 class="fw-semibold mb-1">{{ t.team_name }}</h6>
-                  <div class="text-muted small">{{ t.dept_name }}</div>
+                  <div class="fw-semibold">{{ t.team_name }}</div>
+                  <div class="text-muted small">
+                    {{ t.dept_name }} · 👥 {{ t.member_count }} คน
+                  </div>
                 </div>
 
-                <div class="text-end">
+                <div class="text-end small">
                   {% if t.approver_lv1 %}
-                  <span class="badge bg-light text-dark d-block mb-1">
-                    Lv1: {{ t.approver_lv1 }}
-                  </span>
+                  <div>Lv1: {{ t.approver_lv1 }}</div>
                   {% endif %}
-
                   {% if t.approver_lv2 %}
-                  <span class="badge bg-light text-dark">
-                    Lv2: {{ t.approver_lv2 }}
-                  </span>
+                  <div>Lv2: {{ t.approver_lv2 }}</div>
                   {% endif %}
                 </div>
-
               </div>
-            </a>
-            {% endfor %}
 
+            </a>
+            {% empty %}
+            <div class="text-muted text-center py-4">
+              ยังไม่มีทีม
+            </div>
+            {% endfor %}
           </div>
-          {% else %}
-            <p class="text-muted text-center py-5">
-              ยังไม่มีทีมอนุมัติ
-            </p>
-          {% endif %}
 
         </div>
       </div>
@@ -147,4 +137,40 @@
 
   </div>
 </main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const search = document.getElementById("teamSearch");
+  const filter = document.getElementById("deptFilter");
+  const items = document.querySelectorAll(".team-item");
+
+  function applyFilter() {
+    const keyword = search.value.toLowerCase();
+    const dept = filter.value;
+
+    items.forEach(item => {
+      const name = item.dataset.team;
+      const d = item.dataset.dept;
+      item.style.display =
+        name.includes(keyword) && (!dept || d === dept)
+        ? ""
+        : "none";
+    });
+  }
+
+  search.addEventListener("keyup", applyFilter);
+  filter.addEventListener("change", applyFilter);
+
+});
+</script>
+
+<style>
+.team-scroll {
+  max-height: 520px;
+  overflow-y: auto;
+}
+</style>
 {% endblock %}

@@ -1544,18 +1544,23 @@ def setting_team(request):
         """)
         users = dictfetchall(cursor)
 
-        # teams
+        # teams + member count
         cursor.execute("""
             SELECT
                 t.id,
                 t.name AS team_name,
                 d.dept_name,
                 u1.full_name AS approver_lv1,
-                u2.full_name AS approver_lv2
+                u2.full_name AS approver_lv2,
+                COUNT(tm.user_id) AS member_count
             FROM tickets.team t
             LEFT JOIN tickets.department d ON d.id = t.department_id
             LEFT JOIN tickets.users u1 ON u1.id = t.approver_lv1
             LEFT JOIN tickets.users u2 ON u2.id = t.approver_lv2
+            LEFT JOIN tickets.team_members tm ON tm.team_id = t.id
+            GROUP BY
+                t.id, t.name, d.dept_name,
+                u1.full_name, u2.full_name
             ORDER BY d.dept_name, t.name
         """)
         teams = dictfetchall(cursor)
@@ -1597,6 +1602,7 @@ def setting_team(request):
         "users": users,
         "teams": teams
     })
+
 
 def team_adduser(request, team_id):
 

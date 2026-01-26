@@ -643,3 +643,38 @@ input[type="file"] {
   padding: 6px 10px;
   border-radius: 10px;
 }
+
+/* จำกัดความสูง card ฝั่งขวา */
+.team-list-card {
+  max-height: calc(100vh - 220px);
+}
+
+/* ทำให้ list เลื่อน */
+.team-list-body {
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+/* scrollbar สไตล์องค์กร */
+.team-list-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.team-list-body::-webkit-scrollbar-thumb {
+  background: #d0d4da;
+  border-radius: 10px;
+}
+
+.team-list-body::-webkit-scrollbar-thumb:hover {
+  background: #b8bcc2;
+}
+
+/* item hover ดู premium */
+.team-item {
+  transition: all 0.15s ease;
+}
+
+.team-item:hover {
+  background-color: #f8f9fb;
+  transform: translateY(-1px);
+}
