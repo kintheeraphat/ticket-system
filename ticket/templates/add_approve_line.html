@@ -37,8 +37,8 @@
 
                 <!-- TEAM -->
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Team (หัวหน้าแผนก)</label>
-                    <select name="team_id" class="form-select" required>
+                    <label class="form-label fw-bold">Team</label>
+                    <select name="team_id" id="teamSelect" class="form-select" required>
                         <option value="">-- เลือก Team --</option>
                         {% for t in teams %}
                         <option value="{{ t.id }}">
@@ -53,24 +53,49 @@
                 <!-- APPROVE LEVELS -->
                 <div id="approveLevels" style="display:none;">
 
+                    <!-- LV1 -->
                     <div class="mb-3 level-box" data-level="1">
-                        <label class="form-label fw-bold">Level 1 : หัวหน้าแผนก</label>
-                        <input class="form-control" value="Auto from Team" disabled>
+                        <label class="form-label fw-bold"> หัวหน้าแผนก</label>
+                        <input id="lv1_name" class="form-control" disabled>
                     </div>
 
+                    <!-- LV2 -->
                     <div class="mb-3 level-box" data-level="2">
-                        <label class="form-label fw-bold" id="lv2-label">Level 2</label>
-                        <input class="form-control" value="Auto from Team" disabled>
+                        <label class="form-label fw-bold"> รองหัวหน้าแผนก</label>
+                        <input id="lv2_name" class="form-control" disabled>
                     </div>
 
+                    <!-- ACCOUNTING -->
+                    <div class="mb-3 level-box" data-level="account">
+                        <label class="form-label fw-bold">Accounting</label>
+                        <select name="lv_account" class="form-select">
+                            <option value="">เลือก Accounting (ถ้ามี) </option>
+                            {% for u in users %}
+                                <option value="{{ u.id }}">{{ u.full_name }} ({{ u.username }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- CEO -->
                     <div class="mb-3 level-box" data-level="3">
-                        <label class="form-label fw-bold" id="lv3-label">Level 3</label>
-                        <input class="form-control" value="Auto from Team" disabled>
+                        <label class="form-label fw-bold">CEO</label>
+                        <select name="lv3_user" class="form-select">
+                            <option value="">-- เลือก CEO --</option>
+                            {% for u in users %}
+                                <option value="{{ u.id }}">{{ u.full_name }} ({{ u.username }})</option>
+                            {% endfor %}
+                        </select>
                     </div>
 
+                    <!-- IT -->
                     <div class="mb-3 level-box" data-level="4">
-                        <label class="form-label fw-bold" id="lv4-label">Level 4</label>
-                        <input class="form-control" value="Auto from Team" disabled>
+                        <label class="form-label fw-bold">Level : IT</label>
+                        <select name="lv4_user" class="form-select">
+                            <option value="">-- เลือก IT --</option>
+                            {% for u in users %}
+                                <option value="{{ u.id }}">{{ u.full_name }} ({{ u.username }})</option>
+                            {% endfor %}
+                        </select>
                     </div>
 
                 </div>
@@ -89,14 +114,15 @@
     </div>
 </div>
 
+<!-- ================= SCRIPT ================= -->
 <script>
 const categorySelect = document.getElementById("categorySelect");
+const teamSelect = document.getElementById("teamSelect");
 const approveLevels = document.getElementById("approveLevels");
 const levelBoxes = document.querySelectorAll(".level-box");
 
-const lv2Label = document.getElementById("lv2-label");
-const lv3Label = document.getElementById("lv3-label");
-const lv4Label = document.getElementById("lv4-label");
+const lv1Input = document.getElementById("lv1_name");
+const lv2Input = document.getElementById("lv2_name");
 
 /* category → use_accounting */
 const CATEGORY_ACCOUNTING = {
@@ -108,35 +134,62 @@ const CATEGORY_ACCOUNTING = {
     "6": false   // Active Promotion
 };
 
+/* ===== CATEGORY CHANGE ===== */
 categorySelect.addEventListener("change", function () {
     const val = this.value;
 
-    if (!CATEGORY_ACCOUNTING.hasOwnProperty(val)) {
+    if (!val) {
         approveLevels.style.display = "none";
         return;
     }
 
-    const useAccounting = CATEGORY_ACCOUNTING[val];
     approveLevels.style.display = "block";
 
+    // hide all
     levelBoxes.forEach(box => box.style.display = "none");
 
+    const useAccounting = CATEGORY_ACCOUNTING[val] || false;
+
+    // Always show LV1 + LV2
+    showLevels(["1","2"]);
+
     if (useAccounting){
-        showLevels([1,2,3,4]);
-        lv2Label.innerText = "Level 2 : บัญชี";
-        lv3Label.innerText = "Level 3 : CEO";
-        lv4Label.innerText = "Level 4 : IT";
+        showLevels(["account","3","4"]);
     }else{
-        showLevels([1,2,3]);
-        lv2Label.innerText = "Level 2 : CEO";
-        lv3Label.innerText = "Level 3 : IT";
+        showLevels(["3","4"]);
     }
 });
 
+/* ===== TEAM CHANGE (AJAX FETCH) ===== */
+teamSelect.addEventListener("change", function(){
+    const teamId = this.value;
+
+    if(!teamId){
+        lv1Input.value = "";
+        lv2Input.value = "";
+        return;
+    }
+
+    lv1Input.value = "Loading...";
+    lv2Input.value = "Loading...";
+
+    fetch(`/api/team-approvers/${teamId}/`)
+        .then(res => res.json())
+        .then(data => {
+            lv1Input.value = data.lv1 || "-";
+            lv2Input.value = data.lv2 || "-";
+        })
+        .catch(err=>{
+            console.error(err);
+            lv1Input.value = "Error";
+            lv2Input.value = "Error";
+        });
+});
+
+/* ===== UTIL ===== */
 function showLevels(levelArr){
     levelBoxes.forEach(box=>{
-        const lvl = parseInt(box.dataset.level);
-        if(levelArr.includes(lvl)){
+        if(levelArr.includes(box.dataset.level)){
             box.style.display = "block";
         }
     });

@@ -11,6 +11,8 @@ import os,json
 from django.http import Http404
 from .decorators import login_required_custom, role_required
 from django.conf import settings
+from django.http import JsonResponse
+
 
 def index(request):
     user = request.session.get("user")
@@ -1678,32 +1680,39 @@ def team_adduser(request, team_id):
         "users": users
     })
 
-def team_removeuser(request, team_id, member_id):
+def team_removeuser(request, team_id, user_id):
 
     with connection.cursor() as cursor:
         cursor.execute("""
             DELETE FROM tickets.team_members
             WHERE team_id = %s AND user_id = %s
-        """, [team_id, member_id])
+        """, [team_id, user_id])
 
     messages.success(request, "ลบสมาชิกออกจากทีมเรียบร้อยแล้ว")
     return redirect("team_adduser", team_id=team_id)
+
 
 def add_approve_line(request):
 
     # ===== GET DATA =====
     with connection.cursor() as cursor:
-        # ticket types
+
+        # categories
         cursor.execute("""
             SELECT id, name
-            FROM tickets.ticket_type
+            FROM tickets.category
             ORDER BY name
         """)
-        ticket_types = dictfetchall(cursor)
+        categories = dictfetchall(cursor)
 
         # teams
         cursor.execute("""
-            SELECT t.id, t.name, d.dept_name
+            SELECT 
+                t.id, 
+                t.name, 
+                d.dept_name,
+                t.approver_lv1,
+                t.approver_lv2
             FROM tickets.team t
             LEFT JOIN tickets.department d ON d.id = t.department_id
             ORDER BY d.dept_name, t.name
@@ -1712,7 +1721,7 @@ def add_approve_line(request):
 
         # users
         cursor.execute("""
-            SELECT id, full_name, username
+            SELECT id, full_name, username, role
             FROM tickets.users
             WHERE is_active = true
             ORDER BY full_name
@@ -1721,61 +1730,114 @@ def add_approve_line(request):
 
     # ===== POST =====
     if request.method == "POST":
-        ticket_type_id = request.POST.get("ticket_type_id")
+        category_id = request.POST.get("category_id")
         team_id = request.POST.get("team_id")
-        user_ids = request.POST.getlist("user_ids[]")  # หลายคน
+
+        lv3_user = request.POST.get("lv3_user")  # CEO
+        lv4_user = request.POST.get("lv4_user")  # IT
+        lv_account = request.POST.get("lv_account")  # Accounting (optional)
 
         # ---- validation ----
-        if not ticket_type_id or not team_id or not user_ids:
-            messages.error(request, "กรุณากรอกข้อมูลให้ครบ")
-            return redirect("add_approve_line")
-
-        # ---- remove empty values ----
-        user_ids = [u for u in user_ids if u]
-
-        if len(user_ids) == 0:
-            messages.error(request, "กรุณาเลือกผู้อนุมัติอย่างน้อย 1 คน")
-            return redirect("add_approve_line")
-
-        # ---- check duplicate user ----
-        if len(user_ids) != len(set(user_ids)):
-            messages.error(request, "ห้ามเลือกผู้อนุมัติซ้ำ")
+        if not category_id or not team_id:
+            messages.error(request, "กรุณาเลือก Category และ Team")
             return redirect("add_approve_line")
 
         with connection.cursor() as cursor:
 
-            # ---- check duplicate flow (ticket_type + team) ----
+            # ---- check duplicate flow ----
             cursor.execute("""
-                SELECT COUNT(*) 
+                SELECT COUNT(*)
                 FROM tickets.approve_line
-                WHERE ticket_type_id = %s
+                WHERE category_id = %s
                   AND team_id = %s
-            """, [ticket_type_id, team_id])
+            """, [category_id, team_id])
 
             if cursor.fetchone()[0] > 0:
-                messages.error(request, "มีสายอนุมัติของประเภทคำขอ + ทีมนี้อยู่แล้ว")
+                messages.error(request, "มีสายอนุมัติ Category + Team นี้อยู่แล้ว")
                 return redirect("add_approve_line")
 
-            # ---- insert ----
+            # ---- get team approvers ----
+            cursor.execute("""
+                SELECT approver_lv1, approver_lv2
+                FROM tickets.team
+                WHERE id = %s
+            """, [team_id])
+            team_data = cursor.fetchone()
+
+            approver_lv1 = team_data[0]
+            approver_lv2 = team_data[1]
+
             level = 1
-            for uid in user_ids:
+
+            # ---- Level 1 (auto) ----
+            if approver_lv1:
                 cursor.execute("""
                     INSERT INTO tickets.approve_line
-                    (ticket_type_id, team_id, "level", user_id)
-                    VALUES (%s, %s, %s, %s)
-                """, [
-                    ticket_type_id,
-                    team_id,
-                    level,
-                    uid
-                ])
+                    (category_id, team_id, "level", user_id)
+                    VALUES (%s,%s,%s,%s)
+                """, [category_id, team_id, level, approver_lv1])
                 level += 1
+
+            # ---- Level 2 (auto) ----
+            if approver_lv2:
+                cursor.execute("""
+                    INSERT INTO tickets.approve_line
+                    (category_id, team_id, "level", user_id)
+                    VALUES (%s,%s,%s,%s)
+                """, [category_id, team_id, level, approver_lv2])
+                level += 1
+
+            # ---- Accounting (optional) ----
+            if lv_account:
+                cursor.execute("""
+                    INSERT INTO tickets.approve_line
+                    (category_id, team_id, "level", user_id)
+                    VALUES (%s,%s,%s,%s)
+                """, [category_id, team_id, level, lv_account])
+                level += 1
+
+            # ---- CEO ----
+            if lv3_user:
+                cursor.execute("""
+                    INSERT INTO tickets.approve_line
+                    (category_id, team_id, "level", user_id)
+                    VALUES (%s,%s,%s,%s)
+                """, [category_id, team_id, level, lv3_user])
+                level += 1
+
+            # ---- IT ----
+            if lv4_user:
+                cursor.execute("""
+                    INSERT INTO tickets.approve_line
+                    (category_id, team_id, "level", user_id)
+                    VALUES (%s,%s,%s,%s)
+                """, [category_id, team_id, level, lv4_user])
 
         messages.success(request, "ตั้งค่าสายอนุมัติเรียบร้อยแล้ว")
         return redirect("add_approve_line")
 
     return render(request, "add_approve_line.html", {
-        "ticket_types": ticket_types,
+        "categories": categories,
         "teams": teams,
         "users": users
+    })
+
+
+def get_team_approvers(request, team_id):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT 
+                u1.full_name,
+                u2.full_name
+            FROM tickets.team t
+            LEFT JOIN tickets.users u1 ON u1.id = t.approver_lv1
+            LEFT JOIN tickets.users u2 ON u2.id = t.approver_lv2
+            WHERE t.id = %s
+        """, [team_id])
+
+        row = cursor.fetchone()
+
+    return JsonResponse({
+        "lv1": row[0] if row and row[0] else "-",
+        "lv2": row[1] if row and row[1] else "-"
     })
