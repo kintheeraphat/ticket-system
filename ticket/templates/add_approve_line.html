@@ -1,193 +1,141 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Add Approve Line{% endblock %}
+{% block title %}ตั้งค่าสายอนุมัติ{% endblock %}
 
 {% block content %}
 
-<div class="container mt-4">
-    <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">ตั้งค่าสายอนุมัติ (Approval Flow)</h5>
+<main>
+<div class="form-card">
+
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1">ตั้งค่าสายอนุมัติ</h4>
+        <div class="text-muted" style="font-size:0.85rem">Approval Flow Configuration</div>
+    </div>
+    <span class="status-badge bg-primary-soft">SYSTEM SETTING</span>
+</div>
+
+<!-- MESSAGE -->
+{% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} shadow-sm rounded-3">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<!-- FILTER PANEL -->
+<div class="filter-panel mb-4">
+    <div class="grid-2">
+        <div>
+            <label class="form-label">เอกสาร</label>
+            <select class="form-select" name="document_id" id="documentSelect" form="approveForm" required>
+                <option value="">-- เลือกเอกสาร --</option>
+                {% for d in documents %}
+                <option value="{{ d.id }}">{{ d.name }}</option>
+                {% endfor %}
+            </select>
         </div>
 
-        <div class="card-body">
-
-            {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
-                {{ message }}
-            </div>
-            {% endfor %}
-            {% endif %}
-
-            <form method="post">
-                {% csrf_token %}
-
-                <!-- CATEGORY -->
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Category</label>
-                    <select name="category_id" id="categorySelect" class="form-select" required>
-                        <option value="">-- เลือก Category --</option>
-                        {% for c in categories %}
-                        <option value="{{ c.id }}">{{ c.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <!-- TEAM -->
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Team</label>
-                    <select name="team_id" id="teamSelect" class="form-select" required>
-                        <option value="">-- เลือก Team --</option>
-                        {% for t in teams %}
-                        <option value="{{ t.id }}">
-                            {{ t.dept_name }} - {{ t.name }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <hr>
-
-                <!-- APPROVE LEVELS -->
-                <div id="approveLevels" style="display:none;">
-
-                    <!-- LV1 -->
-                    <div class="mb-3 level-box" data-level="1">
-                        <label class="form-label fw-bold"> หัวหน้าแผนก</label>
-                        <input id="lv1_name" class="form-control" disabled>
-                    </div>
-
-
-                    <div class="mb-3 level-box" data-level="2">
-                        <label class="form-label fw-bold"> รองหัวหน้าแผนก</label>
-                        <input id="lv2_name" class="form-control" disabled>
-                    </div>
-
-                    <!-- ACCOUNTING -->
-                    <div class="mb-3 level-box" data-level="account">
-                        <label class="form-label fw-bold">Accounting</label>
-                        <select name="lv_account" class="form-select">
-                            <option value="">เลือก Accounting (ถ้ามี) </option>
-                            {% for u in users %}
-                                <option value="{{ u.id }}">{{ u.full_name }} ({{ u.username }})</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- CEO -->
-                    <div class="mb-3 level-box" data-level="3">
-                        <label class="form-label fw-bold">CEO</label>
-                        <select name="lv3_user" class="form-select">
-                            <option value="">-- เลือก CEO --</option>
-                            {% for u in users %}
-                                <option value="{{ u.id }}">{{ u.full_name }} ({{ u.username }})</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- IT -->
-                    <div class="mb-3 level-box" data-level="4">
-                        <label class="form-label fw-bold">Admin</label>
-                        <select name="lv4_user" class="form-select">
-                            <option value="">-- เลือก IT --</option>
-                            {% for u in users %}
-                                <option value="{{ u.id }}">{{ u.full_name }} ({{ u.username }})</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                </div>
-
-                <hr>
-
-                <div class="text-end">
-                    <button type="submit" class="btn btn-primary px-4">
-                        บันทึกสายอนุมัติ
-                    </button>
-                </div>
-
-            </form>
-
+        <div>
+            <label class="form-label">Team (จากผู้ใช้งาน)</label>
+            <input type="text" class="form-control bg-light" value="{{ team.name }}" readonly>
+            <input type="hidden" name="team_id" value="{{ team.id }}" form="approveForm">
         </div>
     </div>
 </div>
 
-<!-- ================= SCRIPT ================= -->
+<!-- TABLE -->
+<form method="post" id="approveForm">
+    {% csrf_token %}
+
+    <div class="dashboard-table">
+        <h4 class="mb-3">Approval Flow</h4>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" id="approveTable">
+                <thead>
+                    <tr class="text-center">
+                        <th width="8%">Level</th>
+                        <th>ผู้อนุมัติ</th>
+                        <th width="12%">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="hover-row animate-fade-in">
+                        <td class="text-center">
+                            <span class="badge bg-light">1</span>
+                        </td>
+                        <td>
+                            <select name="approver[]" class="form-select" required>
+                                <option value="">-- เลือกผู้อนุมัติ --</option>
+                                {% for u in users %}
+                                <option value="{{ u.id }}">{{ u.full_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td class="text-center">
+                            <button type="button" class="action-btn" onclick="removeRow(this)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <button type="button" class="btn btn-primary" onclick="addRow()">
+                + เพิ่มระดับอนุมัติ
+            </button>
+
+            <button type="submit" class="btn btn-success">
+                บันทึกสายอนุมัติ
+            </button>
+        </div>
+
+    </div>
+</form>
+
+</div>
+</main>
+
 <script>
-const categorySelect = document.getElementById("categorySelect");
-const teamSelect = document.getElementById("teamSelect");
-const approveLevels = document.getElementById("approveLevels");
-const levelBoxes = document.querySelectorAll(".level-box");
+function addRow(){
+    const table = document.getElementById('approveTable').getElementsByTagName('tbody')[0];
+    const rowCount = table.rows.length + 1;
 
-const lv1Input = document.getElementById("lv1_name");
-const lv2Input = document.getElementById("lv2_name");
+    const row = table.insertRow();
+    row.classList.add('hover-row','animate-fade-in');
 
-const CATEGORY_ACCOUNTING = {
-    "1": true,
-    "4": true,
-    "5": true,
-    "2": false,
-    "3": false,
-    "6": false
-};
+    row.innerHTML = `
+        <td class=\"text-center\">
+            <span class=\"badge bg-light\">${rowCount}</span>
+        </td>
+        <td>
+            <select name=\"approver[]\" class=\"form-select\" required>
+                <option value=\"\">-- เลือกผู้อนุมัติ --</option>
+                {% for u in users %}
+                <option value=\"{{ u.id }}\">{{ u.full_name }}</option>
+                {% endfor %}
+            </select>
+        </td>
+        <td class=\"text-center\">
+            <button type=\"button\" class=\"action-btn\" onclick=\"removeRow(this)\">
+                <i class=\"bi bi-trash\"></i>
+            </button>
+        </td>
+    `;
+}
 
-categorySelect.addEventListener("change", function () {
-    const val = this.value;
+function removeRow(btn){
+    const row = btn.closest('tr');
+    row.remove();
 
-    if (!val) {
-        approveLevels.style.display = "none";
-        return;
-    }
-
-    approveLevels.style.display = "block";
-    levelBoxes.forEach(box => box.style.display = "none");
-
-    const useAccounting = CATEGORY_ACCOUNTING[val] || false;
-
-    showLevels(["1","2"]);
-
-    if (useAccounting){
-        showLevels(["account","3","4"]);
-    }else{
-        showLevels(["3","4"]);
-    }
-});
-
-teamSelect.addEventListener("change", function(){
-    const teamId = this.value;
-
-    if(!teamId){
-        lv1Input.value = "";
-        lv2Input.value = "";
-        return;
-    }
-
-    lv1Input.value = "Loading...";
-    lv2Input.value = "Loading...";
-
-    fetch(`/api/team-approvers/${teamId}/`)
-        .then(res => {
-            if(!res.ok) throw new Error("API error");
-            return res.json();
-        })
-        .then(data => {
-            lv1Input.value = data.lv1 || "-";
-            lv2Input.value = data.lv2 || "-";
-        })
-        .catch(err=>{
-            console.error(err);
-            lv1Input.value = "-";
-            lv2Input.value = "-";
-        });
-});
-
-function showLevels(levelArr){
-    levelBoxes.forEach(box=>{
-        if(levelArr.includes(box.dataset.level)){
-            box.style.display = "block";
-        }
+    const rows = document.querySelectorAll('#approveTable tbody tr');
+    rows.forEach((r,i)=>{
+        r.children[0].innerHTML = `<span class=\"badge bg-light\">${i+1}</span>`;
     });
 }
 </script>
