@@ -89,7 +89,7 @@
 
                     <!-- IT -->
                     <div class="mb-3 level-box" data-level="4">
-                        <label class="form-label fw-bold">Level : IT</label>
+                        <label class="form-label fw-bold">Admin</label>
                         <select name="lv4_user" class="form-select">
                             <option value="">-- เลือก IT --</option>
                             {% for u in users %}
@@ -124,17 +124,15 @@ const levelBoxes = document.querySelectorAll(".level-box");
 const lv1Input = document.getElementById("lv1_name");
 const lv2Input = document.getElementById("lv2_name");
 
-/* category → use_accounting */
 const CATEGORY_ACCOUNTING = {
-    "1": true,   // ERP
-    "4": true,   // Adjust
-    "5": true,   // Application
-    "2": false,  // VPN
-    "3": false,  // Building
-    "6": false   // Active Promotion
+    "1": true,
+    "4": true,
+    "5": true,
+    "2": false,
+    "3": false,
+    "6": false
 };
 
-/* ===== CATEGORY CHANGE ===== */
 categorySelect.addEventListener("change", function () {
     const val = this.value;
 
@@ -144,13 +142,10 @@ categorySelect.addEventListener("change", function () {
     }
 
     approveLevels.style.display = "block";
-
-    // hide all
     levelBoxes.forEach(box => box.style.display = "none");
 
     const useAccounting = CATEGORY_ACCOUNTING[val] || false;
 
-    // Always show LV1 + LV2
     showLevels(["1","2"]);
 
     if (useAccounting){
@@ -160,7 +155,6 @@ categorySelect.addEventListener("change", function () {
     }
 });
 
-/* ===== TEAM CHANGE (AJAX FETCH) ===== */
 teamSelect.addEventListener("change", function(){
     const teamId = this.value;
 
@@ -174,19 +168,21 @@ teamSelect.addEventListener("change", function(){
     lv2Input.value = "Loading...";
 
     fetch(`/api/team-approvers/${teamId}/`)
-        .then(res => res.json())
+        .then(res => {
+            if(!res.ok) throw new Error("API error");
+            return res.json();
+        })
         .then(data => {
             lv1Input.value = data.lv1 || "-";
             lv2Input.value = data.lv2 || "-";
         })
         .catch(err=>{
             console.error(err);
-            lv1Input.value = "Error";
-            lv2Input.value = "Error";
+            lv1Input.value = "-";
+            lv2Input.value = "-";
         });
 });
 
-/* ===== UTIL ===== */
 function showLevels(levelArr){
     levelBoxes.forEach(box=>{
         if(levelArr.includes(box.dataset.level)){

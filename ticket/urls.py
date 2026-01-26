@@ -56,6 +56,7 @@ urlpatterns = [
     path("settingline/", views.setting_team, name="setting_team"),
     path("team/<int:team_id>/add-user/", views.team_adduser, name="team_adduser"),
     path("approval/add-line/", views.add_approve_line, name="add_approve_line"),
+    path("api/team-approvers/<int:team_id>/", views.get_team_approvers, name="get_team_approvers"),
     path("team/<int:team_id>/add-user/", views.team_adduser, name="team_adduser"),
     path(
         "team/<int:team_id>/remove-user/<int:member_id>/",
