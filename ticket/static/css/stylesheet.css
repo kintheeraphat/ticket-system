@@ -678,3 +678,65 @@ input[type="file"] {
   background-color: #f8f9fb;
   transform: translateY(-1px);
 }
+.team-scroll {
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+.team-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+}
+
+.team-card:hover {
+  background: #f9fafb;
+  border-color: #c7d2fe;
+}
+
+.team-main {
+  display: flex;
+  justify-content: space-between;
+  text-decoration: none;
+  color: inherit;
+}
+
+.team-title {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.team-meta {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.member-badge {
+  background: #eef2ff;
+  color: #3730a3;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  margin-left: 6px;
+}
+
+.team-approver {
+  font-size: 0.8rem;
+  color: #374151;
+  text-align: right;
+}
+
+.team-action {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.team-link:hover {
+  text-decoration: underline;
+  color: #0d6efd;
+}

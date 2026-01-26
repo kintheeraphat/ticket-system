@@ -2,30 +2,27 @@
 {% block title %}ตั้งค่าทีมอนุมัติ | Team Setup{% endblock %}
 
 {% block content %}
-<main class="main-content container-fluid">
+<main class="container-fluid">
 
-  <!-- HEADER -->
-  <div class="mb-4">
-    <h2 class="fw-bold mb-1">ตั้งค่าทีมอนุมัติ</h2>
-    <p class="text-muted">จัดการทีมและผู้อนุมัติสำหรับระบบ Workflow</p>
-  </div>
+  <h2 class="fw-bold mb-4">ตั้งค่าทีมอนุมัติ</h2>
 
   <div class="row g-4">
 
-    <!-- ================= CREATE TEAM ================= -->
-    <div class="col-xl-4 col-lg-5">
-      <div class="card shadow-sm border-0">
+    <!-- CREATE TEAM -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
         <div class="card-body">
 
-          <h5 class="fw-semibold mb-3">สร้างทีมอนุมัติใหม่</h5>
+          <h5 class="fw-semibold mb-3">สร้างทีมใหม่</h5>
 
           <form method="post">
             {% csrf_token %}
+            <input type="hidden" name="action" value="create">
 
             <div class="mb-3">
-              <label class="form-label fw-semibold">แผนก</label>
+              <label class="form-label">แผนก</label>
               <select name="department_id" class="form-select" required>
-                <option value="">-- เลือกแผนก --</option>
+                <option value="">-- เลือก --</option>
                 {% for d in departments %}
                 <option value="{{ d.id }}">{{ d.dept_name }}</option>
                 {% endfor %}
@@ -33,16 +30,12 @@
             </div>
 
             <div class="mb-3">
-              <label class="form-label fw-semibold">ชื่อทีมอนุมัติ</label>
-              <input type="text"
-                     name="team_name"
-                     class="form-control"
-                     placeholder="เช่น IT Manager Approval"
-                     required>
+              <label class="form-label">ชื่อทีม</label>
+              <input name="team_name" class="form-control" required>
             </div>
 
             <div class="mb-3">
-              <label class="form-label fw-semibold">ผู้อนุมัติ Level 1</label>
+              <label class="form-label">Approver Lv1</label>
               <select name="approver_lv1" class="form-select" required>
                 <option value="">-- เลือก --</option>
                 {% for u in users %}
@@ -51,10 +44,8 @@
               </select>
             </div>
 
-            <div class="mb-4">
-              <label class="form-label fw-semibold">
-                ผู้อนุมัติ Level 2 <span class="text-muted">(ไม่บังคับ)</span>
-              </label>
+            <div class="mb-3">
+              <label class="form-label">Approver Lv2</label>
               <select name="approver_lv2" class="form-select">
                 <option value="">-- ไม่เลือก --</option>
                 {% for u in users %}
@@ -63,32 +54,24 @@
               </select>
             </div>
 
-            <button class="btn btn-primary w-100">
-              บันทึกทีมอนุมัติ
-            </button>
+            <button class="btn btn-primary w-100">บันทึก</button>
           </form>
 
         </div>
       </div>
     </div>
 
-    <!-- ================= TEAM LIST ================= -->
-    <div class="col-xl-8 col-lg-7">
-      <div class="card shadow-sm border-0 h-100">
+    <!-- TEAM LIST -->
+    <div class="col-lg-8">
+      <div class="card shadow-sm h-100">
         <div class="card-body">
 
-          <h5 class="fw-semibold mb-3">ทีมอนุมัติ</h5>
-
-          <!-- Search & Filter -->
           <div class="row g-2 mb-3">
-            <div class="col-md-7">
-              <input type="text"
-                     id="teamSearch"
-                     class="form-control"
-                     placeholder="ค้นหาชื่อทีม">
+            <div class="col">
+              <input id="search" class="form-control" placeholder="ค้นหาทีม">
             </div>
-            <div class="col-md-5">
-              <select id="deptFilter" class="form-select">
+            <div class="col">
+              <select id="filter" class="form-select">
                 <option value="">ทุกแผนก</option>
                 {% for d in departments %}
                 <option value="{{ d.dept_name }}">{{ d.dept_name }}</option>
@@ -97,39 +80,66 @@
             </div>
           </div>
 
-          <!-- LIST -->
           <div class="list-group team-scroll">
-            {% for t in teams %}
+
+          {% for t in teams %}
+          <div class="list-group-item team-item"
+              data-name="{{ t.team_name|lower }}"
+              data-dept="{{ t.dept_name }}">
+
+            <!-- ✅ คลิกตรงนี้ = ไปหน้า team_adduser -->
             <a href="{% url 'team_adduser' t.id %}"
-               class="list-group-item list-group-item-action team-item"
-               data-team="{{ t.team_name|lower }}"
-               data-dept="{{ t.dept_name }}">
+              class="team-link d-block text-decoration-none text-dark">
 
               <div class="d-flex justify-content-between">
                 <div>
                   <div class="fw-semibold">{{ t.team_name }}</div>
-                  <div class="text-muted small">
+                  <small class="text-muted">
                     {{ t.dept_name }} · 👥 {{ t.member_count }} คน
-                  </div>
+                  </small>
                 </div>
 
                 <div class="text-end small">
-                  {% if t.approver_lv1 %}
-                  <div>Lv1: {{ t.approver_lv1 }}</div>
-                  {% endif %}
-                  {% if t.approver_lv2 %}
-                  <div>Lv2: {{ t.approver_lv2 }}</div>
+                  <div>Lv1: {{ t.approver_lv1_name }}</div>
+                  {% if t.approver_lv2_name %}
+                  <div>Lv2: {{ t.approver_lv2_name }}</div>
                   {% endif %}
                 </div>
               </div>
-
             </a>
-            {% empty %}
-            <div class="text-muted text-center py-4">
-              ยังไม่มีทีม
+
+            <!-- ❌ ปุ่มด้านล่าง ไม่พาไป adduser -->
+            <div class="mt-2 text-end">
+
+              <button class="btn btn-sm btn-outline-warning"
+                      data-bs-toggle="modal"
+                      data-bs-target="#editModal"
+                      data-id="{{ t.id }}"
+                      data-name="{{ t.team_name }}"
+                      data-dept="{{ t.department_id }}"
+                      data-lv1="{{ t.approver_lv1 }}"
+                      data-lv2="{{ t.approver_lv2 }}"
+                      onclick="event.stopPropagation()">
+                แก้ไข
+              </button>
+
+              <form method="post"
+                    class="d-inline"
+                    onsubmit="return confirm('ยืนยันลบทีม?')"
+                    onclick="event.stopPropagation()">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="team_id" value="{{ t.id }}">
+                <button class="btn btn-sm btn-outline-danger">ลบ</button>
+              </form>
+
             </div>
-            {% endfor %}
+
           </div>
+          {% endfor %}
+
+        </div>
+
 
         </div>
       </div>
@@ -137,35 +147,49 @@
 
   </div>
 </main>
-{% endblock %}
 
-{% block extra_js %}
-<script>
-document.addEventListener("DOMContentLoaded", function () {
+<!-- EDIT MODAL -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update">
+        <input type="hidden" name="team_id" id="edit_id">
 
-  const search = document.getElementById("teamSearch");
-  const filter = document.getElementById("deptFilter");
-  const items = document.querySelectorAll(".team-item");
+        <div class="modal-header">
+          <h5 class="modal-title">แก้ไขทีม</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
 
-  function applyFilter() {
-    const keyword = search.value.toLowerCase();
-    const dept = filter.value;
+        <div class="modal-body">
+          <input id="edit_name" name="team_name" class="form-control mb-2">
+          <select id="edit_dept" name="department_id" class="form-select mb-2">
+            {% for d in departments %}
+            <option value="{{ d.id }}">{{ d.dept_name }}</option>
+            {% endfor %}
+          </select>
+          <select id="edit_lv1" name="approver_lv1" class="form-select mb-2">
+            {% for u in users %}
+            <option value="{{ u.id }}">{{ u.full_name }}</option>
+            {% endfor %}
+          </select>
+          <select id="edit_lv2" name="approver_lv2" class="form-select">
+            <option value="">-- ไม่เลือก --</option>
+            {% for u in users %}
+            <option value="{{ u.id }}">{{ u.full_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
 
-    items.forEach(item => {
-      const name = item.dataset.team;
-      const d = item.dataset.dept;
-      item.style.display =
-        name.includes(keyword) && (!dept || d === dept)
-        ? ""
-        : "none";
-    });
-  }
-
-  search.addEventListener("keyup", applyFilter);
-  filter.addEventListener("change", applyFilter);
-
-});
-</script>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+          <button class="btn btn-primary">บันทึก</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 <style>
 .team-scroll {
@@ -173,4 +197,28 @@ document.addEventListener("DOMContentLoaded", function () {
   overflow-y: auto;
 }
 </style>
+
+<script>
+document.getElementById("editModal").addEventListener("show.bs.modal", e => {
+  const b = e.relatedTarget;
+  edit_id.value = b.dataset.id;
+  edit_name.value = b.dataset.name;
+  edit_dept.value = b.dataset.dept;
+  edit_lv1.value = b.dataset.lv1;
+  edit_lv2.value = b.dataset.lv2 || "";
+});
+
+const search = document.getElementById("search");
+const filter = document.getElementById("filter");
+document.querySelectorAll(".team-item").forEach(item => {
+  const fn = () => {
+    item.style.display =
+      item.dataset.name.includes(search.value.toLowerCase()) &&
+      (!filter.value || item.dataset.dept === filter.value)
+      ? "" : "none";
+  };
+  search.addEventListener("keyup", fn);
+  filter.addEventListener("change", fn);
+});
+</script>
 {% endblock %}

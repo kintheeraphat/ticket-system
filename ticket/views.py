@@ -1517,6 +1517,7 @@ Promotion: {promo_name}
     return render(request, "tickets_form/active_promotion_form.html")
 
     
+
 def dictfetchall(cursor):
     columns = [col[0] for col in cursor.description]
     return [dict(zip(columns, row)) for row in cursor.fetchall()]
@@ -1546,31 +1547,35 @@ def setting_team(request):
         """)
         users = dictfetchall(cursor)
 
-        # teams + member count
+        # teams
         cursor.execute("""
             SELECT
                 t.id,
                 t.name AS team_name,
                 d.dept_name,
-                u1.full_name AS approver_lv1,
-                u2.full_name AS approver_lv2,
-                COUNT(tm.user_id) AS member_count
+                t.department_id,
+                t.approver_lv1,
+                t.approver_lv2,
+                u1.full_name AS approver_lv1_name,
+                u2.full_name AS approver_lv2_name,
+                (
+                    SELECT COUNT(*)
+                    FROM tickets.team_members tm
+                    WHERE tm.team_id = t.id
+                ) AS member_count
             FROM tickets.team t
             LEFT JOIN tickets.department d ON d.id = t.department_id
             LEFT JOIN tickets.users u1 ON u1.id = t.approver_lv1
             LEFT JOIN tickets.users u2 ON u2.id = t.approver_lv2
-            LEFT JOIN tickets.team_members tm ON tm.team_id = t.id
-            GROUP BY
-                t.id, t.name, d.dept_name,
-                u1.full_name, u2.full_name
             ORDER BY d.dept_name, t.name
         """)
         teams = dictfetchall(cursor)
 
     # =========================
-    # POST
+    # CREATE TEAM
     # =========================
-    if request.method == "POST":
+    if request.method == "POST" and request.POST.get("action") == "create":
+
         team_name = request.POST.get("team_name")
         department_id = request.POST.get("department_id")
         approver_lv1 = request.POST.get("approver_lv1")
@@ -1599,12 +1604,63 @@ def setting_team(request):
         messages.success(request, "สร้างทีมอนุมัติเรียบร้อยแล้ว")
         return redirect("setting_team")
 
+    # =========================
+    # UPDATE TEAM (MODAL)
+    # =========================
+    if request.method == "POST" and request.POST.get("action") == "update":
+
+        team_id = request.POST.get("team_id")
+        team_name = request.POST.get("team_name")
+        department_id = request.POST.get("department_id")
+        approver_lv1 = request.POST.get("approver_lv1")
+        approver_lv2 = request.POST.get("approver_lv2")
+
+        if not team_name or not department_id or not approver_lv1:
+            messages.error(request, "กรุณากรอกข้อมูลให้ครบ")
+            return redirect("setting_team")
+
+        if approver_lv2 and approver_lv1 == approver_lv2:
+            messages.error(request, "ไม่สามารถเลือกผู้อนุมัติซ้ำกันได้")
+            return redirect("setting_team")
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                UPDATE tickets.team
+                SET name = %s,
+                    department_id = %s,
+                    approver_lv1 = %s,
+                    approver_lv2 = %s
+                WHERE id = %s
+            """, [
+                team_name,
+                department_id,
+                approver_lv1,
+                approver_lv2 if approver_lv2 else None,
+                team_id
+            ])
+
+        messages.success(request, "อัปเดตทีมเรียบร้อยแล้ว")
+        return redirect("setting_team")
+
+    # =========================
+    # DELETE TEAM
+    # =========================
+    if request.method == "POST" and request.POST.get("action") == "delete":
+
+        team_id = request.POST.get("team_id")
+
+        with connection.cursor() as cursor:
+            cursor.execute("DELETE FROM tickets.team_members WHERE team_id = %s", [team_id])
+            cursor.execute("DELETE FROM tickets.team WHERE id = %s", [team_id])
+
+        messages.success(request, "ลบทีมเรียบร้อยแล้ว")
+        return redirect("setting_team")
+
     return render(request, "setting_team.html", {
         "departments": departments,
         "users": users,
         "teams": teams
     })
-
 
 def team_adduser(request, team_id):
 
@@ -1727,7 +1783,7 @@ def add_approve_line(request):
 
         # users
         cursor.execute("""
-            SELECT id, full_name, username, role
+            SELECT id, full_name, username
             FROM tickets.users
             WHERE is_active = true
             ORDER BY full_name
