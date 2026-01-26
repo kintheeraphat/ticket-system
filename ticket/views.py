@@ -1538,15 +1538,6 @@ def setting_team(request):
         """)
         departments = dictfetchall(cursor)
 
-        # users
-        cursor.execute("""
-            SELECT id, full_name, username
-            FROM tickets.users
-            WHERE is_active = true
-            ORDER BY full_name
-        """)
-        users = dictfetchall(cursor)
-
         # teams
         cursor.execute("""
             SELECT
@@ -1554,10 +1545,6 @@ def setting_team(request):
                 t.name AS team_name,
                 d.dept_name,
                 t.department_id,
-                t.approver_lv1,
-                t.approver_lv2,
-                u1.full_name AS approver_lv1_name,
-                u2.full_name AS approver_lv2_name,
                 (
                     SELECT COUNT(*)
                     FROM tickets.team_members tm
@@ -1565,8 +1552,6 @@ def setting_team(request):
                 ) AS member_count
             FROM tickets.team t
             LEFT JOIN tickets.department d ON d.id = t.department_id
-            LEFT JOIN tickets.users u1 ON u1.id = t.approver_lv1
-            LEFT JOIN tickets.users u2 ON u2.id = t.approver_lv2
             ORDER BY d.dept_name, t.name
         """)
         teams = dictfetchall(cursor)
@@ -1578,66 +1563,36 @@ def setting_team(request):
 
         team_name = request.POST.get("team_name")
         department_id = request.POST.get("department_id")
-        approver_lv1 = request.POST.get("approver_lv1")
-        approver_lv2 = request.POST.get("approver_lv2")
 
-        if not team_name or not department_id or not approver_lv1:
+        if not team_name or not department_id:
             messages.error(request, "กรุณากรอกข้อมูลให้ครบ")
-            return redirect("setting_team")
-
-        if approver_lv2 and approver_lv1 == approver_lv2:
-            messages.error(request, "ไม่สามารถเลือกผู้อนุมัติซ้ำกันได้")
             return redirect("setting_team")
 
         with connection.cursor() as cursor:
             cursor.execute("""
-                INSERT INTO tickets.team
-                (name, department_id, approver_lv1, approver_lv2)
-                VALUES (%s, %s, %s, %s)
-            """, [
-                team_name,
-                department_id,
-                approver_lv1,
-                approver_lv2 if approver_lv2 else None
-            ])
+                INSERT INTO tickets.team (name, department_id)
+                VALUES (%s, %s)
+            """, [team_name, department_id])
 
-        messages.success(request, "สร้างทีมอนุมัติเรียบร้อยแล้ว")
+        messages.success(request, "สร้างทีมเรียบร้อยแล้ว")
         return redirect("setting_team")
 
     # =========================
-    # UPDATE TEAM (MODAL)
+    # UPDATE TEAM
     # =========================
     if request.method == "POST" and request.POST.get("action") == "update":
 
         team_id = request.POST.get("team_id")
         team_name = request.POST.get("team_name")
         department_id = request.POST.get("department_id")
-        approver_lv1 = request.POST.get("approver_lv1")
-        approver_lv2 = request.POST.get("approver_lv2")
-
-        if not team_name or not department_id or not approver_lv1:
-            messages.error(request, "กรุณากรอกข้อมูลให้ครบ")
-            return redirect("setting_team")
-
-        if approver_lv2 and approver_lv1 == approver_lv2:
-            messages.error(request, "ไม่สามารถเลือกผู้อนุมัติซ้ำกันได้")
-            return redirect("setting_team")
 
         with connection.cursor() as cursor:
             cursor.execute("""
                 UPDATE tickets.team
                 SET name = %s,
-                    department_id = %s,
-                    approver_lv1 = %s,
-                    approver_lv2 = %s
+                    department_id = %s
                 WHERE id = %s
-            """, [
-                team_name,
-                department_id,
-                approver_lv1,
-                approver_lv2 if approver_lv2 else None,
-                team_id
-            ])
+            """, [team_name, department_id, team_id])
 
         messages.success(request, "อัปเดตทีมเรียบร้อยแล้ว")
         return redirect("setting_team")
@@ -1658,7 +1613,6 @@ def setting_team(request):
 
     return render(request, "setting_team.html", {
         "departments": departments,
-        "users": users,
         "teams": teams
     })
 
@@ -1795,9 +1749,9 @@ def add_approve_line(request):
         category_id = request.POST.get("category_id")
         team_id = request.POST.get("team_id")
 
-        lv3_user = request.POST.get("lv3_user")  # CEO
-        lv4_user = request.POST.get("lv4_user")  # IT
-        lv_account = request.POST.get("lv_account")  # Accounting (optional)
+        lv3_user = request.POST.get("lv3_user")       # CEO
+        lv4_user = request.POST.get("lv4_user")       # IT
+        lv_account = request.POST.get("lv_account")   # Accounting
 
         # ---- validation ----
         if not category_id or not team_id:
@@ -1806,74 +1760,70 @@ def add_approve_line(request):
 
         with connection.cursor() as cursor:
 
-            # ---- check duplicate flow ----
+            # ---- check duplicate ----
             cursor.execute("""
-                SELECT COUNT(*)
+                SELECT 1
                 FROM tickets.approve_line
-                WHERE category_id = %s
-                  AND team_id = %s
+                WHERE category_id = %s AND team_id = %s
+                LIMIT 1
             """, [category_id, team_id])
 
-            if cursor.fetchone()[0] > 0:
-                messages.error(request, "มีสายอนุมัติ Category + Team นี้อยู่แล้ว")
+            if cursor.fetchone():
+                messages.error(request, "มีสายอนุมัติของ Category + Team นี้แล้ว")
                 return redirect("add_approve_line")
 
             # ---- get team approvers ----
             cursor.execute("""
-                SELECT approver_lv1, approver_lv2
-                FROM tickets.team
-                WHERE id = %s
-            """, [team_id])
+                SELECT
+                u1.full_name,
+                u2.full_name
+                FROM tickets.team t
+                LEFT JOIN tickets.users u1 ON u1.id = t.approver_lv1
+                LEFT JOIN tickets.users u2 ON u2.id = t.approver_lv2
+                WHERE t.id = %s
+                """, [team_id])
+
             team_data = cursor.fetchone()
+
+            if not team_data:
+                messages.error(request, "ไม่พบ Team นี้ในระบบ")
+                return redirect("add_approve_line")
 
             approver_lv1 = team_data[0]
             approver_lv2 = team_data[1]
 
             level = 1
 
-            # ---- Level 1 (auto) ----
+            def insert_line(cat, team, lvl, user):
+                cursor.execute("""
+                    INSERT INTO tickets.approve_line
+                    (category_id, team_id, "level", user_id)
+                    VALUES (%s,%s,%s,%s)
+                """, [cat, team, lvl, user])
+
+            # ---- Level 1 ----
             if approver_lv1:
-                cursor.execute("""
-                    INSERT INTO tickets.approve_line
-                    (category_id, team_id, "level", user_id)
-                    VALUES (%s,%s,%s,%s)
-                """, [category_id, team_id, level, approver_lv1])
+                insert_line(category_id, team_id, level, approver_lv1)
                 level += 1
 
-            # ---- Level 2 (auto) ----
+            # ---- Level 2 ----
             if approver_lv2:
-                cursor.execute("""
-                    INSERT INTO tickets.approve_line
-                    (category_id, team_id, "level", user_id)
-                    VALUES (%s,%s,%s,%s)
-                """, [category_id, team_id, level, approver_lv2])
+                insert_line(category_id, team_id, level, approver_lv2)
                 level += 1
 
-            # ---- Accounting (optional) ----
+            # ---- Accounting ----
             if lv_account:
-                cursor.execute("""
-                    INSERT INTO tickets.approve_line
-                    (category_id, team_id, "level", user_id)
-                    VALUES (%s,%s,%s,%s)
-                """, [category_id, team_id, level, lv_account])
+                insert_line(category_id, team_id, level, lv_account)
                 level += 1
 
             # ---- CEO ----
             if lv3_user:
-                cursor.execute("""
-                    INSERT INTO tickets.approve_line
-                    (category_id, team_id, "level", user_id)
-                    VALUES (%s,%s,%s,%s)
-                """, [category_id, team_id, level, lv3_user])
+                insert_line(category_id, team_id, level, lv3_user)
                 level += 1
 
             # ---- IT ----
             if lv4_user:
-                cursor.execute("""
-                    INSERT INTO tickets.approve_line
-                    (category_id, team_id, "level", user_id)
-                    VALUES (%s,%s,%s,%s)
-                """, [category_id, team_id, level, lv4_user])
+                insert_line(category_id, team_id, level, lv4_user)
 
         messages.success(request, "ตั้งค่าสายอนุมัติเรียบร้อยแล้ว")
         return redirect("add_approve_line")
@@ -1884,11 +1834,13 @@ def add_approve_line(request):
         "users": users
     })
 
-
 def get_team_approvers(request, team_id):
+    print("API HIT team_id =", team_id) # <--- ดูใน terminal
+
+
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT 
+            SELECT
                 u1.full_name,
                 u2.full_name
             FROM tickets.team t
@@ -1897,9 +1849,12 @@ def get_team_approvers(request, team_id):
             WHERE t.id = %s
         """, [team_id])
 
+
         row = cursor.fetchone()
+    print("API ROW =", row)
+
 
     return JsonResponse({
         "lv1": row[0] if row and row[0] else "-",
         "lv2": row[1] if row and row[1] else "-"
-    })
+})
