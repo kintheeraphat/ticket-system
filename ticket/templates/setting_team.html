@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}ตั้งค่าทีมอนุมัติ | Team Setup{% endblock %}
 
 {% block content %}
@@ -195,6 +196,16 @@
 .team-scroll {
   max-height: 520px;
   overflow-y: auto;
+
+  .team-item {
+  border-radius: 10px;
+  margin-bottom: 8px;
+  transition: background .15s ease;
+}
+
+.team-link:hover {
+  background: #f8fafc;
+}
 }
 </style>
 
