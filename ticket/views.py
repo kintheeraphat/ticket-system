@@ -12,7 +12,52 @@ from django.http import Http404
 from .decorators import login_required_custom, role_required
 from django.conf import settings
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import requests
+ERP_API_URL = "http://172.17.1.55:8111/erpAuth/"
 
+@csrf_exempt
+def erp_auth(username, password):
+    """
+    ตรวจสอบ username / password กับ ERP
+    คืนค่า dict ถ้าสำเร็จ
+    คืน None ถ้าไม่ผ่าน
+    """
+
+    try:
+        response = requests.post(
+            ERP_API_URL,
+            data={
+                "username": username,
+                "password": password
+            },
+            timeout=10
+        )
+    except requests.exceptions.RequestException:
+        return None
+
+    if response.status_code != 200:
+        return None
+
+    data = response.json()
+
+    if data.get("status") != "success":
+        return None
+
+    return data
+def get_department_id(dept_name):
+    if not dept_name:
+        return None
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id
+            FROM tickets.department
+            WHERE LOWER(dept_name) = LOWER(%s)
+        """, [dept_name])
+
+        row = cursor.fetchone()
+        return row[0] if row else None
 
 def index(request):
     user = request.session.get("user")
@@ -37,12 +82,19 @@ def thai_date(d):
 
 def login_view(request):
 
-    if request.session.get("user"):
-        role = request.session["user"]["role"]
+    # ==========================
+    # ถ้า login แล้ว
+    # ==========================
+    user = request.session.get("user")
+    if user:
+        role = user.get("role", "user")
         if role in ["admin", "manager"]:
             return redirect("/dashboard/")
         return redirect("/tickets/")
 
+    # ==========================
+    # POST LOGIN
+    # ==========================
     if request.method == "POST":
         username = request.POST.get("username", "").strip()
         password = request.POST.get("password", "").strip()
@@ -51,15 +103,17 @@ def login_view(request):
             messages.error(request, "กรุณากรอกชื่อผู้ใช้และรหัสผ่าน")
             return render(request, "login.html")
 
+        # ==================================================
+        # 1️⃣ LOGIN FROM DATABASE
+        # ==================================================
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT
                     u.id,
                     u.username,
                     u.full_name,
-                    LOWER(TRIM(r.role_name)) AS role
+                    u.role
                 FROM tickets.users u
-                JOIN tickets.roles r ON r.id = u.role_id
                 WHERE u.username = %s
                   AND u.password = crypt(%s, u.password)
                   AND u.is_active = TRUE
@@ -67,22 +121,139 @@ def login_view(request):
 
             row = cursor.fetchone()
 
-        if not row:
+        if row:
+            request.session["user"] = {
+                "id": row[0],
+                "username": row[1],
+                "full_name": row[2],
+                "role": row[3],
+            }
+
+            if row[3] in ["admin", "manager"]:
+                return redirect("/dashboard/")
+            return redirect("/tickets/")
+
+        # ==================================================
+        # 2️⃣ LOGIN FROM ERP
+        # ==================================================
+        try:
+            res = requests.post(
+                ERP_API_URL,
+                data={
+                    "username": username,
+                    "password": password
+                },
+                timeout=10
+            )
+        except Exception:
+            messages.error(request, "ไม่สามารถเชื่อมต่อ ERP")
+            return render(request, "login.html")
+
+        if res.status_code != 200:
+            messages.error(request, "ไม่สามารถเชื่อมต่อ ERP")
+            return render(request, "login.html")
+
+        data = res.json()
+        if data.get("status") != "success":
             messages.error(request, "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง")
             return render(request, "login.html")
 
+        # ==================================================
+        # 3️⃣ INSERT USER IF NOT EXISTS
+        # ==================================================
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT id, role
+                FROM tickets.users
+                WHERE erp_user_id = %s
+            """, [data["user_id"]])
+
+            row = cursor.fetchone()
+
+            if not row:
+                cursor.execute("""
+                    INSERT INTO tickets.users
+                    (
+                        erp_user_id,
+                        username,
+                        full_name,
+                        role,
+                        is_active
+                    )
+                    VALUES (%s, %s, %s, %s, TRUE)
+                    RETURNING id, role
+                """, [
+                    data["user_id"],
+                    data["login"],
+                    data["name"],
+                    "user"
+                ])
+                row = cursor.fetchone()
+
+        # ==================================================
+        # 4️⃣ LOGIN SUCCESS
+        # ==================================================
         request.session["user"] = {
             "id": row[0],
-            "username": row[1],
-            "full_name": row[2],
-            "role": row[3],
+            "username": data["login"],
+            "full_name": data["name"],
+            "role": row[1],
         }
 
-        if row[3] in ["admin", "manager"]:
-            return redirect("/dashboard/")
         return redirect("/tickets/")
 
     return render(request, "login.html")
+
+# def login_view(request):
+
+#     user = request.session.get("user")
+
+#     if user:
+#         role = user.get("role")
+#         if role in ["admin", "manager"]:
+#             return redirect("/dashboard/")
+#         return redirect("/tickets/")
+
+#     if request.method == "POST":
+#         username = request.POST.get("username", "").strip()
+#         password = request.POST.get("password", "").strip()
+
+#         if not username or not password:
+#             messages.error(request, "กรุณากรอกชื่อผู้ใช้และรหัสผ่าน")
+#             return render(request, "login.html")
+
+#         with connection.cursor() as cursor:
+#             cursor.execute("""
+#                 SELECT
+#                     u.id,
+#                     u.username,
+#                     u.full_name,
+#                     LOWER(TRIM(r.role_name)) AS role
+#                 FROM tickets.users u
+#                 JOIN tickets.roles r ON r.id = u.role_id
+#                 WHERE u.username = %s
+#                   AND u.password = crypt(%s, u.password)
+#                   AND u.is_active = TRUE
+#             """, [username, password])
+
+#             row = cursor.fetchone()
+
+#         if not row:
+#             messages.error(request, "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง")
+#             return render(request, "login.html")
+
+#         request.session["user"] = {
+#             "id": row[0],
+#             "username": row[1],
+#             "full_name": row[2],
+#             "role": row[3],
+#         }
+
+#         if row[3] in ["admin", "manager"]:
+#             return redirect("/dashboard/")
+#         return redirect("/tickets/")
+
+#     return render(request, "login.html")
 
 
 
