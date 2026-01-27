@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.db import connection, transaction
+from django.db import connection ,transaction
 from django.utils import timezone
 from django.contrib import messages
 from django.utils.dateparse import parse_date
@@ -1708,8 +1708,6 @@ def team_removeuser(request, team_id, member_id):
     messages.success(request, "ลบสมาชิกออกจากทีมเรียบร้อยแล้ว")
     return redirect("team_adduser", team_id=team_id)
 
-PENDING_STATUS_ID = 7   # <-- id ของ Pending (approve_level)
-WAITING_STATUS_ID = 6   # <-- id ของ Waiting (approve_level)
 def add_approve_line(request):
 
     # ===== GET DATA =====
@@ -1741,21 +1739,23 @@ def add_approve_line(request):
     if request.method == "POST":
         category_id = request.POST.get("category_id")
         team_id = request.POST.get("team_id")
-        approvers = request.POST.getlist("approver[]")
+        raw_approvers = request.POST.getlist("approver[]")
 
         # ---- validation ----
         if not category_id or not team_id:
             messages.error(request, "กรุณาเลือก Category และ Team")
             return redirect("add_approve_line")
 
-        # ลบค่าว่าง / None
-        approvers = [a for a in approvers if a]
+        # แปลง approver ให้เป็น int ล้วน
+        approvers = []
+        for a in raw_approvers:
+            if a and a.isdigit():
+                approvers.append(int(a))
 
         if not approvers:
-            messages.error(request, "กรุณาเพิ่มผู้อนุมัติอย่างน้อย 1 คน")
+            messages.error(request, "กรุณาเลือกผู้อนุมัติจากรายการ")
             return redirect("add_approve_line")
 
-        # กัน user ซ้ำ
         if len(approvers) != len(set(approvers)):
             messages.error(request, "ไม่สามารถเลือกผู้อนุมัติซ้ำได้")
             return redirect("add_approve_line")
@@ -1763,37 +1763,35 @@ def add_approve_line(request):
         with transaction.atomic():
             with connection.cursor() as cursor:
 
-                # ---- check duplicate flow ----
+                # ===== สร้าง flow_no ใหม่ =====
                 cursor.execute("""
-                    SELECT 1
+                    SELECT COALESCE(MAX(flow_no), 0) + 1
                     FROM tickets.approve_line
                     WHERE category_id = %s
                       AND team_id = %s
-                    LIMIT 1
                 """, [category_id, team_id])
 
-                if cursor.fetchone():
-                    messages.error(request, "มีสายอนุมัติของ Category + Team นี้แล้ว")
-                    return redirect("add_approve_line")
+                flow_no = cursor.fetchone()[0]
 
-                # ---- insert approve_line ----
+                # ===== insert approve_line =====
                 for idx, user_id in enumerate(approvers):
                     level = idx + 1
-                    status_id = PENDING_STATUS_ID if level == 1 else WAITING_STATUS_ID
-
                     cursor.execute("""
                         INSERT INTO tickets.approve_line
-                        (category_id, team_id, level, user_id, status_id)
+                        (category_id, team_id, flow_no, level, user_id)
                         VALUES (%s, %s, %s, %s, %s)
                     """, [
                         category_id,
                         team_id,
+                        flow_no,
                         level,
-                        user_id,
-                        status_id
+                        user_id
                     ])
 
-        messages.success(request, "ตั้งค่าสายอนุมัติเรียบร้อยแล้ว")
+        messages.success(
+            request,
+            f"ตั้งค่าสายอนุมัติเรียบร้อยแล้ว (Flow #{flow_no})"
+        )
         return redirect("add_approve_line")
 
     return render(request, "add_approve_line.html", {
@@ -1801,7 +1799,7 @@ def add_approve_line(request):
         "teams": teams,
         "users": users
     })
-
+    
 def get_team_approvers(request, team_id):
     print("API HIT team_id =", team_id) # <--- ดูใน terminal
 
