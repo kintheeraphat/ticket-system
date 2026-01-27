@@ -16,18 +16,25 @@ DB_PORT=5432
 DB_SCHEMA=tickets
 
 
-CREATE TABLE tickets.approve_level (
-    id serial4 PRIMARY KEY,
-    ticket_id int4 NOT NULL,
-    level int4 NOT NULL,
-    user_id int4 NOT NULL,
-    status_id int4 NOT NULL,  -- pending / waiting / approved / rejected
-    approved_at timestamp NULL,
-    remark text NULL,
-    CONSTRAINT uq_ticket_level UNIQUE (ticket_id, level)
+-- tickets.approve_line definition
+
+-- Drop table
+
+-- DROP TABLE tickets.approve_line;
+
+CREATE TABLE tickets.approve_line (
+	id serial4 NOT NULL,
+	ticket_type_id int4 NULL,
+	"level" int4 NULL,
+	user_id int4 NULL,
+	team_id int4 NULL,
+	CONSTRAINT approve_line_pkey PRIMARY KEY (id),
+	CONSTRAINT uq_flow UNIQUE (ticket_type_id, level),
+	CONSTRAINT fk_al_ticket_type FOREIGN KEY (ticket_type_id) REFERENCES tickets.ticket_type(id),
+	CONSTRAINT fk_al_user FOREIGN KEY (user_id) REFERENCES tickets.users(id),
+	CONSTRAINT fk_approve_line_ticket_type FOREIGN KEY (ticket_type_id) REFERENCES tickets.ticket_type(id),
+	CONSTRAINT fk_approve_line_user FOREIGN KEY (user_id) REFERENCES tickets.users(id) ON DELETE CASCADE
 );
-
-
 
 ALTER TABLE tickets.status
 ADD COLUMN status_group varchar(30) NOT NULL DEFAULT 'general';
