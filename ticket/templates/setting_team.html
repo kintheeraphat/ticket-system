@@ -46,56 +46,91 @@
       <div class="card shadow-sm h-100">
         <div class="card-body">
 
-          <!-- Search -->
-          <input id="search" class="form-control mb-3" placeholder="ค้นหาทีม">
+          <!-- Search + Filter -->
+          <div class="row g-2 mb-3">
+            <div class="col-md-7">
+              <input id="searchName"
+                     class="form-control"
+                     placeholder="ค้นหาชื่อทีม">
+            </div>
+            <div class="col-md-5">
+              <select id="filterDept" class="form-select">
+                <option value="">ทุกแผนก</option>
+                {% for d in departments %}
+                  <option value="{{ d.id }}">{{ d.dept_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
 
           <div class="list-group team-scroll">
 
-            {% for t in teams %}
-            <div class="list-group-item team-item"
-                 data-name="{{ t.team_name|lower }}">
+            {% if teams %}
+              {% for t in teams %}
+              <div class="list-group-item team-item"
+                   data-name="{{ t.team_name|lower }}"
+                   data-dept-id="{{ t.department_id }}">
 
-              <!-- คลิกชื่อทีม → ไป add user -->
-              <a href="{% url 'team_adduser' t.id %}"
-                 class="text-decoration-none text-dark d-block">
+                <!-- คลิกชื่อทีม -->
+                <a href="{% url 'team_adduser' t.id %}"
+                   class="text-decoration-none text-dark d-block">
 
-                <div class="d-flex justify-content-between">
-                  <div>
-                    <div class="fw-semibold">{{ t.team_name }}</div>
-                    <small class="text-muted">
-                      {{ t.dept_name }} · 👥 {{ t.member_count }} คน
-                    </small>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <div class="fw-semibold">{{ t.team_name }}</div>
+                      <small class="text-muted">{{ t.dept_name }}</small>
+                    </div>
+                    <span class="badge bg-primary rounded-pill">
+                      👥 {{ t.member_count }}
+                    </span>
                   </div>
+                </a>
+
+                <!-- Action -->
+                <div class="mt-2 text-end">
+
+                  <button class="btn btn-sm btn-outline-warning"
+                          data-bs-toggle="modal"
+                          data-bs-target="#editModal"
+                          data-id="{{ t.id }}"
+                          data-name="{{ t.team_name }}"
+                          data-dept="{{ t.department_id }}"
+                          onclick="event.stopPropagation()">
+                    แก้ไข
+                  </button>
+
+                  <form method="post"
+                        class="d-inline"
+                        onclick="event.stopPropagation()"
+                        onsubmit="return confirm('ยืนยันลบทีม?')">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="team_id" value="{{ t.id }}">
+
+                    {% if t.member_count > 0 %}
+                      <button class="btn btn-sm btn-outline-danger"
+                              disabled
+                              title="ต้องลบสมาชิกก่อน">
+                        ลบไม่ได้
+                      </button>
+                    {% else %}
+                      <button class="btn btn-sm btn-outline-danger">
+                        ลบ
+                      </button>
+                    {% endif %}
+                  </form>
+
                 </div>
-              </a>
-
-              <!-- Action -->
-              <div class="mt-2 text-end">
-
-                <button class="btn btn-sm btn-outline-warning"
-                        data-bs-toggle="modal"
-                        data-bs-target="#editModal"
-                        data-id="{{ t.id }}"
-                        data-name="{{ t.team_name }}"
-                        data-dept="{{ t.department_id }}"
-                        onclick="event.stopPropagation()">
-                  แก้ไข
-                </button>
-
-                <form method="post"
-                      class="d-inline"
-                      onsubmit="return confirm('ยืนยันลบทีม?')"
-                      onclick="event.stopPropagation()">
-                  {% csrf_token %}
-                  <input type="hidden" name="action" value="delete">
-                  <input type="hidden" name="team_id" value="{{ t.id }}">
-                  <button class="btn btn-sm btn-outline-danger">ลบ</button>
-                </form>
 
               </div>
-
-            </div>
-            {% endfor %}
+              {% endfor %}
+            {% else %}
+              <!-- Empty State -->
+              <div class="text-center text-muted py-5">
+                <h6>ยังไม่มีทีมอนุมัติ</h6>
+                <small>เริ่มต้นโดยสร้างทีมใหม่ทางซ้าย</small>
+              </div>
+            {% endif %}
 
           </div>
 
@@ -122,9 +157,15 @@
         </div>
 
         <div class="modal-body">
-          <input id="edit_name" name="team_name" class="form-control mb-2">
+          <label class="form-label">ชื่อทีม</label>
+          <input id="edit_name"
+                 name="team_name"
+                 class="form-control mb-3">
 
-          <select id="edit_dept" name="department_id" class="form-select">
+          <label class="form-label">แผนก</label>
+          <select id="edit_dept"
+                  name="department_id"
+                  class="form-select">
             {% for d in departments %}
             <option value="{{ d.id }}">{{ d.dept_name }}</option>
             {% endfor %}
@@ -132,8 +173,12 @@
         </div>
 
         <div class="modal-footer">
-          <button class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-          <button class="btn btn-primary">บันทึก</button>
+          <button class="btn btn-secondary" data-bs-dismiss="modal">
+            ยกเลิก
+          </button>
+          <button class="btn btn-primary">
+            บันทึก
+          </button>
         </div>
 
       </form>
@@ -149,6 +194,7 @@
 .team-item {
   border-radius: 10px;
   margin-bottom: 8px;
+  transition: 0.15s;
 }
 .team-item:hover {
   background: #f8fafc;
@@ -156,20 +202,32 @@
 </style>
 
 <script>
-document.getElementById("editModal").addEventListener("show.bs.modal", e => {
-  const b = e.relatedTarget;
-  edit_id.value = b.dataset.id;
-  edit_name.value = b.dataset.name;
-  edit_dept.value = b.dataset.dept;
-});
-
-const search = document.getElementById("search");
-document.querySelectorAll(".team-item").forEach(item => {
-  search.addEventListener("keyup", () => {
-    item.style.display =
-      item.dataset.name.includes(search.value.toLowerCase())
-      ? "" : "none";
+/* ===== Edit Modal ===== */
+document.getElementById("editModal")
+  .addEventListener("show.bs.modal", e => {
+    const b = e.relatedTarget;
+    edit_id.value = b.dataset.id;
+    edit_name.value = b.dataset.name;
+    edit_dept.value = b.dataset.dept;
   });
-});
+
+/* ===== Filter Team ===== */
+const searchName = document.getElementById("searchName");
+const filterDept = document.getElementById("filterDept");
+const items = document.querySelectorAll(".team-item");
+
+function filterTeams() {
+  const nameQ = searchName.value.toLowerCase();
+  const deptQ = filterDept.value;
+
+  items.forEach(item => {
+    const matchName = item.dataset.name.includes(nameQ);
+    const matchDept = !deptQ || item.dataset.deptId === deptQ;
+    item.style.display = (matchName && matchDept) ? "" : "none";
+  });
+}
+
+searchName.addEventListener("keyup", filterTeams);
+filterDept.addEventListener("change", filterTeams);
 </script>
 {% endblock %}
