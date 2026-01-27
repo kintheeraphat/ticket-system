@@ -16,23 +16,37 @@ DB_PORT=5432
 DB_SCHEMA=tickets
 
 
--- 1) ลบ Foreign Key ก่อน
-ALTER TABLE tickets.approve_line
-DROP CONSTRAINT fk_approve_line_ticket_type;
-
--- 2) ลบ column ticket_type_id
-ALTER TABLE tickets.approve_line
-DROP COLUMN ticket_type_id;
-
--- 1) เพิ่ม column category_id
-ALTER TABLE tickets.approve_line
-ADD COLUMN category_id int4 NULL;
-
--- 2) เพิ่ม Foreign Key constraint
-ALTER TABLE tickets.approve_line
-ADD CONSTRAINT fk_approve_line_category
-FOREIGN KEY (category_id)
-REFERENCES tickets.category(id);
+CREATE TABLE tickets.approve_level (
+    id serial4 PRIMARY KEY,
+    ticket_id int4 NOT NULL,
+    level int4 NOT NULL,
+    user_id int4 NOT NULL,
+    status_id int4 NOT NULL,  -- pending / waiting / approved / rejected
+    approved_at timestamp NULL,
+    remark text NULL,
+    CONSTRAINT uq_ticket_level UNIQUE (ticket_id, level)
+);
 
 
 
+ALTER TABLE tickets.status
+ADD COLUMN status_group varchar(30) NOT NULL DEFAULT 'general';
+
+
+ALTER TABLE tickets.approve_level
+ADD CONSTRAINT fk_ap_ticket
+FOREIGN KEY (ticket_id)
+REFERENCES tickets.tickets(id)
+ON DELETE CASCADE;
+
+ALTER TABLE tickets.approve_level
+ADD CONSTRAINT fk_ap_user
+FOREIGN KEY (user_id)
+REFERENCES tickets.users(id)
+ON DELETE RESTRICT;
+
+ALTER TABLE tickets.approve_level
+ADD CONSTRAINT fk_ap_status
+FOREIGN KEY (status_id)
+REFERENCES tickets.status(id)
+ON DELETE RESTRICT;

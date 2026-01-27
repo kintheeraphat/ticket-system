@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.db import connection
+from django.db import connection, transaction
 from django.utils import timezone
 from django.contrib import messages
 from django.utils.dateparse import parse_date
@@ -1708,12 +1708,13 @@ def team_removeuser(request, team_id, member_id):
     messages.success(request, "ลบสมาชิกออกจากทีมเรียบร้อยแล้ว")
     return redirect("team_adduser", team_id=team_id)
 
+PENDING_STATUS_ID = 7   # <-- id ของ Pending (approve_level)
+WAITING_STATUS_ID = 6   # <-- id ของ Waiting (approve_level)
 def add_approve_line(request):
 
     # ===== GET DATA =====
     with connection.cursor() as cursor:
 
-        # categories
         cursor.execute("""
             SELECT id, name
             FROM tickets.category
@@ -1721,23 +1722,15 @@ def add_approve_line(request):
         """)
         categories = dictfetchall(cursor)
 
-        # teams
         cursor.execute("""
-            SELECT 
-                t.id, 
-                t.name, 
-                d.dept_name,
-                t.approver_lv1,
-                t.approver_lv2
-            FROM tickets.team t
-            LEFT JOIN tickets.department d ON d.id = t.department_id
-            ORDER BY d.dept_name, t.name
+            SELECT id, name
+            FROM tickets.team
+            ORDER BY name
         """)
         teams = dictfetchall(cursor)
 
-        # users
         cursor.execute("""
-            SELECT id, full_name, username
+            SELECT id, full_name
             FROM tickets.users
             WHERE is_active = true
             ORDER BY full_name
@@ -1748,82 +1741,57 @@ def add_approve_line(request):
     if request.method == "POST":
         category_id = request.POST.get("category_id")
         team_id = request.POST.get("team_id")
-
-        lv3_user = request.POST.get("lv3_user")       # CEO
-        lv4_user = request.POST.get("lv4_user")       # IT
-        lv_account = request.POST.get("lv_account")   # Accounting
+        approvers = request.POST.getlist("approver[]")
 
         # ---- validation ----
         if not category_id or not team_id:
             messages.error(request, "กรุณาเลือก Category และ Team")
             return redirect("add_approve_line")
 
-        with connection.cursor() as cursor:
+        # ลบค่าว่าง / None
+        approvers = [a for a in approvers if a]
 
-            # ---- check duplicate ----
-            cursor.execute("""
-                SELECT 1
-                FROM tickets.approve_line
-                WHERE category_id = %s AND team_id = %s
-                LIMIT 1
-            """, [category_id, team_id])
+        if not approvers:
+            messages.error(request, "กรุณาเพิ่มผู้อนุมัติอย่างน้อย 1 คน")
+            return redirect("add_approve_line")
 
-            if cursor.fetchone():
-                messages.error(request, "มีสายอนุมัติของ Category + Team นี้แล้ว")
-                return redirect("add_approve_line")
+        # กัน user ซ้ำ
+        if len(approvers) != len(set(approvers)):
+            messages.error(request, "ไม่สามารถเลือกผู้อนุมัติซ้ำได้")
+            return redirect("add_approve_line")
 
-            # ---- get team approvers ----
-            cursor.execute("""
-                SELECT
-                u1.full_name,
-                u2.full_name
-                FROM tickets.team t
-                LEFT JOIN tickets.users u1 ON u1.id = t.approver_lv1
-                LEFT JOIN tickets.users u2 ON u2.id = t.approver_lv2
-                WHERE t.id = %s
-                """, [team_id])
+        with transaction.atomic():
+            with connection.cursor() as cursor:
 
-            team_data = cursor.fetchone()
-
-            if not team_data:
-                messages.error(request, "ไม่พบ Team นี้ในระบบ")
-                return redirect("add_approve_line")
-
-            approver_lv1 = team_data[0]
-            approver_lv2 = team_data[1]
-
-            level = 1
-
-            def insert_line(cat, team, lvl, user):
+                # ---- check duplicate flow ----
                 cursor.execute("""
-                    INSERT INTO tickets.approve_line
-                    (category_id, team_id, "level", user_id)
-                    VALUES (%s,%s,%s,%s)
-                """, [cat, team, lvl, user])
+                    SELECT 1
+                    FROM tickets.approve_line
+                    WHERE category_id = %s
+                      AND team_id = %s
+                    LIMIT 1
+                """, [category_id, team_id])
 
-            # ---- Level 1 ----
-            if approver_lv1:
-                insert_line(category_id, team_id, level, approver_lv1)
-                level += 1
+                if cursor.fetchone():
+                    messages.error(request, "มีสายอนุมัติของ Category + Team นี้แล้ว")
+                    return redirect("add_approve_line")
 
-            # ---- Level 2 ----
-            if approver_lv2:
-                insert_line(category_id, team_id, level, approver_lv2)
-                level += 1
+                # ---- insert approve_line ----
+                for idx, user_id in enumerate(approvers):
+                    level = idx + 1
+                    status_id = PENDING_STATUS_ID if level == 1 else WAITING_STATUS_ID
 
-            # ---- Accounting ----
-            if lv_account:
-                insert_line(category_id, team_id, level, lv_account)
-                level += 1
-
-            # ---- CEO ----
-            if lv3_user:
-                insert_line(category_id, team_id, level, lv3_user)
-                level += 1
-
-            # ---- IT ----
-            if lv4_user:
-                insert_line(category_id, team_id, level, lv4_user)
+                    cursor.execute("""
+                        INSERT INTO tickets.approve_line
+                        (category_id, team_id, level, user_id, status_id)
+                        VALUES (%s, %s, %s, %s, %s)
+                    """, [
+                        category_id,
+                        team_id,
+                        level,
+                        user_id,
+                        status_id
+                    ])
 
         messages.success(request, "ตั้งค่าสายอนุมัติเรียบร้อยแล้ว")
         return redirect("add_approve_line")
