@@ -1710,9 +1710,10 @@ def team_removeuser(request, team_id, member_id):
 
 def add_approve_line(request):
 
-    # ===== GET DATA =====
+    # ===== GET DATA (ใช้ทั้งหน้า) =====
     with connection.cursor() as cursor:
 
+        # สายอนุมัติทั้งหมด
         cursor.execute("""
             SELECT
                 al.flow_no,
@@ -1724,22 +1725,15 @@ def add_approve_line(request):
             JOIN tickets.users u ON u.id = al.user_id
             JOIN tickets.category c ON c.id = al.category_id
             JOIN tickets.team t ON t.id = al.team_id
-            ORDER BY c.name, t.name, al.flow_no, al.level
+            ORDER BY al.flow_no, al.level
         """)
         approve_lines = dictfetchall(cursor)
 
-        cursor.execute("""
-            SELECT id, name
-            FROM tickets.category
-            ORDER BY name
-        """)
+        # dropdown
+        cursor.execute("SELECT id, name FROM tickets.category ORDER BY name")
         categories = dictfetchall(cursor)
 
-        cursor.execute("""
-            SELECT id, name
-            FROM tickets.team
-            ORDER BY name
-        """)
+        cursor.execute("SELECT id, name FROM tickets.team ORDER BY name")
         teams = dictfetchall(cursor)
 
         cursor.execute("""
@@ -1750,87 +1744,93 @@ def add_approve_line(request):
         """)
         users = dictfetchall(cursor)
 
-    # ===== POST =====
+    # ===== POST: สร้างสายใหม่ =====
     if request.method == "POST":
         category_id = request.POST.get("category_id")
         team_id = request.POST.get("team_id")
-        raw_approvers = request.POST.getlist("approver[]")
+        approvers = [
+            int(a) for a in request.POST.getlist("approver[]") if a.isdigit()
+        ]
 
-        # ---- validation ----
-        if not category_id or not team_id:
-            messages.error(request, "กรุณาเลือก Category และ Team")
-            return redirect("add_approve_line")
-
-        approvers = [int(a) for a in raw_approvers if a and a.isdigit()]
-
-        if not approvers:
-            messages.error(request, "กรุณาเลือกผู้อนุมัติจากรายการ")
-            return redirect("add_approve_line")
-
-        if len(approvers) != len(set(approvers)):
-            messages.error(request, "ไม่สามารถเลือกผู้อนุมัติซ้ำได้")
+        if not category_id or not team_id or not approvers:
+            messages.error(request, "ข้อมูลไม่ครบ")
             return redirect("add_approve_line")
 
         with transaction.atomic():
             with connection.cursor() as cursor:
 
-                # ===== สร้าง flow_no ใหม่ ต่อ category + team =====
                 cursor.execute("""
                     SELECT COALESCE(MAX(flow_no), 0) + 1
                     FROM tickets.approve_line
-                    WHERE category_id = %s
-                      AND team_id = %s
-                """, [category_id, team_id])
-
+                """)
                 flow_no = cursor.fetchone()[0]
 
-                # ===== insert approve_line =====
                 for idx, user_id in enumerate(approvers):
                     cursor.execute("""
                         INSERT INTO tickets.approve_line
-                        (category_id, team_id, flow_no, level, user_id)
+                        (flow_no, category_id, team_id, level, user_id)
                         VALUES (%s, %s, %s, %s, %s)
                     """, [
+                        flow_no,
                         category_id,
                         team_id,
-                        flow_no,
                         idx + 1,
                         user_id
                     ])
 
-        messages.success(
-            request,
-            f"ตั้งค่าสายอนุมัติเรียบร้อยแล้ว (Flow {flow_no})"
-        )
-        return redirect("add_approve_line")
+        return redirect("approval_flow_detail", flow_no=flow_no)
 
     return render(request, "add_approve_line.html", {
+        "approve_lines": approve_lines,
         "categories": categories,
         "teams": teams,
-        "users": users,
-        "approve_lines": approve_lines
+        "users": users
     })
-def get_team_approvers(request, team_id):
-    print("API HIT team_id =", team_id) # <--- ดูใน terminal
 
+def approval_flow_list(request):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT DISTINCT
+                al.flow_no,
+                c.name AS category_name,
+                t.name AS team_name,
+                COUNT(*) AS step_count
+            FROM tickets.approve_line al
+            JOIN tickets.category c ON c.id = al.category_id
+            JOIN tickets.team t ON t.id = al.team_id
+            GROUP BY al.flow_no, c.name, t.name
+            ORDER BY al.flow_no DESC
+        """)
+        flows = dictfetchall(cursor)
+
+    return render(request, "approval_flow_list.html", {
+        "flows": flows
+    })
+
+def approval_flow_detail(request, flow_no):
 
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT
-                u1.full_name,
-                u2.full_name
-            FROM tickets.team t
-            LEFT JOIN tickets.users u1 ON u1.id = t.approver_lv1
-            LEFT JOIN tickets.users u2 ON u2.id = t.approver_lv2
-            WHERE t.id = %s
-        """, [team_id])
+                al.flow_no,
+                al.level,
+                u.full_name,
+                c.name AS category_name,
+                t.name AS team_name
+            FROM tickets.approve_line al
+            JOIN tickets.users u ON u.id = al.user_id
+            JOIN tickets.category c ON c.id = al.category_id
+            JOIN tickets.team t ON t.id = al.team_id
+            WHERE al.flow_no = %s
+            ORDER BY al.level
+        """, [flow_no])
 
+        flow = dictfetchall(cursor)
 
-        row = cursor.fetchone()
-    print("API ROW =", row)
+    if not flow:
+        raise Http404("ไม่พบสายอนุมัติ")
 
-
-    return JsonResponse({
-        "lv1": row[0] if row and row[0] else "-",
-        "lv2": row[1] if row and row[1] else "-"
-})
+    return render(request, "approval_flow_detail.html", {
+        "flow": flow,
+        "flow_no": flow_no
+    })

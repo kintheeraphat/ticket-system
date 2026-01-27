@@ -1,0 +1,55 @@
+{% if approve_lines %}
+{% regroup approve_lines by flow_no as flow_list %}
+
+{% for flow in flow_list %}
+<div class="flow-card mb-4">
+
+  <div class="flow-card-header">
+    <span class="flow-badge">
+      <i class="bi bi-layers me-1"></i>
+      Flow {{ flow.grouper }}
+    </span>
+  </div>
+
+  <div class="flow-track">
+    {% for step in flow.list %}
+    <div class="flow-node">
+
+      <div class="node-circle">{{ step.level }}</div>
+
+      <div class="node-card">
+        <div class="node-user">
+          <i class="bi bi-person-check me-1 text-success"></i>
+          {{ step.full_name }}
+        </div>
+
+        <div class="node-meta">
+          <div>
+            <i class="bi bi-people me-1"></i>
+            {{ step.team_name }}
+          </div>
+          <div>
+            <i class="bi bi-file-earmark-text me-1"></i>
+            {{ step.category_name }}
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    {% if not forloop.last %}
+    <div class="flow-connector">
+      <span class="line"></span>
+      <i class="bi bi-arrow-right arrow"></i>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+
+{% else %}
+<div class="text-muted fst-italic">
+  ยังไม่มีข้อมูลสายอนุมัติ
+</div>
+{% endif %}

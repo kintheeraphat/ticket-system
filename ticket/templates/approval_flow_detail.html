@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3 class="fw-bold mb-4">Flow {{ flow_no }}</h3>
+
+<div class="d-flex gap-4 flex-wrap">
+  {% for step in flow %}
+  <div class="card p-3">
+    <div class="fw-bold">Level {{ step.level }}</div>
+    <div>{{ step.full_name }}</div>
+    <small class="text-muted">
+      {{ step.team_name }} | {{ step.category_name }}
+    </small>
+  </div>
+  {% endfor %}
+</div>
+
+<a href="{% url 'add_approve_line' %}" class="btn btn-outline-secondary mt-4">
+  ← กลับ
+</a>
+
+{% endblock %}

@@ -4,471 +4,317 @@
 {% block title %}ตั้งค่าสายอนุมัติ{% endblock %}
 
 {% block content %}
-<main class="container-fluid approval-page">
+<div class="container-fluid approval-page">
 
-    <!-- ================================================= -->
-    <!-- =============== APPROVAL FLOW VIEW ============== -->
-    <!-- ================================================= -->
-    <div class="card shadow-sm mb-4 approval-graphic">
+  <!-- ================================================= -->
+  <!-- ============ APPROVAL FLOW LIST ================= -->
+  <!-- ================================================= -->
+  {% regroup approve_lines by flow_no as flows %}
 
-        <!-- HEADER -->
-        <div class="card-header d-flex align-items-center gap-2">
-            <i class="bi bi-diagram-3 fs-5 text-primary"></i>
-            <h5 class="mb-0 fw-bold">Approval Flow</h5>
-        </div>
-
-        <div class="card-body">
-
-            <!-- ===== CATEGORY FILTER ===== -->
-            <div class="row mb-4">
-                <div class="col-md-4">
-                    <label class="form-label mb-1">
-                        <i class="bi bi-funnel me-1"></i> กรองตามเอกสาร (Category)
-                    </label>
-                    <select class="form-select" id="filterCategory">
-                        <option value="">ทั้งหมด</option>
-                        {% for c in categories %}
-                        <option value="{{ c.name }}">{{ c.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-
-            <!-- ===== FLOW GRAPHIC ===== -->
-            {% if approve_lines %}
-            {% regroup approve_lines by flow_no as flow_list %}
-
-            {% for flow in flow_list %}
-            <div class="flow-card mb-4"
-                 data-category="{{ flow.list.0.category_name }}">
-
-                <div class="flow-card-header">
-                    <span class="flow-badge">
-                        <i class="bi bi-layers me-1"></i>
-                        Flow {{ flow.grouper }}
-                    </span>
-                </div>
-
-                <div class="flow-track">
-                    {% for step in flow.list %}
-                    <div class="flow-node">
-
-                        <div class="node-circle">
-                            {{ step.level }}
-                        </div>
-
-                        <div class="node-card">
-                            <div class="node-user">
-                                <i class="bi bi-person-check me-1 text-success"></i>
-                                {{ step.full_name }}
-                            </div>
-
-                            <div class="node-meta">
-                                <div>
-                                    <i class="bi bi-people me-1"></i>
-                                    {{ step.team_name }}
-                                </div>
-                                <div>
-                                    <i class="bi bi-file-earmark-text me-1"></i>
-                                    {{ step.category_name }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {% if not forloop.last %}
-                    <div class="flow-connector">
-                        <span class="line"></span>
-                        <i class="bi bi-arrow-right arrow"></i>
-                    </div>
-                    {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-            {% endfor %}
-
-            {% else %}
-            <div class="text-muted fst-italic">
-                ยังไม่มีการตั้งค่าสายอนุมัติ
-            </div>
-            {% endif %}
-
-        </div>
+  <div class="card shadow-sm mb-4">
+    <div class="card-header fw-bold d-flex align-items-center gap-2">
+      <i class="bi bi-diagram-3 text-primary"></i>
+      สายอนุมัติทั้งหมด
     </div>
 
-    <!-- ================================================= -->
-    <!-- =============== CREATE APPROVAL FLOW ============= -->
-    <!-- ================================================= -->
-    <div class="card shadow-sm">
-        <div class="card-header">
-            <h5 class="mb-0 fw-bold">
-                <i class="bi bi-plus-circle me-1 text-primary"></i>
-                ตั้งค่าสายอนุมัติ
-            </h5>
-            <small class="text-muted">Approval Flow Configuration</small>
-        </div>
+    <div class="card-body">
 
-        <div class="card-body">
+      {% if flows %}
+        {% for f in flows %}
+        <a href="{% url 'approval_flow_detail' f.grouper %}"
+           class="text-decoration-none text-dark d-block mb-3">
 
-            <!-- MESSAGE -->
-            {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} shadow-sm rounded-3">
-                {{ message }}
-            </div>
-            {% endfor %}
-            {% endif %}
+          <div class="border rounded-3 p-3 hover-row">
 
-            <!-- FILTER -->
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <label class="form-label">เอกสาร (Category)</label>
-                    <select class="form-select" name="category_id" form="approveForm" required>
-                        <option value="">-- เลือกเอกสาร --</option>
-                        {% for c in categories %}
-                        <option value="{{ c.id }}">{{ c.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Team</label>
-                    <select class="form-select" name="team_id" form="approveForm" required>
-                        <option value="">-- เลือกทีม --</option>
-                        {% for t in teams %}
-                        <option value="{{ t.id }}">{{ t.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <strong>Flow {{ f.grouper }}</strong>
+              <i class="bi bi-chevron-right text-muted"></i>
             </div>
 
-            <!-- FORM -->
-            <form method="post" id="approveForm">
-                {% csrf_token %}
+            <div class="d-flex flex-wrap gap-2">
+              {% for step in f.list %}
+                <span class="badge bg-light">
+                  {{ step.level }}. {{ step.full_name }}
+                </span>
+              {% endfor %}
+            </div>
 
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle" id="approveTable">
-                        <thead class="table-light">
-                            <tr class="text-center">
-                                <th width="8%">Level</th>
-                                <th>ผู้อนุมัติ</th>
-                                <th width="10%">จัดการ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="text-center">
-                                    <span class="badge bg-light">1</span>
-                                </td>
-                                <td>
-                                    <div class="position-relative">
-                                        <input type="text"
-                                               class="form-control approver-input"
-                                               placeholder="พิมพ์ชื่อผู้อนุมัติ..."
-                                               autocomplete="off"
-                                               oninput="filterUsers(this)"
-                                               onkeydown="handleKey(this, event)">
-                                        <input type="hidden" name="approver[]" class="approver-id">
-                                        <div class="autocomplete-box"></div>
-                                    </div>
-                                </td>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="d-flex justify-content-between mt-3">
-                    <button type="button" class="btn btn-outline-primary" onclick="addRow()">
-                        + เพิ่มระดับอนุมัติ
-                    </button>
-                    <button type="submit" class="btn btn-success px-4">
-                        บันทึกสายอนุมัติ
-                    </button>
-                </div>
-            </form>
-
+          </div>
+        </a>
+        {% endfor %}
+      {% else %}
+        <div class="text-muted fst-italic">
+          ยังไม่มีการตั้งค่าสายอนุมัติ
         </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <!-- ================================================= -->
+  <!-- ============ CREATE APPROVAL FLOW =============== -->
+  <!-- ================================================= -->
+  <div class="card shadow-sm">
+    <div class="card-header">
+      <h5 class="mb-0 fw-bold">
+        <i class="bi bi-plus-circle me-1 text-primary"></i>
+        ตั้งค่าสายอนุมัติ
+      </h5>
+      <small class="text-muted">Approval Flow Configuration</small>
     </div>
 
-</main>
+    <div class="card-body">
+
+      <!-- MESSAGE -->
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+
+      <!-- CATEGORY / TEAM -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <label class="form-label">เอกสาร (Category)</label>
+          <select class="form-select" name="category_id" form="approveForm" required>
+            <option value="">-- เลือกเอกสาร --</option>
+            {% for c in categories %}
+              <option value="{{ c.id }}">{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Team</label>
+          <select class="form-select" name="team_id" form="approveForm" required>
+            <option value="">-- เลือกทีม --</option>
+            {% for t in teams %}
+              <option value="{{ t.id }}">{{ t.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <!-- FORM -->
+      <form method="post" id="approveForm">
+        {% csrf_token %}
+
+        <div class="table-responsive overflow-visible">
+          <table class="table table-hover align-middle" id="approveTable">
+            <thead class="table-light">
+              <tr class="text-center">
+                <th width="8%">Level</th>
+                <th>ผู้อนุมัติ</th>
+                <th width="10%">จัดการ</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td class="text-center">
+                  <span class="badge bg-light">1</span>
+                </td>
+                <td>
+                  <div class="position-relative">
+                    <input type="text"
+                           class="form-control approver-input"
+                           placeholder="พิมพ์ชื่อผู้อนุมัติ..."
+                           autocomplete="off"
+                           oninput="filterUsers(this)"
+                           onkeydown="handleKey(this, event)">
+                    <input type="hidden" name="approver[]" class="approver-id">
+                    <div class="autocomplete-box"></div>
+                  </div>
+                </td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="d-flex justify-content-between mt-3">
+          <button type="button"
+                  class="btn btn-outline-primary"
+                  onclick="addRow()">
+            + เพิ่มระดับอนุมัติ
+          </button>
+
+          <button type="submit"
+                  class="btn btn-success px-4">
+            บันทึกสายอนุมัติ
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</div>
 
 <!-- ================================================= -->
-<!-- ================== SCRIPT ======================= -->
+<!-- ================= SCRIPT ======================== -->
 <!-- ================================================= -->
 <script>
 const USERS = [
-    {% for u in users %}
-    { id: "{{ u.id }}", name: "{{ u.full_name }}" },
-    {% endfor %}
+{% for u in users %}
+  { id: "{{ u.id }}", name: "{{ u.full_name }}" },
+{% endfor %}
 ];
 
 let activeIndex = -1;
 
-/* ===== ADD ROW ===== */
 function addRow() {
-    const tbody = document.querySelector("#approveTable tbody");
-    const level = tbody.rows.length + 1;
+  const tbody = document.querySelector("#approveTable tbody");
+  const level = tbody.rows.length + 1;
 
-    const row = document.createElement("tr");
-    row.innerHTML = `
-        <td class="text-center">
-            <span class="badge bg-light">${level}</span>
-        </td>
-        <td>
-            <div class="position-relative">
-                <input type="text" class="form-control approver-input"
-                       placeholder="พิมพ์ชื่อผู้อนุมัติ..."
-                       autocomplete="off"
-                       oninput="filterUsers(this)"
-                       onkeydown="handleKey(this, event)">
-                <input type="hidden" name="approver[]" class="approver-id">
-                <div class="autocomplete-box"></div>
-            </div>
-        </td>
-        <td class="text-center">
-            <button type="button" class="trash-btn" onclick="removeRow(this)">
-                🗑
-            </button>
-        </td>
-    `;
-    tbody.appendChild(row);
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td class="text-center">
+      <span class="badge bg-light">${level}</span>
+    </td>
+    <td>
+      <div class="position-relative">
+        <input type="text"
+               class="form-control approver-input"
+               placeholder="พิมพ์ชื่อผู้อนุมัติ..."
+               autocomplete="off"
+               oninput="filterUsers(this)"
+               onkeydown="handleKey(this, event)">
+        <input type="hidden" name="approver[]" class="approver-id">
+        <div class="autocomplete-box"></div>
+      </div>
+    </td>
+    <td class="text-center">
+      <button type="button"
+              class="btn btn-sm btn-outline-danger"
+              onclick="removeRow(this)">
+        🗑
+      </button>
+    </td>
+  `;
+  tbody.appendChild(row);
 }
 
-/* ===== REMOVE ROW ===== */
 function removeRow(btn) {
-    const tbody = document.querySelector("#approveTable tbody");
-    if (tbody.rows.length <= 1) {
-        alert("ต้องมีอย่างน้อย 1 ระดับอนุมัติ");
-        return;
-    }
-    btn.closest("tr").remove();
-
-    [...tbody.rows].forEach((row, i) => {
-        row.cells[0].innerHTML = `<span class="badge bg-light">${i + 1}</span>`;
-    });
+  const tbody = document.querySelector("#approveTable tbody");
+  if (tbody.rows.length <= 1) {
+    alert("ต้องมีอย่างน้อย 1 ระดับอนุมัติ");
+    return;
+  }
+  btn.closest("tr").remove();
+  [...tbody.rows].forEach((row, i) => {
+    row.cells[0].innerHTML = `<span class="badge bg-light">${i + 1}</span>`;
+  });
 }
 
-/* ===== AUTOCOMPLETE ===== */
 function filterUsers(input) {
-    const keyword = input.value.toLowerCase();
-    const box = input.parentElement.querySelector(".autocomplete-box");
-    const hidden = input.parentElement.querySelector(".approver-id");
+  const keyword = input.value.toLowerCase();
+  const box = input.parentElement.querySelector(".autocomplete-box");
+  const hidden = input.parentElement.querySelector(".approver-id");
 
-    box.innerHTML = "";
-    hidden.value = "";
-    activeIndex = -1;
+  box.innerHTML = "";
+  hidden.value = "";
+  activeIndex = -1;
 
-    if (!keyword) {
-        box.style.display = "none";
-        return;
-    }
+  if (!keyword) {
+    box.style.display = "none";
+    return;
+  }
 
-    const matches = USERS.filter(u => u.name.toLowerCase().includes(keyword));
-    if (!matches.length) {
-        box.style.display = "none";
-        return;
-    }
+  const matches = USERS.filter(u =>
+    u.name.toLowerCase().includes(keyword)
+  );
 
-    matches.forEach((u, i) => {
-        const div = document.createElement("div");
-        div.className = "autocomplete-item";
-        div.textContent = u.name;
-        div.onclick = () => selectUser(input, hidden, box, u);
-        box.appendChild(div);
-    });
+  if (!matches.length) {
+    box.style.display = "none";
+    return;
+  }
 
-    box.style.display = "block";
+  matches.forEach(u => {
+    const div = document.createElement("div");
+    div.className = "autocomplete-item";
+    div.textContent = u.name;
+    div.onclick = () => {
+      input.value = u.name;
+      hidden.value = u.id;
+      box.style.display = "none";
+    };
+    box.appendChild(div);
+  });
+
+  box.style.display = "block";
 }
 
 function handleKey(input, e) {
-    const box = input.parentElement.querySelector(".autocomplete-box");
-    const items = box.querySelectorAll(".autocomplete-item");
-    if (!items.length) return;
+  const box = input.parentElement.querySelector(".autocomplete-box");
+  const items = box.querySelectorAll(".autocomplete-item");
+  if (!items.length) return;
 
-    if (e.key === "ArrowDown") {
-        e.preventDefault();
-        activeIndex = (activeIndex + 1) % items.length;
-    }
-    if (e.key === "ArrowUp") {
-        e.preventDefault();
-        activeIndex = (activeIndex - 1 + items.length) % items.length;
-    }
-    if (e.key === "Enter") {
-        e.preventDefault();
-        if (activeIndex >= 0) {
-            const user = USERS.find(u => u.name === items[activeIndex].textContent);
-            selectUser(input,
-                input.parentElement.querySelector(".approver-id"),
-                box,
-                user);
-        }
-    }
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    activeIndex = (activeIndex + 1) % items.length;
+  }
+  if (e.key === "ArrowUp") {
+    e.preventDefault();
+    activeIndex = (activeIndex - 1 + items.length) % items.length;
+  }
+  if (e.key === "Enter" && activeIndex >= 0) {
+    e.preventDefault();
+    items[activeIndex].click();
+  }
 
-    items.forEach((it, i) => it.classList.toggle("active", i === activeIndex));
+  items.forEach((el, i) =>
+    el.classList.toggle("active", i === activeIndex)
+  );
 }
 
-function selectUser(input, hidden, box, user) {
-    input.value = user.name;
-    hidden.value = user.id;
-    box.style.display = "none";
-}
-
-/* ===== SUBMIT VALIDATION ===== */
-document.getElementById("approveForm").addEventListener("submit", function (e) {
-    const rows = document.querySelectorAll(".approver-input");
-    for (let r of rows) {
-        const hidden = r.parentElement.querySelector(".approver-id");
-        if (!hidden.value) {
-            alert("กรุณาเลือกผู้อนุมัติจากรายการเท่านั้น");
-            e.preventDefault();
-            return;
-        }
+document.getElementById("approveForm").addEventListener("submit", e => {
+  document.querySelectorAll(".approver-input").forEach(input => {
+    const hidden = input.parentElement.querySelector(".approver-id");
+    if (!hidden.value) {
+      alert("กรุณาเลือกผู้อนุมัติจากรายการ");
+      e.preventDefault();
     }
-});
-
-/* ===== CATEGORY FILTER ===== */
-document.getElementById("filterCategory")?.addEventListener("change", function () {
-    const selected = this.value;
-    document.querySelectorAll(".flow-card").forEach(flow => {
-        const flowCategory = flow.getAttribute("data-category");
-        flow.style.display = (!selected || flowCategory === selected) ? "block" : "none";
-    });
+  });
 });
 </script>
 
 <!-- ================================================= -->
-<!-- =================== STYLE ======================= -->
+<!-- ================= STYLE ========================= -->
 <!-- ================================================= -->
 <style>
-.approval-page .card {
-    border-radius: 14px;
-}
-
-.approval-page .card-header {
-    background: #f8fafc;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-#filterCategory {
-    max-width: 280px;
-}
-
-/* ===== Flow Graphic ===== */
-.flow-card {
-    background: #f8fafc;
-    border-radius: 16px;
-    padding: 16px 20px;
-    border: 1px solid #e5e7eb;
-}
-
-.flow-badge {
-    background: #2563eb;
-    color: #fff;
-    font-size: 0.8rem;
-    font-weight: 600;
-    padding: 6px 14px;
-    border-radius: 20px;
-}
-
-.flow-track {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-top: 12px;
-}
-
-.flow-node {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.node-circle {
-    width: 38px;
-    height: 38px;
-    background: #2563eb;
-    color: #fff;
-    border-radius: 50%;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 10px rgba(37,99,235,.25);
-}
-
-.node-card {
-    background: #ffffff;
-    border-radius: 14px;
-    padding: 10px 14px;
-    min-width: 190px;
-    box-shadow: 0 6px 14px rgba(0,0,0,.06);
-    border: 1px solid #e5e7eb;
-}
-
-.node-user {
-    font-weight: 700;
-    font-size: 0.95rem;
-}
-
-.node-meta {
-    font-size: 0.75rem;
-    color: #64748b;
-    margin-top: 4px;
-}
-
-/* ===== Connector ===== */
-.flow-connector {
-    display: flex;
-    align-items: center;
-    margin: 0 14px;
-}
-
-.flow-connector .line {
-    width: 28px;
-    height: 2px;
-    background: #c7d2fe;
-}
-
-.flow-connector .arrow {
-    color: #2563eb;
-    font-size: 1.2rem;
-    margin-left: 6px;
-}
-
-/* ===== Autocomplete ===== */
 .autocomplete-box {
-    position: absolute;
-    z-index: 1000;
-    width: 100%;
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    max-height: 200px;
-    overflow-y: auto;
+  position: absolute;
+  z-index: 1000;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .autocomplete-item {
-    padding: 8px 12px;
-    cursor: pointer;
+  padding: 8px 12px;
+  cursor: pointer;
 }
 
 .autocomplete-item:hover,
 .autocomplete-item.active {
-    background: #eef2ff;
-    font-weight: 600;
+  background: #eef2ff;
+  font-weight: 600;
+}
+/* แก้ autocomplete โดน scrollbar บัง */
+#approveTable {
+  overflow: visible !important;
 }
 
-/* ===== Responsive ===== */
-@media (max-width: 768px) {
-    .flow-track {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .flow-connector {
-        display: none;
-    }
+.table-responsive {
+  overflow: visible !important;
 }
+.overflow-visible {
+  overflow: visible !important;
+}
+
 </style>
 {% endblock %}
