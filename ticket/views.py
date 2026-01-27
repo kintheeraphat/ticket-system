@@ -1712,6 +1712,21 @@ def add_approve_line(request):
 
     # ===== GET DATA =====
     with connection.cursor() as cursor:
+        
+        cursor.execute("""
+            SELECT
+                al.flow_no,
+                al.level,
+                u.full_name,
+                c.name AS category_name,
+                t.name AS team_name
+            FROM tickets.approve_line al
+            JOIN tickets.users u ON u.id = al.user_id
+            JOIN tickets.category c ON c.id = al.category_id
+            JOIN tickets.team t ON t.id = al.team_id
+            ORDER BY c.name, t.name, al.flow_no, al.level
+        """)
+        approve_lines = dictfetchall(cursor)
 
         cursor.execute("""
             SELECT id, name
@@ -1797,7 +1812,8 @@ def add_approve_line(request):
     return render(request, "add_approve_line.html", {
         "categories": categories,
         "teams": teams,
-        "users": users
+        "users": users,
+        "approve_lines": approve_lines
     })
     
 def get_team_approvers(request, team_id):
