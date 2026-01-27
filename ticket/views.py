@@ -1712,7 +1712,7 @@ def add_approve_line(request):
 
     # ===== GET DATA =====
     with connection.cursor() as cursor:
-        
+
         cursor.execute("""
             SELECT
                 al.flow_no,
@@ -1761,11 +1761,7 @@ def add_approve_line(request):
             messages.error(request, "กรุณาเลือก Category และ Team")
             return redirect("add_approve_line")
 
-        # แปลง approver ให้เป็น int ล้วน
-        approvers = []
-        for a in raw_approvers:
-            if a and a.isdigit():
-                approvers.append(int(a))
+        approvers = [int(a) for a in raw_approvers if a and a.isdigit()]
 
         if not approvers:
             messages.error(request, "กรุณาเลือกผู้อนุมัติจากรายการ")
@@ -1778,7 +1774,7 @@ def add_approve_line(request):
         with transaction.atomic():
             with connection.cursor() as cursor:
 
-                # ===== สร้าง flow_no ใหม่ =====
+                # ===== สร้าง flow_no ใหม่ ต่อ category + team =====
                 cursor.execute("""
                     SELECT COALESCE(MAX(flow_no), 0) + 1
                     FROM tickets.approve_line
@@ -1790,7 +1786,6 @@ def add_approve_line(request):
 
                 # ===== insert approve_line =====
                 for idx, user_id in enumerate(approvers):
-                    level = idx + 1
                     cursor.execute("""
                         INSERT INTO tickets.approve_line
                         (category_id, team_id, flow_no, level, user_id)
@@ -1799,13 +1794,13 @@ def add_approve_line(request):
                         category_id,
                         team_id,
                         flow_no,
-                        level,
+                        idx + 1,
                         user_id
                     ])
 
         messages.success(
             request,
-            f"ตั้งค่าสายอนุมัติเรียบร้อยแล้ว (Flow #{flow_no})"
+            f"ตั้งค่าสายอนุมัติเรียบร้อยแล้ว (Flow {flow_no})"
         )
         return redirect("add_approve_line")
 
@@ -1815,7 +1810,6 @@ def add_approve_line(request):
         "users": users,
         "approve_lines": approve_lines
     })
-    
 def get_team_approvers(request, team_id):
     print("API HIT team_id =", team_id) # <--- ดูใน terminal
 
