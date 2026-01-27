@@ -52,12 +52,20 @@ body {
 ================================ */
 .sidebar {
   width: 260px;
-  background: #1e293b;
-  color: #fff;
-  padding: 1.5rem 1rem;
-  position: sticky;
+  background: #0f172a;
+  color: #e5e7eb;
+  padding: 16px;
+
+  position: fixed;        /* ⭐ สำคัญ */
   top: 0;
+  left: 0;
+  height: 100vh;          /* ⭐ เต็มจอ */
+  overflow-y: auto;       /* scroll เฉพาะ sidebar ถ้าเมนูยาว */
+
+  transition: width .25s ease;
+  z-index: 1100;
 }
+
 
 .sidebar-title {
   text-align: center;
@@ -69,12 +77,25 @@ body {
 .main-content {
   padding: 24px;
   min-height: 100vh;
+
+  margin-left: 260px;   /* ⭐ เว้นที่ให้ sidebar */
+  transition: margin-left .25s ease;
 }
+.sidebar.collapsed ~ .main-content {
+  margin-left: 72px;
+}
+
 
 /* เผื่อ Mobile Header */
 @media (max-width: 991.98px) {
+  .sidebar.d-lg-flex {
+    position: relative;
+    width: 100%;
+    height: auto;
+  }
+
   .main-content {
-    padding-top: 80px;
+    margin-left: 0;
   }
 }
 
