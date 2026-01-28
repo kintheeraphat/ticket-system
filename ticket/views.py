@@ -2024,7 +2024,7 @@ def add_approve_line(request):
     
 
     
-def approval_flow_detail(request, flow_no):
+def approval_flow_detail(request, category_id, team_id):
 
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -2038,16 +2038,20 @@ def approval_flow_detail(request, flow_no):
             JOIN tickets.users u ON u.id = al.user_id
             JOIN tickets.category c ON c.id = al.category_id
             JOIN tickets.team t ON t.id = al.team_id
-            WHERE al.flow_no = %s
-            ORDER BY al.level
-        """, [flow_no])
+            WHERE al.category_id = %s
+              AND al.team_id = %s
+            ORDER BY al.flow_no, al.level
+        """, [category_id, team_id])
 
-        flow = dictfetchall(cursor)
+        flows = dictfetchall(cursor)
 
-    if not flow:
+    if not flows:
         raise Http404("ไม่พบสายอนุมัติ")
 
     return render(request, "approval_flow_detail.html", {
-        "flow": flow,
-        "flow_no": flow_no
+        "flows": flows,
+        "category_name": flows[0]["category_name"],
+        "team_name": flows[0]["team_name"],
+        "category_id": category_id,
+        "team_id": team_id,
     })

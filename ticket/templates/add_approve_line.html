@@ -11,55 +11,51 @@
   <!-- ================================================= -->
   {% regroup flow_summary by category_name as category_groups %}
 
-  <div class="card shadow-sm mb-4">
-    <div class="card-header fw-bold d-flex align-items-center gap-2">
-      <i class="bi bi-diagram-3 text-primary"></i>
-      Category ที่ตั้งค่าสายอนุมัติแล้ว
-    </div>
+  <div class="row g-4">
 
-    <div class="card-body">
-      {% if category_groups %}
-      {% for cat in category_groups %}
-      {% regroup cat.list by team_name as team_groups %}
+    {% for cat in category_groups %}
+    <div class="col-12 col-md-6 col-xl-4">
 
-      <h6 class="fw-bold mt-3">
-        <i class="bi bi-file-earmark-text me-1"></i>
-        {{ cat.grouper }}
-      </h6>
+      <!-- CATEGORY CARD -->
+      <div class="category-box h-100">
 
-      {% for team in team_groups %}
-      <div class="category-card mb-3">
-
-        <!-- LEFT -->
-        <div>
-          <div class="category-title">
-            <i class="bi bi-people me-1"></i>
-            {{ team.grouper }}
-          </div>
-          <div class="category-sub">
-            มี {{ team.list|length }} สายอนุมัติ
-          </div>
+        <div class="category-box-header">
+          <i class="bi bi-file-earmark-text me-2"></i>
+          {{ cat.grouper }}
         </div>
 
-        <!-- RIGHT -->
-        <div class="category-actions">
-          {% for f in team.list %}
-          <a href="{% url 'approval_flow_detail' f.flow_no %}" class="btn btn-outline-primary btn-sm">
-            Flow {{ f.flow_no }} ({{ f.total_levels }} ขั้น)
+        {% regroup cat.list by team_name as team_groups %}
+
+        <div class="category-box-body">
+          {% for team in team_groups %}
+          <a href="{% url 'approval_flow_detail' team.list.0.category_id team.list.0.team_id %}"
+            class="text-decoration-none text-dark">
+
+
+            <div class="team-card-left">
+              <div class="team-name">
+                <i class="bi bi-people me-1"></i>
+                {{ team.grouper }}
+              </div>
+              <div class="team-sub">
+                {{ team.list|length }} สายอนุมัติ
+              </div>
+            </div>
+
+            <div class="team-card-right">
+              <i class="bi bi-chevron-right"></i>
+            </div>
+
           </a>
           {% endfor %}
         </div>
 
       </div>
-      {% endfor %}
-      {% endfor %}
-      {% else %}
-      <div class="text-muted fst-italic">
-        ยังไม่มี Category ที่ตั้งค่าสายอนุมัติ
-      </div>
-      {% endif %}
     </div>
+    {% endfor %}
+
   </div>
+
 
   <!-- ================================================= -->
   <!-- ============ CREATE APPROVAL FLOW =============== -->
@@ -319,6 +315,68 @@
 
   .overflow-visible {
     overflow: visible !important;
+  }
+
+  .category-box {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .05);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .category-box-header {
+    padding: 14px 18px;
+    font-weight: 700;
+    font-size: 1rem;
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+    border-radius: 16px 16px 0 0;
+    color: #1e293b;
+  }
+
+  .category-box-body {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* TEAM CARD */
+  .team-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    text-decoration: none;
+    color: inherit;
+    transition: all .15s ease;
+  }
+
+  .team-card:hover {
+    background: #f1f5ff;
+    border-color: #c7d2fe;
+    transform: translateY(-1px);
+  }
+
+  .team-name {
+    font-weight: 600;
+    font-size: .95rem;
+  }
+
+  .team-sub {
+    font-size: .75rem;
+    color: #64748b;
+    margin-top: 2px;
+  }
+
+  .team-card-right {
+    color: #94a3b8;
+    font-size: 1.1rem;
   }
 </style>
 {% endblock %}
