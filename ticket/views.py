@@ -1760,30 +1760,38 @@ def setting_team(request):
 
         teams = dictfetchall(cursor)
 
-    # =========================
-    # CREATE TEAM (admin เท่านั้น)
-    # =========================
-    if request.method == "POST" and request.POST.get("action") == "create":
+        # =========================
+        # CREATE TEAM (admin + user)
+        # =========================
+        if request.method == "POST" and request.POST.get("action") == "create":
 
-        if role_id not in [1, 2]:
-            messages.error(request, "ไม่มีสิทธิ์สร้างทีม")
+            team_name = request.POST.get("team_name")
+            department_id = request.POST.get("department_id")
+
+            if not team_name or not department_id:
+                messages.error(request, "กรุณากรอกข้อมูลให้ครบ")
+                return redirect("setting_team")
+
+            with connection.cursor() as cursor:
+
+                # 1️⃣ สร้างทีม
+                cursor.execute("""
+                    INSERT INTO tickets.team (name, department_id)
+                    VALUES (%s, %s)
+                    RETURNING id
+                """, [team_name, department_id])
+
+                team_id = cursor.fetchone()[0]
+
+                # 2️⃣ ใส่คนสร้างเป็นสมาชิกทีมทันที
+                cursor.execute("""
+                    INSERT INTO tickets.team_members (team_id, user_id)
+                    VALUES (%s, %s)
+                """, [team_id, user_id])
+
+            messages.success(request, "สร้างทีมเรียบร้อยแล้ว")
             return redirect("setting_team")
 
-        team_name = request.POST.get("team_name")
-        department_id = request.POST.get("department_id")
-
-        if not team_name or not department_id:
-            messages.error(request, "กรุณากรอกข้อมูลให้ครบ")
-            return redirect("setting_team")
-
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                INSERT INTO tickets.team (name, department_id)
-                VALUES (%s, %s)
-            """, [team_name, department_id])
-
-        messages.success(request, "สร้างทีมเรียบร้อยแล้ว")
-        return redirect("setting_team")
 
     # =========================
     # UPDATE TEAM
@@ -1858,7 +1866,6 @@ def setting_team(request):
         "departments": departments,
         "teams": teams
     })
-
 
 def team_adduser(request, team_id):
 
