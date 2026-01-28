@@ -1980,6 +1980,14 @@ def add_approve_line(request):
         """)
         flow_summary = dictfetchall(cursor)
 
+        # ใช้สำหรับ dropdown filter (ไม่ซ้ำ)
+        cursor.execute("""
+            SELECT DISTINCT name
+            FROM tickets.category
+            ORDER BY name
+        """)
+        category_filters = dictfetchall(cursor)
+
         cursor.execute("SELECT id, name FROM tickets.category ORDER BY name")
         categories = dictfetchall(cursor)
 
@@ -1994,47 +2002,13 @@ def add_approve_line(request):
         """)
         users = dictfetchall(cursor)
 
-    if request.method == "POST":
-        category_id = request.POST.get("category_id")
-        team_id = request.POST.get("team_id")
-        approvers = [
-            int(a) for a in request.POST.getlist("approver[]") if a.isdigit()
-        ]
-
-        if not category_id or not team_id or not approvers:
-            messages.error(request, "ข้อมูลไม่ครบ")
-            return redirect("add_approve_line")
-
-        with transaction.atomic():
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    "SELECT COALESCE(MAX(flow_no),0)+1 FROM tickets.approve_line"
-                )
-                flow_no = cursor.fetchone()[0]
-
-                for i, user_id in enumerate(approvers):
-                    cursor.execute("""
-                        INSERT INTO tickets.approve_line
-                        (flow_no, category_id, team_id, level, user_id)
-                        VALUES (%s,%s,%s,%s,%s)
-                    """, [flow_no, category_id, team_id, i+1, user_id])
-
-        messages.success(request, "สร้างสายอนุมัติเรียบร้อย")
-        return redirect(
-            "approval_flow_detail",
-            category_id=category_id,
-            team_id=team_id
-        )
-
     return render(request, "add_approve_line.html", {
         "flow_summary": flow_summary,
+        "category_filters": category_filters,
         "categories": categories,
         "teams": teams,
         "users": users,
     })
-
-    
-
     
 def approval_flow_detail(request, category_id, team_id):
 
