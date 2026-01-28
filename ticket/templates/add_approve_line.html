@@ -179,8 +179,8 @@
 <script>
   const USERS = [
     {% for u in users %}
-    { id: "{{ u.id }}", name: "{{ u.full_name }}" },
-    {% endfor %}
+  { id: "{{ u.id }}", name: "{{ u.full_name }}" },
+  {% endfor %}
   ];
 
   function addRow() {
@@ -323,6 +323,29 @@
 
   .team-card-right {
     color: #94a3b8;
+  }
+
+  .autocomplete-box {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 999;
+  }
+
+  .autocomplete-item {
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+
+  .autocomplete-item:hover {
+    background: #eef2ff;
+    font-weight: 600;
   }
 </style>
 {% endblock %}
