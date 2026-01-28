@@ -9,11 +9,14 @@ from datetime import datetime
 from django.core.files.storage import FileSystemStorage
 import os,json
 from django.http import Http404
-from .decorators import login_required_custom, role_required
+from .decorators import login_required_custom
 from django.conf import settings
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import requests
+from functools import wraps
+from django.http import HttpResponseForbidden
+
+
 ERP_API_URL = "http://172.17.1.55:8111/erpAuth/"
 
 @csrf_exempt
@@ -79,7 +82,21 @@ def thai_date(d):
         return ""
     return d.strftime("%d/%m/") + str(d.year + 543)
 
+def role_required_role_id(allowed_role_ids):
+    def decorator(view_func):
+        @wraps(view_func)
+        def _wrapped_view(request, *args, **kwargs):
+            user = request.session.get("user")
+            if not user:
+                return redirect("login")
 
+            role_id = user.get("role_id")
+            if role_id not in allowed_role_ids:
+                return HttpResponseForbidden("คุณไม่มีสิทธิ์เข้าใช้งานหน้านี้")
+
+            return view_func(request, *args, **kwargs)
+        return _wrapped_view
+    return decorator
 def login_view(request):
 
     # ==========================
@@ -87,8 +104,7 @@ def login_view(request):
     # ==========================
     user = request.session.get("user")
     if user:
-        role = user.get("role", "user")
-        if role in ["admin", "manager"]:
+        if user.get("role_id") in [1, 2]:
             return redirect("/dashboard/")
         return redirect("/tickets/")
 
@@ -108,17 +124,12 @@ def login_view(request):
         # ==================================================
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT
-                    u.id,
-                    u.username,
-                    u.full_name,
-                    u.role
-                FROM tickets.users u
-                WHERE u.username = %s
-                  AND u.password = crypt(%s, u.password)
-                  AND u.is_active = TRUE
+                SELECT id, username, full_name, role_id
+                FROM tickets.users
+                WHERE username = %s
+                  AND password = crypt(%s, password)
+                  AND is_active = TRUE
             """, [username, password])
-
             row = cursor.fetchone()
 
         if row:
@@ -126,10 +137,10 @@ def login_view(request):
                 "id": row[0],
                 "username": row[1],
                 "full_name": row[2],
-                "role": row[3],
+                "role_id": row[3],
             }
 
-            if row[3] in ["admin", "manager"]:
+            if row[3] in [1, 2]:
                 return redirect("/dashboard/")
             return redirect("/tickets/")
 
@@ -139,10 +150,7 @@ def login_view(request):
         try:
             res = requests.post(
                 ERP_API_URL,
-                data={
-                    "username": username,
-                    "password": password
-                },
+                data={"username": username, "password": password},
                 timeout=10
             )
         except Exception:
@@ -163,30 +171,23 @@ def login_view(request):
         # ==================================================
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT id, role
+                SELECT id, role_id
                 FROM tickets.users
                 WHERE erp_user_id = %s
             """, [data["user_id"]])
-
             row = cursor.fetchone()
 
             if not row:
                 cursor.execute("""
                     INSERT INTO tickets.users
-                    (
-                        erp_user_id,
-                        username,
-                        full_name,
-                        role,
-                        is_active
-                    )
+                    (erp_user_id, username, full_name, role_id, is_active)
                     VALUES (%s, %s, %s, %s, TRUE)
-                    RETURNING id, role
+                    RETURNING id, role_id
                 """, [
                     data["user_id"],
                     data["login"],
                     data["name"],
-                    "user"
+                    3  # default = user
                 ])
                 row = cursor.fetchone()
 
@@ -197,12 +198,15 @@ def login_view(request):
             "id": row[0],
             "username": data["login"],
             "full_name": data["name"],
-            "role": row[1],
+            "role_id": row[1],
         }
 
+        if row[1] in [1, 2]:
+            return redirect("/dashboard/")
         return redirect("/tickets/")
 
     return render(request, "login.html")
+
 
 # def login_view(request):
 
@@ -258,7 +262,7 @@ def login_view(request):
 
 
 @login_required_custom
-@role_required(["user","admin", "manager"])
+@role_required_role_id([1, 2, 3])  
 def ticket_success(request):
     return render(request, "tickets_form/ticket_success.html")
 
@@ -269,7 +273,7 @@ def logout_view(request):
 
 
 @login_required_custom
-@role_required(["admin", "manager"])
+@role_required_role_id([1, 2])  
 def dashboard(request):
 
     # =====================
@@ -380,11 +384,11 @@ def dashboard(request):
     return render(request, "dashboard.html", context)
 
 @login_required_custom
-@role_required(["admin", "manager", "user"])
+@role_required_role_id([1, 2, 3])  
 def tickets_list(request):
 
     user = request.session["user"]
-    role = user["role"]
+    role_id = user["role_id"]   # ✅ ใช้ role_id
     user_id = user["id"]
 
     search = request.GET.get("search", "")
@@ -414,8 +418,8 @@ def tickets_list(request):
 
     params = []
 
-    # 🔒 user เห็นเฉพาะของตัวเอง
-    if role == "user":
+    # 🔒 user (role_id = 3) เห็นเฉพาะของตัวเอง
+    if role_id == 3:
         query += " AND t.user_id = %s"
         params.append(user_id)
 
@@ -427,7 +431,8 @@ def tickets_list(request):
         query += " AND s.name = %s"
         params.append(status)
 
-    if assignee and role != "user":
+    # 🔓 admin / manager ดูตาม assignee ได้
+    if assignee and role_id != 3:
         query += " AND a.username = %s"
         params.append(assignee)
 
@@ -450,7 +455,7 @@ def tickets_list(request):
 
     tickets_data = []
     for row in rows:
-        created_at = row[8]  # ✅ index ถูกแล้ว
+        created_at = row[8]
 
         if created_at and timezone.is_naive(created_at):
             created_at = timezone.make_aware(created_at, dt_timezone.utc)
@@ -472,11 +477,11 @@ def tickets_list(request):
 
     return render(request, "tickets_list.html", {
         "tickets": tickets_data,
-        "is_user": role == "user",   # ✅ ส่งให้ template
+        "is_user": role_id == 3,   # ✅ template ใช้ role_id
     })
-
+    
 @login_required_custom
-@role_required(["user","admin", "manager"])
+@role_required_role_id([1, 2, 3])  
 def tickets_create(req):
     return render(req,'tickets_create.html')
 
@@ -599,7 +604,7 @@ def erp_perm(request):
        
     return render(request, "tickets_form/erp_perm.html")
 @login_required_custom
-@role_required(["user"])
+@role_required_role_id([3])  
 def my_tickets(request):
     user_id = request.session["user"]["id"]
 
@@ -920,7 +925,7 @@ def tickets_detail_repairs(request, ticket_id):
     })
     
 @login_required_custom
-@role_required(["user", "admin", "manager"])
+@role_required_role_id([1, 2, 3])  
 def tickets_detail_report(request, ticket_id):
     with connection.cursor() as cursor:
         cursor.execute("""

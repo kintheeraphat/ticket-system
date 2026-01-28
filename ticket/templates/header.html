@@ -24,7 +24,7 @@
   <ul class="sidebar-menu list-unstyled flex-grow-1">
 
     <!-- ================= ADMIN / MANAGER ================= -->
-    {% if request.session.user.role != "user" %}
+    {% if request.session.user.role_id == 1 or request.session.user.role_id == 2 %}
     <li class="{% if request.path == '/' %}active{% endif %}">
       <a href="{% url 'dashboard' %}">
         <i class="fas fa-gauge-high"></i>
@@ -38,7 +38,8 @@
         <span>Tickets</span>
       </a>
     </li>
-    {% if request.session.user.role != "user" %}
+    {% if request.session.user.role_id == 1 or request.session.user.role_id == 2  or request.session.user.role_id == 3 %}
+
     <li class="{% if request.path == '/' %}active{% endif %}">
       <a href="{% url 'setting_team' %}">
         <i class="fa-solid fa-people-group"></i>
@@ -46,7 +47,8 @@
       </a>
     </li>
     {% endif %}
-        {% if request.session.user.role != "user" %}
+        {% if request.session.user.role_id == 1 or request.session.user.role_id == 2  or request.session.user.role_id == 3 %}
+
     <li class="{% if request.path == '/' %}active{% endif %}">
       <a href="{% url 'add_approve_line' %}">
         <i class="fa-solid fa-arrow-down-up-lock"></i>
@@ -65,7 +67,8 @@
     </li>
 
     <!-- USER HISTORY -->
-    {% comment %} {% if request.session.user.role == "user" %}
+    {% comment %} {% if request.session.user.role_id == 1 %}
+
     <li class="{% if request.path == '/my-tickets/' %}active{% endif %}">
       <a href="{% url 'my_tickets' %}">
         <i class="fas fa-list"></i>
