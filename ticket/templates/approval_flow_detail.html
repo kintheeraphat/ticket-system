@@ -1,22 +1,181 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h3 class="fw-bold mb-4">Flow {{ flow_no }}</h3>
+<h3 class="fw-bold mb-3">
+  Approval Flow : {{ category_name }}
+</h3>
 
-<div class="d-flex gap-4 flex-wrap">
-  {% for step in flow %}
-  <div class="card p-3">
-    <div class="fw-bold">Level {{ step.level }}</div>
-    <div>{{ step.full_name }}</div>
-    <small class="text-muted">
-      {{ step.team_name }} | {{ step.category_name }}
-    </small>
+<div class="workflow-wrapper">
+
+  {% regroup flow by flow_no as flow_groups %}
+
+  {% for flow_group in flow_groups %}
+  <div class="flow-card">
+
+    <div class="flow-title">
+      Flow {{ flow_group.grouper }}
+    </div>
+
+    <div class="flow-steps">
+
+      {% regroup flow_group.list by level as level_groups %}
+
+      {% for level in level_groups %}
+      <div class="step-wrapper">
+
+        <div class="step-card">
+          <div class="step-level">
+            Level {{ level.grouper }}
+          </div>
+
+          {% for step in level.list %}
+          <div class="step-user">
+            {{ step.full_name }}
+          </div>
+          {% endfor %}
+        </div>
+
+        {% if not forloop.last %}
+        <div class="step-arrow"><span></span></div>
+        {% endif %}
+
+      </div>
+      {% endfor %}
+
+    </div>
   </div>
   {% endfor %}
+
 </div>
 
 <a href="{% url 'add_approve_line' %}" class="btn btn-outline-secondary mt-4">
   ← กลับ
 </a>
+
+<!-- ===============================
+     CSS
+================================ -->
+<style>
+/* ===== Layout ===== */
+.workflow-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+/* ===== Category ===== */
+.category-section {
+  background: #f8fafc;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.05);
+}
+
+.category-header {
+  margin-bottom: 20px;
+}
+
+.category-pill {
+  display: inline-block;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: #fff;
+  font-weight: 700;
+  font-size: .85rem;
+  padding: 8px 18px;
+  border-radius: 999px;
+}
+
+/* ===== Flow ===== */
+.flow-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 18px 20px;
+  margin-bottom: 18px;
+  border: 1px solid #e5e7eb;
+}
+
+.flow-title {
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 14px;
+}
+
+/* ===== Steps ===== */
+.flow-steps {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.step-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+/* ===== Step Card ===== */
+.step-card {
+  min-width: 180px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 14px 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 6px 16px rgba(0,0,0,.06);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.step-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0,0,0,.1);
+}
+
+/* Level badge */
+.step-level {
+  font-size: .75rem;
+  font-weight: 700;
+  color: #2563eb;
+  margin-bottom: 6px;
+}
+
+/* Users */
+.step-user {
+  font-size: .9rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* ===== Arrow ===== */
+.step-arrow {
+  width: 28px;
+  height: 2px;
+  background: #c7d2fe;
+  position: relative;
+  margin: 0 10px;
+}
+
+.step-arrow span {
+  position: absolute;
+  right: -6px;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid #c7d2fe;
+  border-right: 2px solid #c7d2fe;
+  transform: rotate(45deg);
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 768px) {
+  .flow-steps {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .step-arrow {
+    transform: rotate(90deg);
+    margin: 12px 0;
+  }
+}
+</style>
 
 {% endblock %}

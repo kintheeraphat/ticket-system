@@ -1886,26 +1886,29 @@ def team_removeuser(request, team_id, member_id):
 
 def add_approve_line(request):
 
-    # ===== GET DATA (ใช้ทั้งหน้า) =====
     with connection.cursor() as cursor:
 
-        # สายอนุมัติทั้งหมด
+        # ===== SUMMARY: Category + Team + Flow =====
         cursor.execute("""
             SELECT
-                al.flow_no,
-                al.level,
-                u.full_name,
                 c.name AS category_name,
-                t.name AS team_name
+                t.name AS team_name,
+                al.category_id,
+                al.team_id,
+                al.flow_no,
+                COUNT(*) AS total_levels
             FROM tickets.approve_line al
-            JOIN tickets.users u ON u.id = al.user_id
             JOIN tickets.category c ON c.id = al.category_id
             JOIN tickets.team t ON t.id = al.team_id
-            ORDER BY al.flow_no, al.level
+            GROUP BY
+                c.name, t.name,
+                al.category_id, al.team_id,
+                al.flow_no
+            ORDER BY c.name, t.name, al.flow_no
         """)
-        approve_lines = dictfetchall(cursor)
+        flow_summary = dictfetchall(cursor)
 
-        # dropdown
+        # ===== dropdown =====
         cursor.execute("SELECT id, name FROM tickets.category ORDER BY name")
         categories = dictfetchall(cursor)
 
@@ -1920,13 +1923,11 @@ def add_approve_line(request):
         """)
         users = dictfetchall(cursor)
 
-    # ===== POST: สร้างสายใหม่ =====
+    # ===== POST: create flow (เหมือนเดิม) =====
     if request.method == "POST":
         category_id = request.POST.get("category_id")
         team_id = request.POST.get("team_id")
-        approvers = [
-            int(a) for a in request.POST.getlist("approver[]") if a.isdigit()
-        ]
+        approvers = [int(a) for a in request.POST.getlist("approver[]") if a.isdigit()]
 
         if not category_id or not team_id or not approvers:
             messages.error(request, "ข้อมูลไม่ครบ")
@@ -1934,55 +1935,27 @@ def add_approve_line(request):
 
         with transaction.atomic():
             with connection.cursor() as cursor:
-
-                cursor.execute("""
-                    SELECT COALESCE(MAX(flow_no), 0) + 1
-                    FROM tickets.approve_line
-                """)
+                cursor.execute("SELECT COALESCE(MAX(flow_no),0)+1 FROM tickets.approve_line")
                 flow_no = cursor.fetchone()[0]
 
-                for idx, user_id in enumerate(approvers):
+                for i, user_id in enumerate(approvers):
                     cursor.execute("""
                         INSERT INTO tickets.approve_line
                         (flow_no, category_id, team_id, level, user_id)
-                        VALUES (%s, %s, %s, %s, %s)
-                    """, [
-                        flow_no,
-                        category_id,
-                        team_id,
-                        idx + 1,
-                        user_id
-                    ])
+                        VALUES (%s,%s,%s,%s,%s)
+                    """, [flow_no, category_id, team_id, i+1, user_id])
 
         return redirect("approval_flow_detail", flow_no=flow_no)
 
     return render(request, "add_approve_line.html", {
-        "approve_lines": approve_lines,
+        "flow_summary": flow_summary,
         "categories": categories,
         "teams": teams,
-        "users": users
+        "users": users,
     })
+    
 
-def approval_flow_list(request):
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT DISTINCT
-                al.flow_no,
-                c.name AS category_name,
-                t.name AS team_name,
-                COUNT(*) AS step_count
-            FROM tickets.approve_line al
-            JOIN tickets.category c ON c.id = al.category_id
-            JOIN tickets.team t ON t.id = al.team_id
-            GROUP BY al.flow_no, c.name, t.name
-            ORDER BY al.flow_no DESC
-        """)
-        flows = dictfetchall(cursor)
-
-    return render(request, "approval_flow_list.html", {
-        "flows": flows
-    })
-
+    
 def approval_flow_detail(request, flow_no):
 
     with connection.cursor() as cursor:
