@@ -1699,14 +1699,22 @@ def dictfetchall(cursor):
     return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 
+
 def setting_team(request):
+
+    user = request.session.get("user")
+    if not user:
+        return redirect("login")
+
+    user_id = user["id"]
+    role_id = user["role_id"]
 
     # =========================
     # GET DATA
     # =========================
     with connection.cursor() as cursor:
 
-        # departments
+        # -------- departments --------
         cursor.execute("""
             SELECT id, dept_name
             FROM tickets.department
@@ -1714,28 +1722,52 @@ def setting_team(request):
         """)
         departments = dictfetchall(cursor)
 
-        # teams
-        cursor.execute("""
-            SELECT
-                t.id,
-                t.name AS team_name,
-                d.dept_name,
-                t.department_id,
-                (
-                    SELECT COUNT(*)
-                    FROM tickets.team_members tm
-                    WHERE tm.team_id = t.id
-                ) AS member_count
-            FROM tickets.team t
-            LEFT JOIN tickets.department d ON d.id = t.department_id
-            ORDER BY d.dept_name, t.name
-        """)
+        # -------- teams --------
+        if role_id in [1, 2]:  # admin
+            cursor.execute("""
+                SELECT
+                    t.id,
+                    t.name AS team_name,
+                    d.dept_name,
+                    t.department_id,
+                    (
+                        SELECT COUNT(*)
+                        FROM tickets.team_members tm
+                        WHERE tm.team_id = t.id
+                    ) AS member_count
+                FROM tickets.team t
+                LEFT JOIN tickets.department d ON d.id = t.department_id
+                ORDER BY d.dept_name, t.name
+            """)
+        else:  # user → เห็นเฉพาะทีมที่ตัวเองอยู่
+            cursor.execute("""
+                SELECT DISTINCT
+                    t.id,
+                    t.name AS team_name,
+                    d.dept_name,
+                    t.department_id,
+                    (
+                        SELECT COUNT(*)
+                        FROM tickets.team_members tm
+                        WHERE tm.team_id = t.id
+                    ) AS member_count
+                FROM tickets.team t
+                JOIN tickets.team_members tm ON tm.team_id = t.id
+                LEFT JOIN tickets.department d ON d.id = t.department_id
+                WHERE tm.user_id = %s
+                ORDER BY d.dept_name, t.name
+            """, [user_id])
+
         teams = dictfetchall(cursor)
 
     # =========================
-    # CREATE TEAM
+    # CREATE TEAM (admin เท่านั้น)
     # =========================
     if request.method == "POST" and request.POST.get("action") == "create":
+
+        if role_id not in [1, 2]:
+            messages.error(request, "ไม่มีสิทธิ์สร้างทีม")
+            return redirect("setting_team")
 
         team_name = request.POST.get("team_name")
         department_id = request.POST.get("department_id")
@@ -1763,12 +1795,27 @@ def setting_team(request):
         department_id = request.POST.get("department_id")
 
         with connection.cursor() as cursor:
-            cursor.execute("""
-                UPDATE tickets.team
-                SET name = %s,
-                    department_id = %s
-                WHERE id = %s
-            """, [team_name, department_id, team_id])
+
+            if role_id in [1, 2]:  # admin แก้ได้ทุกทีม
+                cursor.execute("""
+                    UPDATE tickets.team
+                    SET name = %s,
+                        department_id = %s
+                    WHERE id = %s
+                """, [team_name, department_id, team_id])
+            else:  # user → แก้ได้เฉพาะทีมที่ตัวเองอยู่
+                cursor.execute("""
+                    UPDATE tickets.team
+                    SET name = %s,
+                        department_id = %s
+                    WHERE id = %s
+                      AND EXISTS (
+                          SELECT 1
+                          FROM tickets.team_members
+                          WHERE team_id = %s
+                            AND user_id = %s
+                      )
+                """, [team_name, department_id, team_id, team_id, user_id])
 
         messages.success(request, "อัปเดตทีมเรียบร้อยแล้ว")
         return redirect("setting_team")
@@ -1781,8 +1828,28 @@ def setting_team(request):
         team_id = request.POST.get("team_id")
 
         with connection.cursor() as cursor:
-            cursor.execute("DELETE FROM tickets.team_members WHERE team_id = %s", [team_id])
-            cursor.execute("DELETE FROM tickets.team WHERE id = %s", [team_id])
+
+            if role_id in [1, 2]:  # admin
+                cursor.execute("""
+                    DELETE FROM tickets.team_members
+                    WHERE team_id = %s
+                """, [team_id])
+
+                cursor.execute("""
+                    DELETE FROM tickets.team
+                    WHERE id = %s
+                """, [team_id])
+            else:  # user → ลบได้เฉพาะทีมที่ตัวเองอยู่
+                cursor.execute("""
+                    DELETE FROM tickets.team
+                    WHERE id = %s
+                      AND EXISTS (
+                          SELECT 1
+                          FROM tickets.team_members
+                          WHERE team_id = %s
+                            AND user_id = %s
+                      )
+                """, [team_id, team_id, user_id])
 
         messages.success(request, "ลบทีมเรียบร้อยแล้ว")
         return redirect("setting_team")
@@ -1791,6 +1858,7 @@ def setting_team(request):
         "departments": departments,
         "teams": teams
     })
+
 
 def team_adduser(request, team_id):
 
