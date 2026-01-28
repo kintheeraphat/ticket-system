@@ -74,9 +74,10 @@ urlpatterns = [
     ),
 
     path(
-    "approval/flow/<int:flow_no>/",
-    views.approval_flow_detail,
-    name="approval_flow_detail"
-)
+        "approval/flow/<int:category_id>/<int:team_id>/",
+        views.approval_flow_detail,
+        name="approval_flow_detail"
+    )
+
 
 ]
