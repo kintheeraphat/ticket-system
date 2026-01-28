@@ -1958,12 +1958,9 @@ def team_removeuser(request, team_id, member_id):
 
     messages.success(request, "ลบสมาชิกออกจากทีมเรียบร้อยแล้ว")
     return redirect("team_adduser", team_id=team_id)
-
 def add_approve_line(request):
 
     with connection.cursor() as cursor:
-
-        # ===== SUMMARY: Category + Team + Flow =====
         cursor.execute("""
             SELECT
                 c.name AS category_name,
@@ -1983,7 +1980,6 @@ def add_approve_line(request):
         """)
         flow_summary = dictfetchall(cursor)
 
-        # ===== dropdown =====
         cursor.execute("SELECT id, name FROM tickets.category ORDER BY name")
         categories = dictfetchall(cursor)
 
@@ -1998,11 +1994,12 @@ def add_approve_line(request):
         """)
         users = dictfetchall(cursor)
 
-    # ===== POST: create flow (เหมือนเดิม) =====
     if request.method == "POST":
         category_id = request.POST.get("category_id")
         team_id = request.POST.get("team_id")
-        approvers = [int(a) for a in request.POST.getlist("approver[]") if a.isdigit()]
+        approvers = [
+            int(a) for a in request.POST.getlist("approver[]") if a.isdigit()
+        ]
 
         if not category_id or not team_id or not approvers:
             messages.error(request, "ข้อมูลไม่ครบ")
@@ -2010,7 +2007,9 @@ def add_approve_line(request):
 
         with transaction.atomic():
             with connection.cursor() as cursor:
-                cursor.execute("SELECT COALESCE(MAX(flow_no),0)+1 FROM tickets.approve_line")
+                cursor.execute(
+                    "SELECT COALESCE(MAX(flow_no),0)+1 FROM tickets.approve_line"
+                )
                 flow_no = cursor.fetchone()[0]
 
                 for i, user_id in enumerate(approvers):
@@ -2020,7 +2019,12 @@ def add_approve_line(request):
                         VALUES (%s,%s,%s,%s,%s)
                     """, [flow_no, category_id, team_id, i+1, user_id])
 
-        return redirect("approval_flow_detail", flow_no=flow_no)
+        messages.success(request, "สร้างสายอนุมัติเรียบร้อย")
+        return redirect(
+            "approval_flow_detail",
+            category_id=category_id,
+            team_id=team_id
+        )
 
     return render(request, "add_approve_line.html", {
         "flow_summary": flow_summary,
@@ -2028,6 +2032,7 @@ def add_approve_line(request):
         "teams": teams,
         "users": users,
     })
+
     
 
     

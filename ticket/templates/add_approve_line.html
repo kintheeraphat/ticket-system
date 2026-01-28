@@ -6,148 +6,154 @@
 {% block content %}
 <div class="container-fluid approval-page">
 
-  <!-- ================================================= -->
-  <!-- ============ APPROVAL FLOW LIST ================= -->
-  <!-- ================================================= -->
-  {% regroup flow_summary by category_name as category_groups %}
-
   <div class="row g-4">
 
-    {% for cat in category_groups %}
-    <div class="col-12 col-md-6 col-xl-4">
+    <!-- ================================================= -->
+    <!-- ============ LEFT : CREATE APPROVAL FLOW ======= -->
+    <!-- ================================================= -->
+    <div class="col-12 col-lg-4">
 
-      <!-- CATEGORY CARD -->
-      <div class="category-box h-100">
-
-        <div class="category-box-header">
-          <i class="bi bi-file-earmark-text me-2"></i>
-          {{ cat.grouper }}
+      <div class="card shadow-sm sticky-top" style="top:20px;">
+        <div class="card-header">
+          <h5 class="mb-0 fw-bold">
+            <i class="bi bi-plus-circle me-1 text-primary"></i>
+            ตั้งค่าสายอนุมัติ
+          </h5>
+          <small class="text-muted">Approval Flow Configuration</small>
         </div>
 
-        {% regroup cat.list by team_name as team_groups %}
+        <div class="card-body">
 
-        <div class="category-box-body">
-          {% for team in team_groups %}
-          <a href="{% url 'approval_flow_detail' team.list.0.category_id team.list.0.team_id %}"
-            class="text-decoration-none text-dark">
-
-
-            <div class="team-card-left">
-              <div class="team-name">
-                <i class="bi bi-people me-1"></i>
-                {{ team.grouper }}
-              </div>
-              <div class="team-sub">
-                {{ team.list|length }} สายอนุมัติ
-              </div>
-            </div>
-
-            <div class="team-card-right">
-              <i class="bi bi-chevron-right"></i>
-            </div>
-
-          </a>
+          {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+          </div>
           {% endfor %}
-        </div>
 
+          <!-- CATEGORY / TEAM -->
+          <div class="row mb-3">
+            <div class="col-12 mb-3">
+              <label class="form-label">เอกสาร (Category)</label>
+              <select class="form-select" name="category_id" form="approveForm" required>
+                <option value="">-- เลือกเอกสาร --</option>
+                {% for c in categories %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Team</label>
+              <select class="form-select" name="team_id" form="approveForm" required>
+                <option value="">-- เลือกทีม --</option>
+                {% for t in teams %}
+                <option value="{{ t.id }}">{{ t.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <!-- FORM -->
+          <form method="post" id="approveForm">
+            {% csrf_token %}
+
+            <div class="table-responsive overflow-visible">
+              <table class="table table-hover align-middle" id="approveTable">
+                <thead class="table-light">
+                  <tr class="text-center">
+                    <th width="20%">Level</th>
+                    <th>ผู้อนุมัติ</th>
+                    <th width="10%"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="text-center">
+                      <span class="badge bg-light">1</span>
+                    </td>
+                    <td>
+                      <div class="position-relative">
+                        <input type="text" class="form-control approver-input" placeholder="พิมพ์ชื่อผู้อนุมัติ..."
+                          autocomplete="off" oninput="filterUsers(this)" onkeydown="handleKey(this, event)">
+                        <input type="hidden" name="approver[]" class="approver-id">
+                        <div class="autocomplete-box"></div>
+                      </div>
+                    </td>
+                    <td></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="d-flex justify-content-between mt-3">
+              <button type="button" class="btn btn-outline-primary" onclick="addRow()">
+                + เพิ่มระดับ
+              </button>
+              <button type="submit" class="btn btn-success px-4">
+                บันทึก
+              </button>
+            </div>
+
+          </form>
+        </div>
       </div>
+
     </div>
-    {% endfor %}
 
-  </div>
+    <!-- ================================================= -->
+    <!-- ============ RIGHT : FLOW LIST ================= -->
+    <!-- ================================================= -->
+    <div class="col-12 col-lg-8">
 
+      {% regroup flow_summary by category_name as category_groups %}
 
-  <!-- ================================================= -->
-  <!-- ============ CREATE APPROVAL FLOW =============== -->
-  <!-- ================================================= -->
-  <div class="card shadow-sm">
-    <div class="card-header">
-      <h5 class="mb-0 fw-bold">
-        <i class="bi bi-plus-circle me-1 text-primary"></i>
-        ตั้งค่าสายอนุมัติ
-      </h5>
-      <small class="text-muted">Approval Flow Configuration</small>
-    </div>
+      <div class="row g-4">
 
-    <div class="card-body">
+        {% for cat in category_groups %}
+        <div class="col-12 col-md-6">
 
-      <!-- MESSAGE -->
-      {% for message in messages %}
-      <div class="alert alert-{{ message.tags }}">
-        {{ message }}
-      </div>
-      {% endfor %}
+          <div class="category-box h-100">
 
-      <!-- CATEGORY / TEAM -->
-      <div class="row mb-4">
-        <div class="col-md-6">
-          <label class="form-label">เอกสาร (Category)</label>
-          <select class="form-select" name="category_id" form="approveForm" required>
-            <option value="">-- เลือกเอกสาร --</option>
-            {% for c in categories %}
-            <option value="{{ c.id }}">{{ c.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
+            <div class="category-box-header">
+              <i class="bi bi-file-earmark-text me-2"></i>
+              {{ cat.grouper }}
+            </div>
 
-        <div class="col-md-6">
-          <label class="form-label">Team</label>
-          <select class="form-select" name="team_id" form="approveForm" required>
-            <option value="">-- เลือกทีม --</option>
-            {% for t in teams %}
-            <option value="{{ t.id }}">{{ t.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
+            {% regroup cat.list by team_name as team_groups %}
 
-      <!-- FORM -->
-      <form method="post" id="approveForm">
-        {% csrf_token %}
+            <div class="category-box-body">
+              {% for team in team_groups %}
+              <a href="{% url 'approval_flow_detail' team.list.0.category_id team.list.0.team_id %}"
+                class="text-decoration-none text-dark">
 
-        <div class="table-responsive overflow-visible">
-          <table class="table table-hover align-middle" id="approveTable">
-            <thead class="table-light">
-              <tr class="text-center">
-                <th width="8%">Level</th>
-                <th>ผู้อนุมัติ</th>
-                <th width="10%">จัดการ</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <tr>
-                <td class="text-center">
-                  <span class="badge bg-light">1</span>
-                </td>
-                <td>
-                  <div class="position-relative">
-                    <input type="text" class="form-control approver-input" placeholder="พิมพ์ชื่อผู้อนุมัติ..."
-                      autocomplete="off" oninput="filterUsers(this)" onkeydown="handleKey(this, event)">
-                    <input type="hidden" name="approver[]" class="approver-id">
-                    <div class="autocomplete-box"></div>
+                <div>
+                  <div class="team-name">
+                    <i class="bi bi-people me-1"></i>
+                    {{ team.grouper }}
                   </div>
-                </td>
-                <td></td>
-              </tr>
-            </tbody>
-          </table>
+                  <div class="team-sub">
+                    {{ team.list|length }} สายอนุมัติ
+                  </div>
+                </div>
+
+                <div class="team-card-right">
+                  <i class="bi bi-chevron-right"></i>
+                </div>
+
+              </a>
+              {% endfor %}
+            </div>
+
+          </div>
+
         </div>
+        {% endfor %}
 
-        <div class="d-flex justify-content-between mt-3">
-          <button type="button" class="btn btn-outline-primary" onclick="addRow()">
-            + เพิ่มระดับอนุมัติ
-          </button>
+      </div>
 
-          <button type="submit" class="btn btn-success px-4">
-            บันทึกสายอนุมัติ
-          </button>
-        </div>
-
-      </form>
     </div>
-  </div>
 
+  </div>
 </div>
 
 <!-- ================================================= -->
