@@ -142,37 +142,36 @@
               {{ cat.grouper }}
             </div>
 
-            <div class="category-box-body">
-              {% for team in team_groups %}
-              <a href="{% url 'approval_flow_detail'
-                        team.list.0.category_id
-                        team.list.0.team_id %}" class="team-card" data-team="{{ team.grouper|lower }}">
+            <a href="{% url 'approval_flow_detail'
+           team.list.0.category_id
+           team.list.0.team_id %}" class="team-card" data-team="{{ team.grouper|lower }}">
 
-                <div>
-                  <div class="team-name">
-                    <i class="bi bi-people me-1"></i>
-                    {{ team.grouper }}
-                  </div>
-                  <div class="team-sub">
-                    {{ team.list|length }} สายอนุมัติ
-                  </div>
+
+              <div>
+                <div class="team-name">
+                  <i class="bi bi-people me-1"></i>
+                  {{ team.grouper }}
                 </div>
-
-                <div class="team-card-right">
-                  <i class="bi bi-chevron-right"></i>
+                <div class="team-sub">
+                  {{ team.list|length }} สายอนุมัติ
                 </div>
+              </div>
 
-              </a>
-              {% endfor %}
-            </div>
+              <div class="team-card-right">
+                <i class="bi bi-chevron-right"></i>
+              </div>
 
+            </a>
+            {% endfor %}
           </div>
-        </div>
-        {% endfor %}
 
+        </div>
       </div>
+      {% endfor %}
+
     </div>
   </div>
+</div>
 </div>
 
 <!-- ================= SCRIPT ================= -->
@@ -271,6 +270,41 @@
       e.preventDefault();
     }
   });
+  const filterCategory = document.getElementById("filterCategory");
+  const searchInput = document.getElementById("searchInput");
+
+  function applyFilter() {
+    const selectedCategory = filterCategory.value.toLowerCase();
+    const keyword = searchInput.value.toLowerCase();
+
+    document.querySelectorAll(".flow-category").forEach(col => {
+      const categoryName = col.dataset.category;
+      let categoryMatch =
+        !selectedCategory || categoryName === selectedCategory;
+
+      let hasVisibleTeam = false;
+
+      col.querySelectorAll(".team-card").forEach(team => {
+        const teamName = team.dataset.team;
+
+        const matchKeyword =
+          !keyword ||
+          teamName.includes(keyword) ||
+          categoryName.includes(keyword);
+
+        const show = categoryMatch && matchKeyword;
+
+        team.style.display = show ? "flex" : "none";
+        if (show) hasVisibleTeam = true;
+      });
+
+      // ซ่อนทั้งกล่อง category ถ้าไม่มี team แสดง
+      col.style.display = hasVisibleTeam ? "" : "none";
+    });
+  }
+
+  filterCategory.addEventListener("change", applyFilter);
+  searchInput.addEventListener("input", applyFilter);
 </script>
 
 <!-- ================= STYLE ================= -->
