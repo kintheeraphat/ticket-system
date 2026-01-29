@@ -15,7 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 import requests
 from functools import wraps
 from django.http import HttpResponseForbidden
-
+from ticket.utils.approval import create_ticket_approval_by_ticket_type
 
 ERP_API_URL = "http://172.17.1.55:8111/erpAuth/"
 
@@ -533,7 +533,11 @@ def erp_perm(request):
                 department
             ])
             ticket_id = cursor.fetchone()[0]
-
+            create_ticket_approval_by_ticket_type(
+    ticket_id=ticket_id,
+    ticket_type_id=ticket_type_id,
+    requester_user_id=user_id
+)
         # -----------------------------
         # PREPARE ERP DATA
         # -----------------------------
@@ -685,6 +689,11 @@ def vpn(request):
                 uservpn
             ])
             vpn_data_id = cursor.fetchone()[0]
+            create_ticket_approval_by_ticket_type(
+    ticket_id=ticket_id,
+    ticket_type_id=ticket_type_id,
+    requester_user_id=user_id
+)
 
         # -----------------------------
         # UPLOAD FILES
@@ -1062,7 +1071,11 @@ def repairs_form(request):
                 ticket_type_id
             ])
             ticket_id = cursor.fetchone()[0]
-
+            create_ticket_approval_by_ticket_type(
+    ticket_id=ticket_id,
+    ticket_type_id=ticket_type_id,
+    requester_user_id=user_id
+)
         # -----------------------------
         # INSERT ticket_data_building_repair
         # -----------------------------
@@ -1110,6 +1123,7 @@ def repairs_form(request):
                     user_id,
                     timezone.now()
                 ])
+                
         return redirect("ticket_success")
     return render(request, "tickets_form/repairs_form.html")
 
@@ -1311,7 +1325,11 @@ def adjust_form(request):
                     user_id,
                     timezone.now()
                 ])
-
+                create_ticket_approval_by_ticket_type(
+    ticket_id=ticket_id,
+    ticket_type_id=ticket_type_id,
+    requester_user_id=user_id
+)
         return redirect("ticket_success")
     return render(request, "tickets_form/adjust_form.html")
 
@@ -1412,7 +1430,11 @@ def app_form(request):
             ])
 
             ticket_id = cursor.fetchone()[0]
-
+            create_ticket_approval_by_ticket_type(
+    ticket_id=ticket_id,
+    ticket_type_id=ticket_type_id,
+    requester_user_id=user_id
+)
             # =========================
             # 2) INSERT ticket_data_erp_app
             # =========================
@@ -1530,6 +1552,11 @@ def report_form(request):
                 report_detail or None,      # new_value
                 timezone.now().date()
             ])
+            create_ticket_approval_by_ticket_type(
+    ticket_id=ticket_id,
+    ticket_type_id=ticket_type_id,
+    requester_user_id=user_id
+)
 
         messages.success(request, "ส่งคำร้องขอรายงานเรียบร้อยแล้ว")
         return redirect("ticket_success")
@@ -1615,7 +1642,6 @@ Promotion: {promo_name}
                 timezone.now()
             ])
             ticket_id = cursor.fetchone()[0]
-
         # =====================
         # INSERT ticket_data_erp_app
         # =====================
@@ -1683,7 +1709,11 @@ Promotion: {promo_name}
                     user_id,              # users.id (ไม่มี FK แล้ว)
                     timezone.now()
                 ])
-
+                create_ticket_approval_by_ticket_type(
+        ticket_id=ticket_id,
+        ticket_type_id=ticket_type_id,
+        requester_user_id=user_id
+    )
         messages.success(request, "ส่งคำร้อง Active Promotion เรียบร้อยแล้ว")
         return redirect("ticket_success")
 
