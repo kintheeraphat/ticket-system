@@ -1991,6 +1991,13 @@ def team_removeuser(request, team_id, member_id):
 
 def add_approve_line(request):
 
+    user = request.session.get("user")
+    if not user:
+        return redirect("login")
+
+    user_id = user["id"]
+    role_id = user["role_id"]
+
     # =========================
     # SAVE APPROVE LINE
     # =========================
@@ -2005,7 +2012,6 @@ def add_approve_line(request):
 
         with connection.cursor() as cursor:
 
-            # หา flow_no ล่าสุดของ category + team
             cursor.execute("""
                 SELECT COALESCE(MAX(flow_no), 0) + 1
                 FROM tickets.approve_line
@@ -2014,8 +2020,7 @@ def add_approve_line(request):
             """, [category_id, team_id])
             flow_no = cursor.fetchone()[0]
 
-            # insert ทีละ level
-            for idx, user_id in enumerate(approvers, start=1):
+            for idx, user_id_approve in enumerate(approvers, start=1):
                 cursor.execute("""
                     INSERT INTO tickets.approve_line
                     (category_id, team_id, flow_no, level, user_id)
@@ -2025,35 +2030,59 @@ def add_approve_line(request):
                     team_id,
                     flow_no,
                     idx,
-                    user_id
+                    user_id_approve
                 ])
 
         messages.success(request, "บันทึกสายอนุมัติเรียบร้อยแล้ว")
         return redirect("add_approve_line")
 
     # =========================
-    # GET DATA
+    # GET FLOW SUMMARY
     # =========================
     with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT
-                c.name AS category_name,
-                t.name AS team_name,
-                al.category_id,
-                al.team_id,
-                al.flow_no,
-                COUNT(*) AS total_levels
-            FROM tickets.approve_line al
-            JOIN tickets.category c ON c.id = al.category_id
-            JOIN tickets.team t ON t.id = al.team_id
-            GROUP BY
-                c.name, t.name,
-                al.category_id, al.team_id,
-                al.flow_no
-            ORDER BY c.name, t.name, al.flow_no
-        """)
+
+        if role_id in [1, 2]:  # admin / manager
+            cursor.execute("""
+                SELECT
+                    c.name AS category_name,
+                    t.name AS team_name,
+                    al.category_id,
+                    al.team_id,
+                    al.flow_no,
+                    COUNT(*) AS total_levels
+                FROM tickets.approve_line al
+                JOIN tickets.category c ON c.id = al.category_id
+                JOIN tickets.team t ON t.id = al.team_id
+                GROUP BY
+                    c.name, t.name,
+                    al.category_id, al.team_id,
+                    al.flow_no
+                ORDER BY c.name, t.name, al.flow_no
+            """)
+        else:  # user → เห็นเฉพาะทีมที่ตัวเองอยู่
+            cursor.execute("""
+                SELECT
+                    c.name AS category_name,
+                    t.name AS team_name,
+                    al.category_id,
+                    al.team_id,
+                    al.flow_no,
+                    COUNT(*) AS total_levels
+                FROM tickets.approve_line al
+                JOIN tickets.category c ON c.id = al.category_id
+                JOIN tickets.team t ON t.id = al.team_id
+                JOIN tickets.team_members tm ON tm.team_id = t.id
+                WHERE tm.user_id = %s
+                GROUP BY
+                    c.name, t.name,
+                    al.category_id, al.team_id,
+                    al.flow_no
+                ORDER BY c.name, t.name, al.flow_no
+            """, [user_id])
+
         flow_summary = dictfetchall(cursor)
 
+        # filters
         cursor.execute("""
             SELECT DISTINCT name
             FROM tickets.category
@@ -2064,7 +2093,17 @@ def add_approve_line(request):
         cursor.execute("SELECT id, name FROM tickets.category ORDER BY name")
         categories = dictfetchall(cursor)
 
-        cursor.execute("SELECT id, name FROM tickets.team ORDER BY name")
+        # team dropdown
+        if role_id in [1, 2]:
+            cursor.execute("SELECT id, name FROM tickets.team ORDER BY name")
+        else:
+            cursor.execute("""
+                SELECT t.id, t.name
+                FROM tickets.team t
+                JOIN tickets.team_members tm ON tm.team_id = t.id
+                WHERE tm.user_id = %s
+                ORDER BY t.name
+            """, [user_id])
         teams = dictfetchall(cursor)
 
         cursor.execute("""
