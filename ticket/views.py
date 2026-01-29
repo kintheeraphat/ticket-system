@@ -1958,8 +1958,52 @@ def team_removeuser(request, team_id, member_id):
 
     messages.success(request, "ลบสมาชิกออกจากทีมเรียบร้อยแล้ว")
     return redirect("team_adduser", team_id=team_id)
+
 def add_approve_line(request):
 
+    # =========================
+    # SAVE APPROVE LINE
+    # =========================
+    if request.method == "POST":
+        category_id = request.POST.get("category_id")
+        team_id = request.POST.get("team_id")
+        approvers = request.POST.getlist("approver[]")
+
+        if not category_id or not team_id or not approvers:
+            messages.error(request, "กรุณากรอกข้อมูลให้ครบ")
+            return redirect("add_approve_line")
+
+        with connection.cursor() as cursor:
+
+            # หา flow_no ล่าสุดของ category + team
+            cursor.execute("""
+                SELECT COALESCE(MAX(flow_no), 0) + 1
+                FROM tickets.approve_line
+                WHERE category_id = %s
+                  AND team_id = %s
+            """, [category_id, team_id])
+            flow_no = cursor.fetchone()[0]
+
+            # insert ทีละ level
+            for idx, user_id in enumerate(approvers, start=1):
+                cursor.execute("""
+                    INSERT INTO tickets.approve_line
+                    (category_id, team_id, flow_no, level, user_id)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, [
+                    category_id,
+                    team_id,
+                    flow_no,
+                    idx,
+                    user_id
+                ])
+
+        messages.success(request, "บันทึกสายอนุมัติเรียบร้อยแล้ว")
+        return redirect("add_approve_line")
+
+    # =========================
+    # GET DATA
+    # =========================
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT
@@ -1980,7 +2024,6 @@ def add_approve_line(request):
         """)
         flow_summary = dictfetchall(cursor)
 
-        # ใช้สำหรับ dropdown filter (ไม่ซ้ำ)
         cursor.execute("""
             SELECT DISTINCT name
             FROM tickets.category
@@ -2009,6 +2052,7 @@ def add_approve_line(request):
         "teams": teams,
         "users": users,
     })
+
     
 def approval_flow_detail(request, category_id, team_id):
 
