@@ -42,9 +42,8 @@
         </div>
     </div>
 
-
     <!-- ================= ERP DETAIL ================= -->
-    <div class="card shadow-sm">
+    <div class="card shadow-sm mb-4">
         <div class="card-header bg-primary text-white fw-semibold">
             ข้อมูลคำขอ ERP
         </div>
@@ -52,7 +51,6 @@
         <div class="table-responsive">
             <table class="table table-bordered table-sm align-middle mb-0">
 
-                <!-- User Request -->
                 {% if detail.requesters %}
                 <tr>
                     <th class="bg-light" style="width:260px;">
@@ -73,7 +71,6 @@
                 </tr>
                 {% endif %}
 
-                <!-- Module -->
                 {% if detail.module_name %}
                 <tr>
                     <th class="bg-light">Module</th>
@@ -85,20 +82,45 @@
 
             </table>
         </div>
-        <!-- ================= DESCRIPTION ================= -->
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-light fw-semibold">
-                รายละเอียดคำขอ
-            </div>
-            <div class="card-body">
-                {{ ticket.description|linebreaksbr }}
-            </div>
+    </div>
+
+    <!-- ================= DESCRIPTION ================= -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light fw-semibold">
+            รายละเอียดคำขอ
+        </div>
+        <div class="card-body">
+            {{ ticket.description|linebreaksbr }}
         </div>
     </div>
+
+    <!-- ================= APPROVE SECTION ================= -->
+    {% if can_approve %}
+<form method="post" action="{% url 'approve_ticket' ticket.id %}">
+    {% csrf_token %}
+
+    <div class="mb-2">
+        <textarea
+            name="remark"
+            class="form-control"
+            rows="2"
+            placeholder="หมายเหตุ (ถ้ามี)"
+        ></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        ✅ อนุมัติ
+    </button>
+</form>
+{% endif %}
+
+
+    <!-- ================= FOOTER ================= -->
     <div class="mt-4">
         <a href="/tickets" class="btn btn-secondary">
             ← กลับหน้ารายการ
         </a>
     </div>
+
 </div>
-{% endblock %} 
+{% endblock %}

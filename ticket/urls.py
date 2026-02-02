@@ -79,6 +79,17 @@ urlpatterns = [
         name="approval_flow_detail"
     ),
     path("admin/users/", views.manage_user, name="manage_user"),
+     path(
+        "tickets/detail/erp/<int:ticket_id>/",
+        views.tickets_detail_erp,
+        name="tickets_detail_erp"
+    ),
 
+    # approve
+    path(
+        "tickets/approve/<int:ticket_id>/",
+        views.approve_ticket,
+        name="approve_ticket"
+    ),
 
 ] 
