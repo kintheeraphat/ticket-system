@@ -85,6 +85,7 @@ def thai_date(d):
         return ""
     return d.strftime("%d/%m/") + str(d.year + 543)
 
+
 def role_required_role_id(allowed_role_ids):
     def decorator(view_func):
         @wraps(view_func)
@@ -447,7 +448,6 @@ def dashboard(request):
 @login_required_custom
 @role_required_role_id([1, 2, 3])  
 def tickets_list(request):
-
     user = request.session["user"]
     user_id = user["id"]
 
@@ -455,7 +455,7 @@ def tickets_list(request):
     date_range = request.GET.get("date_range", "")
 
     query = """
-        SELECT DISTINCT
+        SELECT
             t.id,
             t.title,
             t.description,
@@ -466,24 +466,23 @@ def tickets_list(request):
             t.create_at,
             s.name        AS ticket_status,
 
-            -- level ที่ user ต้องอนุมัติ (ถ้ามี)
+            t.user_id     AS ticket_owner_id,
+
+            -- level ที่ user อยู่ (ถ้าเป็น approver)
             (
                 SELECT tas.level
                 FROM tickets.ticket_approval_status tas
                 WHERE tas.ticket_id = t.id
                   AND tas.user_id = %s
-                  AND tas.status_id = 7
+                  AND tas.status_id = %s
                 LIMIT 1
             ) AS approve_level,
 
+            -- ลบได้หรือไม่ (owner + Waiting for Approve)
             (
-                SELECT tas.status_id
-                FROM tickets.ticket_approval_status tas
-                WHERE tas.ticket_id = t.id
-                  AND tas.user_id = %s
-                ORDER BY tas.level
-                LIMIT 1
-            ) AS approve_status_id
+                t.user_id = %s
+                AND t.status_id = %s
+            ) AS can_delete
 
         FROM tickets.tickets t
         JOIN tickets.users u
@@ -497,33 +496,43 @@ def tickets_list(request):
 
         WHERE
         (
-            -- ผู้ร้องขอ
-            t.user_id = %s
+            -- เจ้าของคำขอ (ยังมี pending)
+            (
+                t.user_id = %s
+                AND EXISTS (
+                    SELECT 1
+                    FROM tickets.ticket_approval_status tas
+                    WHERE tas.ticket_id = t.id
+                      AND tas.status_id = %s
+                )
+            )
 
             OR
 
-            -- ผู้ที่ถึงคิวอนุมัติ
+            -- ผู้อนุมัติ (ถึงคิว)
             EXISTS (
                 SELECT 1
                 FROM tickets.ticket_approval_status tas
                 WHERE tas.ticket_id = t.id
                   AND tas.user_id = %s
-                  AND tas.status_id = 7
+                  AND tas.status_id = %s
             )
         )
     """
 
     params = [
-        user_id,  # approve_level
-        user_id,  # approve_status_id
-        user_id,  # requester
-        user_id,  # approver
+        user_id, APPROVE_PENDING,     # approve_level
+        user_id, DOC_WAITING_APPROVE, # can_delete
+        user_id, APPROVE_PENDING,     # requester
+        user_id, APPROVE_PENDING,     # approver
     ]
 
+    # ---------- SEARCH ----------
     if search:
         query += " AND (t.id::text ILIKE %s OR t.title ILIKE %s)"
         params.extend([f"%{search}%", f"%{search}%"])
 
+    # ---------- DATE RANGE ----------
     if date_range:
         try:
             start_str, end_str = date_range.split(" ถึง ")
@@ -558,16 +567,24 @@ def tickets_list(request):
             "ticket_type_id": row[5],
             "requester": row[6],
             "created_at": created_at,
-            "ticket_status": row[8],
+            "status": row[8],
 
-            "approve_level": row[9],
-            "approve_status_id": row[10],
-            "is_my_turn": (row[9] is not None),
+            # approval
+            "approve_level": row[10],
+            "is_my_turn": row[10] is not None,
+
+            # delete
+            "can_delete": row[11],
         })
 
-    return render(request, "tickets_list.html", {
-        "tickets": tickets_data,
-    })
+    return render(
+        request,
+        "tickets_list.html",
+        {
+            "tickets": tickets_data,
+        }
+    )
+    
     
 @login_required_custom
 @role_required_role_id([1, 2, 3])  
@@ -1016,6 +1033,9 @@ def tickets_detail_repairs(request, ticket_id):
 @login_required_custom
 @role_required_role_id([1, 2, 3])  
 def tickets_detail_report(request, ticket_id):
+
+    user_id = request.session["user"]["id"]
+
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT
@@ -1032,7 +1052,7 @@ def tickets_detail_report(request, ticket_id):
             JOIN tickets.tickets t 
                 ON t.id = e.ticket_id
             LEFT JOIN tickets.users u 
-                ON u.id = t.user_id      -- ✅ แก้ตรงนี้
+                ON u.id = t.user_id
             WHERE e.report_access IS TRUE
               AND t.id = %s
             ORDER BY e.id DESC
@@ -1044,10 +1064,29 @@ def tickets_detail_report(request, ticket_id):
         if not data:
             raise Http404("Report ticket not found")
 
+    # timezone
     created_at = data["ticket_create_at"]
     if created_at and timezone.is_naive(created_at):
         created_at = timezone.make_aware(created_at, dt_timezone.utc)
     created_at = timezone.localtime(created_at)
+
+    # -----------------------------
+    # ตรวจสิทธิ์ approve
+    # -----------------------------
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT level
+            FROM tickets.ticket_approval_status
+            WHERE ticket_id = %s
+              AND user_id = %s
+              AND status_id = 7
+            LIMIT 1
+        """, [ticket_id, user_id])
+
+        approve_row = cursor.fetchone()
+
+    can_approve = bool(approve_row)
+    my_level = approve_row[0] if approve_row else None
 
     return render(
         request,
@@ -1060,13 +1099,18 @@ def tickets_detail_report(request, ticket_id):
                 "create_at": created_at,
                 "user_name": data["full_name"],
                 "department": data["department"],
+                "ticket_type_id": data["ticket_type_id"],
             },
             "detail": {
                 "old_value": data["old_value"],
                 "new_value": data["new_value"],
-            }
+            },
+            # 👇 ส่งให้ template
+            "can_approve": can_approve,
+            "my_level": my_level,
         }
     )
+    
 def tickets_detail_newapp(request, ticket_id):
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -2422,3 +2466,31 @@ def approve_ticket(request, ticket_id):
         messages.error(request, str(e))
 
     return redirect("tickets_list")
+
+
+def delete_ticket(request, ticket_id):
+    user_id = request.session["user"]["id"]
+
+    with connection.cursor() as cursor:
+        # เช็กว่าเป็นเจ้าของ + ยัง Waiting for Approve
+        cursor.execute("""
+            DELETE FROM tickets.tickets
+            WHERE id = %s
+              AND user_id = %s
+              AND status_id = %s
+        """, [
+            ticket_id,
+            user_id,
+            DOC_WAITING_APPROVE
+        ])
+
+        if cursor.rowcount == 0:
+            messages.error(
+                request,
+                "ไม่สามารถลบได้ เนื่องจากสถานะไม่ใช่ Waiting for Approve"
+            )
+            return redirect("tickets_list")
+
+    messages.success(request, "ลบคำขอเรียบร้อย")
+    return redirect("tickets_list")
+

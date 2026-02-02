@@ -4,302 +4,250 @@
 
 {% block content %}
 
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
 
-    <style>
-        #ticketTable tbody tr {
-            cursor: pointer;
-        }
+<style>
+    #ticketTable tbody tr {
+        cursor: pointer;
+    }
 
-        #ticketTable tbody tr:hover {
-            background-color: #f9fafb;
-        }
+    #ticketTable tbody tr:hover {
+        background-color: #f9fafb;
+    }
 
-        .ticket-type-box small {
-            font-size: 0.75rem;
-        }
-    </style>
+    .ticket-type-box small {
+        font-size: 0.75rem;
+    }
+</style>
 
-    <!-- ================= HEADER ================= -->
-    <div class="d-flex justify-content-between align-items-center mb-4 pt-2">
-        <div>
-            <h2 class="fw-bold mb-1">
-                {% if is_user %}
-                    รายการคำขอของฉัน
-                {% else %}
-                    รายการคำขอทั้งหมด
-                {% endif %}
-            </h2>
-
-            <p class="text-muted small mb-0">
-                ตรวจสอบและบริหารจัดการสถานะรายการแจ้งซ่อมหรือคำร้องขอภายในระบบ
-            </p>
-        </div>
-    </div>
-
-    <!-- ================= FILTER ================= -->
-    <div class="filter-panel mb-4">
-        <form class="row g-3 align-items-end" onsubmit="return false;">
-
-            <div class="col-md-2">
-                <label class="form-label small text-muted">สถานะ</label>
-                <select id="statusFilter" class="form-select">
-                    <option value="">ทุกสถานะ</option>
-                    <option value="รอดำเนินการ">รอดำเนินการ</option>
-                    <option value="รออนุมัติ">รออนุมัติ</option>
-                    <option value="ดราฟ">ดราฟ</option>
-                    <option value="เสร็จสิ้นแล้ว">เสร็จสิ้นแล้ว</option>
-                </select>
-            </div>
-
-            {% if not is_user %}
-            <div class="col-md-3">
-                <label class="form-label small text-muted">ผู้รับผิดชอบ</label>
-                <select id="assigneeFilter" class="form-select">
-                    <option value="">ทุกคน</option>
-                    {% for t in tickets %}
-                        {% if t.assignee != "ยังไม่มอบหมาย" %}
-                            <option value="{{ t.assignee }}">{{ t.assignee }}</option>
-                        {% endif %}
-                    {% endfor %}
-                </select>
-            </div>
+<!-- ================= HEADER ================= -->
+<div class="d-flex justify-content-between align-items-center mb-4 pt-2">
+    <div>
+        <h2 class="fw-bold mb-1">
+            {% if is_user %}
+            รายการคำขอของฉัน
+            {% else %}
+            รายการคำขอทั้งหมด
             {% endif %}
-
-
-            <div class="col-md-2">
-                <label class="form-label small text-muted">ช่วงเวลา</label>
-                <select id="quickDateFilter" class="form-select">
-                    <option value="">เดือนปัจจุบัน</option>
-                    <option value="7">7 วันที่แล้ว</option>
-                    <option value="14">14 วันที่แล้ว</option>
-                    <option value="last_month">เดือนที่แล้ว</option>
-                </select>
-            </div>
-
-            <div class="col-md-2">
-                <label class="form-label small text-muted">จากวันที่</label>
-                <input type="date" id="startDate" class="form-control">
-            </div>
-
-            <div class="col-md-2">
-                <label class="form-label small text-muted">ถึงวันที่</label>
-                <input type="date" id="endDate" class="form-control">
-            </div>
-
-            <div class="col-md-1">
-                <button id="clearFilters" class="btn btn-outline-secondary w-100">
-                    ล้าง
-                </button>
-            </div>
-
-        </form>
+        </h2>
+        <p class="text-muted small mb-0">
+            ตรวจสอบและบริหารจัดการสถานะคำขอภายในระบบ
+        </p>
     </div>
+</div>
 
-    <!-- ================= TABLE ================= -->
-    <div class="dashboard-table overflow-hidden">
-        <div class="table-responsive">
+<!-- ================= TABLE ================= -->
+<div class="dashboard-table overflow-hidden">
+    <div class="table-responsive">
 
-            <table id="ticketTable" class="table table-hover align-middle mb-0">
+        <table id="ticketTable" class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th class="text-center">#</th>
+                    <th>ผู้แจ้ง</th>
+                    <th>หมวดหมู่</th>
+                    <th>รายละเอียดคำขอ</th>
+                    <th>วันที่</th>
+                    <th class="text-center">สถานะ</th>
+                    <th>ผู้รับผิดชอบ</th>
+                    <th class="text-end">จัดการ</th>
+                </tr>
+            </thead>
 
-                <thead>
-                    <tr>
-                        <th class="text-center">#</th>
-                        <th>ผู้แจ้ง</th>
-                        <th>หมวดหมู่</th>
-                        <th>รายละเอียดคำขอ</th>
-                        <th>วันที่</th>
-                        <th class="text-center">สถานะ</th>
-                        <th>ผู้รับผิดชอบ</th>
-                        <th></th>
-                    </tr>
-                </thead>
+            <tbody>
+                {% for t in tickets %}
+                <tr data-href="
+                    {% if t.ticket_type_id == 3 %}
+                        {% url 'tickets_detail_vpn' t.id %}
+                    {% elif t.ticket_type_id == 4 %}
+                        {% url 'tickets_detail_repairs' t.id %}
+                    {% elif t.ticket_type_id == 11 %}
+                        {% url 'tickets_detail_report' t.id %}
+                    {% elif t.ticket_type_id == 9 or t.ticket_type_id == 10 %}
+                        {% url 'tickets_detail_newapp' t.id %}
+                    {% else %}
+                        {% url 'tickets_detail_erp' t.id %}
+                    {% endif %}
+                ">
 
-                <tbody>
-                    {% for t in tickets %}
-                    <tr data-href="
-{% if t.ticket_type_id == 3 %}
-    {% url 'tickets_detail_vpn' t.id %}
-{% elif t.ticket_type_id == 4 %}
-    {% url 'tickets_detail_repairs' t.id %}
-{% elif t.ticket_type_id == 11 %}
-    {% url 'tickets_detail_report' t.id %}
-{% elif t.ticket_type_id == 9 or t.ticket_type_id == 10 %}
-    {% url 'tickets_detail_newapp' t.id %}
-    {% elif t.ticket_type_id == 12 %}
-    {% url 'active_promotion_detail' t.id %}
-{% else %}
-    {% url 'tickets_detail_erp' t.id %}
-{% endif %}
+                    <!-- ID -->
+                    <td class="text-center fw-bold text-muted">
+                        #{{ t.id }}
+                    </td>
 
-">
-                        </a>
-                        <td class="text-center fw-bold text-muted">#{{ t.id }}</td>
+                    <!-- Requester -->
+                    <td>
+                        <div class="fw-semibold">{{ t.requester }}</div>
+                    </td>
 
-                        <td>
-                            <div class="fw-semibold">{{ t.requester }}</div>
-                            {% if t.department %}
-                            <small class="text-muted">{{ t.department }}</small>
-                            {% endif %}
-                        </td>
+                    <!-- Category -->
+                    <td>
+                        <div class="ticket-type-box">
+                            <div class="fw-semibold">{{ t.category }}</div>
+                            <small class="text-muted">{{ t.ticket_type }}</small>
+                        </div>
+                    </td>
 
-                        <td>
-                            <div class="ticket-type-box">
-                                <div class="fw-semibold">{{ t.category }}</div>
-                                <small class="text-muted">{{ t.ticket_type }}</small>
-                            </div>
-                        </td>
+                    <!-- Title -->
+                    <td>
+                        <div class="fw-bold">{{ t.title }}</div>
+                    </td>
 
-                        <td>
-                            <div class="fw-bold">{{ t.title }}</div>
-                        </td>
+                    <!-- Date -->
+                    <td data-date="{{ t.created_at|localtime|date:'Y-m-d H:i:s' }}">
+                        <div>{{ t.created_at|localtime|date:"d M Y" }}</div>
+                        <small class="text-muted">
+                            {{ t.created_at|localtime|date:"H:i" }} น.
+                        </small>
+                    </td>
 
-                        <td data-date="{{ t.created_at|localtime|date:'Y-m-d H:i:s' }}">
-                            <div>{{ t.created_at|localtime|date:"d M Y" }}</div>
-                            <small class="text-muted">
-                                {{ t.created_at|localtime|date:"H:i" }} น.
-                            </small>
-                        </td>
+                    <!-- Status -->
+                    <td class="text-center">
+                        <span class="badge-status">
+                            {{ t.status }}
+                        </span>
+                    </td>
 
-                        <td class="text-center">
-                            <span class="badge-status
-            {% if t.status == 'รอดำเนินการ' %}status-pending
-            {% elif t.status == 'รออนุมัติ' %}status-approve
-            {% elif t.status == 'ดราฟ' %}status-draft
-            {% else %}status-done{% endif %}">
-                                {{ t.status }}
-                            </span>
-                        </td>
+                    <!-- Assignee -->
+                    <td>
+                        {% if t.assignee %}
+                        <span class="assignee-pill">{{ t.assignee }}</span>
+                        {% else %}
+                        <small class="text-muted">ยังไม่มอบหมาย</small>
+                        {% endif %}
+                    </td>
 
-                        <td>
-                            {% if t.assignee %}
-                            <span class="assignee-pill">{{ t.assignee }}</span>
+                    <!-- Actions -->
+                    <td class="text-end">
+
+                        <!-- ดูรายละเอียด -->
+                        <a href="
+                            {% if t.ticket_type_id == 3 %}
+                                {% url 'tickets_detail_vpn' t.id %}
+                            {% elif t.ticket_type_id == 4 %}
+                                {% url 'tickets_detail_repairs' t.id %}
+                            {% elif t.ticket_type_id == 11 %}
+                                {% url 'tickets_detail_report' t.id %}
+                            {% elif t.ticket_type_id == 9 or t.ticket_type_id == 10 %}
+                                {% url 'tickets_detail_newapp' t.id %}
                             {% else %}
-                            <small class="text-muted">ยังไม่มอบหมาย</small>
+                                {% url 'tickets_detail_erp' t.id %}
                             {% endif %}
-                        </td>
+                        " class="btn btn-sm btn-outline-primary me-1">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
 
-                        <td class="text-end">
-                            <a href="
-{% if t.ticket_type_id == 3 %}
-    {% url 'tickets_detail_vpn' t.id %}
-{% elif t.ticket_type_id == 4 %}
-    {% url 'tickets_detail_repairs' t.id %}
-{% elif t.ticket_type_id == 11 %}
-    {% url 'tickets_detail_report' t.id %}
-{% elif t.ticket_type_id == 9 or t.ticket_type_id == 10 %}
-    {% url 'tickets_detail_newapp' t.id %}
-{% else %}
-    {% url 'tickets_detail_erp' t.id %}
-{% endif %}
+                        <!-- ลบ -->
+                        {% if t.can_delete %}
+                        <form method="post" action="{% url 'delete_ticket' t.id %}" style="display:inline"
+                            onsubmit="return confirm('ยืนยันการลบคำขอนี้ ?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
 
-" class="action-btn">
-                                <i class="fas fa-chevron-right"></i>
-                            </a>
-
-                        </td>
-
-
-                    </tr>
-                    {% endfor %}
-                </tbody>
-
-            </table>
-        </div>
+        </table>
     </div>
+</div>
 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 
-    <script>
-        $(function () {
+<script>
+    $(function () {
 
-            const today = new Date();
+        const today = new Date();
 
-            $.fn.dataTable.ext.search.push(function (settings, data, index) {
+        $.fn.dataTable.ext.search.push(function (settings, data, index) {
 
-                const row = settings.aoData[index].nTr;
-                const dateStr = $(row).find('[data-date]').data('date');
-                if (!dateStr) return true;
+            const row = settings.aoData[index].nTr;
+            const dateStr = $(row).find('[data-date]').data('date');
+            if (!dateStr) return true;
 
-                const rowDate = new Date(dateStr.replace(' ', 'T'));
-                const quick = $('#quickDateFilter').val();
-                const startVal = $('#startDate').val();
-                const endVal = $('#endDate').val();
+            const rowDate = new Date(dateStr.replace(' ', 'T'));
+            const quick = $('#quickDateFilter').val();
+            const startVal = $('#startDate').val();
+            const endVal = $('#endDate').val();
 
-                // เลือกช่วงวันที่เอง
-                if (startVal || endVal) {
-                    const start = startVal ? new Date(startVal + ' 00:00:00') : null;
-                    const end = endVal ? new Date(endVal + ' 23:59:59') : null;
-                    if (start && rowDate < start) return false;
-                    if (end && rowDate > end) return false;
-                    return true;
-                }
-
-                // เดือนปัจจุบัน
-                if (quick === "") {
-                    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-                    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
-                    return rowDate >= startOfMonth && rowDate <= endOfMonth;
-                }
-
-                // 7 / 14 วัน
-                if (quick === "7" || quick === "14") {
-                    const days = parseInt(quick);
-                    const from = new Date();
-                    from.setDate(today.getDate() - days);
-                    return rowDate >= from && rowDate <= today;
-                }
-
-                // เดือนที่แล้ว
-                if (quick === "last_month") {
-                    const startOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-                    const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0, 23, 59, 59);
-                    return rowDate >= startOfLastMonth && rowDate <= endOfLastMonth;
-                }
-
+            // เลือกช่วงวันที่เอง
+            if (startVal || endVal) {
+                const start = startVal ? new Date(startVal + ' 00:00:00') : null;
+                const end = endVal ? new Date(endVal + ' 23:59:59') : null;
+                if (start && rowDate < start) return false;
+                if (end && rowDate > end) return false;
                 return true;
-            });
+            }
 
-            const table = $('#ticketTable').DataTable({
-                pageLength: 10,
-                order: [[4, 'desc']],
-                language: { zeroRecords: "ไม่พบข้อมูล" }
-            });
+            // เดือนปัจจุบัน
+            if (quick === "") {
+                const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
+                return rowDate >= startOfMonth && rowDate <= endOfMonth;
+            }
 
-            $('#ticketTable tbody').on('click', 'tr', function (e) {
-                if ($(e.target).closest('a,button').length) return;
-                window.location = $(this).data('href');
-            });
+            // 7 / 14 วัน
+            if (quick === "7" || quick === "14") {
+                const days = parseInt(quick);
+                const from = new Date();
+                from.setDate(today.getDate() - days);
+                return rowDate >= from && rowDate <= today;
+            }
 
-            $('#statusFilter').on('change', () => table.column(5).search($('#statusFilter').val()).draw());
-            $('#assigneeFilter').on('change', () => table.column(6).search($('#assigneeFilter').val()).draw());
+            // เดือนที่แล้ว
+            if (quick === "last_month") {
+                const startOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0, 23, 59, 59);
+                return rowDate >= startOfLastMonth && rowDate <= endOfLastMonth;
+            }
 
-            $('#quickDateFilter').on('change', function () {
-                $('#startDate,#endDate').val('');
-                table.draw();
-            });
+            return true;
+        });
 
-            $('#startDate,#endDate').on('change', function () {
-                $('#quickDateFilter').val('');
-                table.draw();
-            });
+        const table = $('#ticketTable').DataTable({
+            pageLength: 10,
+            order: [[4, 'desc']],
+            language: { zeroRecords: "ไม่พบข้อมูล" }
+        });
 
-            $('#clearFilters').on('click', function () {
-                $('#statusFilter,#assigneeFilter,#quickDateFilter,#startDate,#endDate').val('');
-                table.search('').columns().search('');
-                table.draw();
-            });
+        $('#ticketTable tbody').on('click', 'tr', function (e) {
+            if ($(e.target).closest('a,button').length) return;
+            window.location = $(this).data('href');
+        });
 
+        $('#statusFilter').on('change', () => table.column(5).search($('#statusFilter').val()).draw());
+        $('#assigneeFilter').on('change', () => table.column(6).search($('#assigneeFilter').val()).draw());
+
+        $('#quickDateFilter').on('change', function () {
+            $('#startDate,#endDate').val('');
             table.draw();
         });
-        {% if not is_user %}
-        $('#assigneeFilter').on('change', () =>
-            table.column(6).search($('#assigneeFilter').val()).draw()
-        );
-        {% endif %}
 
-    </script>
+        $('#startDate,#endDate').on('change', function () {
+            $('#quickDateFilter').val('');
+            table.draw();
+        });
+
+        $('#clearFilters').on('click', function () {
+            $('#statusFilter,#assigneeFilter,#quickDateFilter,#startDate,#endDate').val('');
+            table.search('').columns().search('');
+            table.draw();
+        });
+
+        table.draw();
+    });
+    {% if not is_user %}
+    $('#assigneeFilter').on('change', () =>
+        table.column(6).search($('#assigneeFilter').val()).draw()
+    );
+    {% endif %}
+
+</script>
 
 {% endblock %}

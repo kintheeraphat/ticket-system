@@ -87,5 +87,6 @@ urlpatterns = [
         views.approve_ticket,
         name="approve_ticket"
     ),
+   path("tickets/delete/<int:ticket_id>/", views.delete_ticket, name="delete_ticket"),
 
 ] 
