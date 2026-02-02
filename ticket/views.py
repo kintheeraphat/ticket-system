@@ -444,53 +444,80 @@ def dashboard(request):
 def tickets_list(request):
 
     user = request.session["user"]
-    role_id = user["role_id"]   # ✅ ใช้ role_id
     user_id = user["id"]
 
     search = request.GET.get("search", "")
-    status = request.GET.get("status", "")
-    assignee = request.GET.get("assignee", "")
     date_range = request.GET.get("date_range", "")
 
     query = """
-        SELECT t.id,
-               t.title,
-               t.description,
-               c.name AS category,
-               tt.name AS ticket_type,
-               t.ticket_type_id,
-               u.username AS requester,
-               a.username AS assignee,
-               t.create_at,
-               s.name AS status
+        SELECT DISTINCT
+            t.id,
+            t.title,
+            t.description,
+            c.name        AS category,
+            tt.name       AS ticket_type,
+            t.ticket_type_id,
+            u.username    AS requester,
+            t.create_at,
+            s.name        AS ticket_status,
+
+            -- level ที่ user ต้องอนุมัติ (ถ้ามี)
+            (
+                SELECT tas.level
+                FROM tickets.ticket_approval_status tas
+                WHERE tas.ticket_id = t.id
+                  AND tas.user_id = %s
+                  AND tas.status_id = 7
+                LIMIT 1
+            ) AS approve_level,
+
+            (
+                SELECT tas.status_id
+                FROM tickets.ticket_approval_status tas
+                WHERE tas.ticket_id = t.id
+                  AND tas.user_id = %s
+                ORDER BY tas.level
+                LIMIT 1
+            ) AS approve_status_id
+
         FROM tickets.tickets t
-        LEFT JOIN tickets.users u ON u.id = t.user_id
-        LEFT JOIN tickets.users a ON a.id = t.assign_id
-        LEFT JOIN tickets.ticket_type tt ON tt.id = t.ticket_type_id
-        LEFT JOIN tickets.category c ON c.id = tt.category
-        LEFT JOIN tickets.status s ON s.id = t.status_id
-        WHERE 1=1
+        JOIN tickets.users u
+            ON u.id = t.user_id
+        JOIN tickets.ticket_type tt
+            ON tt.id = t.ticket_type_id
+        JOIN tickets.category c
+            ON c.id = tt.category
+        JOIN tickets.status s
+            ON s.id = t.status_id
+
+        WHERE
+        (
+            -- ผู้ร้องขอ
+            t.user_id = %s
+
+            OR
+
+            -- ผู้ที่ถึงคิวอนุมัติ
+            EXISTS (
+                SELECT 1
+                FROM tickets.ticket_approval_status tas
+                WHERE tas.ticket_id = t.id
+                  AND tas.user_id = %s
+                  AND tas.status_id = 7
+            )
+        )
     """
 
-    params = []
-
-    # 🔒 user (role_id = 3) เห็นเฉพาะของตัวเอง
-    if role_id == 3:
-        query += " AND t.user_id = %s"
-        params.append(user_id)
+    params = [
+        user_id,  # approve_level
+        user_id,  # approve_status_id
+        user_id,  # requester
+        user_id,  # approver
+    ]
 
     if search:
         query += " AND (t.id::text ILIKE %s OR t.title ILIKE %s)"
         params.extend([f"%{search}%", f"%{search}%"])
-
-    if status:
-        query += " AND s.name = %s"
-        params.append(status)
-
-    # 🔓 admin / manager ดูตาม assignee ได้
-    if assignee and role_id != 3:
-        query += " AND a.username = %s"
-        params.append(assignee)
 
     if date_range:
         try:
@@ -511,10 +538,9 @@ def tickets_list(request):
 
     tickets_data = []
     for row in rows:
-        created_at = row[8]
-
+        created_at = row[7]
         if created_at and timezone.is_naive(created_at):
-            created_at = timezone.make_aware(created_at, dt_timezone.utc)
+            created_at = timezone.make_aware(created_at)
         if created_at:
             created_at = timezone.localtime(created_at)
 
@@ -526,14 +552,16 @@ def tickets_list(request):
             "ticket_type": row[4],
             "ticket_type_id": row[5],
             "requester": row[6],
-            "assignee": row[7] or "ยังไม่มอบหมาย",
             "created_at": created_at,
-            "status": row[9],
+            "ticket_status": row[8],
+
+            "approve_level": row[9],
+            "approve_status_id": row[10],
+            "is_my_turn": (row[9] is not None),
         })
 
     return render(request, "tickets_list.html", {
         "tickets": tickets_data,
-        "is_user": role_id == 3,   # ✅ template ใช้ role_id
     })
     
 @login_required_custom
