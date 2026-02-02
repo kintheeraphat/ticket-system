@@ -887,6 +887,8 @@ def tickets_detail_erp(request, ticket_id):
 
 def tickets_detail_vpn(request, ticket_id):
 
+    user_id = request.session["user"]["id"]
+
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT
@@ -901,9 +903,8 @@ def tickets_detail_vpn(request, ticket_id):
                 v.vpn_reason
             FROM tickets.ticket_data_vpn v
             JOIN tickets.tickets t ON t.id = v.ticket_id
-            JOIN tickets.users u on u.id = t.user_id 
-            where t.id = %s 
-        
+            JOIN tickets.users u ON u.id = t.user_id 
+            WHERE t.id = %s
         """, [ticket_id])
 
         data = dictfetchone(cursor)
@@ -912,37 +913,38 @@ def tickets_detail_vpn(request, ticket_id):
             raise Http404("VPN Ticket not found")
 
     # -----------------------------
-    # แยก uservpn (ขึ้นบรรทัด)
+    # VPN users
     # -----------------------------
-    vpn_user_list = []
+    vpn_users = []
     if data.get("uservpn"):
-        vpn_user_list = [
-            u.strip()
-            for u in data["uservpn"].splitlines()
-            if u.strip()
-        ]
+        vpn_user_list = [u.strip() for u in data["uservpn"].splitlines() if u.strip()]
+        dept_list = []
+        if data.get("department"):
+            dept_list = [d.strip() for d in data["department"].split(",") if d.strip()]
+
+        for i, name in enumerate(vpn_user_list):
+            vpn_users.append({
+                "name": name,
+                "department": dept_list[i] if i < len(dept_list) else ""
+            })
 
     # -----------------------------
-    # แยก department (คั่นด้วย ,)
+    # ตรวจสิทธิ์ approve
     # -----------------------------
-    department_list = []
-    if data.get("department"):
-        department_list = [
-            d.strip()
-            for d in data["department"].split(",")
-            if d.strip()
-        ]
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT level
+            FROM tickets.ticket_approval_status
+            WHERE ticket_id = %s
+              AND user_id = %s
+              AND status_id = 7
+            LIMIT 1
+        """, [ticket_id, user_id])
 
-    # -----------------------------
-    # จับคู่ user + department
-    # -----------------------------
-    vpn_users_with_department = []
-    for i, name in enumerate(vpn_user_list):
-        dept = department_list[i] if i < len(department_list) else ""
-        vpn_users_with_department.append({
-            "name": name,
-            "department": dept
-        })
+        approve_row = cursor.fetchone()
+
+    can_approve = bool(approve_row)
+    my_level = approve_row[0] if approve_row else None
 
     return render(request, "tickets_form/tickets_detail_vpn.html", {
         "ticket": {
@@ -954,10 +956,14 @@ def tickets_detail_vpn(request, ticket_id):
             "ticket_type_id": data["ticket_type_id"],
         },
         "detail": {
-            "vpn_users": vpn_users_with_department,
+            "vpn_users": vpn_users,
             "vpn_reason": data["vpn_reason"],
-        }
+        },
+        # 👇 สำคัญ
+        "can_approve": can_approve,
+        "my_level": my_level,
     })
+
 
 def tickets_detail_repairs(request, ticket_id):
     query = """
