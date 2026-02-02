@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3 class="mb-4">จัดการผู้ใช้งาน (Manage Users)</h3>
+
+<table class="table table-bordered table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>ID</th>
+            <th>ERP ID</th>
+            <th>Username</th>
+            <th>ชื่อ-นามสกุล</th>
+            <th>Role</th>
+            <th>สถานะ</th>
+            <th>จัดการ</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for u in users %}
+        <tr>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="user_id" value="{{ u.id }}">
+
+                <td>{{ u.id }}</td>
+                <td>{{ u.erp_user_id|default:"-" }}</td>
+                <td>{{ u.username }}</td>
+                <td>{{ u.full_name }}</td>
+
+                <td>
+                    <select name="role_id" class="form-select form-select-sm">
+                        {% for r in roles %}
+                            <option value="{{ r.id }}"
+                                {% if r.role_name == u.role_name %}selected{% endif %}>
+                                {{ r.role_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </td>
+
+                <td class="text-center">
+                    <input type="checkbox"
+                           name="is_active"
+                           value="1"
+                           {% if u.is_active %}checked{% endif %}>
+                </td>
+
+                <td>
+                    <button class="btn btn-sm btn-primary">
+                        บันทึก
+                    </button>
+                </td>
+            </form>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="7" class="text-center text-muted">
+                ไม่พบผู้ใช้งาน
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

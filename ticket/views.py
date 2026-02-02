@@ -298,20 +298,22 @@ def manage_user(request):
             SELECT
                 u.id,
                 u.erp_user_id,
-                u.username      AS erp_name,
+                u.username,
+                u.full_name,
                 u.is_active,
-                r.id            AS role_id,
-                r.name          AS role_name
+                r.role_name AS role_name
             FROM tickets.users u
             LEFT JOIN tickets.roles r ON r.id = u.role_id
             ORDER BY u.id
+
         """)
         users = dictfetchall(cursor)
 
         cursor.execute("""
-            SELECT id, name
+            SELECT id, role_name
             FROM tickets.roles
             ORDER BY id
+
         """)
         roles = dictfetchall(cursor)
 
@@ -1623,17 +1625,11 @@ def report_form(request):
 
 def active_promotion_form(request):
 
-    # =====================
-    # CHECK LOGIN
-    # =====================
     if "user" not in request.session:
         return redirect("login")
 
     user_id = request.session["user"]["id"]
 
-    # =====================
-    # SUBMIT FORM
-    # =====================
     if request.method == "POST":
 
         promo_name  = request.POST.get("promo_name", "").strip()
@@ -1646,9 +1642,6 @@ def active_promotion_form(request):
             messages.error(request, "กรุณากรอกข้อมูลให้ครบถ้วน")
             return render(request, "tickets_form/active_promotion_form.html")
 
-        # =====================
-        # PARSE DATE (d/m/Y)
-        # =====================
         try:
             start_date = datetime.strptime(start_raw, "%d/%m/%Y").date()
             end_date   = datetime.strptime(end_raw, "%d/%m/%Y").date()
@@ -1656,12 +1649,8 @@ def active_promotion_form(request):
             messages.error(request, "รูปแบบวันที่ไม่ถูกต้อง")
             return render(request, "tickets_form/active_promotion_form.html")
 
-        # =====================
-        # PREPARE TICKET
-        # =====================
         title = "Active Promotion Package"
-        description = f"""
-Promotion: {promo_name}
+        description = f"""Promotion: {promo_name}
 แผนก: {department}
 ช่วงเวลา: {start_raw} - {end_raw}
 
@@ -1670,112 +1659,50 @@ Promotion: {promo_name}
 """.strip()
 
         status_id = 1
-        ticket_type_id = 12   # Active Promotion
+        ticket_type_id = 12
 
-        # =====================
-        # INSERT tickets
-        # =====================
         with connection.cursor() as cursor:
+            # 1️⃣ insert tickets
+            cursor.execute("""
+                INSERT INTO tickets.tickets
+                (title, description, user_id, status_id, ticket_type_id, department, create_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+            """, [
+                title,
+                description,
+                user_id,
+                status_id,
+                ticket_type_id,
+                department,
+                timezone.now()
+            ])
+            ticket_id = cursor.fetchone()[0]
+
+            # 2️⃣ insert promotion data
             cursor.execute("""
                 INSERT INTO tickets.ticket_data_erp_app
-                (
-                    ticket_id,
-                    promo_name,
-                    start_date,
-                    end_date,
-                    department,
-                    reason
-                )
-                VALUES (%s, %s, %s, %s, %s, %s)
+                (ticket_id, promo_name, start_date, end_date, reason)
+                VALUES (%s, %s, %s, %s, %s)
             """, [
                 ticket_id,
                 promo_name,
                 start_date,
                 end_date,
-                department,
                 reason
             ])
 
-            ticket_id = cursor.fetchone()[0]
-        # =====================
-        # INSERT ticket_data_erp_app
-        # =====================
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                INSERT INTO tickets.ticket_data_erp_app
-                (
-                    ticket_id,
-                    promo_name,
-                    start_date,
-                    end_date
-                )
-                VALUES (%s, %s, %s, %s)
-            """, [
-                ticket_id,
-                promo_name,
-                start_date,
-                end_date
-            ])
-
-        # =====================
-        # SAVE FILES (FIXED)
-        # =====================
-        files = request.FILES.getlist("files")
-
-        # path สำหรับเก็บไฟล์จริง
-        upload_dir = os.path.join(
-            settings.MEDIA_ROOT,
-            "tickets",
-            str(ticket_id)
+        create_ticket_approval_by_ticket_type(
+            ticket_id=ticket_id,
+            ticket_type_id=ticket_type_id,
+            requester_user_id=user_id
         )
-        os.makedirs(upload_dir, exist_ok=True)
 
-        for f in files:
-            real_path = os.path.join(upload_dir, f.name)
-
-            with open(real_path, "wb+") as destination:
-                for chunk in f.chunks():
-                    destination.write(chunk)
-
-            # path สำหรับเก็บลง DB (relative only)
-            db_file_path = f"tickets/{ticket_id}/{f.name}"
-
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO tickets.ticket_files
-                    (
-                        ticket_id,
-                        ref_type,
-                        file_name,
-                        file_path,
-                        file_type,
-                        file_size,
-                        uploaded_by,
-                        create_at
-                    )
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                """, [
-                    ticket_id,
-                    "ACTIVE_PROMOTION",
-                    f.name,
-                    db_file_path,
-                    f.content_type,
-                    f.size,
-                    user_id,              # users.id (ไม่มี FK แล้ว)
-                    timezone.now()
-                ])
-                create_ticket_approval_by_ticket_type(
-        ticket_id=ticket_id,
-        ticket_type_id=ticket_type_id,
-        requester_user_id=user_id
-    )
         messages.success(request, "ส่งคำร้อง Active Promotion เรียบร้อยแล้ว")
         return redirect("ticket_success")
 
-    # =====================
-    # LOAD PAGE
-    # =====================
     return render(request, "tickets_form/active_promotion_form.html")
+
 
     
 
