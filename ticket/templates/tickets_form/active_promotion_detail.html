@@ -5,64 +5,122 @@
 {% block content %}
 <div class="dashboard-table shadow-sm p-4 bg-white rounded">
 
-  <h4 class="mb-4">
-    <i class="fas fa-bullhorn me-2"></i>รายละเอียดคำขอ Active Promotion
-  </h4>
-
-  <!-- ================= Ticket Info ================= -->
-  <div class="mb-4 p-3 border rounded">
-    <h6 class="fw-bold text-primary">ข้อมูล Ticket</h6>
-    <p><b>ผู้ร้องขอ:</b> {{ ticket.user_name }}</p>
-    <p><b>วันที่สร้าง:</b> {{ ticket.create_at }}</p>
-    <p><b>หัวข้อ:</b> {{ ticket.title }}</p>
-    <p><b>รายละเอียด:</b> {{ ticket.description }}</p>
+  <!-- ================= HEADER ================= -->
+  <div class="mb-4">
+    <h4 class="mb-1">
+      <i class="fas fa-bullhorn me-2 text-danger"></i>
+      รายละเอียดคำขอ Active Promotion Package
+    </h4>
+    <small class="text-muted">
+      Ticket ID: {{ ticket.id }}
+    </small>
   </div>
 
-  <!-- ================= Promotion ================= -->
+  <!-- ================= REQUESTER ================= -->
   <div class="mb-4 p-3 border rounded">
-    <h6 class="fw-bold text-danger">ข้อมูล Promotion</h6>
-    <p><b>ชื่อ Promotion:</b> {{ promotion.promo_name }}</p>
-    <p><b>วันที่เริ่ม:</b> {{ promotion.start_date }}</p>
-    <p><b>วันที่สิ้นสุด:</b> {{ promotion.end_date }}</p>
+    <h6 class="fw-bold text-primary mb-3">
+      <i class="fas fa-user me-1"></i> ข้อมูลผู้ร้องขอ
+    </h6>
+
+    <div class="row">
+      <div class="col-md-6">
+        <p><b>ชื่อผู้ร้องขอ:</b> {{ ticket.user_name }}</p>
+        <p><b>แผนก:</b> {{ promotion.department }}</p>
+      </div>
+      <div class="col-md-6">
+        <p><b>วันที่สร้างคำร้อง:</b> {{ ticket.create_at }}</p>
+        <p><b>สถานะ:</b>
+          <span class="badge bg-warning text-dark">
+            {{ ticket.status_name }}
+          </span>
+        </p>
+      </div>
+    </div>
   </div>
 
-  <!-- ================= Requesters ================= -->
-  <!-- <div class="mb-4 p-3 border rounded">
-    <h6 class="fw-bold text-success">ผู้เกี่ยวข้อง</h6>
-    <table class="table table-sm table-bordered">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>ชื่อ</th>
-          <th>แผนก</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for r in detail.requesters %}
-        <tr>
-          <td>{{ forloop.counter }}</td>
-          <td>{{ r.name }}</td>
-          <td>{{ r.department }}</td>
-        </tr>
+  <!-- ================= PROMOTION INFO ================= -->
+  <div class="mb-4 p-3 border rounded">
+    <h6 class="fw-bold text-danger mb-3">
+      <i class="fas fa-tag me-1"></i> ข้อมูล Promotion
+    </h6>
+
+    <div class="row">
+      <div class="col-md-6 mb-2">
+        <b>ชื่อ Promotion:</b><br>
+        {{ promotion.promo_name }}
+      </div>
+
+      <div class="col-md-3 mb-2">
+        <b>วันที่เริ่ม:</b><br>
+        {{ promotion.start_date }}
+      </div>
+
+      <div class="col-md-3 mb-2">
+        <b>วันที่สิ้นสุด:</b><br>
+        {{ promotion.end_date }}
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= REASON ================= -->
+  <div class="mb-4 p-3 border rounded bg-light">
+    <h6 class="fw-bold text-success mb-2">
+      <i class="fas fa-comment-dots me-1"></i> เหตุผลในการขอ Active
+    </h6>
+    <div class="p-2 bg-white rounded border">
+      {{ promotion.reason|linebreaks }}
+    </div>
+  </div>
+
+  <!-- ================= FILE ATTACHMENTS ================= -->
+  <div class="mb-4 p-3 border rounded">
+    <h6 class="fw-bold text-secondary mb-3">
+      <i class="fas fa-paperclip me-1"></i> เอกสารแนบ
+    </h6>
+
+    {% if files %}
+      <div class="list-group">
+
+        {% for f in files %}
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+
+          <div>
+            <i class="fas fa-file me-2"></i>
+            {{ f.file_name }}
+            <br>
+            <small class="text-muted">
+              {{ f.file_size|filesizeformat }}
+            </small>
+          </div>
+
+          <div class="btn-group">
+            <a href="{{ MEDIA_URL }}{{ f.file_path }}"
+               target="_blank"
+               class="btn btn-sm btn-outline-primary">
+              <i class="fas fa-eye"></i> ดู
+            </a>
+
+            <a href="{{ MEDIA_URL }}{{ f.file_path }}"
+               download
+               class="btn btn-sm btn-outline-secondary">
+              <i class="fas fa-download"></i> ดาวน์โหลด
+            </a>
+          </div>
+
+        </div>
         {% endfor %}
-      </tbody>
-    </table>
-  </div> -->
 
-  <!-- ================= Change Info ================= -->
-  {% if detail.old_value or detail.new_value %}
-  <div class="mb-4 p-3 border rounded">
-    <h6 class="fw-bold text-warning">ข้อมูลการเปลี่ยนแปลง</h6>
-    <p><b>ค่าเดิม:</b></p>
-    <pre>{{ detail.old_value }}</pre>
-    <p><b>ค่าใหม่:</b></p>
-    <pre>{{ detail.new_value }}</pre>
+      </div>
+    {% else %}
+      <p class="text-muted mb-0">ไม่มีเอกสารแนบ</p>
+    {% endif %}
   </div>
-  {% endif %}
 
-  <!-- ================= Buttons ================= -->
+  <!-- ================= ACTION ================= -->
   <div class="text-end border-top pt-3">
-    <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+    <button type="button"
+            class="btn btn-outline-secondary"
+            onclick="history.back()">
       <i class="fas fa-arrow-left me-1"></i> กลับ
     </button>
   </div>

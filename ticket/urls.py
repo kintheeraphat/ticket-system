@@ -73,11 +73,12 @@ urlpatterns = [
         name="add_approve_line"
     ),
 
-    path(
+    path( 
         "approval/flow/<int:category_id>/<int:team_id>/",
         views.approval_flow_detail,
         name="approval_flow_detail"
-    )
+    ),
+    path("admin/users/", views.manage_user, name="manage_user"),
 
 
-]
+] 

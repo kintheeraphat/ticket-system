@@ -260,6 +260,62 @@ def login_view(request):
 #     return render(request, "login.html")
 
 
+def manage_user(request):
+
+    user = request.session.get("user")
+    if not user or user["role_id"] != 1:
+        raise Http404("Not allowed")
+
+    # =====================
+    # UPDATE USER
+    # =====================
+    if request.method == "POST":
+        user_id     = request.POST.get("user_id")
+        is_active   = request.POST.get("is_active") == "1"
+        role_id     = request.POST.get("role_id")
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                UPDATE tickets.users
+                SET is_active = %s,
+                    role_id = %s,
+                    updated_at = NOW()
+                WHERE id = %s
+            """, [is_active, role_id, user_id])
+
+        messages.success(request, "อัปเดตผู้ใช้งานเรียบร้อยแล้ว")
+        return redirect("manage_user")
+
+    # =====================
+    # LOAD DATA
+    # =====================
+    with connection.cursor() as cursor:
+
+        cursor.execute("""
+            SELECT
+                u.id,
+                u.erp_user_id,
+                u.username      AS erp_name,
+                u.is_active,
+                r.id            AS role_id,
+                r.name          AS role_name
+            FROM tickets.users u
+            LEFT JOIN tickets.roles r ON r.id = u.role_id
+            ORDER BY u.id
+        """)
+        users = dictfetchall(cursor)
+
+        cursor.execute("""
+            SELECT id, name
+            FROM tickets.roles
+            ORDER BY id
+        """)
+        roles = dictfetchall(cursor)
+
+    return render(request, "admin/manage_user.html", {
+        "users": users,
+        "roles": roles
+    })
 
 @login_required_custom
 @role_required_role_id([1, 2, 3])  
@@ -1128,6 +1184,7 @@ def repairs_form(request):
     return render(request, "tickets_form/repairs_form.html")
 
 def active_promotion_detail(request, ticket_id):
+
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT 
@@ -1136,27 +1193,17 @@ def active_promotion_detail(request, ticket_id):
                 t.description,
                 t.create_at         AS ticket_create_at,
                 u.full_name         AS requester_name,
-                t.department,
-
                 tt.name             AS type,
                 s.name              AS status,
 
                 e.promo_name,
                 e.start_date,
-                e.end_date,
-                e.requester_names,
-                e.module_name,
-                e.old_value,
-                e.new_value
-
+                e.end_date
             FROM tickets.tickets t
-            JOIN tickets.users u
-                ON u.id = t.user_id                  -- ✅ FIX
-            JOIN tickets.ticket_type tt 
-                ON t.ticket_type_id = tt.id
-            JOIN tickets.status s 
-                ON t.status_id = s.id
-            LEFT JOIN tickets.ticket_data_erp_app e  -- ✅ FIX
+            JOIN tickets.users u ON u.id = t.user_id
+            JOIN tickets.ticket_type tt ON t.ticket_type_id = tt.id
+            JOIN tickets.status s ON t.status_id = s.id
+            LEFT JOIN tickets.ticket_data_erp_app e
                 ON e.ticket_id = t.id
             WHERE t.id = %s
         """, [ticket_id])
@@ -1166,58 +1213,44 @@ def active_promotion_detail(request, ticket_id):
     if not data:
         raise Http404("Active Promotion Ticket not found")
 
-    # -----------------------------
-    # requester_names → list
-    # -----------------------------
-    requester_list = []
-    if data.get("requester_names"):
-        requester_list = [
-            r.strip()
-            for r in data["requester_names"].splitlines()
-            if r.strip()
-        ]
+    # =============================
+    # FILES
+    # =============================
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                id,
+                file_name,
+                file_path,
+                file_type,
+                file_size,
+                create_at
+            FROM tickets.ticket_files
+            WHERE ticket_id = %s
+              AND ref_type = 'ACTIVE_PROMOTION'
+            ORDER BY create_at
+        """, [ticket_id])
 
-    # -----------------------------
-    # department → list
-    # -----------------------------
-    department_list = []
-    if data.get("department"):
-        department_list = [
-            d.strip()
-            for d in str(data["department"]).replace("{","").replace("}","").split(",")
-            if d.strip()
-        ]
-
-    requester_with_department = []
-    for i, name in enumerate(requester_list):
-        dept = department_list[i] if i < len(department_list) else ""
-        requester_with_department.append({
-            "name": name,
-            "department": dept
-        })
+        files = dictfetchall(cursor)
 
     return render(request, "tickets_form/active_promotion_detail.html", {
         "ticket": {
             "id": data["ticket_id"],
             "title": data["title"],
-            "description": data["description"],
+            "description": data["description"],      # ✅ ใช้ตรงนี้
             "create_at": data["ticket_create_at"],
             "user_name": data["requester_name"],
-            "type": data["type"],
             "status": data["status"],
         },
         "promotion": {
             "promo_name": data["promo_name"],
             "start_date": data["start_date"],
             "end_date": data["end_date"],
-            "module_name": data["module_name"],
         },
-        "detail": {
-            "requesters": requester_with_department,
-            "old_value": data["old_value"],
-            "new_value": data["new_value"],
-        }
+        "files": files,
     })
+
+
 
 def adjust_form(request):
     user = request.session.get("user")
@@ -1622,25 +1655,25 @@ Promotion: {promo_name}
         # =====================
         with connection.cursor() as cursor:
             cursor.execute("""
-                INSERT INTO tickets.tickets
+                INSERT INTO tickets.ticket_data_erp_app
                 (
-                    title,
-                    description,
-                    user_id,
-                    status_id,
-                    ticket_type_id,
-                    create_at
+                    ticket_id,
+                    promo_name,
+                    start_date,
+                    end_date,
+                    department,
+                    reason
                 )
                 VALUES (%s, %s, %s, %s, %s, %s)
-                RETURNING id
             """, [
-                title,
-                description,
-                user_id,
-                status_id,
-                ticket_type_id,
-                timezone.now()
+                ticket_id,
+                promo_name,
+                start_date,
+                end_date,
+                department,
+                reason
             ])
+
             ticket_id = cursor.fetchone()[0]
         # =====================
         # INSERT ticket_data_erp_app
