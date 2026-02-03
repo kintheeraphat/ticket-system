@@ -266,17 +266,61 @@ def login_view(request):
 
 def manage_user(request):
 
+    # =====================
+    # ADMIN ONLY
+    # =====================
     user = request.session.get("user")
-    if not user or user["role_id"] != 1:
+    if not user or user.get("role_id") != 1:
         raise Http404("Not allowed")
 
     # =====================
-    # UPDATE USER
+    # POST
     # =====================
     if request.method == "POST":
-        user_id     = request.POST.get("user_id")
-        is_active   = request.POST.get("is_active") == "1"
-        role_id     = request.POST.get("role_id")
+
+        action = request.POST.get("action")
+
+        # ---------------------------------
+        # ADD USER FROM ERP
+        # ---------------------------------
+        if action == "add_user_from_erp":
+
+            erp_username = request.POST.get("erp_username")
+            role_id = request.POST.get("role_id")
+            is_active = request.POST.get("is_active") == "1"
+
+            if not erp_username:
+                messages.error(request, "กรุณาระบุ ERP Username")
+                return redirect("manage_user")
+
+            erp_data = call_erp_user_info(erp_username)
+            if not erp_data:
+                messages.error(request, "ไม่พบผู้ใช้งานใน ERP")
+                return redirect("manage_user")
+
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO tickets.users
+                    (erp_user_id, username, full_name, role_id, is_active)
+                    VALUES (%s, %s, %s, %s, %s)
+                    ON CONFLICT (username) DO NOTHING
+                """, [
+                    erp_data["user_id"],
+                    erp_data["login"],
+                    erp_data["name"],
+                    role_id,
+                    is_active
+                ])
+
+            messages.success(request, "เพิ่มผู้ใช้งานจาก ERP เรียบร้อยแล้ว")
+            return redirect("manage_user")
+
+        # ---------------------------------
+        # UPDATE USER
+        # ---------------------------------
+        user_id   = request.POST.get("user_id")
+        role_id   = request.POST.get("role_id")
+        is_active = request.POST.get("is_active") == "1"
 
         with connection.cursor() as cursor:
             cursor.execute("""
@@ -291,7 +335,7 @@ def manage_user(request):
         return redirect("manage_user")
 
     # =====================
-    # LOAD DATA
+    # GET (LOAD PAGE)
     # =====================
     with connection.cursor() as cursor:
 
@@ -302,11 +346,10 @@ def manage_user(request):
                 u.username,
                 u.full_name,
                 u.is_active,
-                r.role_name AS role_name
+                r.role_name
             FROM tickets.users u
             LEFT JOIN tickets.roles r ON r.id = u.role_id
             ORDER BY u.id
-
         """)
         users = dictfetchall(cursor)
 
@@ -314,11 +357,42 @@ def manage_user(request):
             SELECT id, role_name
             FROM tickets.roles
             ORDER BY id
-
         """)
         roles = dictfetchall(cursor)
 
     return render(request, "admin/manage_user.html", {
+        "users": users,
+        "roles": roles
+    })
+
+
+    # =====================
+    # LOAD DATA (GET)
+    # =====================
+    with connection.cursor() as cursor:
+
+        cursor.execute("""
+            SELECT
+                u.id,
+                u.erp_user_id,
+                u.username,
+                u.full_name,
+                u.is_active,
+                r.role_name
+            FROM tickets.users u
+            LEFT JOIN tickets.roles r ON r.id = u.role_id
+            ORDER BY u.id
+        """)
+        users = dictfetchall(cursor)
+
+        cursor.execute("""
+            SELECT id, role_name
+            FROM tickets.roles
+            ORDER BY id
+        """)
+        roles = dictfetchall(cursor)
+
+    return render(request, "manage_user.html", {
         "users": users,
         "roles": roles
     })

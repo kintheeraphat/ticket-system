@@ -86,11 +86,37 @@
     {% endif %} {% endcomment %}
       <!-- Logout -->
     <div class="sidebar-footer">
+
+      <!-- ===== Current User ===== -->
+      <div class="current-user">
+        <div class="user-avatar">
+          <i class="fas fa-user-circle"></i>
+        </div>
+
+        <div class="user-info">
+          <div class="user-name">
+            {{ request.session.user.full_name|default:request.session.user.username }}
+          </div>
+          <div class="user-role">
+            {% if request.session.user.role_id == 1 %}
+              Administrator
+            {% elif request.session.user.role_id == 2 %}
+              Manager
+            {% else %}
+              User
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Logout -->
       <a href="{% url 'logout' %}" class="logout-btn">
         <i class="fas fa-right-from-bracket"></i>
         <span>Logout</span>
       </a>
+
     </div>
+
   </ul>
 </aside>
 {% endif %}
@@ -298,6 +324,45 @@
 
 .sidebar.collapsed .logout-btn i {
   font-size: 1.25rem;
+}
+/* ===== Current User Box ===== */
+.current-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.06);
+  color: #e5e7eb;
+}
+
+.user-avatar i {
+  font-size: 2rem;
+  color: #60a5fa;
+}
+
+.user-info {
+  line-height: 1.2;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.user-role {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+/* ตอน sidebar พับ */
+.sidebar.collapsed .current-user {
+  justify-content: center;
+}
+
+.sidebar.collapsed .user-info {
+  display: none;
 }
 
 </style>
