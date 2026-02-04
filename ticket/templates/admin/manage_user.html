@@ -2,173 +2,212 @@
 {% block title %}Manage Users{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
 
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3>จัดการผู้ใช้งาน (Manage Users)</h3>
-    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal">
-      + เพิ่มผู้ใช้งาน
-    </button>
+<!-- ================= HEADER ================= -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="fw-bold mb-0">จัดการผู้ใช้งาน (Manage Users)</h3>
+  <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
+    + เพิ่มผู้ใช้งาน
+  </button>
+</div>
+
+<!-- ================= MESSAGES ================= -->
+{% for m in messages %}
+  <div class="alert alert-{{ m.tags }} alert-dismissible fade show" role="alert">
+    {{ m }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
   </div>
+{% endfor %}
 
-  {% for m in messages %}
-    <div class="alert alert-{{ m.tags }}">{{ m }}</div>
-  {% endfor %}
+<!-- ================= FILTER ================= -->
+<div class="filter-panel mb-3">
+  <div class="row g-2">
+    <div class="col-md-6">
+      <input type="search"
+             id="customSearch"
+             class="form-control form-control-sm"
+             placeholder="ค้นหา Username / ชื่อ">
+    </div>
+    <div class="col-md-4">
+      <select id="roleFilter" class="form-select form-select-sm">
+        <option value="">ทุก Role</option>
+        {% for r in roles %}
+          <option value="{{ r.role_name|lower }}">{{ r.role_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+</div>
 
-  <table class="table table-bordered table-hover align-middle">
-    <thead class="table-light">
+<!-- ================= TABLE ================= -->
+<div class="form-card p-2">
+    <table
+        id="userTable"
+        class="table table-hover align-middle table-compact"
+        data-toggle="table"
+        data-pagination="true"
+        data-page-size="10"
+        data-search="true"
+    >
+
+
+    <thead>
       <tr class="text-center">
         <th>ID</th>
-        <th>ERP ID</th>
+        <th>ERP</th>
         <th>Username</th>
         <th>ชื่อ-นามสกุล</th>
         <th>Role</th>
         <th>Active</th>
-        <th>จัดการ</th>
+        <th style="width:60px;">บันทึก</th>
       </tr>
     </thead>
+
     <tbody>
-
     {% for u in users %}
-      <tr {% if u.id == current_user_id %}class="table-warning"{% endif %}>
-        <form method="post">
-          {% csrf_token %}
-          <input type="hidden" name="user_id" value="{{ u.id }}">
+    <tr data-role="{{ u.role_name|lower }}">
+        <td class="text-center">{{ u.id }}</td>
+        <td class="text-center">{{ u.erp_user_id|default:"-" }}</td>
 
-          <td class="text-center">{{ u.id }}</td>
-          <td class="text-center">{{ u.erp_user_id|default:"-" }}</td>
-          <td>
-            {{ u.username }}
-            {% if u.id == current_user_id %}
-              <span class="badge bg-primary">คุณ</span>
-            {% endif %}
-          </td>
-          <td>{{ u.full_name }}</td>
-
-          <td>
-            <select name="role_id" class="form-select form-select-sm">
-              {% for r in roles %}
-                <option value="{{ r.id }}"
-                  {% if r.role_name == u.role_name %}selected{% endif %}>
-                  {{ r.role_name }}
-                </option>
-              {% endfor %}
-            </select>
-          </td>
-
-          <td class="text-center">
-            <input type="checkbox" name="is_active" value="1" {% if u.is_active %}checked{% endif %}>
-          </td>
-
-          <td class="text-center">
-            <button class="btn btn-sm btn-primary">บันทึก</button>
-          </td>
-        </form>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-</div>
-
-<!-- ADD USER MODAL -->
-<div class="modal fade" id="addUserModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <form method="post">
-    {% csrf_token %}
-    <input type="hidden" name="action" value="add_user_from_erp">
-
-    <div class="modal-content">
-        <div class="modal-header">
-        <h5 class="modal-title">เพิ่มผู้ใช้งานจาก ERP</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-
-        <div class="modal-body">
-
-        <!-- ✅ ERP USERNAME -->
-        <div class="mb-3">
-            <label class="form-label">ERP Username</label>
-            <input type="text"
-                name="erp_username"
-                class="form-control"
-                placeholder="เช่น adminsp"
-                required>
-        </div>
+        <td>{{ u.username }}</td>
+        <td>{{ u.full_name }}</td>
 
         <!-- ROLE -->
-        <div class="mb-3">
-            <label class="form-label">Role</label>
-            <select name="role_id" class="form-select" required>
+        <td>
+        <select name="role_id"
+                form="form-{{ u.id }}"
+                class="form-select form-select-sm">
             {% for r in roles %}
-                <option value="{{ r.id }}">{{ r.role_name }}</option>
+            <option value="{{ r.id }}"
+                {% if r.role_name == u.role_name %}selected{% endif %}>
+                {{ r.role_name }}
+            </option>
             {% endfor %}
-            </select>
-        </div>
+        </select>
+        </td>
 
         <!-- ACTIVE -->
-        <div class="form-check form-switch">
-            <input class="form-check-input"
+        <td class="text-center">
+        <input class="form-check-input"
                 type="checkbox"
                 name="is_active"
                 value="1"
-                checked>
-            <label class="form-check-label">เปิดใช้งาน</label>
+                form="form-{{ u.id }}"
+                {% if u.is_active %}checked{% endif %}>
+        </td>
+
+        <!-- SAVE -->
+        <td class="text-center">
+        <form method="post" id="form-{{ u.id }}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_user">
+            <input type="hidden" name="user_id" value="{{ u.id }}">
+            <button type="submit"
+                    class="btn btn-primary btn-sm btn-icon"
+                    title="บันทึก">
+            <i class="fas fa-save"></i>
+            </button>
+        </form>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+
+  </table>
+</div>
+
+<!-- ================= ADD USER MODAL ================= -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="add_user_from_erp">
+
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">เพิ่มผู้ใช้งานจาก ERP</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
 
+        <div class="modal-body">
+          <div class="mb-2">
+            <label class="form-label">ERP Username</label>
+            <input type="text"
+                   name="erp_username"
+                   class="form-control form-control-sm"
+                   required>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label">Role</label>
+            <select name="role_id"
+                    class="form-select form-select-sm"
+                    required>
+              {% for r in roles %}
+                <option value="{{ r.id }}">{{ r.role_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-check form-switch">
+            <input class="form-check-input"
+                   type="checkbox"
+                   name="is_active"
+                   value="1"
+                   checked>
+            <label class="form-check-label">เปิดใช้งาน</label>
+          </div>
         </div>
 
         <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <button type="button"
+                  class="btn btn-secondary btn-sm"
+                  data-bs-dismiss="modal">
             ยกเลิก
-        </button>
-        <button type="submit" class="btn btn-success">
+          </button>
+          <button type="submit"
+                  class="btn btn-primary btn-sm">
             ดึงข้อมูลจาก ERP
-        </button>
+          </button>
         </div>
-    </div>
+      </div>
     </form>
   </div>
 </div>
-{% endblock %}
 
+{% endblock %}
 
 {% block extra_js %}
 <script>
-$(function () {
-  $('#userTable').DataTable({
-    pageLength: 10,
-    lengthChange: false,
-    language: {
-      info: "แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ",
-      paginate: { previous: "ก่อนหน้า", next: "ถัดไป" }
-    }
-  });
-});
-$(document).ready(function () {
+  function applyFilter() {
+    const keyword = $('#customSearch').val().toLowerCase();
+    const role    = $('#roleFilter').val().toLowerCase();
 
-    // ================= CUSTOM SEARCH =================
-    $('#userSearch, #roleFilter').on('input change', function () {
+    $('#userTable tbody tr').each(function () {
+      const $tr = $(this);
 
-        const keyword = $('#userSearch').val().toLowerCase();
-        const role    = $('#roleFilter').val();
+      const username = $tr.find('td').eq(2).text().toLowerCase();
+      const fullname = $tr.find('td').eq(3).text().toLowerCase();
+      const rowRole  = $tr.data('role');
 
-        table.rows().every(function () {
-            const row = $(this.node());
-            const text = row.data('search');
-            const rowRole = row.data('role');
+      const matchText =
+        !keyword ||
+        username.includes(keyword) ||
+        fullname.includes(keyword);
 
-            const matchText = !keyword || text.includes(keyword);
-            const matchRole = !role || rowRole === role;
+      const matchRole =
+        !role || rowRole === role;
 
-            if (matchText && matchRole) {
-                row.show();
-            } else {
-                row.hide();
-            }
-        });
-
+      $tr.toggle(matchText && matchRole);
     });
+  }
 
-});
+  $('#customSearch').on('input', applyFilter);
+  $('#roleFilter').on('change', applyFilter);
 </script>
+
 {% endblock %}
+
+
+
+

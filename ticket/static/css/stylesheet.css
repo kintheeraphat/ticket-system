@@ -767,3 +767,58 @@ background: #eef2ff;
 color: #1d4ed8;
 font-weight: 600;
 }
+
+/* ===============================
+   COMPACT TABLE (Manage Users)
+================================ */
+.table-compact th,
+.table-compact td {
+  padding: 0.45rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.table-compact thead th {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+/* badges เล็กลง */
+.table-compact .badge {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.7rem;
+}
+
+/* form ในตาราง */
+.table-compact .form-select,
+.table-compact .form-control {
+  padding: 0.25rem 0.45rem;
+  font-size: 0.8rem;
+}
+
+.table-compact .form-check-label {
+  font-size: 0.75rem;
+}
+
+/* ===============================
+   ACTION COLUMN
+================================ */
+.action-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: stretch;
+}
+
+/* ปุ่ม icon */
+.btn-icon {
+  width: 34px;
+  height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon i {
+  font-size: 0.9rem;
+}

@@ -326,21 +326,23 @@ def manage_user(request):
         # =====================
         # UPDATE USER
         # =====================
-        user_id = request.POST.get("user_id")
-        role_id = request.POST.get("role_id")
-        is_active = request.POST.get("is_active") == "1"
+        if action == "update_user":
+            user_id = request.POST.get("user_id")
+            role_id = request.POST.get("role_id")
+            is_active = request.POST.get("is_active") == "1"
 
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                UPDATE tickets.users
-                SET is_active = %s,
-                    role_id = %s,
-                    updated_at = NOW()
-                WHERE id = %s
-            """, [is_active, role_id, user_id])
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    UPDATE tickets.users
+                    SET is_active = %s,
+                        role_id = %s,
+                        updated_at = NOW()
+                    WHERE id = %s
+                """, [is_active, role_id, user_id])
 
-        messages.success(request, "อัปเดตผู้ใช้งานเรียบร้อยแล้ว")
-        return redirect("manage_user")
+            messages.success(request, "อัปเดตผู้ใช้งานเรียบร้อยแล้ว")
+            return redirect("manage_user")
+
 
     # =====================
     # GET
