@@ -95,26 +95,47 @@
     </div>
 
     <!-- ================= APPROVE SECTION ================= -->
-    {% if can_approve %}
-<form method="post" action="{% url 'approve_ticket' ticket.id %}">
-    {% csrf_token %}
+{% if can_approve or is_admin %}
+<div class="card shadow-sm border-success mb-4">
+    <div class="card-body">
 
-    <div class="mb-2">
-        <textarea
-            name="remark"
-            class="form-control"
-            rows="2"
-            placeholder="หมายเหตุ (ถ้ามี)"
-        ></textarea>
+        {% if is_admin %}
+            <div class="fw-semibold text-danger mb-2">
+                ⚠ Admin Override Approval
+            </div>
+        {% else %}
+            <div class="fw-semibold text-success mb-2">
+                คุณอยู่ในสายอนุมัติ (Level {{ my_level }})
+            </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'approve_ticket' ticket.id %}">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <textarea name="remark"
+                          class="form-control"
+                          rows="2"
+                          placeholder="หมายเหตุ (ถ้ามี)"></textarea>
+            </div>
+
+            {% if is_admin %}
+                <input type="hidden" name="admin_override" value="1">
+            {% endif %}
+
+            <button type="submit"
+                    class="btn {% if is_admin %}btn-danger{% else %}btn-success{% endif %}">
+                {% if is_admin %}
+                    🚀 Admin Approve
+                {% else %}
+                    ✅ Approve
+                {% endif %}
+            </button>
+        </form>
+
     </div>
-
-    <button type="submit" class="btn btn-success">
-        ✅ อนุมัติ
-    </button>
-</form>
+</div>
 {% endif %}
-
-
     <!-- ================= FOOTER ================= -->
     <div class="mt-4">
         <a href="/tickets" class="btn btn-secondary">

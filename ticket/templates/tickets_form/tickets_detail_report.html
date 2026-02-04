@@ -15,7 +15,7 @@
         <p class="text-muted mb-4">
             แจ้งโดย {{ ticket.user_name }}
             {% if ticket.department %}
-                | แผนก {{ ticket.department }}
+            | แผนก {{ ticket.department }}
             {% endif %}
             <br>
             วันที่ {{ ticket.create_at|localtime|date:"d M Y H:i" }} น.
@@ -79,7 +79,43 @@
             </div>
         </div>
         {% endif %}
+        {% if can_approve or is_admin %}
+        <div class="card shadow-sm border-success mb-4">
+            <div class="card-body">
 
+                {% if is_admin %}
+                <div class="fw-semibold text-danger mb-2">
+                    ⚠ Admin Override Approval
+                </div>
+                {% else %}
+                <div class="fw-semibold text-success mb-2">
+                    คุณอยู่ในสายอนุมัติ (Level {{ my_level }})
+                </div>
+                {% endif %}
+
+                <form method="post" action="{% url 'approve_ticket' ticket.id %}">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <textarea name="remark" class="form-control" rows="2" placeholder="หมายเหตุ (ถ้ามี)"></textarea>
+                    </div>
+
+                    {% if is_admin %}
+                    <input type="hidden" name="admin_override" value="1">
+                    {% endif %}
+
+                    <button type="submit" class="btn {% if is_admin %}btn-danger{% else %}btn-success{% endif %}">
+                        {% if is_admin %}
+                        🚀 Admin Approve
+                        {% else %}
+                        ✅ Approve
+                        {% endif %}
+                    </button>
+                </form>
+
+            </div>
+        </div>
+        {% endif %}
         <!-- BACK -->
         <div class="mt-4">
             <a href="{% url 'tickets_list' %}" class="btn btn-secondary">

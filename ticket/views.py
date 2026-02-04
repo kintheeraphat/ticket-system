@@ -520,14 +520,18 @@ def dashboard(request):
     return render(request, "dashboard.html", context)
 
 @login_required_custom
-@role_required_role_id([1, 2, 3])  
+@role_required_role_id([1, 2, 3])
 def tickets_list(request):
     user = request.session["user"]
     user_id = user["id"]
+    role_id = user["role_id"]
 
     search = request.GET.get("search", "")
     date_range = request.GET.get("date_range", "")
 
+    # ===============================
+    # BASE QUERY
+    # ===============================
     query = """
         SELECT
             t.id,
@@ -542,7 +546,7 @@ def tickets_list(request):
 
             t.user_id     AS ticket_owner_id,
 
-            -- level ที่ user อยู่ (ถ้าเป็น approver)
+            -- level ที่ user อยู่ (ถ้ามี)
             (
                 SELECT tas.level
                 FROM tickets.ticket_approval_status tas
@@ -552,61 +556,57 @@ def tickets_list(request):
                 LIMIT 1
             ) AS approve_level,
 
-            -- ลบได้หรือไม่ (owner + Waiting for Approve)
+            -- ลบได้หรือไม่
             (
                 t.user_id = %s
                 AND t.status_id = %s
             ) AS can_delete
 
         FROM tickets.tickets t
-        JOIN tickets.users u
-            ON u.id = t.user_id
-        JOIN tickets.ticket_type tt
-            ON tt.id = t.ticket_type_id
-        JOIN tickets.category c
-            ON c.id = tt.category
-        JOIN tickets.status s
-            ON s.id = t.status_id
-
-        WHERE
-        (
-            -- เจ้าของคำขอ (ยังมี pending)
-            (
-                t.user_id = %s
-                AND EXISTS (
-                    SELECT 1
-                    FROM tickets.ticket_approval_status tas
-                    WHERE tas.ticket_id = t.id
-                      AND tas.status_id = %s
-                )
-            )
-
-            OR
-
-            -- ผู้อนุมัติ (ถึงคิว)
-            EXISTS (
-                SELECT 1
-                FROM tickets.ticket_approval_status tas
-                WHERE tas.ticket_id = t.id
-                  AND tas.user_id = %s
-                  AND tas.status_id = %s
-            )
-        )
+        JOIN tickets.users u ON u.id = t.user_id
+        JOIN tickets.ticket_type tt ON tt.id = t.ticket_type_id
+        JOIN tickets.category c ON c.id = tt.category
+        JOIN tickets.status s ON s.id = t.status_id
     """
 
     params = [
         user_id, APPROVE_PENDING,     # approve_level
         user_id, DOC_WAITING_APPROVE, # can_delete
-        user_id, APPROVE_PENDING,     # requester
-        user_id, APPROVE_PENDING,     # approver
     ]
 
-    # ---------- SEARCH ----------
+    # ===============================
+    # ROLE-BASED VISIBILITY
+    # ===============================
+    if role_id == 1:
+        # ✅ ADMIN เห็นทุก ticket
+        query += " WHERE 1=1 "
+
+    else:
+        # USER / MANAGER
+        query += """
+            WHERE
+            (
+                t.user_id = %s
+                OR EXISTS (
+                    SELECT 1
+                    FROM tickets.ticket_approval_status tas
+                    WHERE tas.ticket_id = t.id
+                      AND tas.user_id = %s
+                )
+            )
+        """
+        params.extend([user_id, user_id])
+
+    # ===============================
+    # SEARCH
+    # ===============================
     if search:
         query += " AND (t.id::text ILIKE %s OR t.title ILIKE %s)"
         params.extend([f"%{search}%", f"%{search}%"])
 
-    # ---------- DATE RANGE ----------
+    # ===============================
+    # DATE RANGE
+    # ===============================
     if date_range:
         try:
             start_str, end_str = date_range.split(" ถึง ")
@@ -643,21 +643,15 @@ def tickets_list(request):
             "created_at": created_at,
             "status": row[8],
 
-            # approval
             "approve_level": row[10],
             "is_my_turn": row[10] is not None,
 
-            # delete
             "can_delete": row[11],
         })
 
-    return render(
-        request,
-        "tickets_list.html",
-        {
-            "tickets": tickets_data,
-        }
-    )
+    return render(request, "tickets_list.html", {
+        "tickets": tickets_data,
+    })
     
     
 @login_required_custom
@@ -922,24 +916,40 @@ def dictfetchone(cursor):
     columns = [col[0] for col in cursor.description]
     return dict(zip(columns, row))
 APPROVE_PENDING = 7
-
+@login_required_custom
+@role_required_role_id([1, 2, 3])
 def tickets_detail_erp(request, ticket_id):
 
-    user_id = request.session["user"]["id"]
+    user = request.session["user"]
+    user_id = user["id"]
+    role_id = user["role_id"]
+
+    # -----------------------------
+    # เช็ค admin
+    # -----------------------------
+    is_admin = (role_id == 1)
 
     # -----------------------------
     # ticket หลัก
     # -----------------------------
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT t.id, t.title, t.description,
-                   u.username, t.create_at
+            SELECT
+                t.id,
+                t.title,
+                t.description,
+                u.username,
+                t.create_at
             FROM tickets.tickets t
-            JOIN tickets.users u ON u.id = t.user_id
+            JOIN tickets.users u
+                ON u.id = t.user_id
             WHERE t.id = %s
         """, [ticket_id])
 
         row = cursor.fetchone()
+
+        if not row:
+            raise Http404("Ticket not found")
 
     ticket = {
         "id": row[0],
@@ -950,7 +960,7 @@ def tickets_detail_erp(request, ticket_id):
     }
 
     # -----------------------------
-    # เช็คว่าอยู่ในสายอนุมัติไหม (level ≥ 1)
+    # ตรวจสอบสายอนุมัติ
     # -----------------------------
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -963,25 +973,46 @@ def tickets_detail_erp(request, ticket_id):
 
         approval_row = cursor.fetchone()
 
-    is_in_approval_flow = approval_row is not None
     can_approve = False
     my_level = None
 
+    # กรณีเป็น approver ตาม flow
     if approval_row:
         my_level = approval_row[0]
         can_approve = (approval_row[1] == APPROVE_PENDING)
 
-    return render(request, "tickets_form/tickets_detail_erp.html", {
-        "ticket": ticket,
-        "is_in_approval_flow": is_in_approval_flow,
-        "can_approve": can_approve,
-        "my_level": my_level,
-    })
+    # -----------------------------
+    # ADMIN OVERRIDE
+    # -----------------------------
+    if is_admin:
+        can_approve = True
 
+    return render(
+        request,
+        "tickets_form/tickets_detail_erp.html",
+        {
+            "ticket": ticket,
+            "can_approve": can_approve,
+            "my_level": my_level,
+            "is_admin": is_admin,   # 👈 สำคัญมาก
+        }
+    )
+@login_required_custom
+@role_required_role_id([1, 2, 3])
 def tickets_detail_vpn(request, ticket_id):
 
-    user_id = request.session["user"]["id"]
+    user = request.session["user"]
+    user_id = user["id"]
+    role_id = user["role_id"]
 
+    # -----------------------------
+    # เช็ค admin
+    # -----------------------------
+    is_admin = (role_id == 1)
+
+    # -----------------------------
+    # VPN ticket หลัก
+    # -----------------------------
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT
@@ -995,8 +1026,10 @@ def tickets_detail_vpn(request, ticket_id):
                 v.uservpn,
                 v.vpn_reason
             FROM tickets.ticket_data_vpn v
-            JOIN tickets.tickets t ON t.id = v.ticket_id
-            JOIN tickets.users u ON u.id = t.user_id 
+            JOIN tickets.tickets t
+                ON t.id = v.ticket_id
+            JOIN tickets.users u
+                ON u.id = t.user_id 
             WHERE t.id = %s
         """, [ticket_id])
 
@@ -1012,6 +1045,7 @@ def tickets_detail_vpn(request, ticket_id):
     if data.get("uservpn"):
         vpn_user_list = [u.strip() for u in data["uservpn"].splitlines() if u.strip()]
         dept_list = []
+
         if data.get("department"):
             dept_list = [d.strip() for d in data["department"].split(",") if d.strip()]
 
@@ -1022,43 +1056,71 @@ def tickets_detail_vpn(request, ticket_id):
             })
 
     # -----------------------------
-    # ตรวจสิทธิ์ approve
+    # ตรวจสิทธิ์ approve (ตามสาย)
     # -----------------------------
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT level
+            SELECT level, status_id
             FROM tickets.ticket_approval_status
             WHERE ticket_id = %s
               AND user_id = %s
-              AND status_id = 7
             LIMIT 1
         """, [ticket_id, user_id])
 
         approve_row = cursor.fetchone()
 
-    can_approve = bool(approve_row)
-    my_level = approve_row[0] if approve_row else None
+    can_approve = False
+    my_level = None
 
-    return render(request, "tickets_form/tickets_detail_vpn.html", {
-        "ticket": {
-            "id": data["ticket_id"],
-            "title": data["title"],
-            "description": data["description"],
-            "create_at": data["ticket_create_at"],
-            "user_name": data["full_name"],
-            "ticket_type_id": data["ticket_type_id"],
-        },
-        "detail": {
-            "vpn_users": vpn_users,
-            "vpn_reason": data["vpn_reason"],
-        },
-        # 👇 สำคัญ
-        "can_approve": can_approve,
-        "my_level": my_level,
-    })
+    # กรณีเป็น approver ตาม flow
+    if approve_row:
+        my_level = approve_row[0]
+        can_approve = (approve_row[1] == APPROVE_PENDING)
 
+    # -----------------------------
+    # ADMIN OVERRIDE
+    # -----------------------------
+    if is_admin:
+        can_approve = True
 
+    return render(
+        request,
+        "tickets_form/tickets_detail_vpn.html",
+        {
+            "ticket": {
+                "id": data["ticket_id"],
+                "title": data["title"],
+                "description": data["description"],
+                "create_at": data["ticket_create_at"],
+                "user_name": data["full_name"],
+                "ticket_type_id": data["ticket_type_id"],
+            },
+            "detail": {
+                "vpn_users": vpn_users,
+                "vpn_reason": data["vpn_reason"],
+            },
+            # 👇 สำคัญ
+            "can_approve": can_approve,
+            "my_level": my_level,
+            "is_admin": is_admin,
+        }
+    )
+@login_required_custom
+@role_required_role_id([1, 2, 3])
 def tickets_detail_repairs(request, ticket_id):
+
+    user = request.session["user"]
+    user_id = user["id"]
+    role_id = user["role_id"]
+
+    # -----------------------------
+    # เช็ค admin
+    # -----------------------------
+    is_admin = (role_id == 1)
+
+    # -----------------------------
+    # ดึงข้อมูล ticket แจ้งซ่อม
+    # -----------------------------
     query = """
         SELECT
             t.id,
@@ -1071,8 +1133,10 @@ def tickets_detail_repairs(request, ticket_id):
             b.problem_detail,
             b.building
         FROM tickets.ticket_data_building_repair b
-        JOIN tickets.tickets t ON t.id = b.ticket_id
-        JOIN tickets.users u ON u.erp_user_id = t.user_id
+        JOIN tickets.tickets t
+            ON t.id = b.ticket_id
+        JOIN tickets.users u
+            ON u.erp_user_id = t.user_id
         WHERE t.id = %s
     """
 
@@ -1083,33 +1147,81 @@ def tickets_detail_repairs(request, ticket_id):
     if not row:
         return render(request, "404.html", status=404)
 
+    # timezone
     created_at = row[3]
     if created_at and timezone.is_naive(created_at):
         created_at = timezone.make_aware(created_at, dt_timezone.utc)
     created_at = timezone.localtime(created_at)
 
-    detail = {
+    ticket = {
         "id": row[0],
         "title": row[1],
         "description": row[2],
         "created_at": created_at,
-        "full_name": row[4],
+        "user_name": row[4],
         "department": row[5],
         "ticket_type_id": row[6],
+    }
+
+    detail = {
         "problem_detail": row[7],
         "building": row[8],
     }
 
-    return render(request, "tickets_form/tickets_detail_repairs.html", {
-        "detail": detail
-    })
-    
+    # -----------------------------
+    # ตรวจสิทธิ์ approve (ตามสาย)
+    # -----------------------------
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT level, status_id
+            FROM tickets.ticket_approval_status
+            WHERE ticket_id = %s
+              AND user_id = %s
+            LIMIT 1
+        """, [ticket_id, user_id])
+
+        approval_row = cursor.fetchone()
+
+    can_approve = False
+    my_level = None
+
+    if approval_row:
+        my_level = approval_row[0]
+        can_approve = (approval_row[1] == APPROVE_PENDING)
+
+    # -----------------------------
+    # ADMIN OVERRIDE
+    # -----------------------------
+    if is_admin:
+        can_approve = True
+
+    return render(
+        request,
+        "tickets_form/tickets_detail_repairs.html",
+        {
+            "ticket": ticket,
+            "detail": detail,
+            "can_approve": can_approve,
+            "my_level": my_level,
+            "is_admin": is_admin,
+        }
+    )
 @login_required_custom
-@role_required_role_id([1, 2, 3])  
+@role_required_role_id([1, 2, 3])
 def tickets_detail_report(request, ticket_id):
 
-    user_id = request.session["user"]["id"]
+    user = request.session["user"]
+    user_id = user["id"]
+    role_id = user["role_id"]
 
+    # -----------------------------
+    # เช็ค admin
+    # -----------------------------
+    is_admin = (role_id == 1)
+
+    # -----------------------------
+    # ดึงข้อมูล report ticket
+    # -----------------------------
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT
@@ -1135,57 +1247,87 @@ def tickets_detail_report(request, ticket_id):
 
         data = dictfetchone(cursor)
 
-        if not data:
-            raise Http404("Report ticket not found")
+    if not data:
+        raise Http404("Report ticket not found")
 
+    # -----------------------------
     # timezone
+    # -----------------------------
     created_at = data["ticket_create_at"]
     if created_at and timezone.is_naive(created_at):
         created_at = timezone.make_aware(created_at, dt_timezone.utc)
     created_at = timezone.localtime(created_at)
 
+    ticket = {
+        "id": data["ticket_id"],
+        "title": data["title"],
+        "description": data["description"],
+        "create_at": created_at,
+        "user_name": data["full_name"],
+        "department": data["department"],
+        "ticket_type_id": data["ticket_type_id"],
+    }
+
+    detail = {
+        "old_value": data["old_value"],
+        "new_value": data["new_value"],
+    }
+
     # -----------------------------
-    # ตรวจสิทธิ์ approve
+    # ตรวจสิทธิ์ approve (ตามสาย)
     # -----------------------------
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT level
+            SELECT level, status_id
             FROM tickets.ticket_approval_status
             WHERE ticket_id = %s
               AND user_id = %s
-              AND status_id = 7
             LIMIT 1
         """, [ticket_id, user_id])
 
-        approve_row = cursor.fetchone()
+        approval_row = cursor.fetchone()
 
-    can_approve = bool(approve_row)
-    my_level = approve_row[0] if approve_row else None
+    can_approve = False
+    my_level = None
+
+    if approval_row:
+        my_level = approval_row[0]
+        can_approve = (approval_row[1] == APPROVE_PENDING)
+
+    # -----------------------------
+    # ADMIN OVERRIDE
+    # -----------------------------
+    if is_admin:
+        can_approve = True
 
     return render(
         request,
         "tickets_form/tickets_detail_report.html",
         {
-            "ticket": {
-                "id": data["ticket_id"],
-                "title": data["title"],
-                "description": data["description"],
-                "create_at": created_at,
-                "user_name": data["full_name"],
-                "department": data["department"],
-                "ticket_type_id": data["ticket_type_id"],
-            },
-            "detail": {
-                "old_value": data["old_value"],
-                "new_value": data["new_value"],
-            },
-            # 👇 ส่งให้ template
+            "ticket": ticket,
+            "detail": detail,
             "can_approve": can_approve,
             "my_level": my_level,
+            "is_admin": is_admin,
         }
     )
-    
+
+@login_required_custom
+@role_required_role_id([1, 2, 3])
 def tickets_detail_newapp(request, ticket_id):
+
+    user = request.session["user"]
+    user_id = user["id"]
+    role_id = user["role_id"]
+
+    # -----------------------------
+    # เช็ค admin
+    # -----------------------------
+    is_admin = (role_id == 1)
+
+    # -----------------------------
+    # ดึงข้อมูล New App
+    # -----------------------------
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT
@@ -1205,29 +1347,69 @@ def tickets_detail_newapp(request, ticket_id):
 
         data = dictfetchone(cursor)
 
-        if not data:
-            raise Http404("New App ticket not found")
+    if not data:
+        raise Http404("New App ticket not found")
 
+    # -----------------------------
     # timezone
+    # -----------------------------
     created_at = data["ticket_create_at"]
     if created_at and timezone.is_naive(created_at):
         created_at = timezone.make_aware(created_at, dt_timezone.utc)
     created_at = timezone.localtime(created_at)
 
-    return render(request, "tickets_form/tickets_detail_newapp.html", {
-        "ticket": {
-            "id": data["ticket_id"],
-            "title": data["title"],
-            "description": data["description"],
-            "create_at": created_at,
-            "user_name": data["full_name"],
-            "department": data["department"],
-        },
-        "detail": {
-            "new_value": data["new_value"],
+    ticket = {
+        "id": data["ticket_id"],
+        "title": data["title"],
+        "description": data["description"],
+        "create_at": created_at,
+        "user_name": data["full_name"],
+        "department": data["department"],
+        "ticket_type_id": data["ticket_type_id"],
+    }
+
+    detail = {
+        "new_value": data["new_value"],
+    }
+
+    # -----------------------------
+    # ตรวจสิทธิ์ approve (ตามสาย)
+    # -----------------------------
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT level, status_id
+            FROM tickets.ticket_approval_status
+            WHERE ticket_id = %s
+              AND user_id = %s
+            LIMIT 1
+        """, [ticket_id, user_id])
+
+        approval_row = cursor.fetchone()
+
+    can_approve = False
+    my_level = None
+
+    if approval_row:
+        my_level = approval_row[0]
+        can_approve = (approval_row[1] == APPROVE_PENDING)
+
+    # -----------------------------
+    # ADMIN OVERRIDE
+    # -----------------------------
+    if is_admin:
+        can_approve = True
+
+    return render(
+        request,
+        "tickets_form/tickets_detail_newapp.html",
+        {
+            "ticket": ticket,
+            "detail": detail,
+            "can_approve": can_approve,
+            "my_level": my_level,
+            "is_admin": is_admin,
         }
-    })
-    
+    )
     
     
 def repairs_form(request):
@@ -2406,141 +2588,176 @@ def create_ticket_approval_by_ticket_type(
             team_id,
             flow_no
         ])
+  
 def approve_ticket_flow(
     *,
     ticket_id: int,
     approver_user_id: int,
-    remark: str | None = None
+    remark: str | None = None,
+    is_admin: bool = False
 ):
-    """
-    ใช้กด Approve
-    - ปิด level ปัจจุบัน
-    - เปิด level ถัดไป
-    - อัปเดต status เอกสาร
-    """
-
     with transaction.atomic():
         with connection.cursor() as cursor:
 
-            # ---------------------------------------------
-            # 1) หา row ที่ถึงคิว approve
-            # ---------------------------------------------
+            # ------------------------------------
+            # 1) category + team ของ ticket
+            # ------------------------------------
             cursor.execute("""
-                SELECT id, level
-                FROM tickets.ticket_approval_status
-                WHERE ticket_id = %s
-                  AND user_id = %s
-                  AND status_id = %s
-                FOR UPDATE
-            """, [
-                ticket_id,
-                approver_user_id,
-                APPROVE_PENDING
-            ])
+                SELECT category_id, team_id
+                FROM tickets.tickets
+                WHERE id = %s
+            """, [ticket_id])
 
             row = cursor.fetchone()
             if not row:
-                raise Exception("ไม่ถึงคิว approve หรือไม่มีสิทธิ์")
+                raise Exception("Ticket not found")
 
-            tas_id, current_level = row
+            category_id, team_id = row
 
-            # ---------------------------------------------
-            # 2) ปิด level ปัจจุบัน
-            # ---------------------------------------------
+            # ------------------------------------
+            # 2) ADMIN OVERRIDE
+            # ------------------------------------
+            if is_admin:
+                cursor.execute("""
+                    UPDATE tickets.ticket_approval_status
+                    SET status_id = %s,
+                        action_time = %s,
+                        remark = %s
+                    WHERE ticket_id = %s
+                      AND status_id = %s
+                """, [
+                    APPROVE_WAITING,
+                    timezone.now(),
+                    remark,
+                    ticket_id,
+                    APPROVE_PENDING
+                ])
+
+                cursor.execute("""
+                    UPDATE tickets.tickets
+                    SET status_id = %s
+                    WHERE id = %s
+                """, [DOC_COMPLETED, ticket_id])
+
+                return {"result": "ADMIN_COMPLETED"}
+
+            # ------------------------------------
+            # 3) หา level ที่กำลังรอ approve
+            # ------------------------------------
+            cursor.execute("""
+                SELECT level
+                FROM tickets.ticket_approval_status
+                WHERE ticket_id = %s
+                  AND status_id = %s
+                ORDER BY level
+                LIMIT 1
+            """, [ticket_id, APPROVE_PENDING])
+
+            row = cursor.fetchone()
+            if not row:
+                raise Exception("ไม่มี level ที่รออนุมัติ")
+
+            current_level = row[0]
+
+            # ------------------------------------
+            # 4) โหลด approve flow จาก DB
+            # ------------------------------------
+            from ticket.services.approval import get_approve_line_dict_all_flows
+            flow = get_approve_line_dict_all_flows(category_id, team_id)
+
+            current_level_users = flow.get(current_level)
+            if not current_level_users:
+                raise Exception("Level นี้ไม่มีผู้อนุมัติ")
+
+            # 🔥 핵심: ใครก็ได้ใน {} กดได้
+            if approver_user_id not in current_level_users:
+                raise PermissionError("คุณไม่อยู่ใน level นี้")
+
+            # ------------------------------------
+            # 5) ปิด level ปัจจุบัน (ทุก user)
+            # ------------------------------------
             cursor.execute("""
                 UPDATE tickets.ticket_approval_status
                 SET status_id = %s,
                     action_time = %s,
                     remark = %s
-                WHERE id = %s
+                WHERE ticket_id = %s
+                  AND level = %s
+                  AND status_id = %s
             """, [
                 APPROVE_WAITING,
                 timezone.now(),
                 remark,
-                tas_id
+                ticket_id,
+                current_level,
+                APPROVE_PENDING
             ])
 
-            # ---------------------------------------------
-            # 3) หา level ถัดไป
-            # ---------------------------------------------
+            # ------------------------------------
+            # 6) เปิด level ถัดไป / ปิดงาน
+            # ------------------------------------
             cursor.execute("""
-                SELECT id
+                SELECT 1
                 FROM tickets.ticket_approval_status
                 WHERE ticket_id = %s
                   AND level = %s
                 LIMIT 1
-            """, [
-                ticket_id,
-                current_level + 1
-            ])
+            """, [ticket_id, current_level + 1])
 
-            next_row = cursor.fetchone()
-
-            if next_row:
-                # -----------------------------------------
-                # เปิด level ถัดไป
-                # -----------------------------------------
+            if cursor.fetchone():
                 cursor.execute("""
                     UPDATE tickets.ticket_approval_status
                     SET status_id = %s
-                    WHERE id = %s
+                    WHERE ticket_id = %s
+                      AND level = %s
                 """, [
                     APPROVE_PENDING,
-                    next_row[0]
+                    ticket_id,
+                    current_level + 1
                 ])
 
-                # -----------------------------------------
-                # เอกสารกำลังดำเนินการ
-                # -----------------------------------------
                 cursor.execute("""
                     UPDATE tickets.tickets
                     SET status_id = %s
                     WHERE id = %s
-                """, [
-                    DOC_IN_PROGRESS,
-                    ticket_id
-                ])
+                """, [DOC_IN_PROGRESS, ticket_id])
 
-                return {
-                    "result": "NEXT_LEVEL",
-                    "level": current_level + 1
-                }
+                return {"result": "NEXT_LEVEL"}
 
-            else:
-                # -----------------------------------------
-                # ไม่มี level ถัดไป → ปิดเอกสาร
-                # -----------------------------------------
-                cursor.execute("""
-                    UPDATE tickets.tickets
-                    SET status_id = %s
-                    WHERE id = %s
-                """, [
-                    DOC_COMPLETED,
-                    ticket_id
-                ])
+            # ------------------------------------
+            # 7) ไม่มี level ต่อ → completed
+            # ------------------------------------
+            cursor.execute("""
+                UPDATE tickets.tickets
+                SET status_id = %s
+                WHERE id = %s
+            """, [DOC_COMPLETED, ticket_id])
 
-                return {
-                    "result": "COMPLETED",
-                    "final_level": current_level
-                }
-
+            return {"result": "COMPLETED"}
+        
 @require_POST
 def approve_ticket(request, ticket_id):
-    user_id = request.session["user"]["id"]
+    user = request.session["user"]
+    user_id = user["id"]
+    role_id = user["role_id"]
+
     remark = request.POST.get("remark", "")
+    is_admin = (role_id == 1) or bool(request.POST.get("admin_override"))
 
     try:
         approve_ticket_flow(
             ticket_id=ticket_id,
             approver_user_id=user_id,
-            remark=remark
+            remark=remark,
+            is_admin=is_admin
         )
         messages.success(request, "อนุมัติเรียบร้อยแล้ว")
+    except PermissionError:
+        messages.error(request, "คุณไม่มีสิทธิ์อนุมัติในขั้นตอนนี้")
     except Exception as e:
         messages.error(request, str(e))
 
     return redirect("tickets_list")
-
 
 def delete_ticket(request, ticket_id):
     user_id = request.session["user"]["id"]
@@ -2568,3 +2785,118 @@ def delete_ticket(request, ticket_id):
     messages.success(request, "ลบคำขอเรียบร้อย")
     return redirect("tickets_list")
 
+def get_admin_and_approval_context(request, ticket_id):
+    user = request.session["user"]
+    user_id = user["id"]
+    role_id = user["role_id"]
+
+    is_admin = (role_id == 1)
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT level, status_id
+            FROM tickets.ticket_approval_status
+            WHERE ticket_id = %s
+              AND user_id = %s
+            LIMIT 1
+        """, [ticket_id, user_id])
+
+        row = cursor.fetchone()
+
+    can_approve = False
+    my_level = None
+
+    if row:
+        my_level = row[0]
+        can_approve = (row[1] == APPROVE_PENDING)
+
+    return {
+        "is_admin": is_admin,
+        "can_approve": can_approve,
+        "my_level": my_level,
+    }
+    
+def get_approve_line_dict(*, category_id, team_id, flow_no=1):
+    """
+    return:
+    {
+        level: {user_id, user_id, ...}
+    }
+    """
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT level, user_id
+            FROM tickets.approve_line
+            WHERE category_id = %s
+              AND team_id = %s
+              AND flow_no = %s
+            ORDER BY level
+        """, [category_id, team_id, flow_no])
+
+        rows = cursor.fetchall()
+
+    flow = {}
+    for level, user_id in rows:
+        flow.setdefault(level, set()).add(user_id)
+
+    return flow
+def create_ticket_approval_status(ticket_id, category_id, team_id):
+    flow = get_approve_line_dict(
+        category_id=category_id,
+        team_id=team_id,
+        flow_no=1
+    )
+
+    min_level = min(flow.keys())
+
+    with connection.cursor() as cursor:
+        for level, user_ids in flow.items():
+            for user_id in user_ids:
+                cursor.execute("""
+                    INSERT INTO tickets.ticket_approval_status
+                        (ticket_id, user_id, level, status_id)
+                    VALUES (%s, %s, %s, %s)
+                """, [
+                    ticket_id,
+                    user_id,
+                    level,
+                    APPROVE_PENDING if level == min_level else APPROVE_WAITING
+                ])
+def can_user_approve(ticket_id, user_id):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT 1
+            FROM tickets.ticket_approval_status
+            WHERE ticket_id = %s
+              AND user_id = %s
+              AND status_id = %s
+            LIMIT 1
+        """, [ticket_id, user_id, APPROVE_PENDING])
+
+        return cursor.fetchone() is not None
+    from django.db import connection
+
+
+def get_approve_line_dict_all_flows(category_id, team_id):
+    """
+    รวมทุก flow ของ category + team
+    {
+        level: {user_id1, user_id2, ...}
+    }
+    """
+
+    approve_flow = {}
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT level, user_id
+            FROM tickets.approve_line
+            WHERE category_id = %s
+              AND team_id = %s
+            ORDER BY flow_no, level
+        """, [category_id, team_id])
+
+        for level, user_id in cursor.fetchall():
+            approve_flow.setdefault(level, set()).add(user_id)
+
+    return approve_flow
