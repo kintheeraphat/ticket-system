@@ -4,188 +4,147 @@
 {% block content %}
 <div class="container-fluid">
 
-    <!-- ================= HEADER ================= -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="mb-0">จัดการผู้ใช้งาน (Manage Users)</h3>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>จัดการผู้ใช้งาน (Manage Users)</h3>
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal">
+      + เพิ่มผู้ใช้งาน
+    </button>
+  </div>
 
-        <button class="btn btn-success"
-                data-bs-toggle="modal"
-                data-bs-target="#addUserModal">
-            <i class="fa fa-user-plus"></i> เพิ่มผู้ใช้งาน
-        </button>
-    </div>
+  {% for m in messages %}
+    <div class="alert alert-{{ m.tags }}">{{ m }}</div>
+  {% endfor %}
 
-    <!-- ================= FILTER BAR ================= -->
-    <div class="row g-3 mb-3">
+  <table class="table table-bordered table-hover align-middle">
+    <thead class="table-light">
+      <tr class="text-center">
+        <th>ID</th>
+        <th>ERP ID</th>
+        <th>Username</th>
+        <th>ชื่อ-นามสกุล</th>
+        <th>Role</th>
+        <th>Active</th>
+        <th>จัดการ</th>
+      </tr>
+    </thead>
+    <tbody>
 
-        <div class="col-md-4">
-            <label class="form-label fw-bold">ค้นหาผู้ใช้งาน</label>
-            <input type="text"
-                   id="userSearch"
-                   class="form-control"
-                   placeholder="ค้นหา ID / ERP ID / Username / ชื่อ">
-        </div>
+    {% for u in users %}
+      <tr {% if u.id == current_user_id %}class="table-warning"{% endif %}>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="user_id" value="{{ u.id }}">
 
-        <div class="col-md-3">
-            <label class="form-label fw-bold">Role</label>
-            <select id="roleFilter" class="form-select">
-                <option value="">ทั้งหมด</option>
-                {% for r in roles %}
-                    <option value="{{ r.role_name|lower }}">
-                        {{ r.role_name }}
-                    </option>
-                {% endfor %}
+          <td class="text-center">{{ u.id }}</td>
+          <td class="text-center">{{ u.erp_user_id|default:"-" }}</td>
+          <td>
+            {{ u.username }}
+            {% if u.id == current_user_id %}
+              <span class="badge bg-primary">คุณ</span>
+            {% endif %}
+          </td>
+          <td>{{ u.full_name }}</td>
+
+          <td>
+            <select name="role_id" class="form-select form-select-sm">
+              {% for r in roles %}
+                <option value="{{ r.id }}"
+                  {% if r.role_name == u.role_name %}selected{% endif %}>
+                  {{ r.role_name }}
+                </option>
+              {% endfor %}
             </select>
-        </div>
+          </td>
 
-    </div>
+          <td class="text-center">
+            <input type="checkbox" name="is_active" value="1" {% if u.is_active %}checked{% endif %}>
+          </td>
 
-    <!-- ================= TABLE ================= -->
-    <div class="table-responsive">
-        <table id="userTable"
-               class="table table-bordered table-hover align-middle w-100">
-            <thead class="table-light">
-                <tr class="text-center">
-                    <th>ID</th>
-                    <th>ERP ID</th>
-                    <th>Username</th>
-                    <th>ชื่อ-นามสกุล</th>
-                    <th>Role</th>
-                    <th>Active</th>
-                    <th>จัดการ</th>
-                </tr>
-            </thead>
-            <tbody>
-
-            {% for u in users %}
-                <tr
-                    data-role="{{ u.role_name|lower }}"
-                    data-search="{{ u.id }} {{ u.erp_user_id }} {{ u.username|lower }} {{ u.full_name|lower }}"
-                >
-                    <form method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="user_id" value="{{ u.id }}">
-
-                        <td class="text-center">{{ u.id }}</td>
-                        <td class="text-center">{{ u.erp_user_id|default:"-" }}</td>
-                        <td>{{ u.username }}</td>
-                        <td>{{ u.full_name }}</td>
-
-                        <td>
-                            <select name="role_id"
-                                    class="form-select form-select-sm">
-                                {% for r in roles %}
-                                    <option value="{{ r.id }}"
-                                        {% if r.role_name == u.role_name %}selected{% endif %}>
-                                        {{ r.role_name }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </td>
-
-                        <td class="text-center">
-                            <div class="form-check form-switch d-inline-flex justify-content-center">
-                                <input class="form-check-input"
-                                       type="checkbox"
-                                       name="is_active"
-                                       value="1"
-                                       {% if u.is_active %}checked{% endif %}>
-                            </div>
-                        </td>
-
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-primary">
-                                บันทึก
-                            </button>
-                        </td>
-                    </form>
-                </tr>
-            {% endfor %}
-
-            </tbody>
-        </table>
-    </div>
+          <td class="text-center">
+            <button class="btn btn-sm btn-primary">บันทึก</button>
+          </td>
+        </form>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
 </div>
 
-<!-- ================= ADD USER MODAL ================= -->
+<!-- ADD USER MODAL -->
 <div class="modal fade" id="addUserModal" tabindex="-1">
-  <div class="modal-dialog modal-md modal-dialog-centered">
+  <div class="modal-dialog modal-dialog-centered">
     <form method="post">
-      {% csrf_token %}
-      <input type="hidden" name="action" value="add_user_from_erp">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="add_user_from_erp">
 
-      <div class="modal-content">
+    <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">เพิ่มผู้ใช้งานจาก ERP</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <h5 class="modal-title">เพิ่มผู้ใช้งานจาก ERP</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
 
         <div class="modal-body">
-          <div class="mb-3">
+
+        <!-- ✅ ERP USERNAME -->
+        <div class="mb-3">
             <label class="form-label">ERP Username</label>
             <input type="text"
-                   name="erp_username"
-                   class="form-control"
-                   placeholder="เช่น user01"
-                   required>
-          </div>
+                name="erp_username"
+                class="form-control"
+                placeholder="เช่น adminsp"
+                required>
+        </div>
 
-          <div class="mb-3">
+        <!-- ROLE -->
+        <div class="mb-3">
             <label class="form-label">Role</label>
             <select name="role_id" class="form-select" required>
-              {% for r in roles %}
+            {% for r in roles %}
                 <option value="{{ r.id }}">{{ r.role_name }}</option>
-              {% endfor %}
+            {% endfor %}
             </select>
-          </div>
+        </div>
 
-          <div class="form-check form-switch">
+        <!-- ACTIVE -->
+        <div class="form-check form-switch">
             <input class="form-check-input"
-                   type="checkbox"
-                   name="is_active"
-                   value="1"
-                   checked>
+                type="checkbox"
+                name="is_active"
+                value="1"
+                checked>
             <label class="form-check-label">เปิดใช้งาน</label>
-          </div>
+        </div>
+
         </div>
 
         <div class="modal-footer">
-          <button type="button"
-                  class="btn btn-secondary"
-                  data-bs-dismiss="modal">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
             ยกเลิก
-          </button>
-          <button type="submit"
-                  class="btn btn-success">
+        </button>
+        <button type="submit" class="btn btn-success">
             ดึงข้อมูลจาก ERP
-          </button>
+        </button>
         </div>
-      </div>
+    </div>
     </form>
   </div>
 </div>
-
 {% endblock %}
+
 
 {% block extra_js %}
 <script>
+$(function () {
+  $('#userTable').DataTable({
+    pageLength: 10,
+    lengthChange: false,
+    language: {
+      info: "แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ",
+      paginate: { previous: "ก่อนหน้า", next: "ถัดไป" }
+    }
+  });
+});
 $(document).ready(function () {
-
-    // ================= DATATABLE =================
-    const table = $('#userTable').DataTable({
-        pageLength: 10,
-        lengthChange: false,
-        searching: false,   // ❌ ปิด search ของ DataTables
-        ordering: true,
-        info: true,
-        language: {
-            info: "แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ",
-            paginate: {
-                previous: "ก่อนหน้า",
-                next: "ถัดไป"
-            }
-        }
-    });
 
     // ================= CUSTOM SEARCH =================
     $('#userSearch, #roleFilter').on('input change', function () {

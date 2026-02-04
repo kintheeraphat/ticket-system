@@ -17,7 +17,7 @@ from functools import wraps
 from django.http import HttpResponseForbidden
 from ticket.utils.approval import create_ticket_approval_by_ticket_type
 from django.views.decorators.http import require_POST
-
+from ticket.services.erp import call_erp_user_info
 
 
 ERP_API_URL = "http://172.17.1.55:8111/erpAuth/"
@@ -280,12 +280,12 @@ def manage_user(request):
 
         action = request.POST.get("action")
 
-        # ---------------------------------
+        # =====================
         # ADD USER FROM ERP
-        # ---------------------------------
+        # =====================
         if action == "add_user_from_erp":
 
-            erp_username = request.POST.get("erp_username")
+            erp_username = request.POST.get("erp_username", "").strip()
             role_id = request.POST.get("role_id")
             is_active = request.POST.get("is_active") == "1"
 
@@ -298,28 +298,36 @@ def manage_user(request):
                 messages.error(request, "ไม่พบผู้ใช้งานใน ERP")
                 return redirect("manage_user")
 
+            print("ERP USER:", erp_data)  # ✅ ต้องเห็นใน terminal
+
             with connection.cursor() as cursor:
                 cursor.execute("""
                     INSERT INTO tickets.users
                     (erp_user_id, username, full_name, role_id, is_active)
                     VALUES (%s, %s, %s, %s, %s)
-                    ON CONFLICT (username) DO NOTHING
+                    ON CONFLICT (erp_user_id)
+                    DO UPDATE SET
+                        username   = EXCLUDED.username,
+                        full_name = EXCLUDED.full_name,
+                        role_id   = EXCLUDED.role_id,
+                        is_active = EXCLUDED.is_active,
+                        updated_at = NOW()
                 """, [
-                    erp_data["user_id"],
-                    erp_data["login"],
-                    erp_data["name"],
+                    erp_data["user_id"],   # 527
+                    erp_data["login"],     # adminsp
+                    erp_data["name"],      # test_01 admin [...]
                     role_id,
                     is_active
                 ])
 
-            messages.success(request, "เพิ่มผู้ใช้งานจาก ERP เรียบร้อยแล้ว")
+            messages.success(request, "เพิ่ม/อัปเดตผู้ใช้งานจาก ERP เรียบร้อยแล้ว")
             return redirect("manage_user")
 
-        # ---------------------------------
+        # =====================
         # UPDATE USER
-        # ---------------------------------
-        user_id   = request.POST.get("user_id")
-        role_id   = request.POST.get("role_id")
+        # =====================
+        user_id = request.POST.get("user_id")
+        role_id = request.POST.get("role_id")
         is_active = request.POST.get("is_active") == "1"
 
         with connection.cursor() as cursor:
@@ -335,10 +343,9 @@ def manage_user(request):
         return redirect("manage_user")
 
     # =====================
-    # GET (LOAD PAGE)
+    # GET
     # =====================
     with connection.cursor() as cursor:
-
         cursor.execute("""
             SELECT
                 u.id,
@@ -361,38 +368,6 @@ def manage_user(request):
         roles = dictfetchall(cursor)
 
     return render(request, "admin/manage_user.html", {
-        "users": users,
-        "roles": roles
-    })
-
-
-    # =====================
-    # LOAD DATA (GET)
-    # =====================
-    with connection.cursor() as cursor:
-
-        cursor.execute("""
-            SELECT
-                u.id,
-                u.erp_user_id,
-                u.username,
-                u.full_name,
-                u.is_active,
-                r.role_name
-            FROM tickets.users u
-            LEFT JOIN tickets.roles r ON r.id = u.role_id
-            ORDER BY u.id
-        """)
-        users = dictfetchall(cursor)
-
-        cursor.execute("""
-            SELECT id, role_name
-            FROM tickets.roles
-            ORDER BY id
-        """)
-        roles = dictfetchall(cursor)
-
-    return render(request, "manage_user.html", {
         "users": users,
         "roles": roles
     })
