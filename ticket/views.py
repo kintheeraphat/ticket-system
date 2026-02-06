@@ -283,11 +283,12 @@ def manage_user(request):
     # POST
     # =====================
     if request.method == "POST":
+
         action = request.POST.get("action")
 
-        # =====================
+        # ==================================================
         # ADD USER FROM ERP
-        # =====================
+        # ==================================================
         if action == "add_user_from_erp":
 
             erp_username = request.POST.get("erp_username", "").strip()
@@ -305,9 +306,9 @@ def manage_user(request):
 
             with connection.cursor() as cursor:
 
-                # ---------------------
+                # =====================
                 # UPSERT DEPARTMENT
-                # ---------------------
+                # =====================
                 if erp_data.get("department_id"):
                     cursor.execute("""
                         SELECT id
@@ -321,16 +322,16 @@ def manage_user(request):
                             VALUES (%s, %s)
                         """, [
                             erp_data["department_id"],
-                            erp_data["department_name"]
+                            erp_data.get("department_name")
                         ])
 
-
-                # ---------------------
+                # =====================
                 # UPSERT USER
-                # ---------------------
+                # =====================
                 cursor.execute("""
                     INSERT INTO tickets.users
-                        (erp_user_id, username, full_name, role_id, is_active, department_id)
+                        (erp_user_id, username, full_name,
+                         role_id, is_active, department_id)
                     VALUES (%s, %s, %s, %s, %s, %s)
                     ON CONFLICT (erp_user_id)
                     DO UPDATE SET
@@ -346,16 +347,17 @@ def manage_user(request):
                     erp_data["name"],
                     role_id,
                     is_active,
-                    erp_data["department_id"]
+                    erp_data.get("department_id")
                 ])
 
             messages.success(request, "เพิ่มผู้ใช้งานจาก ERP เรียบร้อยแล้ว")
             return redirect("manage_user")
 
-        # =====================
-        # UPDATE USER
-        # =====================
+        # ==================================================
+        # UPDATE USER (ROLE / ACTIVE)
+        # ==================================================
         if action == "update_user":
+
             user_id = request.POST.get("user_id")
             role_id = request.POST.get("role_id")
             is_active = request.POST.get("is_active") == "1"
@@ -363,11 +365,11 @@ def manage_user(request):
             with connection.cursor() as cursor:
                 cursor.execute("""
                     UPDATE tickets.users
-                    SET is_active = %s,
-                        role_id = %s,
+                    SET role_id = %s,
+                        is_active = %s,
                         updated_at = NOW()
                     WHERE id = %s
-                """, [is_active, role_id, user_id])
+                """, [role_id, is_active, user_id])
 
             messages.success(request, "อัปเดตผู้ใช้งานเรียบร้อยแล้ว")
             return redirect("manage_user")
@@ -376,6 +378,8 @@ def manage_user(request):
     # GET
     # =====================
     with connection.cursor() as cursor:
+
+        # -------- USERS --------
         cursor.execute("""
             SELECT
                 u.id,
@@ -386,12 +390,15 @@ def manage_user(request):
                 r.role_name,
                 d.dept_name AS department_name
             FROM tickets.users u
-            LEFT JOIN tickets.roles r ON r.id = u.role_id
-            LEFT JOIN tickets.department d ON d.id = u.department_id
+            LEFT JOIN tickets.roles r
+                ON r.id = u.role_id
+            LEFT JOIN tickets.department d
+                ON d.id = u.department_id
             ORDER BY u.id
         """)
         users = dictfetchall(cursor)
 
+        # -------- ROLES --------
         cursor.execute("""
             SELECT id, role_name
             FROM tickets.roles
@@ -399,9 +406,18 @@ def manage_user(request):
         """)
         roles = dictfetchall(cursor)
 
+        # -------- DEPARTMENTS (for filter) --------
+        cursor.execute("""
+            SELECT DISTINCT dept_name AS department_name
+            FROM tickets.department
+            ORDER BY dept_name
+        """)
+        departments = dictfetchall(cursor)
+
     return render(request, "admin/manage_user.html", {
         "users": users,
         "roles": roles,
+        "departments": departments,
         "current_user_id": session_user.get("id"),
     })
 
