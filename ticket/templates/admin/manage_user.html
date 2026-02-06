@@ -211,18 +211,23 @@ $(document).ready(function () {
   });
 
   // ================= CUSTOM FILTER =================
-  $.fn.dataTable.ext.search.push(function (settings, data) {
+  $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
 
     const keyword    = $('#customSearch').val().toLowerCase();
     const role       = $('#roleFilter').val().toLowerCase();
     const department = $('#departmentFilter').val().toLowerCase();
-    const active     = $('#activeFilter').val();
+    const active     = $('#activeFilter').val(); // active | inactive | ""
 
     const username = (data[2] || '').toLowerCase();
     const fullname = (data[3] || '').toLowerCase();
     const dept     = (data[4] || '').toLowerCase();
     const rowRole  = (data[5] || '').toLowerCase();
-    const status   = (data[6] || '').toLowerCase();
+
+    // 🔥 ดึง checkbox จริงจาก DOM
+    const rowNode   = table.row(dataIndex).node();
+    const isActive  = $(rowNode)
+                        .find('input[type="checkbox"][name="is_active"]')
+                        .prop('checked');
 
     const matchText =
       !keyword ||
@@ -237,11 +242,12 @@ $(document).ready(function () {
 
     const matchActive =
       !active ||
-      (active === 'active' && status.includes('active')) ||
-      (active === 'inactive' && status.includes('inactive'));
+      (active === 'active' && isActive) ||
+      (active === 'inactive' && !isActive);
 
     return matchText && matchRole && matchDept && matchActive;
   });
+
 
   $('#customSearch').on('keyup', () => table.draw());
   $('#roleFilter').on('change', () => table.draw());
