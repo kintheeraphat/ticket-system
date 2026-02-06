@@ -275,15 +275,14 @@ def manage_user(request):
     # =====================
     # ADMIN ONLY
     # =====================
-    user = request.session.get("user")
-    if not user or user.get("role_id") != 1:
+    session_user = request.session.get("user")
+    if not session_user or session_user.get("role_id") != 1:
         raise Http404("Not allowed")
 
     # =====================
     # POST
     # =====================
     if request.method == "POST":
-
         action = request.POST.get("action")
 
         # =====================
@@ -304,29 +303,53 @@ def manage_user(request):
                 messages.error(request, "ไม่พบผู้ใช้งานใน ERP")
                 return redirect("manage_user")
 
-            print("ERP USER:", erp_data)  # ✅ ต้องเห็นใน terminal
-
             with connection.cursor() as cursor:
+
+                # ---------------------
+                # UPSERT DEPARTMENT
+                # ---------------------
+                if erp_data.get("department_id"):
+                    cursor.execute("""
+                        SELECT id
+                        FROM tickets.department
+                        WHERE id = %s
+                    """, [erp_data["department_id"]])
+
+                    if not cursor.fetchone():
+                        cursor.execute("""
+                            INSERT INTO tickets.department (id, dept_name)
+                            VALUES (%s, %s)
+                        """, [
+                            erp_data["department_id"],
+                            erp_data["department_name"]
+                        ])
+
+
+                # ---------------------
+                # UPSERT USER
+                # ---------------------
                 cursor.execute("""
                     INSERT INTO tickets.users
-                    (erp_user_id, username, full_name, role_id, is_active)
-                    VALUES (%s, %s, %s, %s, %s)
+                        (erp_user_id, username, full_name, role_id, is_active, department_id)
+                    VALUES (%s, %s, %s, %s, %s, %s)
                     ON CONFLICT (erp_user_id)
                     DO UPDATE SET
-                        username   = EXCLUDED.username,
-                        full_name = EXCLUDED.full_name,
-                        role_id   = EXCLUDED.role_id,
-                        is_active = EXCLUDED.is_active,
-                        updated_at = NOW()
+                        username       = EXCLUDED.username,
+                        full_name     = EXCLUDED.full_name,
+                        role_id       = EXCLUDED.role_id,
+                        is_active     = EXCLUDED.is_active,
+                        department_id = EXCLUDED.department_id,
+                        updated_at    = NOW()
                 """, [
-                    erp_data["user_id"],   # 527
-                    erp_data["login"],     # adminsp
-                    erp_data["name"],      # test_01 admin [...]
+                    erp_data["user_id"],
+                    erp_data["login"],
+                    erp_data["name"],
                     role_id,
-                    is_active
+                    is_active,
+                    erp_data["department_id"]
                 ])
 
-            messages.success(request, "เพิ่ม/อัปเดตผู้ใช้งานจาก ERP เรียบร้อยแล้ว")
+            messages.success(request, "เพิ่มผู้ใช้งานจาก ERP เรียบร้อยแล้ว")
             return redirect("manage_user")
 
         # =====================
@@ -349,7 +372,6 @@ def manage_user(request):
             messages.success(request, "อัปเดตผู้ใช้งานเรียบร้อยแล้ว")
             return redirect("manage_user")
 
-
     # =====================
     # GET
     # =====================
@@ -361,9 +383,11 @@ def manage_user(request):
                 u.username,
                 u.full_name,
                 u.is_active,
-                r.role_name
+                r.role_name,
+                d.dept_name AS department_name
             FROM tickets.users u
             LEFT JOIN tickets.roles r ON r.id = u.role_id
+            LEFT JOIN tickets.department d ON d.id = u.department_id
             ORDER BY u.id
         """)
         users = dictfetchall(cursor)
@@ -377,7 +401,8 @@ def manage_user(request):
 
     return render(request, "admin/manage_user.html", {
         "users": users,
-        "roles": roles
+        "roles": roles,
+        "current_user_id": session_user.get("id"),
     })
 
 @login_required_custom

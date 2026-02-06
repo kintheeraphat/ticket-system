@@ -1,0 +1,6682 @@
+[
+    {
+        "hr_id": 708,
+        "hr_name": "ณัฐพันธ์  พินิจชนานันท์ [0705]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 715,
+        "hr_name": "ปลินดา ฉ่ำเฉื่อย [0712]",
+        "hr_active": true,
+        "user_id": 485.0,
+        "user_name": "palinda.chu",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 712,
+        "hr_name": "โชติกา จริยาจินดาเสถียร [0709]",
+        "hr_active": true,
+        "user_id": 482.0,
+        "user_name": "chotika.cha",
+        "user_active": true,
+        "department_id": 14.0,
+        "department_name": "CEO Dept."
+    },
+    {
+        "hr_id": 919,
+        "hr_name": "ปองณัฐ จำนงค์เลิศ [20176]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 478,
+        "hr_name": "Customer Service Dept. [CUS]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 716,
+        "hr_name": "ชมพูนุท แสงปรีชา [0713]",
+        "hr_active": true,
+        "user_id": 486.0,
+        "user_name": "chompoonut.san",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 920,
+        "hr_name": "นิภาพร เพิ่มทอง [20178]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 718,
+        "hr_name": "นรินทร ศรีแหงโคตร [0715]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 720,
+        "hr_name": "วราลักษณ์ เสานาค [0717]",
+        "hr_active": true,
+        "user_id": 490.0,
+        "user_name": "waralak.sao",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 936,
+        "hr_name": "จักรกฤษณ์ น่วมนาค [20181]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 721,
+        "hr_name": "คุณเจริญ เข็มพิลา [20137]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 483,
+        "hr_name": "TT-CAR แผนกช่างฟิล์มรถยนต์ [TTCar]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 719,
+        "hr_name": "ภัณฑิรา พลภัทรกุล [0716]",
+        "hr_active": true,
+        "user_id": 489.0,
+        "user_name": "pantira.pon",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 737,
+        "hr_name": "สุรศักดิ์ แตงโม [20144]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 818,
+        "hr_name": "ณัฏฐริยา เมธานิธิ [0789]",
+        "hr_active": true,
+        "user_id": 558.0,
+        "user_name": "natthariya.met",
+        "user_active": false,
+        "department_id": 20.0,
+        "department_name": "IMC Production Dept."
+    },
+    {
+        "hr_id": 280,
+        "hr_name": "คุณสุวภัทร ขมะวรรณ [0018]",
+        "hr_active": false,
+        "user_id": 113.0,
+        "user_name": "suwapat.kam",
+        "user_active": false,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 281,
+        "hr_name": "คุณจันดา สายสมร [0020]",
+        "hr_active": true,
+        "user_id": 108.0,
+        "user_name": "chanda.sai",
+        "user_active": true,
+        "department_id": 15.0,
+        "department_name": "COO Dept."
+    },
+    {
+        "hr_id": 725,
+        "hr_name": "คุณสุตาภัทร เลิศนิธิพรชัย [0720]",
+        "hr_active": true,
+        "user_id": 493.0,
+        "user_name": "sutapat.ler",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 488,
+        "hr_name": "ADM แผนกธุรการ [ADM]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 491,
+        "hr_name": "ฝ่ายขาย ฟิล์มรถยนต์ [SAC]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 724,
+        "hr_name": "ธนชัย ขาวดอกไม้ [0719]",
+        "hr_active": true,
+        "user_id": 494.0,
+        "user_name": "tanachai.kha",
+        "user_active": true,
+        "department_id": 12.0,
+        "department_name": "IT Dept."
+    },
+    {
+        "hr_id": 487,
+        "hr_name": "admkesorn admkesorn [ITTEST03]",
+        "hr_active": true,
+        "user_id": 385.0,
+        "user_name": "admkesorn",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 479,
+        "hr_name": "admin promotion [admin_Promotion]",
+        "hr_active": true,
+        "user_id": 379.0,
+        "user_name": "admin@it",
+        "user_active": true,
+        "department_id": 12.0,
+        "department_name": "IT Dept."
+    },
+    {
+        "hr_id": 731,
+        "hr_name": "ฐิติยา เกษมี [0721]",
+        "hr_active": true,
+        "user_id": 495.0,
+        "user_name": "thitiya.kad",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 693,
+        "hr_name": "คุณกรวิชญ์ ชาตินันทน์ [0691]",
+        "hr_active": true,
+        "user_id": 500.0,
+        "user_name": "(Close)korawit.cha",
+        "user_active": false,
+        "department_id": 20.0,
+        "department_name": "IMC Production Dept."
+    },
+    {
+        "hr_id": 572,
+        "hr_name": "คุณจิรทิปต์ นักร้อง [20012]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 699,
+        "hr_name": "คุณเฉลิมพล ขำพร้อม [20112]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 493,
+        "hr_name": "แผนกการเงิน Finnance [FIN]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 489,
+        "hr_name": "EXE ฝ่ายบริหาร [EXE]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 490,
+        "hr_name": "IMC แผนก IMC [IMC]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 709,
+        "hr_name": "ภมรศักดิ์ รัตนพันธ์ [0706]",
+        "hr_active": true,
+        "user_id": 667.0,
+        "user_name": "phamonsak.rat",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 492,
+        "hr_name": "แผนกทรัพยากรบุคคล บุคคล [HR]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 713,
+        "hr_name": "นฤมล แซ่กี้ [0710]",
+        "hr_active": true,
+        "user_id": 483.0,
+        "user_name": "naruemon.sea",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 710,
+        "hr_name": "นิธิชัย ชัยหบุตร [0707]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 286,
+        "hr_name": "คุณสุวรรณี ตันติมณีโชติ [0073]",
+        "hr_active": false,
+        "user_id": 130.0,
+        "user_name": "suwannee.tun",
+        "user_active": false,
+        "department_id": 1.0,
+        "department_name": "Sales Admin Dept."
+    },
+    {
+        "hr_id": 569,
+        "hr_name": "คุณเก่ง บอนไธสง [20017]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 726,
+        "hr_name": "คุณ ไพณรงค์  ธรรมลังกา [20132]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 475,
+        "hr_name": "89 เขตการขายพิเศษ คุณนันทภพ  บุญจำภู [89]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 819,
+        "hr_name": "คุณสุกัญญา อัศวยิ่งเจริญ [0792]",
+        "hr_active": false,
+        "user_id": 563.0,
+        "user_name": "sukanya.ass",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 287,
+        "hr_name": "คุณนภอนงค์ พันธุ์ฤทธิ์ [0080]",
+        "hr_active": true,
+        "user_id": 48.0,
+        "user_name": "nopanong.pan",
+        "user_active": true,
+        "department_id": 16.0,
+        "department_name": "HR Dept."
+    },
+    {
+        "hr_id": 485,
+        "hr_name": "คุณเฉลิมพล นาหมุด [IMB0031]",
+        "hr_active": true,
+        "user_id": 383.0,
+        "user_name": "technicial52",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 703,
+        "hr_name": "คุณชุติพงศ์ สังข์สีเมฆ [20115]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 717,
+        "hr_name": "นวพร สถาวรสมิต [0714]",
+        "hr_active": true,
+        "user_id": 487.0,
+        "user_name": "nawaporn.sat",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 727,
+        "hr_name": "คุณ ธีรไนย   เทพเชษฐา [20133]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 732,
+        "hr_name": "คุณ ศักดิ์วิเชียร   สิตะเสน [20143]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 735,
+        "hr_name": "มัญชุลี รัตนสิทธิ์ [0724]",
+        "hr_active": true,
+        "user_id": 498.0,
+        "user_name": "munchulee.rat",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 733,
+        "hr_name": "ภูษิต ภู่สุด [0723]",
+        "hr_active": true,
+        "user_id": 497.0,
+        "user_name": "pusit.pus",
+        "user_active": true,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 723,
+        "hr_name": "พีรพล จ้อยจินดา [10090]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 734,
+        "hr_name": "ธัณย์นิชา ศิริสุริยาภัทร์ [0722]",
+        "hr_active": false,
+        "user_id": 496.0,
+        "user_name": "(Close)thannicha.sir",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 711,
+        "hr_name": "สุทธิภัทร คงพูล [0708]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 484,
+        "hr_name": "138 รักษาการเขตขายภาคใต้ คุณเพิ่มศักดิ์ [S138]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 736,
+        "hr_name": "ณปภัช รัตนประทีป [0725]",
+        "hr_active": true,
+        "user_id": 499.0,
+        "user_name": "napaphat.rat",
+        "user_active": true,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 768,
+        "hr_name": "163 รักษาการเขตขายกรุงเทพ คุณลลนา [S163]",
+        "hr_active": true,
+        "user_id": 522.0,
+        "user_name": "(Close)BKK",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 704,
+        "hr_name": "คุณจักรกฤษณ์ น่วมนาค [20116]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 706,
+        "hr_name": "คุณจิราภรณ์ กุตัน [20114]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 504,
+        "hr_name": "คุณชุษณะ ศรีโท [0573]",
+        "hr_active": true,
+        "user_id": 401.0,
+        "user_name": "shusana.sri",
+        "user_active": false,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 494,
+        "hr_name": "THULE THULE [99]",
+        "hr_active": false,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 599,
+        "hr_name": "คุณฐิติวรรณ แสงฉาน [IMB0078]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 292,
+        "hr_name": "คุณเขมจิรา ศิริโอฬาร [0110]",
+        "hr_active": false,
+        "user_id": 122.0,
+        "user_name": "khemjira.sir",
+        "user_active": false,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 522,
+        "hr_name": "Strategy  Sales managment [SSM]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 19.0,
+        "department_name": "Strategic Sales Dept."
+    },
+    {
+        "hr_id": 477,
+        "hr_name": "คุณณัฐวุฒิ อนันต์พรนิทัศน์ [0587]",
+        "hr_active": true,
+        "user_id": 381.0,
+        "user_name": "natthawut.ana",
+        "user_active": false,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 441,
+        "hr_name": "คุณปฐมพงศ์ ประชุมวัตร [IMB0023]",
+        "hr_active": true,
+        "user_id": 360.0,
+        "user_name": "Technicial048",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 519,
+        "hr_name": "คุณธนโชติ ใจแสน [0599]",
+        "hr_active": true,
+        "user_id": 393.0,
+        "user_name": "tanachoad.jai",
+        "user_active": false,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 738,
+        "hr_name": "คุณสุกัญญา สถิตวรรณรัตน์ [0726]",
+        "hr_active": true,
+        "user_id": 501.0,
+        "user_name": "sukunya.sat",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 714,
+        "hr_name": "พักตร์ พรมสูงวงศ์ [0711]",
+        "hr_active": true,
+        "user_id": 484.0,
+        "user_name": "pak.pro",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 290,
+        "hr_name": "คุณเขมณัฎฐ์ รัตนคุณาพงษ์ [0091]",
+        "hr_active": true,
+        "user_id": 118.0,
+        "user_name": "kemmanat.rat",
+        "user_active": true,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 537,
+        "hr_name": "คุณธีรชัย  อัคละ [0619]",
+        "hr_active": false,
+        "user_id": 411.0,
+        "user_name": "(Close)terachai.aka",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 730,
+        "hr_name": "คุณ เอกคะรินทร์ เหล่าพรม [20141]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 739,
+        "hr_name": "คุณ เกียรติศักดิ์ จันทนุช [0727]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 37.0,
+        "department_name": "Technical Building"
+    },
+    {
+        "hr_id": 820,
+        "hr_name": "คุณธีรศานต์ บุรุษพัฒน์ [0793]",
+        "hr_active": true,
+        "user_id": 561.0,
+        "user_name": "terasan.bur",
+        "user_active": true,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 747,
+        "hr_name": "อนุรุจน์ ช่วยศรี [0735]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 37.0,
+        "department_name": "Technical Building"
+    },
+    {
+        "hr_id": 740,
+        "hr_name": "วิทยา มีหิริ [10091]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 745,
+        "hr_name": "คุณ  แก้ว จันทร [20146]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 728,
+        "hr_name": "คุณ ภัณฑิรา เอมรัตน์ [20139]",
+        "hr_active": false,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 697,
+        "hr_name": "คุณนที วงศ์ชื่น [0694]",
+        "hr_active": true,
+        "user_id": 472.0,
+        "user_name": "(Close)natee.won",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 506,
+        "hr_name": "คุณกฤษสุวรรณ ริมเกาะ [C8815000003743]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 311,
+        "hr_name": "คุณภูษิต ภู่สด [0215]",
+        "hr_active": false,
+        "user_id": 103.0,
+        "user_name": "pusit.pusold",
+        "user_active": false,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 513,
+        "hr_name": "คุณธนโชติ ใจแสน [0599]",
+        "hr_active": false,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 744,
+        "hr_name": "คุณ สถาปัตถ์ นาถกรณ์ [20145]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 571,
+        "hr_name": "คุณธนัญชัย เที่ยงตรง [20011]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 307,
+        "hr_name": "คุณบัณฑิตา ยุชัย [0187]",
+        "hr_active": false,
+        "user_id": 98.0,
+        "user_name": "buntita.yuc",
+        "user_active": false,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 482,
+        "hr_name": "คุณธัญชนิต สมบูรณ์ [0591]",
+        "hr_active": false,
+        "user_id": 382.0,
+        "user_name": "tanchanit.som",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 507,
+        "hr_name": "คุณธนันท์รัฐ ทิพย์อาสน์ [IMB0027]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 606,
+        "hr_name": "คุณธีรณัฏฐ์ เหมืองทรายมูล [90001]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 729,
+        "hr_name": "คุณ วัฒนาภรณ์ พ้นภัยพาล [20140]",
+        "hr_active": false,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 309,
+        "hr_name": "คุณศรัญญา วิบูลย์ศิริศักดิ์ [0193]",
+        "hr_active": false,
+        "user_id": 100.0,
+        "user_name": "saranya.wib",
+        "user_active": false,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 822,
+        "hr_name": "อุไรวรรณ ไชยวุฒิ [0790]",
+        "hr_active": true,
+        "user_id": 559.0,
+        "user_name": "(Close)uraiwan.cha",
+        "user_active": false,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 748,
+        "hr_name": "กุลิสรา จันทวีป [0733]",
+        "hr_active": true,
+        "user_id": 505.0,
+        "user_name": "kulisara.jan",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 300,
+        "hr_name": "คุณอาทิตย์ อรรถศาสตร์ศรี [0157]",
+        "hr_active": true,
+        "user_id": 37.0,
+        "user_name": "artit.att",
+        "user_active": true,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 741,
+        "hr_name": "ธีรยุทธ ไม้เขียว [0728]",
+        "hr_active": true,
+        "user_id": 502.0,
+        "user_name": "teerayoot.mai",
+        "user_active": false,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 821,
+        "hr_name": "คุณนภัทรารัตน์ เนินภู [0791]",
+        "hr_active": false,
+        "user_id": 560.0,
+        "user_name": "(Close)naphattrarat.noe",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 299,
+        "hr_name": "คุณเพิ่มศักดิ์ ศรีพันธุ์ [0156]",
+        "hr_active": true,
+        "user_id": 83.0,
+        "user_name": "(Close)permsak.sri",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 305,
+        "hr_name": "คุณวสันต์ ช้างแก้ว [0183]",
+        "hr_active": true,
+        "user_id": 39.0,
+        "user_name": "wasun.cha",
+        "user_active": true,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 746,
+        "hr_name": "คุณกิตติเชษฐ์ อมรเวช [0731]",
+        "hr_active": true,
+        "user_id": 510.0,
+        "user_name": "(Close)kittiched.amo",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 823,
+        "hr_name": "คุณธุรการขาย ฝ่ายธุรการขาย [SALEORDER001]",
+        "hr_active": true,
+        "user_id": 564.0,
+        "user_name": "(Close)admin.onusa.kit",
+        "user_active": false,
+        "department_id": null,
+        "department_name": null
+    },
+    {
+        "hr_id": 277,
+        "hr_name": "คุณธารารัตน์ ศรีพันธุ์ [0008]",
+        "hr_active": false,
+        "user_id": 91.0,
+        "user_name": "(Close)tararat.sri",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 743,
+        "hr_name": "ลัดดาวัล นามกุล [0729]",
+        "hr_active": true,
+        "user_id": 503.0,
+        "user_name": "laddawan.nam",
+        "user_active": true,
+        "department_id": 1.0,
+        "department_name": "Sales Admin Dept."
+    },
+    {
+        "hr_id": 754,
+        "hr_name": "รุ่งรัตน์ แต้มแก้ว [0740]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 705,
+        "hr_name": "คุณนิรันดร์ โสภาวัน [20117]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 749,
+        "hr_name": "ปราณิสา คุณีย์พันธุ์ [0734]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 750,
+        "hr_name": "ธัญธร มั่นถาวรวงศ์ [0736]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 577,
+        "hr_name": "คุณคณาธิป อินลอย [IMB0029]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 523,
+        "hr_name": "140 รักษาการเขตขายภาคเหนือ ภาคเหนือ [S140]",
+        "hr_active": true,
+        "user_id": 397.0,
+        "user_name": "(Close)north",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 751,
+        "hr_name": "อุทุมพร ชั้นอินทร์งาม [0737]",
+        "hr_active": true,
+        "user_id": 511.0,
+        "user_name": "uthoomporn.cha",
+        "user_active": true,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 758,
+        "hr_name": "คชรัตน์ สุกาวาส [0744]",
+        "hr_active": false,
+        "user_id": 514.0,
+        "user_name": "(Close)khotcharat.suk",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 685,
+        "hr_name": "คุณดาวนภา บุญแก้ว [0684]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 524,
+        "hr_name": "แผนกไอที IT [IT]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 586,
+        "hr_name": "คุณนนทวัส เหมือนเตย [IMB0060]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 752,
+        "hr_name": "ศุภชัย แซ่โอ้ว [0738]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 37.0,
+        "department_name": "Technical Building"
+    },
+    {
+        "hr_id": 591,
+        "hr_name": "คุณเนติพงษ์ แสงพิทักษ์ [IMB0069]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 585,
+        "hr_name": "คุณเบญจพร ต่วนชะเอม [IMB0059]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 753,
+        "hr_name": "สถาพร ควบคุม [0739]",
+        "hr_active": true,
+        "user_id": 513.0,
+        "user_name": "(Close)sataporn.kau",
+        "user_active": false,
+        "department_id": 1.0,
+        "department_name": "Sales Admin Dept."
+    },
+    {
+        "hr_id": 824,
+        "hr_name": "คุณณัฐพงศ์  มหาบุญผาติ [0794]",
+        "hr_active": true,
+        "user_id": 566.0,
+        "user_name": "(Close)nattaphong.mah",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 531,
+        "hr_name": "IT Test Staff [ITTEST01]",
+        "hr_active": true,
+        "user_id": 370.0,
+        "user_name": "userdemo",
+        "user_active": true,
+        "department_id": null,
+        "department_name": null
+    },
+    {
+        "hr_id": 301,
+        "hr_name": "คุณธันยาสรวง เสนีย์วงศ์ ณ อยุธยา [0160]",
+        "hr_active": true,
+        "user_id": 149.0,
+        "user_name": "thanyasuang.sen",
+        "user_active": true,
+        "department_id": 23.0,
+        "department_name": "IMC Strategic Partnership & Digital Marketing"
+    },
+    {
+        "hr_id": 757,
+        "hr_name": "อนุชา ชิดตุ้ย [10092]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 770,
+        "hr_name": "เขตขายสินค้ากลุ่มพิเศษ คุณสนธิชัย [S159]",
+        "hr_active": true,
+        "user_id": 488.0,
+        "user_name": "sunpet.eadclose",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 552,
+        "hr_name": "คุณชลวิทย์ อัศวะโมสด [IMB0064]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 896,
+        "hr_name": "คุณอโนชา วันทา [20167]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 769,
+        "hr_name": "นาย ธนพล ศรีจวน [20151]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 766,
+        "hr_name": "ชาญชัย หันประดิษฐ์ [0747]",
+        "hr_active": true,
+        "user_id": 526.0,
+        "user_name": "building012",
+        "user_active": true,
+        "department_id": 37.0,
+        "department_name": "Technical Building"
+    },
+    {
+        "hr_id": 291,
+        "hr_name": "คุณสิรีรัตน์ ปรีดาสุวรรณ [0098]",
+        "hr_active": true,
+        "user_id": 94.0,
+        "user_name": "sireerat.pre",
+        "user_active": true,
+        "department_id": 1.0,
+        "department_name": "Sales Admin Dept."
+    },
+    {
+        "hr_id": 702,
+        "hr_name": "คุณปวีณา เขียวทวี [0701]",
+        "hr_active": true,
+        "user_id": 481.0,
+        "user_name": "paweena.khi",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 330,
+        "hr_name": "คุณภูวิช ชูจันทร์ [0372]",
+        "hr_active": false,
+        "user_id": 71.0,
+        "user_name": "(Close)puvit.shu",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 546,
+        "hr_name": "คุณณฐ ด้วงชนะ [0626]",
+        "hr_active": false,
+        "user_id": 416.0,
+        "user_name": "natha.dou",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 641,
+        "hr_name": "151 รักษาการเขตขาย กรุงเทพและปริมณฑล [S151]",
+        "hr_active": true,
+        "user_id": 444.0,
+        "user_name": "(Close)bangkok",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 355,
+        "hr_name": "คุณจารุพร ลิมป์ลิขิตสกุล [0492]",
+        "hr_active": false,
+        "user_id": 244.0,
+        "user_name": "jaruporn.lim",
+        "user_active": false,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 509,
+        "hr_name": "คุณเบญจมาภรณ์ ฟักเล็ก [C8815000000170]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": null,
+        "department_name": null
+    },
+    {
+        "hr_id": 515,
+        "hr_name": "119 รักษาการเขตขาย ภาคตะวันออกเฉียงเหนือ [S119]",
+        "hr_active": true,
+        "user_id": 408.0,
+        "user_name": "(Close)119",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 596,
+        "hr_name": "คุณเบญญาภา สว่างแจ้ง [IMB0074]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 869,
+        "hr_name": "รักษาการเขตขายกรุงเทพและปริมณฑล คุณประมวลวุฒิ [S181]",
+        "hr_active": true,
+        "user_id": 610.0,
+        "user_name": "(Close)S181.bangkokperimeter",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 525,
+        "hr_name": "แผนกบัญชี Accounting [ACC]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 922,
+        "hr_name": "คนธรส แก้วเอี่ยม [0858]",
+        "hr_active": true,
+        "user_id": 651.0,
+        "user_name": "(Close)khontharos.kae",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 532,
+        "hr_name": "IT Test Manager [ITTEST02]",
+        "hr_active": true,
+        "user_id": 402.0,
+        "user_name": "userdemo2",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 760,
+        "hr_name": "อมรรัตน์ ดงงาม [0743]",
+        "hr_active": true,
+        "user_id": 515.0,
+        "user_name": "amornrat.don",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 894,
+        "hr_name": "บัญชา กิติเรืองแสง [0836]",
+        "hr_active": true,
+        "user_id": 619.0,
+        "user_name": "(Close)buncha.kit",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 333,
+        "hr_name": "คุณนภาพร รัตนาเดชากุล [0377]",
+        "hr_active": false,
+        "user_id": 43.0,
+        "user_name": "napaporn.rat",
+        "user_active": false,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 336,
+        "hr_name": "คุณอรอนงค์ พลงาม [0410]",
+        "hr_active": false,
+        "user_id": 116.0,
+        "user_name": "onanong.pon",
+        "user_active": false,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 555,
+        "hr_name": "คุณเฉลิมชัย ดงสุริยัน [IMB0054]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 806,
+        "hr_name": "อรอุษา กิตธารเมธี [0780]",
+        "hr_active": true,
+        "user_id": 549.0,
+        "user_name": "onusa.kit",
+        "user_active": false,
+        "department_id": 1.0,
+        "department_name": "Sales Admin Dept."
+    },
+    {
+        "hr_id": 767,
+        "hr_name": "สรายุทธ  สุดสม [20150                ]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 764,
+        "hr_name": "คุณสุนิศา แสงสุข [0746]",
+        "hr_active": false,
+        "user_id": 517.0,
+        "user_name": "(Close)sunisa.sae",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 742,
+        "hr_name": "จารุวรรณ สีสา [0730]",
+        "hr_active": true,
+        "user_id": 504.0,
+        "user_name": "jaruwan.sis",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 763,
+        "hr_name": "เจนจิรา โคตรพรม [0741]",
+        "hr_active": false,
+        "user_id": 519.0,
+        "user_name": "(Close)jenjira.kho",
+        "user_active": false,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 825,
+        "hr_name": "คุณกรภพ เศรษฐาเดชากุล [0795]",
+        "hr_active": true,
+        "user_id": 568.0,
+        "user_name": "kornphop.sed",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 516,
+        "hr_name": "คุณณฐกร แก้วแป้นผา [TN078]",
+        "hr_active": false,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 556,
+        "hr_name": "คุณธนภัทร โขสูงเนิน [IMB0066]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 521,
+        "hr_name": "คุณปัญญาพร นันทะพันธ์ [0608]",
+        "hr_active": true,
+        "user_id": 390.0,
+        "user_name": "panyaporn.nam",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 341,
+        "hr_name": "คุณสุภาพร เอี้ยงรอด [0419]",
+        "hr_active": false,
+        "user_id": 102.0,
+        "user_name": "suphaphon.aia",
+        "user_active": false,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 639,
+        "hr_name": "คุณปิยะโชค สารวัน [20043]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 344,
+        "hr_name": "คุณนฤมล มุสิกะ [0433]",
+        "hr_active": false,
+        "user_id": 99.0,
+        "user_name": "(Close)narumon.mas",
+        "user_active": false,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 765,
+        "hr_name": "กฤษณพงศ์ อินฟ้าแสง [40141]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 921,
+        "hr_name": "สุทธิพงษ์ ควาซี โอที [0857]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 700,
+        "hr_name": "คุณพงศกร ไกรอ่อน [20113]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 339,
+        "hr_name": "คุณนภดล ตุละพิภาค [0416]",
+        "hr_active": true,
+        "user_id": 80.0,
+        "user_name": "(Close)nopphadon.tul",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 538,
+        "hr_name": "คุณสุกัญญา ภูมิโชติ [0621]",
+        "hr_active": true,
+        "user_id": 412.0,
+        "user_name": "sukanya.poo",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 526,
+        "hr_name": "แผนกฟิล์มอาคาร Building Film [SAB]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 340,
+        "hr_name": "คุณกันยารัตน์ ถาวร [0417]",
+        "hr_active": true,
+        "user_id": 59.0,
+        "user_name": "kanyarat.taw",
+        "user_active": true,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 368,
+        "hr_name": "คุณธิตญา แก้วธิดา [0532]",
+        "hr_active": false,
+        "user_id": 175.0,
+        "user_name": "titaya.kae",
+        "user_active": false,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 331,
+        "hr_name": "คุณศตวรรษ ก้องเสียง [0375]",
+        "hr_active": false,
+        "user_id": 44.0,
+        "user_name": "sattawat.kon",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 756,
+        "hr_name": "ทีมคุณสนธิชัย จิตพิไลเมธา ภาคตะวันออกเฉียงเหนือ [s159]",
+        "hr_active": false,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 615,
+        "hr_name": "คุณศุภวิชญ์ อินอ่อน [0640]",
+        "hr_active": false,
+        "user_id": 431.0,
+        "user_name": "supawit.ino",
+        "user_active": false,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 829,
+        "hr_name": "คุณจิรายุ สิทธิโชคศิริ [0796]",
+        "hr_active": true,
+        "user_id": 569.0,
+        "user_name": "jirayu.sit",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 415,
+        "hr_name": "คุณวันเฉลิม บวบงาม [0442]",
+        "hr_active": true,
+        "user_id": 335.0,
+        "user_name": "Technicial023",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 924,
+        "hr_name": "พนินธร ศิลป์ประเสริฐ [0859]",
+        "hr_active": true,
+        "user_id": 636.0,
+        "user_name": "phanintorn.sin",
+        "user_active": true,
+        "department_id": 14.0,
+        "department_name": "CEO Dept."
+    },
+    {
+        "hr_id": 761,
+        "hr_name": "คุณพลชาติ ธรรมมล [0742]",
+        "hr_active": true,
+        "user_id": 516.0,
+        "user_name": "ponlachart.tha",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 342,
+        "hr_name": "คุณเจตเทพ เหลาแหลม [0422]",
+        "hr_active": false,
+        "user_id": 151.0,
+        "user_name": "(Close)jetathep.lao",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 722,
+        "hr_name": "แสงเดือน สุระพันธ์ [0718]",
+        "hr_active": true,
+        "user_id": 491.0,
+        "user_name": "saengduen.sur",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 914,
+        "hr_name": "คุณวราภรณ์ เลี้ยงถนอม [0848]",
+        "hr_active": true,
+        "user_id": 632.0,
+        "user_name": "(Close) waraporn.lia",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 897,
+        "hr_name": "อุทุมพร ทรงโฉม [20168]",
+        "hr_active": true,
+        "user_id": 652.0,
+        "user_name": "utumporn.son",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 755,
+        "hr_name": "162 รักษาการเขตขายภาคใต้ คุณจิตรียา [S162]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 350,
+        "hr_name": "คุณเสาวลักษณ์ ดิลกคุณธรรม [0464]",
+        "hr_active": false,
+        "user_id": 139.0,
+        "user_name": "saowaluk.dil",
+        "user_active": false,
+        "department_id": 12.0,
+        "department_name": "IT Dept."
+    },
+    {
+        "hr_id": 363,
+        "hr_name": "คุณกรองกาญจน์ ไพบูลย์ศิลป [0514]",
+        "hr_active": false,
+        "user_id": 171.0,
+        "user_name": "krongkan.pai",
+        "user_active": false,
+        "department_id": 27.0,
+        "department_name": "AEC Dept."
+    },
+    {
+        "hr_id": 527,
+        "hr_name": "แผนกคลังสินค้า Warehouse [WHA]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 803,
+        "hr_name": "รักษาการเขตขายกรุงเทพฯ คุณชลันดา [S167]",
+        "hr_active": true,
+        "user_id": 550.0,
+        "user_name": "(Close)bangkok167",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 517,
+        "hr_name": "111 Thule บริษัทฯไม่ใช้ [S111]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 476,
+        "hr_name": "บริษัท เทคโนเซล เฟรย์ จำกัด [8998]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 351,
+        "hr_name": "คุณคิษญากร มณีพันธุ์ [0473]",
+        "hr_active": false,
+        "user_id": 150.0,
+        "user_name": "kissayakorn.man",
+        "user_active": false,
+        "department_id": 21.0,
+        "department_name": "IMC PR, Event Dept"
+    },
+    {
+        "hr_id": 776,
+        "hr_name": "นิดลาวัลย์ เลิศล้ำ [0754]",
+        "hr_active": false,
+        "user_id": 530.0,
+        "user_name": "(Close)nidlawan.ler",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 773,
+        "hr_name": "ศรณย์ภัทร ชาตยาภรณ์ [0749]",
+        "hr_active": true,
+        "user_id": 524.0,
+        "user_name": "(Close)saronpat.cha",
+        "user_active": false,
+        "department_id": 21.0,
+        "department_name": "IMC PR, Event Dept"
+    },
+    {
+        "hr_id": 452,
+        "hr_name": "คุณพจนา เลิศสิริโพธิ์ทอง [0584]",
+        "hr_active": false,
+        "user_id": 307.0,
+        "user_name": "pojjana.ler",
+        "user_active": false,
+        "department_id": 1.0,
+        "department_name": "Sales Admin Dept."
+    },
+    {
+        "hr_id": 514,
+        "hr_name": "คุณพนักงาน TNS [0000]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": null,
+        "department_name": null
+    },
+    {
+        "hr_id": 651,
+        "hr_name": "คุณพรธิดี สนธิพร [0664]",
+        "hr_active": true,
+        "user_id": 445.0,
+        "user_name": "pornthidee.son",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 579,
+        "hr_name": "คุณพงษ์พันธุ์ คลังนุ่ม [IMB0033]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 772,
+        "hr_name": "WareHouse Rujee [WH_Rujee]",
+        "hr_active": true,
+        "user_id": 521.0,
+        "user_name": "rujee.ban02",
+        "user_active": true,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 377,
+        "hr_name": "คุณสุวิจักขณ์ ศรีชิษณวนนท์ [0555]",
+        "hr_active": false,
+        "user_id": 257.0,
+        "user_name": "(Close)suvijak.sri",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 623,
+        "hr_name": "คุณกฤษดา บุญน้อย [20039]",
+        "hr_active": false,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 378,
+        "hr_name": "คุณธวัชชัย ไชยจริม [0557]",
+        "hr_active": false,
+        "user_id": 259.0,
+        "user_name": "(Close)thawatchai.cha",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 775,
+        "hr_name": "อัญชลี พุฒใจกา [20152]",
+        "hr_active": false,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 347,
+        "hr_name": "คุณรัชภร อุดมทรงฉัตร [0448]",
+        "hr_active": true,
+        "user_id": 56.0,
+        "user_name": "ratchaporn.udo",
+        "user_active": true,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 781,
+        "hr_name": "อภิรักษ์ ทองสำโรง [10093]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 778,
+        "hr_name": "นวลพรรณ หล่อนวกิจเจริญ [0752]",
+        "hr_active": true,
+        "user_id": 531.0,
+        "user_name": "(Close)nualpan.lar",
+        "user_active": false,
+        "department_id": 1.0,
+        "department_name": "Sales Admin Dept."
+    },
+    {
+        "hr_id": 783,
+        "hr_name": "ทัตเทพ นุ่มภา [20153]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 782,
+        "hr_name": "เทพน้อย จิดารักษ์ [0757]",
+        "hr_active": true,
+        "user_id": 532.0,
+        "user_name": "tepnoi.jid",
+        "user_active": true,
+        "department_id": 12.0,
+        "department_name": "IT Dept."
+    },
+    {
+        "hr_id": 390,
+        "hr_name": "คุณกุลนิตย์ เรืองวงษ์ [IMB0004]",
+        "hr_active": true,
+        "user_id": 115.0,
+        "user_name": "kunlanit.reu",
+        "user_active": true,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 698,
+        "hr_name": "คุณพรสวรรค์ ยนต์นิยม [0696]",
+        "hr_active": true,
+        "user_id": 473.0,
+        "user_name": "(Close)pornsawan.yon",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 573,
+        "hr_name": "คุณพัชรพล ฮวดสกุล [20013]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 389,
+        "hr_name": "คุณรุจี บางกุล [IMB0002]",
+        "hr_active": true,
+        "user_id": 53.0,
+        "user_name": "rujee.ban",
+        "user_active": true,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 648,
+        "hr_name": "คุณพัชราภรณ์ สาวสายออ [0665]",
+        "hr_active": true,
+        "user_id": 492.0,
+        "user_name": "patcharapon.saw",
+        "user_active": true,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 385,
+        "hr_name": "คุณวิรัช จันทร์ป้อง [0569]",
+        "hr_active": true,
+        "user_id": 286.0,
+        "user_name": "virat.jan",
+        "user_active": false,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 510,
+        "hr_name": "คุณพันธ์เทพ จุฬพันธ์ทอง (คุณธนภัทร / ช่างนอก) [C8815000003941]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": null,
+        "department_name": null
+    },
+    {
+        "hr_id": 628,
+        "hr_name": "คุณพาฝัน แสงทอง [0652]",
+        "hr_active": true,
+        "user_id": 438.0,
+        "user_name": "paphun.sae",
+        "user_active": true,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 399,
+        "hr_name": "คุณกอบพัฒน์ อุสาหพานิช [0231]",
+        "hr_active": true,
+        "user_id": 325.0,
+        "user_name": "Technicial013",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 607,
+        "hr_name": "คุณพิชิตชัย เตารมรัมย์ [20020]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 397,
+        "hr_name": "คุณนุสรา วิไล [0195]",
+        "hr_active": true,
+        "user_id": 323.0,
+        "user_name": "Technicial011",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 777,
+        "hr_name": "เนตรทิพย์ คงวิวาห์ทอง [0753]",
+        "hr_active": false,
+        "user_id": 529.0,
+        "user_name": "(Close)netthip.kon",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 379,
+        "hr_name": "คุณธนภัทร ศรีพูนพันธ์ [0559]",
+        "hr_active": false,
+        "user_id": 285.0,
+        "user_name": "tanaphat.sri",
+        "user_active": false,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 840,
+        "hr_name": "รักษาการเขตขายกรุงเทพและปริมณฑล คุณธิดารัตน์ [S176]",
+        "hr_active": true,
+        "user_id": 586.0,
+        "user_name": "(Close)S176.Bangkokperimeter",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 395,
+        "hr_name": "คุณวิเชียร สุขนอก [0114]",
+        "hr_active": true,
+        "user_id": 321.0,
+        "user_name": "Technicial009",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 396,
+        "hr_name": "คุณธราดล พงษ์สนิท [0180]",
+        "hr_active": true,
+        "user_id": 322.0,
+        "user_name": "Technicial010",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 774,
+        "hr_name": "คุณยุทธกร เลิศพนมวรรณ [0750]",
+        "hr_active": true,
+        "user_id": 523.0,
+        "user_name": "yutthakorn.ler",
+        "user_active": false,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 375,
+        "hr_name": "คุณพีรยสถ์ อริยศิลปิน [0552]",
+        "hr_active": false,
+        "user_id": 255.0,
+        "user_name": "(Close)peerayot.ari",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 784,
+        "hr_name": "คุณอนุสรณ์ โพธิ์เย็น [0762]",
+        "hr_active": true,
+        "user_id": 534.0,
+        "user_name": "(Close)anusorn.pho",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 785,
+        "hr_name": "ชัยยศ ฉัตรอัศวปรีดา [0763]",
+        "hr_active": true,
+        "user_id": 535.0,
+        "user_name": "chaiyod.cha",
+        "user_active": true,
+        "department_id": 16.0,
+        "department_name": "HR Dept."
+    },
+    {
+        "hr_id": 398,
+        "hr_name": "คุณการัณย์ น้อยนิ่ม [0226]",
+        "hr_active": true,
+        "user_id": 324.0,
+        "user_name": "Technicial012",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 508,
+        "hr_name": "คุณธนาศักดิ์ ภู่ดึ [IMB0026]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 361,
+        "hr_name": "คุณสุชาดา ลอยไสว [0511]",
+        "hr_active": false,
+        "user_id": 241.0,
+        "user_name": "suchada.loy",
+        "user_active": false,
+        "department_id": 1.0,
+        "department_name": "Sales Admin Dept."
+    },
+    {
+        "hr_id": 900,
+        "hr_name": "ธันยนันท์ นาคประยูร [0839]",
+        "hr_active": true,
+        "user_id": 624.0,
+        "user_name": "thanyanant.nak",
+        "user_active": true,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 402,
+        "hr_name": "คุณพีระพงศ์ แก้วโสภาค [0287]",
+        "hr_active": true,
+        "user_id": 314.0,
+        "user_name": "Technicial002",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 403,
+        "hr_name": "คุณเชาวลิต วงศ์วาสน์ [0332]",
+        "hr_active": true,
+        "user_id": 315.0,
+        "user_name": "Technicial003",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 404,
+        "hr_name": "คุณยุทธนา การะเกตุ [0334]",
+        "hr_active": true,
+        "user_id": 316.0,
+        "user_name": "Technicial004",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 658,
+        "hr_name": "คุณกวินภพ บาลศิริ [20068]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 789,
+        "hr_name": "ชัยวัฒน์ ขอใหญ่กลาง [0767]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 856,
+        "hr_name": "รักษาการเขตขายภาคตะวันออกเฉียงเหนือ คุณสนธิชัย3 [S178]",
+        "hr_active": true,
+        "user_id": 596.0,
+        "user_name": "S178northeast",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 625,
+        "hr_name": "คุณจดซื้อ-จัดจ้าง ฝ่ายจัดซื้อ [POLOCAL001]",
+        "hr_active": true,
+        "user_id": 426.0,
+        "user_name": "kanyalak.kow02",
+        "user_active": false,
+        "department_id": 1.0,
+        "department_name": "Sales Admin Dept."
+    },
+    {
+        "hr_id": 812,
+        "hr_name": "รักษาการเขตขายกรุงเทพและปริมณฑล 001 [S168]",
+        "hr_active": true,
+        "user_id": 570.0,
+        "user_name": "(Close)S168Bangkok",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 794,
+        "hr_name": "คุณชัยวัฒน์  อึ่งขวัญ [0776]",
+        "hr_active": false,
+        "user_id": 544.0,
+        "user_name": "(Close)chaiwat.eun",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 788,
+        "hr_name": "สุนิสา สุขสมจิตร์ [0766]",
+        "hr_active": false,
+        "user_id": 537.0,
+        "user_name": "(Close)sunisa.suk",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 400,
+        "hr_name": "คุณพรทิพย์ สายเชื้อ [0259]",
+        "hr_active": true,
+        "user_id": 326.0,
+        "user_name": "Technicial014",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 791,
+        "hr_name": "พงศ์พัฒน์ อังคตรีรัตน์ [20154]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 391,
+        "hr_name": "คุณพัชรินทร์ พูลเกิด [IMB0005]",
+        "hr_active": true,
+        "user_id": 120.0,
+        "user_name": "patcharin.poo",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 792,
+        "hr_name": "ธวัชชัย ชนะศรี [0769]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 901,
+        "hr_name": "ขวัญฤทัย อยู่เล็ก [0840]",
+        "hr_active": true,
+        "user_id": 625.0,
+        "user_name": "kwanruthai.yoo",
+        "user_active": true,
+        "department_id": 12.0,
+        "department_name": "IT Dept."
+    },
+    {
+        "hr_id": 802,
+        "hr_name": "รักษาการเขตขายภาคตะวันออก คุณจิตรียา [S166]",
+        "hr_active": true,
+        "user_id": 562.0,
+        "user_name": "(Close)S166East",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 588,
+        "hr_name": "คุณจำนงค์ ปิ่นศรี [IMB0063]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 655,
+        "hr_name": "คุณชนสิษฎ์ สุขล้อม [0668]",
+        "hr_active": false,
+        "user_id": 449.0,
+        "user_name": "chanasit.suk",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 787,
+        "hr_name": "รักษาการณ์เขตขายกรุงเทพฯ  คุณปนัท [S164]",
+        "hr_active": false,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 786,
+        "hr_name": "คุณสรรเพชร เอียดแก้ว [0765]",
+        "hr_active": true,
+        "user_id": 536.0,
+        "user_name": "(Close)sunpet.ead",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 807,
+        "hr_name": "ปารินทร์ โชคขาว [20156]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 401,
+        "hr_name": "คุณวัชระ ปัญญาโชติ [0276]",
+        "hr_active": true,
+        "user_id": 327.0,
+        "user_name": "building002",
+        "user_active": true,
+        "department_id": 37.0,
+        "department_name": "Technical Building"
+    },
+    {
+        "hr_id": 790,
+        "hr_name": "รัตย์สนัย รั้งสันเทียะ [0768]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 564,
+        "hr_name": "คุณโกสินทร์ โกสิทธิ์ [20004]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 416,
+        "hr_name": "คุณจักรี แจ่มศรี [0445]",
+        "hr_active": true,
+        "user_id": 336.0,
+        "user_name": "Technicial024",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 587,
+        "hr_name": "คุณจตุภัทร โพธิ์แย้ม [IMB0061]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 420,
+        "hr_name": "คุณศักดิ์สิทธิ์ ศรีภพ [0461]",
+        "hr_active": true,
+        "user_id": 340.0,
+        "user_name": "Technicial028",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 421,
+        "hr_name": "คุณณัฐวุฒิ นรสิงห์ [0470]",
+        "hr_active": true,
+        "user_id": 320.0,
+        "user_name": "Technicial008",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 795,
+        "hr_name": "พีรภาว์ คุณเลิศ [0775]",
+        "hr_active": true,
+        "user_id": 543.0,
+        "user_name": "peerapha.kun",
+        "user_active": true,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 656,
+        "hr_name": "คุณธนวิชญ์ รถแก้ว [20066]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 793,
+        "hr_name": "ตรีเพชร คำอาจ [20155]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 418,
+        "hr_name": "คุณเชิดชัย แก้วทองนาค [0452]",
+        "hr_active": true,
+        "user_id": 338.0,
+        "user_name": "Technicial026",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 837,
+        "hr_name": "รักษาการเขตขายกรุงเทพและปริมณฑล คุณจิรายุ [S172]",
+        "hr_active": true,
+        "user_id": 581.0,
+        "user_name": "(Close)S172.BKK",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 904,
+        "hr_name": "ศตวรรษ ไม้หอม [20169]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 558,
+        "hr_name": "คุณพิพัฒน์พงษ์ เคนคำภา [0606]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 613,
+        "hr_name": "คุณพีรวิชญ์ นิลประดิษฐ์ [0638]",
+        "hr_active": false,
+        "user_id": 425.0,
+        "user_name": "peerawich.nil",
+        "user_active": false,
+        "department_id": 23.0,
+        "department_name": "IMC Strategic Partnership & Digital Marketing"
+    },
+    {
+        "hr_id": 799,
+        "hr_name": "ระพี วงค์สุวรรณ [0771]",
+        "hr_active": true,
+        "user_id": 539.0,
+        "user_name": "rapee.won",
+        "user_active": true,
+        "department_id": 14.0,
+        "department_name": "CEO Dept."
+    },
+    {
+        "hr_id": 417,
+        "hr_name": "คุณปิยะพงษ์ ศรีชนะ [0446]",
+        "hr_active": true,
+        "user_id": 337.0,
+        "user_name": "Technicial025",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 797,
+        "hr_name": "ศศิชา จิรปิยสุวรรณ [0773]",
+        "hr_active": true,
+        "user_id": 541.0,
+        "user_name": "sasicha.jir",
+        "user_active": true,
+        "department_id": 12.0,
+        "department_name": "IT Dept."
+    },
+    {
+        "hr_id": 902,
+        "hr_name": "พชรพร สรกิจโสภณ [0841]",
+        "hr_active": true,
+        "user_id": 623.0,
+        "user_name": "pacharaporn.sor",
+        "user_active": true,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 805,
+        "hr_name": "อดิศักดิ์ รักษาบุญ [0779]",
+        "hr_active": true,
+        "user_id": 548.0,
+        "user_name": "adisak.ruk",
+        "user_active": false,
+        "department_id": 1.0,
+        "department_name": "Sales Admin Dept."
+    },
+    {
+        "hr_id": 665,
+        "hr_name": "คุณทรงพล ศิริวัฒวงษ์ [20076]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 842,
+        "hr_name": "จันจิรา เหมนิธิ [20159]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 938,
+        "hr_name": "คุณธันยาวัฒน์ อรัญศักดิ์ [0867]",
+        "hr_active": true,
+        "user_id": 653.0,
+        "user_name": "thanyawat.ara",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 780,
+        "hr_name": "วุฒิไกร ยุงกลาง [10094]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 832,
+        "hr_name": "คุณกัญสุชญา จิราธัญวุฒิ [0798]",
+        "hr_active": false,
+        "user_id": 574.0,
+        "user_name": "(Close)kansuchaya.jir",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 937,
+        "hr_name": "สลิลทิพย์ อันวงษา [0868]",
+        "hr_active": true,
+        "user_id": 654.0,
+        "user_name": "(Close)salintip.onw",
+        "user_active": false,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 590,
+        "hr_name": "คุณจิระวัฒน์ สังขุน [IMB0067]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 808,
+        "hr_name": "อิศมาภรณ์ ปักโคทะกัง [0786]",
+        "hr_active": true,
+        "user_id": 553.0,
+        "user_name": "itsamaporn.pak",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 800,
+        "hr_name": "นุชนาฏ ช่วยศรีนวล [0770]",
+        "hr_active": true,
+        "user_id": 538.0,
+        "user_name": "nudchanad.cha",
+        "user_active": true,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 450,
+        "hr_name": "คุณสุธน บวบงาม [0005]",
+        "hr_active": false,
+        "user_id": 302.0,
+        "user_name": "suthon.bua",
+        "user_active": false,
+        "department_id": 11.0,
+        "department_name": "Finance Bill Collector"
+    },
+    {
+        "hr_id": 686,
+        "hr_name": "คุณณัฐนันท์ สายยางหล่อ [0685]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 608,
+        "hr_name": "รักษาการ Asean Economics Community (AEC) [S148]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 27.0,
+        "department_name": "AEC Dept."
+    },
+    {
+        "hr_id": 905,
+        "hr_name": "สมเกียรติ ฤทธิไตรภพ [20170]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 838,
+        "hr_name": "รักษาการเขตขายภาคตะวันออกเฉียงเหนือ คุณสนธิชัย2 [S174]",
+        "hr_active": true,
+        "user_id": 577.0,
+        "user_name": "s174northeast",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 605,
+        "hr_name": "คุณทัศนะ ดีบ้านใหม่ [90002]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 839,
+        "hr_name": "รักษาการเขตขายภาคตะวันออกเฉียงเหนือ คุณรัชพล [S175]",
+        "hr_active": true,
+        "user_id": 580.0,
+        "user_name": "(Close)S175.NorthEast",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 813,
+        "hr_name": "กัญชพร สังข์ทอง [20157]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 817,
+        "hr_name": "รักษาการเขตขายภาคตะวันออกเฉียงเหนือฯ คุณสนธิชัย [S170]",
+        "hr_active": true,
+        "user_id": 565.0,
+        "user_name": "S170northeast",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 443,
+        "hr_name": "THULE 99 [9999]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 19.0,
+        "department_name": "Strategic Sales Dept."
+    },
+    {
+        "hr_id": 903,
+        "hr_name": "ปัทมา อินทโชติ [0842]",
+        "hr_active": false,
+        "user_id": 626.0,
+        "user_name": "(Close)patthama.ain",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 815,
+        "hr_name": "วงศกรณ์ สุดสาคร [0788]",
+        "hr_active": true,
+        "user_id": 555.0,
+        "user_name": "(Close)wongsakorn.sud",
+        "user_active": false,
+        "department_id": 23.0,
+        "department_name": "IMC Strategic Partnership & Digital Marketing"
+    },
+    {
+        "hr_id": 796,
+        "hr_name": "อิสระ เจจือ [0774]",
+        "hr_active": true,
+        "user_id": 542.0,
+        "user_name": "(Close)isara.jaj",
+        "user_active": false,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 458,
+        "hr_name": "คุณอภิชาติ การเพียร [0078]",
+        "hr_active": true,
+        "user_id": 368.0,
+        "user_name": "warehouse004",
+        "user_active": true,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 451,
+        "hr_name": "คุณดิเรกฤทธิ์ สุรพงษ์พิทักษ์ [IMB0008]",
+        "hr_active": true,
+        "user_id": 303.0,
+        "user_name": "direkrit.sur",
+        "user_active": true,
+        "department_id": 11.0,
+        "department_name": "Finance Bill Collector"
+    },
+    {
+        "hr_id": 940,
+        "hr_name": "สุวิษา พวกดี [0870]",
+        "hr_active": true,
+        "user_id": 656.0,
+        "user_name": "suwisa.phu",
+        "user_active": true,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 814,
+        "hr_name": "ภคิน แสงจันทร์ [20158]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 906,
+        "hr_name": "รักษาการเขตขายภาคใต้ คุณปริญญากร [S187]",
+        "hr_active": false,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 833,
+        "hr_name": "วัชรพงษ์ ปิ่นทอง [0799]",
+        "hr_active": true,
+        "user_id": 571.0,
+        "user_name": "(Close) watcharapong.pin",
+        "user_active": false,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 460,
+        "hr_name": "TNSADMIN SupperUSER [Admin]",
+        "hr_active": true,
+        "user_id": 308.0,
+        "user_name": "tnsadmin",
+        "user_active": true,
+        "department_id": 12.0,
+        "department_name": "IT Dept."
+    },
+    {
+        "hr_id": 444,
+        "hr_name": "คุณอัมพร พลวัฒน์ [ลาออกแล้ว]",
+        "hr_active": false,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 445,
+        "hr_name": "คุณกฤษฎา แสนสิงห์ [0205]",
+        "hr_active": true,
+        "user_id": 362.0,
+        "user_name": "building001",
+        "user_active": true,
+        "department_id": 37.0,
+        "department_name": "Technical Building"
+    },
+    {
+        "hr_id": 831,
+        "hr_name": "คุณรังสิยา แสงสุวรรณ [0797]",
+        "hr_active": true,
+        "user_id": 575.0,
+        "user_name": "rangsiya.sae",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 646,
+        "hr_name": "คุณณัฐกฤษ กิตตินวสกุล [20054]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 798,
+        "hr_name": "กัญจนา จารุศรีวรกุล [0772]",
+        "hr_active": true,
+        "user_id": 540.0,
+        "user_name": "kanjana.jar",
+        "user_active": true,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 674,
+        "hr_name": "คุณณัฐภัทร หอทอง [20083]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 810,
+        "hr_name": "ชนาพร จงจิตต์ [0784]",
+        "hr_active": false,
+        "user_id": 552.0,
+        "user_name": "(Close)chanaporn.jon",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 907,
+        "hr_name": "อรรถพันธ์ แสนบุญศรี [20173]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 464,
+        "hr_name": "คุณเนตรนภิส หลิมรักษ์ [0588]",
+        "hr_active": false,
+        "user_id": 309.0,
+        "user_name": "nednapid.lim",
+        "user_active": false,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 642,
+        "hr_name": "คุณบัญชี001 สัญญาจ้างรายวัน [DAILYACC001]",
+        "hr_active": true,
+        "user_id": 437.0,
+        "user_name": "dailystaff001",
+        "user_active": true,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 854,
+        "hr_name": "กฤษดา  บุญน้อย [20161]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 925,
+        "hr_name": "รักษาการเขตขายกรุงเทพและปริมณฑล คุณชลันดา [S190]",
+        "hr_active": true,
+        "user_id": 640.0,
+        "user_name": "S190",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 834,
+        "hr_name": "คุณธิดารัตน์ บุญพงษ์ [0800]",
+        "hr_active": false,
+        "user_id": 572.0,
+        "user_name": "(Close)tidarat.boo",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 941,
+        "hr_name": "พีรพงศ์ มั่นคง [0871]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 851,
+        "hr_name": "AdminIT5 for lamina [adminit5]",
+        "hr_active": true,
+        "user_id": 627.0,
+        "user_name": "adminit6",
+        "user_active": true,
+        "department_id": 12.0,
+        "department_name": "IT Dept."
+    },
+    {
+        "hr_id": 836,
+        "hr_name": "รักษาการณ์เขตขายกรุงเทพและปริมณฑล คุณธารารัตน์ [S171]",
+        "hr_active": false,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 844,
+        "hr_name": "ศศิตา รัชตารมย์ [0803]",
+        "hr_active": true,
+        "user_id": 582.0,
+        "user_name": "sasita.rat",
+        "user_active": true,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 848,
+        "hr_name": "ศุภกฤต ธรรมกร่าง [20160]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 410,
+        "hr_name": "คุณพิชิตชัย เพชรแอ [0414]",
+        "hr_active": true,
+        "user_id": 318.0,
+        "user_name": "Technicial006",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 411,
+        "hr_name": "คุณธวัชชัย สงสิงห์ [0427]",
+        "hr_active": true,
+        "user_id": 319.0,
+        "user_name": "Technicial007",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 852,
+        "hr_name": "ปทุมวรรณ กิมาลี [0810]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 295,
+        "hr_name": "คุณณัฐภร สอนศรี [0120]",
+        "hr_active": false,
+        "user_id": 46.0,
+        "user_name": "natthaporn.sor",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 853,
+        "hr_name": "มงคล หาระบุตร [0811]",
+        "hr_active": true,
+        "user_id": 591.0,
+        "user_name": "(Close)mongkhon.har",
+        "user_active": false,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 849,
+        "hr_name": "กาญจณี แซ่เฮ้ง [0808]",
+        "hr_active": true,
+        "user_id": 587.0,
+        "user_name": "kanchanee.sae",
+        "user_active": true,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 649,
+        "hr_name": "คุณณัฐวัฒน์ หมีสะอาด [10086]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 816,
+        "hr_name": "รักษาการเขตขายกรุงเทพและปริมณฑล 002 [S169]",
+        "hr_active": true,
+        "user_id": 567.0,
+        "user_name": "(Close)S169perimeter",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 845,
+        "hr_name": "สุรพันธ์ จันทร [0804]",
+        "hr_active": true,
+        "user_id": 583.0,
+        "user_name": "suraphan.cha",
+        "user_active": true,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 652,
+        "hr_name": "คุณคำฝั่น บุญคำ [20045]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 811,
+        "hr_name": "ว่าที่ ร.ต. หญิง ชฎารัตน์ เชี่ยวชาญ [0783]",
+        "hr_active": true,
+        "user_id": 551.0,
+        "user_name": "(Close)chadarat.chi",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 593,
+        "hr_name": "คุณพิมลวรรณ สืบดี [IMB0070]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 565,
+        "hr_name": "คุณพีรศักดิ์ ฆ้องประเสริฐ [20005]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 926,
+        "hr_name": "รักษาการเขตขายกรุงเทพและปริมณฑล คุณสาวิตรี 2 [S191]",
+        "hr_active": true,
+        "user_id": 641.0,
+        "user_name": "S191",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 435,
+        "hr_name": "คุณรุ่งอรุณ งาดเกาะ [IMB0014]",
+        "hr_active": true,
+        "user_id": 354.0,
+        "user_name": "Technicial042",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 835,
+        "hr_name": "คุณจรุง กุลวงค์ [0801]",
+        "hr_active": true,
+        "user_id": 573.0,
+        "user_name": "(Close)charoong.koo",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 850,
+        "hr_name": "กิติศักดิ์ เตชนคำรณ [0809]",
+        "hr_active": true,
+        "user_id": 588.0,
+        "user_name": "(Close)kitisak.tec",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 939,
+        "hr_name": "ลายไทย ผิวทอง [0869]",
+        "hr_active": true,
+        "user_id": 655.0,
+        "user_name": "laithai.phi",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 440,
+        "hr_name": "คุณนพชัย ใจยะสุข [IMB0022]",
+        "hr_active": true,
+        "user_id": 359.0,
+        "user_name": "Technicial047",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 944,
+        "hr_name": "พลอยจินดา จินดาศิริพรรณ [0875]",
+        "hr_active": true,
+        "user_id": 660.0,
+        "user_name": "ployjinda.jin",
+        "user_active": true,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 857,
+        "hr_name": "คุณพิชญาภรณ์ ภูมิอภินันท์ [0812]",
+        "hr_active": true,
+        "user_id": 592.0,
+        "user_name": "(Close)phitchayapron.phu",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 759,
+        "hr_name": "พงศธร กิจจาภรณ์ [0745]",
+        "hr_active": true,
+        "user_id": 518.0,
+        "user_name": "pongsathorn.kij",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 436,
+        "hr_name": "คุณปภาวรินทร์ แทนรินทร์ [IMB0015]",
+        "hr_active": true,
+        "user_id": 355.0,
+        "user_name": "Technicial043",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 437,
+        "hr_name": "คุณทรงศักดิ์ ศิลาแยง [IMB0017]",
+        "hr_active": true,
+        "user_id": 356.0,
+        "user_name": "Technicial044",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 438,
+        "hr_name": "คุณสุดใจ แว่นจันทร์ [IMB0019]",
+        "hr_active": true,
+        "user_id": 357.0,
+        "user_name": "Technicial045",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 439,
+        "hr_name": "คุณยงยุทธ บุญประเสริฐ [IMB0020]",
+        "hr_active": false,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 804,
+        "hr_name": "สิริมนต์ ศิริสุวรรณรัตน์ [0778]",
+        "hr_active": true,
+        "user_id": 546.0,
+        "user_name": "sirimon.sir",
+        "user_active": true,
+        "department_id": 39.0,
+        "department_name": "Purchasing (Local)"
+    },
+    {
+        "hr_id": 909,
+        "hr_name": "คุณณัฐญาดา สว่างศรี [0844]",
+        "hr_active": true,
+        "user_id": 628.0,
+        "user_name": "natyada.swa",
+        "user_active": true,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 908,
+        "hr_name": "ยงยุทธ บุญประเสริฐ [20174]",
+        "hr_active": true,
+        "user_id": 358.0,
+        "user_name": "Technicial046",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 302,
+        "hr_name": "คุณกฤชญา ทิมประเสริฐ [0161]",
+        "hr_active": true,
+        "user_id": 42.0,
+        "user_name": "krischaya.tim",
+        "user_active": true,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 442,
+        "hr_name": "คุณชาญวิทย์ ปัญญาทิพย์ [IMB0024]",
+        "hr_active": true,
+        "user_id": 361.0,
+        "user_name": "Technicial049",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 374,
+        "hr_name": "คุณอัญชลี สัปสาร [0551]",
+        "hr_active": false,
+        "user_id": 235.0,
+        "user_name": "anchalee.sap",
+        "user_active": false,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 638,
+        "hr_name": "คุณณัฐพล สกุลพงษ์ [20042]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 928,
+        "hr_name": "รักษาการกรุงเทพและปริมณฑล คุณจิรายุ [S193]",
+        "hr_active": true,
+        "user_id": 643.0,
+        "user_name": "S193",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 673,
+        "hr_name": "คุณแคทรียา จันเทียม [0675]",
+        "hr_active": true,
+        "user_id": 453.0,
+        "user_name": "kattareeya.jan",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 864,
+        "hr_name": "คุณประมวลวุฒิ เศรษฐธารากูลชัย [0820]",
+        "hr_active": true,
+        "user_id": 598.0,
+        "user_name": "pramuanwut.set",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 846,
+        "hr_name": "พันธ์เพชร ติยะประภาวัฒน์ [0805]",
+        "hr_active": true,
+        "user_id": 584.0,
+        "user_name": "punpet.tiy",
+        "user_active": true,
+        "department_id": 21.0,
+        "department_name": "IMC PR, Event Dept"
+    },
+    {
+        "hr_id": 862,
+        "hr_name": "คุณจันทร์จิรา อำไพภาคย์ [0817]",
+        "hr_active": false,
+        "user_id": 597.0,
+        "user_name": "(Close)janjira.amp",
+        "user_active": false,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 858,
+        "hr_name": "กนกวรรณ กวดนอก [0813]",
+        "hr_active": true,
+        "user_id": 593.0,
+        "user_name": "(Close)kanokwan.kua",
+        "user_active": false,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 650,
+        "hr_name": "คุณชัชสรัญ พุ่มนาค [0666]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 863,
+        "hr_name": "รักษาการเขตขายภาคกลาง รักษาการเขตขายภาคกลาง [S179]",
+        "hr_active": true,
+        "user_id": 599.0,
+        "user_name": "S179Central",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 594,
+        "hr_name": "คุณปิยะมล สิงห์เดช [IMB0071]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 899,
+        "hr_name": "ติชิลา ราตะกั่ว [0838]",
+        "hr_active": true,
+        "user_id": 622.0,
+        "user_name": "tichilaa.rat",
+        "user_active": true,
+        "department_id": 14.0,
+        "department_name": "CEO Dept."
+    },
+    {
+        "hr_id": 653,
+        "hr_name": "คุณพงศธร สุวรรณภารต [10087]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 614,
+        "hr_name": "คุณพุทธิพงษ์ จำปาศักดิ์ [20035]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 620,
+        "hr_name": "คุณภัทรพรรณ อร่ามบุตร [0643]",
+        "hr_active": false,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 860,
+        "hr_name": "คุณฐาสุมิณญ์ ท่าน้ำ [0815]",
+        "hr_active": false,
+        "user_id": 595.0,
+        "user_name": "thasumin.tan",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 867,
+        "hr_name": "คุณ ชนิสรา ชิวปรีชา [0822]",
+        "hr_active": false,
+        "user_id": 603.0,
+        "user_name": "(Close)chanisaraa.che",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 859,
+        "hr_name": "คุณธนัท ทศศิริ [0814]",
+        "hr_active": false,
+        "user_id": 594.0,
+        "user_name": "thanut.tho",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 942,
+        "hr_name": "คุณคุณานนท์  อัครวนาธร [0877]",
+        "hr_active": true,
+        "user_id": 662.0,
+        "user_name": "kunanont.aka",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 868,
+        "hr_name": "โชติกา วรรณคีรี [0823]",
+        "hr_active": true,
+        "user_id": 602.0,
+        "user_name": "(Close)chotika.wan",
+        "user_active": false,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 383,
+        "hr_name": "คุณนิรชา จันทรโชติ [0567]",
+        "hr_active": false,
+        "user_id": 276.0,
+        "user_name": "niracha.jan",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 388,
+        "hr_name": "คุณศิริลักษณ์ มั่งกูล [0583]",
+        "hr_active": false,
+        "user_id": 297.0,
+        "user_name": "sirilak.man",
+        "user_active": false,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 866,
+        "hr_name": "คุณณัฐวุฒิ ใจเสริฐ [0821]",
+        "hr_active": true,
+        "user_id": 601.0,
+        "user_name": "nattawut.jai",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 576,
+        "hr_name": "คุณภัทรศักดิ์ เต็มสิริธนโชติ [IMB0016]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 943,
+        "hr_name": "คุณกัณชาติ สิงห์โคตร [0876]",
+        "hr_active": true,
+        "user_id": 661.0,
+        "user_name": "kannachart.sin",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 681,
+        "hr_name": "คุณพิศาล พรมโสดา [20102]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 469,
+        "hr_name": "คุณภิรายุทร ใจเรือน [DUMMYCODE4]",
+        "hr_active": false,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 37.0,
+        "department_name": "Technical Building"
+    },
+    {
+        "hr_id": 865,
+        "hr_name": "รักษาการเขตขายกรุงเทพและปริมณฑล 003 [S180]",
+        "hr_active": true,
+        "user_id": 600.0,
+        "user_name": "(Close)S180 รักษาการณ์เขตขายกรุงเทพและปริมณฑล",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 690,
+        "hr_name": "คุณจิราวัชร ศิริวัฒน์กุล [0689]",
+        "hr_active": true,
+        "user_id": 467.0,
+        "user_name": "jirawat.sir",
+        "user_active": false,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 870,
+        "hr_name": "รักษาการเขตขายกรุงเทพและปริมณฑล คุณพรรณภัทร [S182]",
+        "hr_active": true,
+        "user_id": 615.0,
+        "user_name": "(Close)S182 รักษาการณ์เขตขายกรุงเทพและปริมณฑล คุณพรรณภัทร",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 946,
+        "hr_name": "ตุลา กลิ่นมาลา [0879]",
+        "hr_active": true,
+        "user_id": 663.0,
+        "user_name": "tura.kli",
+        "user_active": true,
+        "department_id": 12.0,
+        "department_name": "IT Dept."
+    },
+    {
+        "hr_id": 927,
+        "hr_name": "รักษาการเขตขายกรุงเทพและปริมณฑล คุณอรัชพร [S192]",
+        "hr_active": true,
+        "user_id": 642.0,
+        "user_name": "S192",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 861,
+        "hr_name": "เยาวเรศ จิตมาตย์ [0816]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 629,
+        "hr_name": "คุณภูริภัทร นวลสะอาด [0653]",
+        "hr_active": false,
+        "user_id": 439.0,
+        "user_name": "phuripat.nua",
+        "user_active": false,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 567,
+        "hr_name": "คุณมนัญชัย อภิเดช [20008]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 528,
+        "hr_name": "คุณมยุรี โตสงวน [0594]",
+        "hr_active": true,
+        "user_id": 396.0,
+        "user_name": "mayuree.tos",
+        "user_active": false,
+        "department_id": 1.0,
+        "department_name": "Sales Admin Dept."
+    },
+    {
+        "hr_id": 881,
+        "hr_name": "ธนิกา เอี่ยมสะอาด [20163]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 314,
+        "hr_name": "คุณชีวิน เสาร์น้อย [0262]",
+        "hr_active": false,
+        "user_id": 148.0,
+        "user_name": "(Close)cheewin.sou",
+        "user_active": false,
+        "department_id": 20.0,
+        "department_name": "IMC Production Dept."
+    },
+    {
+        "hr_id": 679,
+        "hr_name": "คุณประพันธ์ อยู่เขียว [10089]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 847,
+        "hr_name": "ปิยะธิดา สุขคง [0806]",
+        "hr_active": false,
+        "user_id": 585.0,
+        "user_name": "(Close)piyatida.suk",
+        "user_active": false,
+        "department_id": 14.0,
+        "department_name": "CEO Dept."
+    },
+    {
+        "hr_id": 910,
+        "hr_name": "มหิทธิกา ภักดี [10095]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 297,
+        "hr_name": "คุณชัยณรงค์ สายสมร [0130]",
+        "hr_active": true,
+        "user_id": 106.0,
+        "user_name": "chainarong.sai",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 296,
+        "hr_name": "คุณจิตรียา ชาญวารินทร์ [0121]",
+        "hr_active": true,
+        "user_id": 82.0,
+        "user_name": "jittreeya.cha",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 298,
+        "hr_name": "คุณวิฑูรย์ กวินภูวดลมาศ [0154]",
+        "hr_active": false,
+        "user_id": 84.0,
+        "user_name": "witoon.kaw",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 801,
+        "hr_name": "คุณธนอรรถ ปัญญานุกิจ [0777]",
+        "hr_active": true,
+        "user_id": 547.0,
+        "user_name": "tanaaut.pan",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 547,
+        "hr_name": "คุณมาศสิน ทวีคูณ [0629]",
+        "hr_active": false,
+        "user_id": 419.0,
+        "user_name": "(Close)massin.taw",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 647,
+        "hr_name": "คุณรอพนักงานใหม่ รอพนักงานใหม่ [hr999]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 871,
+        "hr_name": "รักษาการเขตขายกรุงเทพและปริณฑล คุณชลันดา [S183]",
+        "hr_active": true,
+        "user_id": 608.0,
+        "user_name": "(Close)S183.bangkokperimeter",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 575,
+        "hr_name": "คุณวทัญญู ศรีอ่ำ [20015]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 496,
+        "hr_name": "คุณวรพจน์ ตั้งอิทธิพลากร [0590]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 691,
+        "hr_name": "คุณวรพล เริงจิตร [20105]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 597,
+        "hr_name": "คุณวรพล ชมจันทร์ [IMB0075]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": null,
+        "department_name": null
+    },
+    {
+        "hr_id": 559,
+        "hr_name": "คุณวรรณพร พิลาแก้ว [0622]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 563,
+        "hr_name": "คุณวรรณพร คชนะเลขา [20003]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 883,
+        "hr_name": "กนกพิชญ์สา ทองแพง [20164]",
+        "hr_active": false,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 622,
+        "hr_name": "คุณเลิศศักดิ์ หูประโคน [10085]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 876,
+        "hr_name": "ชนัญภัค แย้มสรวล [0824]",
+        "hr_active": true,
+        "user_id": 604.0,
+        "user_name": "chananphak.yam",
+        "user_active": true,
+        "department_id": 23.0,
+        "department_name": "IMC Strategic Partnership & Digital Marketing"
+    },
+    {
+        "hr_id": 382,
+        "hr_name": "คุณอานันท์ บูรณแพทย์ [0564]",
+        "hr_active": true,
+        "user_id": 274.0,
+        "user_name": "(Close)anan.boo",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 877,
+        "hr_name": "คุณมณีรัตน์ หมื่นจิตร [0827]",
+        "hr_active": true,
+        "user_id": 607.0,
+        "user_name": "maneerat.mue",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 948,
+        "hr_name": "ปณิธาน โมรัญยา [0881]",
+        "hr_active": true,
+        "user_id": 665.0,
+        "user_name": "panithan.mor",
+        "user_active": false,
+        "department_id": 20.0,
+        "department_name": "IMC Production Dept."
+    },
+    {
+        "hr_id": 282,
+        "hr_name": "คุณวรรนภา พลูหอม [0039]",
+        "hr_active": true,
+        "user_id": 61.0,
+        "user_name": "wannapa.plu",
+        "user_active": true,
+        "department_id": 16.0,
+        "department_name": "HR Dept."
+    },
+    {
+        "hr_id": 474,
+        "hr_name": "บริษัท เทคโนเซล เฟรย์ จำกัด ศูนย์ตัวแทนจำหน่าย [D01]",
+        "hr_active": true,
+        "user_id": 407.0,
+        "user_name": "D01",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 911,
+        "hr_name": "สุรีรัตน์ จันทร์เล็ก [0845]",
+        "hr_active": true,
+        "user_id": 629.0,
+        "user_name": "(Close)sureerat.jan",
+        "user_active": false,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 912,
+        "hr_name": "ปริวิตา ฤทธิรงค์สกุล [0846]",
+        "hr_active": true,
+        "user_id": 630.0,
+        "user_name": "(Close)pariwita.rit",
+        "user_active": false,
+        "department_id": 20.0,
+        "department_name": "IMC Production Dept."
+    },
+    {
+        "hr_id": 278,
+        "hr_name": "คุณกนกพร รัชตะนาวิน [0013]",
+        "hr_active": false,
+        "user_id": 64.0,
+        "user_name": "(Close)kanokporn.rat",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 276,
+        "hr_name": "คุณวาสนา สายสมร [0007]",
+        "hr_active": true,
+        "user_id": 35.0,
+        "user_name": "wassana.sai",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 275,
+        "hr_name": "คุณจินตนา สุคนธสิงห์ [0003]",
+        "hr_active": true,
+        "user_id": 47.0,
+        "user_name": "jintana.suk",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 274,
+        "hr_name": "คุณจันทร์นภา สายสมร [0001]",
+        "hr_active": true,
+        "user_id": 110.0,
+        "user_name": "channapa.sai",
+        "user_active": true,
+        "department_id": 14.0,
+        "department_name": "CEO Dept."
+    },
+    {
+        "hr_id": 294,
+        "hr_name": "คุณพัชรี อุนสกุล [0113]",
+        "hr_active": true,
+        "user_id": 54.0,
+        "user_name": "pucharee.aun",
+        "user_active": true,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 548,
+        "hr_name": "คุณวัฒนะ ยะพลหา [20018]",
+        "hr_active": true,
+        "user_id": 421.0,
+        "user_name": "watthana.yap",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 684,
+        "hr_name": "คุณวงศธร เครือเนียม [0683]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 37.0,
+        "department_name": "Technical Building"
+    },
+    {
+        "hr_id": 446,
+        "hr_name": "คุณวัลลภ ปัญญาโชติ [0106]",
+        "hr_active": true,
+        "user_id": 327.0,
+        "user_name": "building002",
+        "user_active": true,
+        "department_id": 37.0,
+        "department_name": "Technical Building"
+    },
+    {
+        "hr_id": 931,
+        "hr_name": "รักษาการเขตขายกรุงเทพและปริมณฑล คุณวราภรณ์ [S196]",
+        "hr_active": true,
+        "user_id": 646.0,
+        "user_name": "S196",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 882,
+        "hr_name": "รักษาการเขตขายกรุงเทพและปริมณฑล คุณอรัชพร [S184]",
+        "hr_active": true,
+        "user_id": 620.0,
+        "user_name": "(Close)S184.bangkokperimeter",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 644,
+        "hr_name": "คุณวริชธร เตชะภัทรจิตร [0661]",
+        "hr_active": true,
+        "user_id": 441.0,
+        "user_name": "warichtorn.tec",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 878,
+        "hr_name": "คุณวราภรณ์ แซ่เฮ้ง [0826]",
+        "hr_active": false,
+        "user_id": 606.0,
+        "user_name": "(Close)waraporn.sae",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 885,
+        "hr_name": "รักษาการเขตขายกรุงเทพและปริมณฑล คุณนันทภพ [S189]",
+        "hr_active": true,
+        "user_id": 621.0,
+        "user_name": "(Close)S189",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 283,
+        "hr_name": "คุณพูลทรัพย์ ประสิทธิ์แสง [0044]",
+        "hr_active": true,
+        "user_id": 117.0,
+        "user_name": "poonsub.pra",
+        "user_active": true,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 386,
+        "hr_name": "คุณปฎิยุทธ์ โกวิทยกุล [0575]",
+        "hr_active": false,
+        "user_id": 292.0,
+        "user_name": "patiyut.kov",
+        "user_active": false,
+        "department_id": 20.0,
+        "department_name": "IMC Production Dept."
+    },
+    {
+        "hr_id": 637,
+        "hr_name": "คุณวิจิตร ภูศรีดิน [20041]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 284,
+        "hr_name": "คุณภัทรา ธรรมวิญญู [0047]",
+        "hr_active": true,
+        "user_id": 125.0,
+        "user_name": "pathra.tha",
+        "user_active": true,
+        "department_id": 21.0,
+        "department_name": "IMC PR, Event Dept"
+    },
+    {
+        "hr_id": 285,
+        "hr_name": "คุณกัลยาลักษณ์ ขาวกระจ่าง [0055]",
+        "hr_active": true,
+        "user_id": 129.0,
+        "user_name": "kanyalak.kow",
+        "user_active": false,
+        "department_id": 1.0,
+        "department_name": "Sales Admin Dept."
+    },
+    {
+        "hr_id": 682,
+        "hr_name": "คุณยศพนธ์ เกิดไกรชัยวัฒน์ [0681]",
+        "hr_active": false,
+        "user_id": 461.0,
+        "user_name": "(Close)yossapol.koe",
+        "user_active": false,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 289,
+        "hr_name": "คุณอรวรรณ นาคเกษม [0087]",
+        "hr_active": true,
+        "user_id": 34.0,
+        "user_name": "orawan.nak",
+        "user_active": true,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 457,
+        "hr_name": "คุณพิพัฒน์ จันกะหรัด [0097]",
+        "hr_active": true,
+        "user_id": 367.0,
+        "user_name": "warehouse003",
+        "user_active": true,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 707,
+        "hr_name": "คุณณฐกร แก้วแป้นผา [0704]",
+        "hr_active": true,
+        "user_id": 474.0,
+        "user_name": "(Close)nathakorn.kae",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 841,
+        "hr_name": "รักษาการเขตขายภาคกลาง คุณธนอรรถ [S177]",
+        "hr_active": true,
+        "user_id": 576.0,
+        "user_name": "S177Central",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 293,
+        "hr_name": "คุณจันทนี นพพะ [0112]",
+        "hr_active": true,
+        "user_id": 144.0,
+        "user_name": "chantanee.nop",
+        "user_active": true,
+        "department_id": 40.0,
+        "department_name": "IMC Strategic & Sales Promotion"
+    },
+    {
+        "hr_id": 279,
+        "hr_name": "คุณสุวิทย์ ศิริมหาโชคสกุล [0017]",
+        "hr_active": true,
+        "user_id": 89.0,
+        "user_name": "suwit.sir",
+        "user_active": true,
+        "department_id": 14.0,
+        "department_name": "CEO Dept."
+    },
+    {
+        "hr_id": 288,
+        "hr_name": "คุณสนธิชัย จิตพิไลเมธา [0081]",
+        "hr_active": true,
+        "user_id": 73.0,
+        "user_name": "sontichai.jit",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 947,
+        "hr_name": "คุณศกาน หลายวิจิตไพบูลย์ [0880]",
+        "hr_active": true,
+        "user_id": 664.0,
+        "user_name": "sakan.lai",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 771,
+        "hr_name": "คุณวาทินี ปรีชาชุมวงศ์ [0748]",
+        "hr_active": true,
+        "user_id": 520.0,
+        "user_name": "(Close)wathinee.pre",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 913,
+        "hr_name": "ดวงฤดี ชาวระหัส [0847]",
+        "hr_active": false,
+        "user_id": 631.0,
+        "user_name": "(Close)duangruadee.cha",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 499,
+        "hr_name": "คุณปิ่น สุวรรณรัมย์ [0224]",
+        "hr_active": true,
+        "user_id": 465.0,
+        "user_name": "pin.suw",
+        "user_active": true,
+        "department_id": 16.0,
+        "department_name": "HR Dept."
+    },
+    {
+        "hr_id": 306,
+        "hr_name": "คุณธิติมา ทรงกำพล [0186]",
+        "hr_active": true,
+        "user_id": 49.0,
+        "user_name": "thitima.son",
+        "user_active": true,
+        "department_id": 16.0,
+        "department_name": "HR Dept."
+    },
+    {
+        "hr_id": 308,
+        "hr_name": "คุณสุกุมา อรรถพรชัย [0192]",
+        "hr_active": true,
+        "user_id": 107.0,
+        "user_name": "sukuma.art",
+        "user_active": true,
+        "department_id": 16.0,
+        "department_name": "HR Dept."
+    },
+    {
+        "hr_id": 315,
+        "hr_name": "คุณสตรีรัตน์ ชูชาติ [0270]",
+        "hr_active": true,
+        "user_id": 109.0,
+        "user_name": "satreerat.cho",
+        "user_active": true,
+        "department_id": 14.0,
+        "department_name": "CEO Dept."
+    },
+    {
+        "hr_id": 884,
+        "hr_name": "รักษาการเขตขายกรุงเทพและปริมณฑล คุณอรัชพร [S185]",
+        "hr_active": false,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 543,
+        "hr_name": "คุณวิชาญ มงคลวงษ์ [0623]",
+        "hr_active": true,
+        "user_id": 414.0,
+        "user_name": "wichan.mon",
+        "user_active": false,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 310,
+        "hr_name": "คุณปนัท ถนอมสินทรัพย์ [0203]",
+        "hr_active": false,
+        "user_id": 78.0,
+        "user_name": "(Close)panut.tha",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 313,
+        "hr_name": "คุณมุทิตา เทศพานิช [0240]",
+        "hr_active": true,
+        "user_id": 147.0,
+        "user_name": "mutita.tas",
+        "user_active": false,
+        "department_id": 20.0,
+        "department_name": "IMC Production Dept."
+    },
+    {
+        "hr_id": 304,
+        "hr_name": "คุณพันธ์เทพ จุฬพันธ์ทอง [0178]",
+        "hr_active": true,
+        "user_id": 72.0,
+        "user_name": "phanthep.jul",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 317,
+        "hr_name": "คุณเกษร ภูมิพระบุ [0278]",
+        "hr_active": true,
+        "user_id": 140.0,
+        "user_name": "kesorn.pho",
+        "user_active": true,
+        "department_id": 12.0,
+        "department_name": "IT Dept."
+    },
+    {
+        "hr_id": 449,
+        "hr_name": "คุณณรงค์ชัย ผลประเสริฐ [0279]",
+        "hr_active": true,
+        "user_id": 301.0,
+        "user_name": "narongchai.pol",
+        "user_active": true,
+        "department_id": 11.0,
+        "department_name": "Finance Bill Collector"
+    },
+    {
+        "hr_id": 580,
+        "hr_name": "คุณวิทยา เชยเปีย [IMB0040]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 312,
+        "hr_name": "คุณภัทรรัฎชา โคระวัตร์ [0217]",
+        "hr_active": true,
+        "user_id": 41.0,
+        "user_name": "patradcha.kho",
+        "user_active": true,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 687,
+        "hr_name": "คุณวิพัทชัย วิจารณ์ [0686]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 666,
+        "hr_name": "คุณวิษณุ เขื่อนแก้ว [20077]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 659,
+        "hr_name": "คุณวีรศักดิ์ แก้วหาวงศ์ [20069]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 316,
+        "hr_name": "คุณเกรียงศักดิ์ ดำรงสกุล [0277]",
+        "hr_active": true,
+        "user_id": 66.0,
+        "user_name": "kriangsak.dum",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 303,
+        "hr_name": "คุณรณวีร์ องคะสุวรรณ [0172]",
+        "hr_active": true,
+        "user_id": 76.0,
+        "user_name": "(Close)ronawee.ong",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 809,
+        "hr_name": "รวิวรรณ กัลยาณะการี [0785]",
+        "hr_active": false,
+        "user_id": 554.0,
+        "user_name": "(Close)raviwan.kan",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 843,
+        "hr_name": "คุณณัฐธิตรา ถุงทรัพย์ [0802]",
+        "hr_active": false,
+        "user_id": 578.0,
+        "user_name": "(Close)natthithra.thu",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 645,
+        "hr_name": "คุณกนกพร น้อยมะเฟือง [0663]",
+        "hr_active": true,
+        "user_id": 442.0,
+        "user_name": "kanokporn.noi",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 880,
+        "hr_name": "คุณพรรณภัทร เพ็ชรนิลสกุล [0825]",
+        "hr_active": true,
+        "user_id": 605.0,
+        "user_name": "(Close)phannaphat.pet",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 915,
+        "hr_name": "จารุเดช สุนทรปกรณ์กิจ [0853]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 584,
+        "hr_name": "คุณวุฒิชัย แสนเสนาะ [IMB0053]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 320,
+        "hr_name": "คุณพิชชาภรณ์ แม้นพวก [0292]",
+        "hr_active": true,
+        "user_id": 112.0,
+        "user_name": "phichaporn.man",
+        "user_active": false,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 321,
+        "hr_name": "คุณอรวินท์ สวัสดิ์ธนวิสุทธิ์ [0304]",
+        "hr_active": false,
+        "user_id": 88.0,
+        "user_name": "(Close)orawin.saw",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 456,
+        "hr_name": "คุณบุญส่ง ประภัสสร [0318]",
+        "hr_active": true,
+        "user_id": 366.0,
+        "user_name": "warehouse002",
+        "user_active": true,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 322,
+        "hr_name": "คุณพิมพ์ชนก ลาภโชค [0319]",
+        "hr_active": true,
+        "user_id": 127.0,
+        "user_name": "pimchanok.lap",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 895,
+        "hr_name": "รักษาการเขตขายกรุงเทพและปริมณฑล คุณอรัชพร [S186]",
+        "hr_active": false,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 888,
+        "hr_name": "นิชาภา จันทร์ตุ้ม [0828]",
+        "hr_active": false,
+        "user_id": 609.0,
+        "user_name": "(Close)nichapa.jou",
+        "user_active": false,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 550,
+        "hr_name": "คุณวุฒิชัย สิงห์ไธสง [IMB0056]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 325,
+        "hr_name": "คุณปารณีย์ คำสุข [0345]",
+        "hr_active": true,
+        "user_id": 86.0,
+        "user_name": "(Close)paranee.khu",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 405,
+        "hr_name": "คุณศุภฤกษ์ แก้วสิทธิการ [0348]",
+        "hr_active": true,
+        "user_id": 328.0,
+        "user_name": "Technicial016",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 346,
+        "hr_name": "คุณณฐิกา กิตติวิรยานนท์ [0443]",
+        "hr_active": true,
+        "user_id": 101.0,
+        "user_name": "natika.kit",
+        "user_active": true,
+        "department_id": 40.0,
+        "department_name": "IMC Strategic & Sales Promotion"
+    },
+    {
+        "hr_id": 327,
+        "hr_name": "คุณชานนท์ สายสมร [0354]",
+        "hr_active": true,
+        "user_id": 51.0,
+        "user_name": "charnon.sai",
+        "user_active": true,
+        "department_id": 16.0,
+        "department_name": "HR Dept."
+    },
+    {
+        "hr_id": 328,
+        "hr_name": "คุณมานิต ฟ้าขาว [0357]",
+        "hr_active": true,
+        "user_id": 152.0,
+        "user_name": "manit.far",
+        "user_active": true,
+        "department_id": 21.0,
+        "department_name": "IMC PR, Event Dept"
+    },
+    {
+        "hr_id": 406,
+        "hr_name": "คุณคมสัน อาจณะรงค์ [0359]",
+        "hr_active": true,
+        "user_id": 329.0,
+        "user_name": "Technicial017",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 696,
+        "hr_name": "คุณวุฒิกรัย เหลาธิ [0695]",
+        "hr_active": true,
+        "user_id": 470.0,
+        "user_name": "wuttigrai.lao",
+        "user_active": true,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 323,
+        "hr_name": "คุณณัฐ สายสมร [0333]",
+        "hr_active": true,
+        "user_id": 63.0,
+        "user_name": "nut.sai",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 662,
+        "hr_name": "คุณศตวรรษ ก้องเสียง [0671]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 886,
+        "hr_name": "คุณชูนาม กรทิพย์ [0829]",
+        "hr_active": true,
+        "user_id": 611.0,
+        "user_name": "choonam.kro",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 502,
+        "hr_name": "คุณวุฒิชัย เสืออุดม [0556]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 692,
+        "hr_name": "คุณศศิพร คชรักษ์ [0690]",
+        "hr_active": true,
+        "user_id": 469.0,
+        "user_name": "sasiporn.kho",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 627,
+        "hr_name": "คุณศศิมล กล่อมพันธ์ [0651]",
+        "hr_active": true,
+        "user_id": 430.0,
+        "user_name": "sasimol.klo",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 407,
+        "hr_name": "คุณประสิทธิ์ ไพรแก้ว [0361]",
+        "hr_active": true,
+        "user_id": 317.0,
+        "user_name": "Technicial005",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 324,
+        "hr_name": "คุณศักดิ์บดี สุมาพา [0337]",
+        "hr_active": false,
+        "user_id": 85.0,
+        "user_name": "(Close)sakbodee.sum",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 319,
+        "hr_name": "คุณลลนา แซ่เฮ้ง [0285]",
+        "hr_active": false,
+        "user_id": 81.0,
+        "user_name": "(Close)lalana.sae",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 889,
+        "hr_name": "คุณจิรายุส ปิติกาญจนโรจน์ [0832]",
+        "hr_active": true,
+        "user_id": 614.0,
+        "user_name": "(Close)jirayut.pit",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 326,
+        "hr_name": "คุณนันทภพ บุญจำภู [0353]",
+        "hr_active": true,
+        "user_id": 65.0,
+        "user_name": "nanthaphop.boo",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 329,
+        "hr_name": "คุณศรัณย์ เพ็งพุ่ม [0364]",
+        "hr_active": true,
+        "user_id": 258.0,
+        "user_name": "saran.pan",
+        "user_active": true,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 447,
+        "hr_name": "คุณอนุชา สิงห์คะ [0368]",
+        "hr_active": true,
+        "user_id": 364.0,
+        "user_name": "building003",
+        "user_active": true,
+        "department_id": 37.0,
+        "department_name": "Technical Building"
+    },
+    {
+        "hr_id": 334,
+        "hr_name": "คุณณรงค์วิทย์ นิลวัฒน์ [0399]",
+        "hr_active": true,
+        "user_id": 50.0,
+        "user_name": "narongwit.nin",
+        "user_active": true,
+        "department_id": 11.0,
+        "department_name": "Finance Bill Collector"
+    },
+    {
+        "hr_id": 408,
+        "hr_name": "คุณพัฒนพงษ์ คำผุย [0406]",
+        "hr_active": true,
+        "user_id": 330.0,
+        "user_name": "Technicial018",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 337,
+        "hr_name": "คุณสุรชัย พงศ์ประสบชัย [0411]",
+        "hr_active": true,
+        "user_id": 123.0,
+        "user_name": "surachai.pon",
+        "user_active": true,
+        "department_id": 34.0,
+        "department_name": "IMC Director"
+    },
+    {
+        "hr_id": 338,
+        "hr_name": "คุณธนันทร์กรณ์ วงศ์หิริวัตร [0412]",
+        "hr_active": true,
+        "user_id": 124.0,
+        "user_name": "thanunkorn.won",
+        "user_active": true,
+        "department_id": 34.0,
+        "department_name": "IMC Director"
+    },
+    {
+        "hr_id": 409,
+        "hr_name": "คุณวรพล กลิ่นทองหลาง [0413]",
+        "hr_active": true,
+        "user_id": 331.0,
+        "user_name": "Technicial019",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 689,
+        "hr_name": "คุณฉัตรวิทย์ คำตลบ [0688]",
+        "hr_active": true,
+        "user_id": 468.0,
+        "user_name": "chatwit.kam",
+        "user_active": true,
+        "department_id": 40.0,
+        "department_name": "IMC Strategic & Sales Promotion"
+    },
+    {
+        "hr_id": 945,
+        "hr_name": "คุณดลลชา แก้วมณี [0872]",
+        "hr_active": true,
+        "user_id": 657.0,
+        "user_name": "dollacha.kea",
+        "user_active": true,
+        "department_id": 20.0,
+        "department_name": "IMC Production Dept."
+    },
+    {
+        "hr_id": 413,
+        "hr_name": "คุณสราวุฒิ สุขนอก [0438]",
+        "hr_active": true,
+        "user_id": 321.0,
+        "user_name": "Technicial009",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 635,
+        "hr_name": "คุณสมบัติ รัชตะนาวิน [0659]",
+        "hr_active": true,
+        "user_id": 443.0,
+        "user_name": "sombut.rat",
+        "user_active": true,
+        "department_id": 16.0,
+        "department_name": "HR Dept."
+    },
+    {
+        "hr_id": 345,
+        "hr_name": "คุณกวิษย์พร โชคอัครโสภณ [0437]",
+        "hr_active": true,
+        "user_id": 60.0,
+        "user_name": "(Close)kawitphorn.cho",
+        "user_active": false,
+        "department_id": 21.0,
+        "department_name": "IMC PR, Event Dept"
+    },
+    {
+        "hr_id": 578,
+        "hr_name": "คุณศักรินทร์ เชาระกำ [IMB0032]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 412,
+        "hr_name": "คุณกรวุฒิ นวลนุช [0434]",
+        "hr_active": true,
+        "user_id": 332.0,
+        "user_name": "Technicial020",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 335,
+        "hr_name": "คุณโชติกา เศรษฐปรีชากุล [0404]",
+        "hr_active": false,
+        "user_id": 269.0,
+        "user_name": "(Close)chotika.set",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 887,
+        "hr_name": "คุณธนะพัฒน์ แดงวิเศษ [0830]",
+        "hr_active": true,
+        "user_id": 612.0,
+        "user_name": "(Close)thanapat.dan",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 595,
+        "hr_name": "คุณสถิตย์ แก้วอาจ [IMB0072]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 498,
+        "hr_name": "คุณสมคิด สุวรรณ์รัมย์ [0182]",
+        "hr_active": true,
+        "user_id": 464.0,
+        "user_name": "somkid.suw",
+        "user_active": true,
+        "department_id": 16.0,
+        "department_name": "HR Dept."
+    },
+    {
+        "hr_id": 664,
+        "hr_name": "คุณสมยศ เสียงสนั่น [20075]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 695,
+        "hr_name": "คุณศุภสัณห์ วราศัย [0693]",
+        "hr_active": true,
+        "user_id": 480.0,
+        "user_name": "supasan.var",
+        "user_active": true,
+        "department_id": 10.0,
+        "department_name": "Training Dept."
+    },
+    {
+        "hr_id": 890,
+        "hr_name": "คุณอุษณีย์ นิ่มทอง [0831]",
+        "hr_active": true,
+        "user_id": 613.0,
+        "user_name": "(Close)utsanee.nim",
+        "user_active": false,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 892,
+        "hr_name": "คุณสุจิตรา หอยมณี [0834]",
+        "hr_active": true,
+        "user_id": 617.0,
+        "user_name": "sujittra.hoi",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 343,
+        "hr_name": "คุณชลันดา แย้มงามเหลือ [0428]",
+        "hr_active": true,
+        "user_id": 105.0,
+        "user_name": "chalunda.yea",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 916,
+        "hr_name": "ปัณฑารีย์  บาลี [0855]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 12.0,
+        "department_name": "IT Dept."
+    },
+    {
+        "hr_id": 830,
+        "hr_name": "รักษาการเขตขายภาคกลาง  คุณณัฐ [S173]",
+        "hr_active": true,
+        "user_id": 589.0,
+        "user_name": "(Close)S173.Central",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 348,
+        "hr_name": "คุณเดชนินท์ เทียบเมือง [0454]",
+        "hr_active": true,
+        "user_id": 40.0,
+        "user_name": "dedchanin.thi",
+        "user_active": true,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 349,
+        "hr_name": "คุณนันทิดา รุ่งแสง [0458]",
+        "hr_active": true,
+        "user_id": 114.0,
+        "user_name": "nantida.run",
+        "user_active": true,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 318,
+        "hr_name": "คุณนันทวัน เปี่ยมสันติกุล [0283]",
+        "hr_active": true,
+        "user_id": 143.0,
+        "user_name": "nanthawan.pia",
+        "user_active": true,
+        "department_id": 40.0,
+        "department_name": "IMC Strategic & Sales Promotion"
+    },
+    {
+        "hr_id": 918,
+        "hr_name": "ทักษิณา เขื่อนเพชร [0854]",
+        "hr_active": true,
+        "user_id": 634.0,
+        "user_name": "taksina.khu",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 352,
+        "hr_name": "คุณวีรฐา โภชนดา [0474]",
+        "hr_active": true,
+        "user_id": 135.0,
+        "user_name": "veeratha.poc",
+        "user_active": false,
+        "department_id": 12.0,
+        "department_name": "IT Dept."
+    },
+    {
+        "hr_id": 422,
+        "hr_name": "คุณรุ่งโรจน์ เกษราช [0483]",
+        "hr_active": true,
+        "user_id": 341.0,
+        "user_name": "Technicial029",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 893,
+        "hr_name": "วรรณภา ไกยสวน [0835]",
+        "hr_active": true,
+        "user_id": 618.0,
+        "user_name": "wannapa.kai",
+        "user_active": true,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 353,
+        "hr_name": "คุณธนศร พูลกิจวัฒนา [0486]",
+        "hr_active": true,
+        "user_id": 174.0,
+        "user_name": "thanasorn.poo",
+        "user_active": false,
+        "department_id": 12.0,
+        "department_name": "IT Dept."
+    },
+    {
+        "hr_id": 529,
+        "hr_name": "adminIT4 IT4 [adminIT4]",
+        "hr_active": true,
+        "user_id": 533.0,
+        "user_name": "adminit4",
+        "user_active": true,
+        "department_id": 12.0,
+        "department_name": "IT Dept."
+    },
+    {
+        "hr_id": 354,
+        "hr_name": "คุณศิริพร พรมชื่น [0489]",
+        "hr_active": true,
+        "user_id": 240.0,
+        "user_name": "siriporn.pro",
+        "user_active": true,
+        "department_id": 1.0,
+        "department_name": "Sales Admin Dept."
+    },
+    {
+        "hr_id": 917,
+        "hr_name": "ธนัชชา ธนสมบัติ [0856]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 20.0,
+        "department_name": "IMC Production Dept."
+    },
+    {
+        "hr_id": 467,
+        "hr_name": "คุณจิรภัทร แสงสุริยา [0466]",
+        "hr_active": true,
+        "user_id": 372.0,
+        "user_name": "building005",
+        "user_active": true,
+        "department_id": 37.0,
+        "department_name": "Technical Building"
+    },
+    {
+        "hr_id": 466,
+        "hr_name": "คุณชนะชัย หันประดิษฐ์ [0469]",
+        "hr_active": false,
+        "user_id": 371.0,
+        "user_name": "building004",
+        "user_active": true,
+        "department_id": 37.0,
+        "department_name": "Technical Building"
+    },
+    {
+        "hr_id": 423,
+        "hr_name": "คุณภุชงค์ จีนย้าย [0487]",
+        "hr_active": true,
+        "user_id": 342.0,
+        "user_name": "Technicial030",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 468,
+        "hr_name": "คุณชรินทร์ รักชาติ [0484]",
+        "hr_active": true,
+        "user_id": 373.0,
+        "user_name": "building006",
+        "user_active": true,
+        "department_id": 37.0,
+        "department_name": "Technical Building"
+    },
+    {
+        "hr_id": 701,
+        "hr_name": "คุณสมฤทัย เขียวจันทร์ [0700]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 670,
+        "hr_name": "คุณสมศักดิ์ ชุมปัญญา [20080]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 624,
+        "hr_name": "คุณสมาน ขันคำ [20040]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 419,
+        "hr_name": "คุณไพรรัตน์ นนทภา [0459]",
+        "hr_active": true,
+        "user_id": 339.0,
+        "user_name": "Technicial027",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 414,
+        "hr_name": "คุณณัฐวุฒิ ลาเกิด [0441]",
+        "hr_active": true,
+        "user_id": 334.0,
+        "user_name": "Technicial022",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 424,
+        "hr_name": "คุณรัฐพงษ์ คงเป็นนิจ [0491]",
+        "hr_active": true,
+        "user_id": 343.0,
+        "user_name": "Technicial031",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 425,
+        "hr_name": "คุณอนุวัฒน์ หัตถบูรณ์ [0494]",
+        "hr_active": true,
+        "user_id": 344.0,
+        "user_name": "Technicial032",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 356,
+        "hr_name": "คุณมธุสร สำเนียงเสนาะ [0496]",
+        "hr_active": true,
+        "user_id": 239.0,
+        "user_name": "matusorn.sam",
+        "user_active": true,
+        "department_id": 1.0,
+        "department_name": "Sales Admin Dept."
+    },
+    {
+        "hr_id": 357,
+        "hr_name": "คุณกวินธิดา แสงทอง [0499]",
+        "hr_active": true,
+        "user_id": 270.0,
+        "user_name": "kavintida.sao",
+        "user_active": true,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 426,
+        "hr_name": "คุณจินดา วันดี [0500]",
+        "hr_active": true,
+        "user_id": 345.0,
+        "user_name": "Technicial033",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 358,
+        "hr_name": "คุณรณิดา รุ่งโพธิ์กลาง [0501]",
+        "hr_active": true,
+        "user_id": 247.0,
+        "user_name": "ranida.run",
+        "user_active": true,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 428,
+        "hr_name": "คุณพิมาน แสวงผล [0504]",
+        "hr_active": true,
+        "user_id": 347.0,
+        "user_name": "Technicial035",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 359,
+        "hr_name": "คุณฐิติพร สุขเจริญยิ่งยง [0505]",
+        "hr_active": true,
+        "user_id": 238.0,
+        "user_name": "thitiporn.suk",
+        "user_active": true,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 929,
+        "hr_name": "รักษาการเขตขายกรุงเทพและปริมณฑล คุณประมวลวุฒิ [S194]",
+        "hr_active": true,
+        "user_id": 644.0,
+        "user_name": "S194",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 427,
+        "hr_name": "คุณอภิชาติ เอี่ยมทอง [0502]",
+        "hr_active": true,
+        "user_id": 346.0,
+        "user_name": "Technicial034",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 429,
+        "hr_name": "คุณอัตถพล เดชนุช [0507]",
+        "hr_active": true,
+        "user_id": 348.0,
+        "user_name": "Technicial036",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 362,
+        "hr_name": "คุณสุวิมล น่วมสุข [0512]",
+        "hr_active": true,
+        "user_id": 243.0,
+        "user_name": "(Close)suwimol.nua",
+        "user_active": false,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 365,
+        "hr_name": "คุณเวณิกา จำพันธ์ [0518]",
+        "hr_active": true,
+        "user_id": 254.0,
+        "user_name": "(Close)wenika.jam",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 501,
+        "hr_name": "คุณภิรายุทธ ใจเรือน [0517]",
+        "hr_active": false,
+        "user_id": 374.0,
+        "user_name": "building007",
+        "user_active": true,
+        "department_id": 37.0,
+        "department_name": "Technical Building"
+    },
+    {
+        "hr_id": 598,
+        "hr_name": "คุณสราวุฒิ ทองฤทธิ์ [IMB0077]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 589,
+        "hr_name": "คุณสันติวัฒน์ กันยา [IMB0065]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 500,
+        "hr_name": "คุณสาคร ชารีคง [0440]",
+        "hr_active": true,
+        "user_id": 466.0,
+        "user_name": "sakorn.cha",
+        "user_active": true,
+        "department_id": 16.0,
+        "department_name": "HR Dept."
+    },
+    {
+        "hr_id": 657,
+        "hr_name": "คุณสาธิต คำชมภู [20067]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 592,
+        "hr_name": "คุณสานพ อิงควัต [IMB0073]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 574,
+        "hr_name": "คุณสาวิตรี มินตรา [20014]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 364,
+        "hr_name": "คุณมยุรี ชูขุนทด [0516]",
+        "hr_active": true,
+        "user_id": 245.0,
+        "user_name": "mayuree.cho",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 891,
+        "hr_name": "คุณสาวิสตรี พึ่งเสือ [0833]",
+        "hr_active": true,
+        "user_id": 616.0,
+        "user_name": "sawisatree.phu",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 366,
+        "hr_name": "คุณศุภกร ศรีชนะ [0519]",
+        "hr_active": true,
+        "user_id": 252.0,
+        "user_name": "supphakorn.sri",
+        "user_active": true,
+        "department_id": 21.0,
+        "department_name": "IMC PR, Event Dept"
+    },
+    {
+        "hr_id": 367,
+        "hr_name": "คุณชฎาวรรณ บุญงาม [0520]",
+        "hr_active": true,
+        "user_id": 248.0,
+        "user_name": "chadawan.boo",
+        "user_active": true,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 430,
+        "hr_name": "คุณอภิวัฒน์ชัย ภูงามเชิง [0522]",
+        "hr_active": true,
+        "user_id": 349.0,
+        "user_name": "Technicial037",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 949,
+        "hr_name": "บริษัท เทคโนเซล เฟรย์ จำกัด ศูนย์ตัวแทนจำหน่าย [D02]",
+        "hr_active": true,
+        "user_id": 666.0,
+        "user_name": "D02",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 930,
+        "hr_name": "รักษาการเขตขายกรุงเทพและปริมณฑล คุณสาวิตรี1 [S195]",
+        "hr_active": true,
+        "user_id": 645.0,
+        "user_name": "S195",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 432,
+        "hr_name": "คุณอัครพนธ์ เอี่ยมทอง [0525]",
+        "hr_active": true,
+        "user_id": 346.0,
+        "user_name": "Technicial034",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 370,
+        "hr_name": "คุณรัชพล แก้วดี [0536]",
+        "hr_active": false,
+        "user_id": 256.0,
+        "user_name": "(Close)ratchaphon.kae",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 459,
+        "hr_name": "คุณชัยมงคล มหาสุภาพ [0528]",
+        "hr_active": true,
+        "user_id": 369.0,
+        "user_name": "warehouse005",
+        "user_active": true,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 433,
+        "hr_name": "คุณภูวิตร กองตา [0526]",
+        "hr_active": true,
+        "user_id": 352.0,
+        "user_name": "Technicial040",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 455,
+        "hr_name": "คุณรุ่งโรจน์ ฐิตะนันท์ [0537]",
+        "hr_active": true,
+        "user_id": 365.0,
+        "user_name": "warehouse001",
+        "user_active": true,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 434,
+        "hr_name": "คุณศุภลักษณ์ แย้มพี [0539]",
+        "hr_active": true,
+        "user_id": 353.0,
+        "user_name": "Technicial041",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 371,
+        "hr_name": "คุณอภิชน คงสวัสดิ์ [0542]",
+        "hr_active": true,
+        "user_id": 250.0,
+        "user_name": "[close]apichon.kon",
+        "user_active": false,
+        "department_id": 23.0,
+        "department_name": "IMC Strategic Partnership & Digital Marketing"
+    },
+    {
+        "hr_id": 683,
+        "hr_name": "คุณสุกัญญา อัศวยิ่งเจริญ [0682]",
+        "hr_active": false,
+        "user_id": 462.0,
+        "user_name": "sukanya.ass1",
+        "user_active": false,
+        "department_id": 1.0,
+        "department_name": "Sales Admin Dept."
+    },
+    {
+        "hr_id": 369,
+        "hr_name": "คุณภิญญ์ สินรัชตานันท์ [0535]",
+        "hr_active": false,
+        "user_id": 249.0,
+        "user_name": "(Close)pinn.sin",
+        "user_active": false,
+        "department_id": 20.0,
+        "department_name": "IMC Production Dept."
+    },
+    {
+        "hr_id": 470,
+        "hr_name": "คุณพีระพล พลสิทธิ์ [0530]",
+        "hr_active": true,
+        "user_id": 375.0,
+        "user_name": "building008",
+        "user_active": true,
+        "department_id": 37.0,
+        "department_name": "Technical Building"
+    },
+    {
+        "hr_id": 630,
+        "hr_name": "คุณสิริลักษณ์ เมรัตน์ [0654]",
+        "hr_active": true,
+        "user_id": 440.0,
+        "user_name": "(Close)sirilak.mer(Close)",
+        "user_active": false,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 688,
+        "hr_name": "คุณสิริลักษณ์ เกรียงสมุทร [0687]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 562,
+        "hr_name": "คุณสุทธิพงษ์ เสาวรส  [20002]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 672,
+        "hr_name": "คุณสุทัด ทองคุ้มญาติ [20082]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 431,
+        "hr_name": "คุณยุทธกร สุนา [0523]",
+        "hr_active": true,
+        "user_id": 350.0,
+        "user_name": "Technicial038",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 950,
+        "hr_name": "บริษัท เทคโนเซล เฟรย์ จำกัด ศูนย์ตัวแทนจำหน่าย [D02]",
+        "hr_active": false,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 372,
+        "hr_name": "คุณบุญชู ศรีขัดเค้า [0544]",
+        "hr_active": true,
+        "user_id": 172.0,
+        "user_name": "boonchoo.sri",
+        "user_active": true,
+        "department_id": 12.0,
+        "department_name": "IT Dept."
+    },
+    {
+        "hr_id": 373,
+        "hr_name": "คุณวรัญญา ยั่งยืน [0545]",
+        "hr_active": true,
+        "user_id": 253.0,
+        "user_name": "(Close)warunya.yan",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 376,
+        "hr_name": "คุณณิชาภัทร นุกูลธรรม [0554]",
+        "hr_active": true,
+        "user_id": 57.0,
+        "user_name": "nichapat.nuk",
+        "user_active": true,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 951,
+        "hr_name": "พชรดนัย บุญประเสริฐ [0882]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 381,
+        "hr_name": "คุณมนฑิฬา ยาใจ [0562]",
+        "hr_active": true,
+        "user_id": 287.0,
+        "user_name": "montila.yaj",
+        "user_active": true,
+        "department_id": 1.0,
+        "department_name": "Sales Admin Dept."
+    },
+    {
+        "hr_id": 923,
+        "hr_name": "จิรัศญา โนนจันทร์ศรี [0860]",
+        "hr_active": true,
+        "user_id": 635.0,
+        "user_name": "jiratsaya.non",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 600,
+        "hr_name": "คุณสุพรรษา วิชาชู [IMB0080]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 332,
+        "hr_name": "คุณลัดดาวัลย์ สายรัตน์ [0376]",
+        "hr_active": false,
+        "user_id": 97.0,
+        "user_name": "(Close)laddawan.say",
+        "user_active": false,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 779,
+        "hr_name": "วีรวัฒน์  จีระชัยธนธรณ์ [0751]",
+        "hr_active": true,
+        "user_id": 528.0,
+        "user_name": "weerawat.jir",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 392,
+        "hr_name": "คุณจุฬาลักษณ์ พนมมาส [0563]",
+        "hr_active": true,
+        "user_id": 295.0,
+        "user_name": "[CLOSE] chulalak.pan [CLOSE]",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 393,
+        "hr_name": "คุณจุฑาทิพย์ อัสสวาส [0576]",
+        "hr_active": true,
+        "user_id": 298.0,
+        "user_name": "(Close)juthathip.ass",
+        "user_active": false,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 394,
+        "hr_name": "คุณมินยา ชายสิทธิ์ [0579]",
+        "hr_active": true,
+        "user_id": 299.0,
+        "user_name": "minya.cha",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 380,
+        "hr_name": "คุณวรรณิศา อุดมบุญ [0560]",
+        "hr_active": false,
+        "user_id": 273.0,
+        "user_name": "(Close) wannisa.oud",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 471,
+        "hr_name": "คุณเฉลิม อาจภักดี [0566]",
+        "hr_active": true,
+        "user_id": 376.0,
+        "user_name": "building009",
+        "user_active": true,
+        "department_id": 37.0,
+        "department_name": "Technical Building"
+    },
+    {
+        "hr_id": 932,
+        "hr_name": "พิทยาภรณ์ เทียมพล [0866]",
+        "hr_active": true,
+        "user_id": 649.0,
+        "user_name": "(Close)pittayaphon.tem",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 472,
+        "hr_name": "คุณณัฐกิตติ์ ใจศิล [0565]",
+        "hr_active": true,
+        "user_id": 377.0,
+        "user_name": "building010",
+        "user_active": true,
+        "department_id": 37.0,
+        "department_name": "Technical Building"
+    },
+    {
+        "hr_id": 473,
+        "hr_name": "คุณยุทธนา โคณะบาล [0572]",
+        "hr_active": true,
+        "user_id": 378.0,
+        "user_name": "building011",
+        "user_active": true,
+        "department_id": 37.0,
+        "department_name": "Technical Building"
+    },
+    {
+        "hr_id": 581,
+        "hr_name": "คุณสุนันทา ถนัดหนังสือ [IMB0044]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 610,
+        "hr_name": "คุณสุเมธ นามตะพันธ์ [IMB0082]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 933,
+        "hr_name": "สันสณี เกตุแผ้ว [0862]",
+        "hr_active": true,
+        "user_id": 638.0,
+        "user_name": "sunsanee.kat",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 953,
+        "hr_name": "จินดาภรณ์ การะเกตุ [0873]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 934,
+        "hr_name": "ณัฐธิดา สังข์รุ่ง [0864]",
+        "hr_active": true,
+        "user_id": 648.0,
+        "user_name": "nattida.san",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 384,
+        "hr_name": "คุณชลิตา สุวรรณรัตน์ [0568]",
+        "hr_active": false,
+        "user_id": 277.0,
+        "user_name": "(Close)chalita.suw",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 952,
+        "hr_name": "คุณณัฐมน พลอยขาว [0883]",
+        "hr_active": true,
+        "user_id": 405.0,
+        "user_name": "nuttamon.plo",
+        "user_active": true,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 387,
+        "hr_name": "คุณภัทรา เปรมสำราญ [0581]",
+        "hr_active": true,
+        "user_id": 296.0,
+        "user_name": "patra.pra",
+        "user_active": true,
+        "department_id": 1.0,
+        "department_name": "Sales Admin Dept."
+    },
+    {
+        "hr_id": 678,
+        "hr_name": "คุณปัญญาวุธ สิงห์งอย [10088]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 533,
+        "hr_name": "คุณฤกษ์ดี ฤชุพจน์ [0610]",
+        "hr_active": false,
+        "user_id": 406.0,
+        "user_name": "(Close)rurkdee.ruc",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 465,
+        "hr_name": "คุณปริญญากร ดวงสุวรรณ [0589]",
+        "hr_active": true,
+        "user_id": 310.0,
+        "user_name": "parinyakorn.dua",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 530,
+        "hr_name": "คุณดุษฎี พึ่งพา [0595]",
+        "hr_active": true,
+        "user_id": 400.0,
+        "user_name": "dootsadee.phu",
+        "user_active": true,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 935,
+        "hr_name": "จิรัฐยา สุวรรณราช [0865]",
+        "hr_active": true,
+        "user_id": 650.0,
+        "user_name": "jirattaya.suw",
+        "user_active": true,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 454,
+        "hr_name": "คุณคณัสมน สกุลพล [0586]",
+        "hr_active": false,
+        "user_id": 304.0,
+        "user_name": "(Close)kanutsamon.sak",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 520,
+        "hr_name": "คุณวิรากร วิญญูนัทกุล [0601]",
+        "hr_active": false,
+        "user_id": 392.0,
+        "user_name": "(Close)virakorn.win",
+        "user_active": false,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 535,
+        "hr_name": "คุณนพวรรณ บุญมา [0605]",
+        "hr_active": true,
+        "user_id": 388.0,
+        "user_name": "nopphawan.bun",
+        "user_active": true,
+        "department_id": 1.0,
+        "department_name": "Sales Admin Dept."
+    },
+    {
+        "hr_id": 954,
+        "hr_name": "รีนา หันสาริกิจ [0884]",
+        "hr_active": true,
+        "user_id": 673.0,
+        "user_name": "reena.han",
+        "user_active": false,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 512,
+        "hr_name": "คุณพัชรพร หรรษาจารุพันธ์ [0598]",
+        "hr_active": true,
+        "user_id": 387.0,
+        "user_name": "patcharaporn.han",
+        "user_active": true,
+        "department_id": 12.0,
+        "department_name": "IT Dept."
+    },
+    {
+        "hr_id": 486,
+        "hr_name": "คุณกนกพร ชิดไชย [0593]",
+        "hr_active": true,
+        "user_id": 384.0,
+        "user_name": "(Close)kanokphon.chi",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 518,
+        "hr_name": "คุณสุดารัตน์ เมืองสุข [0597]",
+        "hr_active": true,
+        "user_id": 391.0,
+        "user_name": "(Close) sudarat.mue",
+        "user_active": false,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 505,
+        "hr_name": "คุณวัชรพล อินเกสร [0580]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 541,
+        "hr_name": "คุณณัฐธนภัสสร์ สุธาพจน์ [0600]",
+        "hr_active": true,
+        "user_id": 395.0,
+        "user_name": "nattanapat.sut",
+        "user_active": true,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 582,
+        "hr_name": "คุณสุรสิทธิ์ แย้มพี [IMB0051]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 583,
+        "hr_name": "คุณปิยะรัตน์ โพธิ์งาม [IMB0052]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 609,
+        "hr_name": "คุณชัยวัฒน์ โบสุวรรณนานา [0635]",
+        "hr_active": false,
+        "user_id": 422.0,
+        "user_name": "chaiwat.bos",
+        "user_active": false,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 955,
+        "hr_name": "คุณปภัษศร แสนบุญศรี [20184]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 360,
+        "hr_name": "คุณกรกันยา ฝอยทอง [0625]",
+        "hr_active": true,
+        "user_id": 236.0,
+        "user_name": "kornkanya.foy",
+        "user_active": true,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 560,
+        "hr_name": "คุณมลฑิรา สุขภิรมย์ [0628]",
+        "hr_active": true,
+        "user_id": 428.0,
+        "user_name": "montira.suk",
+        "user_active": true,
+        "department_id": 12.0,
+        "department_name": "IT Dept."
+    },
+    {
+        "hr_id": 542,
+        "hr_name": "คุณนันทวุฒิ พลศรี [0618]",
+        "hr_active": true,
+        "user_id": 413.0,
+        "user_name": "nantawut.pon",
+        "user_active": true,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 956,
+        "hr_name": "คุณณฐกร แก้วแป้นผา [0885]",
+        "hr_active": true,
+        "user_id": 676.0,
+        "user_name": "nathakorn.kae",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 958,
+        "hr_name": "คุณสุวิจักขณ์ ศรีชิษณวนนท์ [0889]",
+        "hr_active": true,
+        "user_id": 677.0,
+        "user_name": "suvijak.sri",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 957,
+        "hr_name": "บริษัท เทคโนเซล เฟรย์ จำกัด (ฟิล์มอาคาร) [8998B]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 898,
+        "hr_name": "ชมัยพร สุขลักษณ์ [0837]",
+        "hr_active": true,
+        "user_id": 678.0,
+        "user_name": "chamaiporn.suk",
+        "user_active": true,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 544,
+        "hr_name": "คุณบุณนภา บุญเกิด [0627]",
+        "hr_active": true,
+        "user_id": 415.0,
+        "user_name": "boonnapa.boo",
+        "user_active": true,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 611,
+        "hr_name": "คุณมัณฑรพ สุริยะปฐมธนกร [0636]",
+        "hr_active": true,
+        "user_id": 423.0,
+        "user_name": "montrarop.sur",
+        "user_active": true,
+        "department_id": 27.0,
+        "department_name": "AEC Dept."
+    },
+    {
+        "hr_id": 534,
+        "hr_name": "คุณณัฐมน พลอยขาว [0633]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 536,
+        "hr_name": "คุณณิชา ทับแป้น [0615]",
+        "hr_active": true,
+        "user_id": 410.0,
+        "user_name": "nicha.tha",
+        "user_active": true,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 962,
+        "hr_name": "คุณณัฐฐิณี ใจฉลาด [0892]",
+        "hr_active": true,
+        "user_id": 683.0,
+        "user_name": "nattinee.jai",
+        "user_active": true,
+        "department_id": 20.0,
+        "department_name": "IMC Production Dept."
+    },
+    {
+        "hr_id": 617,
+        "hr_name": "คุณธีรพันธ์ บุญอาษา [0642]",
+        "hr_active": true,
+        "user_id": 432.0,
+        "user_name": "teerapan.boo",
+        "user_active": true,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 612,
+        "hr_name": "คุณปริชา สุรเวช [0637]",
+        "hr_active": true,
+        "user_id": 424.0,
+        "user_name": "paricha.sur",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 960,
+        "hr_name": "ภัทรพล พิชัยกาล [0895]",
+        "hr_active": true,
+        "user_id": 682.0,
+        "user_name": "pattarapon.pic",
+        "user_active": true,
+        "department_id": 40.0,
+        "department_name": "IMC Strategic & Sales Promotion"
+    },
+    {
+        "hr_id": 959,
+        "hr_name": "วีรินทร์ ชินวงค์ [0894]",
+        "hr_active": true,
+        "user_id": 680.0,
+        "user_name": "weerin.chi",
+        "user_active": true,
+        "department_id": 13.0,
+        "department_name": "Building Film Dept."
+    },
+    {
+        "hr_id": 961,
+        "hr_name": "ธนันโชตน์ เลิศวรสมบูรณ์ [0896]",
+        "hr_active": true,
+        "user_id": 681.0,
+        "user_name": "thaninchot.ler",
+        "user_active": true,
+        "department_id": 20.0,
+        "department_name": "IMC Production Dept."
+    },
+    {
+        "hr_id": 963,
+        "hr_name": "บรรหาร จันทรังษี [20191]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 626,
+        "hr_name": "คุณจุฑามาศ เกิดแจ [0649]",
+        "hr_active": false,
+        "user_id": 429.0,
+        "user_name": "(Close)juthamas.ker",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 643,
+        "hr_name": "คุณฉัตรสุดา สิงห์ลอ [0662]",
+        "hr_active": true,
+        "user_id": 452.0,
+        "user_name": "chatsuda.sin",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 633,
+        "hr_name": "คุณปิยรัตน์ อินฟ้าแสง [0657]",
+        "hr_active": false,
+        "user_id": 434.0,
+        "user_name": "(Close)piyarat.inf",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 632,
+        "hr_name": "คุณทิพวัลย์ จรุงการ [0656]",
+        "hr_active": false,
+        "user_id": 435.0,
+        "user_name": "(Close)tippawan.cha",
+        "user_active": false,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 654,
+        "hr_name": "คุณกนกรัตน์ กุลมลิวัลย์ [0667]",
+        "hr_active": true,
+        "user_id": 448.0,
+        "user_name": "(Close)kanokrat.kul",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 634,
+        "hr_name": "คุณกนกวรรณ แดงจันทร์แก้ว [0658]",
+        "hr_active": true,
+        "user_id": 446.0,
+        "user_name": "(Close)kanokwan.dan",
+        "user_active": false,
+        "department_id": 23.0,
+        "department_name": "IMC Strategic Partnership & Digital Marketing"
+    },
+    {
+        "hr_id": 636,
+        "hr_name": "คุณพจวรรณ โรจน์ชีวพันธ์ [0660]",
+        "hr_active": true,
+        "user_id": 436.0,
+        "user_name": "(Close)pojchawan.roj",
+        "user_active": false,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 669,
+        "hr_name": "คุณวิชญาดา ปัญญานิธิสุภา [0674]",
+        "hr_active": true,
+        "user_id": 457.0,
+        "user_name": "witchayada.pan",
+        "user_active": true,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 667,
+        "hr_name": "คุณวิภาดา ฝางคำ [0672]",
+        "hr_active": false,
+        "user_id": 454.0,
+        "user_name": "(Close)wipada.fan",
+        "user_active": false,
+        "department_id": 17.0,
+        "department_name": "Customer Service Dept."
+    },
+    {
+        "hr_id": 668,
+        "hr_name": "คุณขวัญชนก นาชัยเวช [0673]",
+        "hr_active": true,
+        "user_id": 460.0,
+        "user_name": "khwanchanok.nac",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 675,
+        "hr_name": "คุณธนาพันธ์ุ มั่งคั่ง [0676]",
+        "hr_active": true,
+        "user_id": 458.0,
+        "user_name": "thanapunt.man",
+        "user_active": true,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 661,
+        "hr_name": "คุณปรียารัตน์ เงินสม [0670]",
+        "hr_active": true,
+        "user_id": 451.0,
+        "user_name": "preeyarat.nge",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 677,
+        "hr_name": "คุณวรรณาภรณ์ นิธิกาญจนา [0678]",
+        "hr_active": true,
+        "user_id": 456.0,
+        "user_name": "wannaporn.nit",
+        "user_active": true,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 676,
+        "hr_name": "คุณวาสนา พลทามูล [0677]",
+        "hr_active": true,
+        "user_id": 455.0,
+        "user_name": "wassana.pol",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 497,
+        "hr_name": "คุณสุวรรณา วงค์คูณ [0115]",
+        "hr_active": true,
+        "user_id": 463.0,
+        "user_name": "suwanna.won",
+        "user_active": true,
+        "department_id": 16.0,
+        "department_name": "HR Dept."
+    },
+    {
+        "hr_id": 557,
+        "hr_name": "คุณสุวัฒน์ ไมตรีแพน [IMB0042]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 680,
+        "hr_name": "คุณหนึ่งฤทัย เขียวจันทร์ [0679]",
+        "hr_active": true,
+        "user_id": 459.0,
+        "user_name": "nuengrunthai.khr",
+        "user_active": true,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 671,
+        "hr_name": "คุณอดุลย์ วังคำหาญ [20081]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 540,
+        "hr_name": "คุณอภิชญา เอี่ยมกระจาง [0602]",
+        "hr_active": true,
+        "user_id": 394.0,
+        "user_name": "apichaya.ale",
+        "user_active": true,
+        "department_id": 9.0,
+        "department_name": "Accounting"
+    },
+    {
+        "hr_id": 503,
+        "hr_name": "คุณอภิชัย โอฬารนัฎ [0571]",
+        "hr_active": true,
+        "user_id": 399.0,
+        "user_name": "apichai.ora",
+        "user_active": true,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 631,
+        "hr_name": "คุณอภิญญา พรมณะ [0655]",
+        "hr_active": false,
+        "user_id": 433.0,
+        "user_name": "apinya.pro",
+        "user_active": false,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 694,
+        "hr_name": "คุณอภิวรรณ คำมี [0692]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 619,
+        "hr_name": "คุณอภิสิทธิ์ กลิ่นราตรี [10084]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 660,
+        "hr_name": "คุณอมรรัตน์ ลาภเจริญวงศ์ [0669]",
+        "hr_active": true,
+        "user_id": 450.0,
+        "user_name": "amornrat.lap",
+        "user_active": true,
+        "department_id": 16.0,
+        "department_name": "HR Dept."
+    },
+    {
+        "hr_id": 511,
+        "hr_name": "คุณอธิชน ยันกระโทก [IMB0028]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 553,
+        "hr_name": "คุณสุวัฒน์ชัย โคตรกันยา [20001]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 618,
+        "hr_name": "คุณอนนท์ ปิ่นศรี [10083]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 663,
+        "hr_name": "คุณอโนชา วันทา [20074]",
+        "hr_active": false,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 551,
+        "hr_name": "คุณอรรคเดช สุวรรณ [IMB0057]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 561,
+        "hr_name": "คุณอัญชลี เจริญผล [0631]",
+        "hr_active": true,
+        "user_id": 420.0,
+        "user_name": "anchalee.jar",
+        "user_active": false,
+        "department_id": 26.0,
+        "department_name": "Finance Dept."
+    },
+    {
+        "hr_id": 568,
+        "hr_name": "คุณอับดุล ฮากิม บาโง [20016]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 621,
+        "hr_name": "คุณอัมพรเพชร์ ดอกไม้ [0644]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 616,
+        "hr_name": "คุณอัมรินทร์ ปติตัน [0641]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 24.0,
+        "department_name": "Warehouse Dept."
+    },
+    {
+        "hr_id": 549,
+        "hr_name": "คุณอานนท์ สีอ่วม [20019]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 570,
+        "hr_name": "คุณอำนาจ สุวรรณรัตน์ [20010]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 640,
+        "hr_name": "คุณอิฐพงษ์ สุขศิริ [20044]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 566,
+        "hr_name": "คุณอุทุมพร จิตร์อารีย์ [20006]",
+        "hr_active": true,
+        "user_id": null,
+        "user_name": null,
+        "user_active": null,
+        "department_id": 18.0,
+        "department_name": "Technical Dept."
+    },
+    {
+        "hr_id": 495,
+        "hr_name": "คุณเอกสิทธิ์ ภิรมย์ทอง [0592]",
+        "hr_active": true,
+        "user_id": 386.0,
+        "user_name": "ekkasit.phi",
+        "user_active": true,
+        "department_id": 16.0,
+        "department_name": "HR Dept."
+    },
+    {
+        "hr_id": 539,
+        "hr_name": "คุณอรัชพร บุญสัน [0612]",
+        "hr_active": true,
+        "user_id": 404.0,
+        "user_name": "aruchaporn.boo",
+        "user_active": true,
+        "department_id": 5.0,
+        "department_name": "Sales  Dept."
+    },
+    {
+        "hr_id": 964,
+        "hr_name": "test_01 admin [test_admin_it]",
+        "hr_active": true,
+        "user_id": 527.0,
+        "user_name": "adminsp",
+        "user_active": true,
+        "department_id": 12.0,
+        "department_name": "IT Dept."
+    }
+]
