@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load tz %}
+
+{% block title %}งานที่กำลังดำเนินการ{% endblock %}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+
+{% block content %}
+<div class="container-fluid">
+
+    <h4 class="fw-bold mb-4">
+        🛠 งานที่กำลังดำเนินการ (Accepting work)
+    </h4>
+
+    {% if tickets %}
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table id="acceptingWorkTable" class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-center">ลำดับ</th>
+                        <th>ประเภท</th>
+                        <th>หัวข้อ</th>
+                        <th>ผู้แจ้ง</th>
+                        <th>วันที่แจ้ง</th>
+                        <th class="text-center">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in tickets %}
+                    <tr>
+                        <td class="text-center fw-bold text-muted">
+                            {{ t.id }}
+                        </td>
+                        <td>{{ t.ticket_type }}</td>
+                        <td class="fw-semibold">{{ t.title }}</td>
+                        <td>{{ t.username }}</td>
+                        <td>
+                            <div>{{ t.create_at|date:"d M Y" }}</div>
+                            <small class="text-muted">
+                                {{ t.create_at|date:"H:i" }} น.
+                            </small>
+                        </td>
+                        <td class="text-center">
+                            {% if t.status_id == 8 %}
+                            <form method="post"
+                                  action="{% url 'admin_complete_ticket' t.id %}"
+                                  onsubmit="return confirm('ยืนยันว่าทำงานเสร็จแล้ว?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    เสร็จงาน
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="text-muted small">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-secondary">
+        ไม่มีงานที่กำลังดำเนินการ
+    </div>
+    {% endif %}
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+    $(function () {
+        $('#acceptingWorkTable').DataTable({
+            pageLength: 10,
+            order: [[4, 'desc']],
+            language: {
+                zeroRecords: "ไม่พบข้อมูล"
+            },
+            columnDefs: [
+                { orderable: false, targets: 5 }
+            ]
+        });
+    });
+</script>
+
+{% endblock %}

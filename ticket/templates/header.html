@@ -64,6 +64,14 @@
       </a>
     </li>
     {% endif %}
+      {% if request.session.user.role_id == 1 %}
+      <li>
+        <a href="{% url 'tickets_accepting_work'%}">
+          <i class="fa-solid fa-handshake"></i>
+          <span>Accepting Work</span>
+        </a>
+      </li>
+      {% endif %}
 
 
     <!-- ================= USER + ADMIN ================= -->

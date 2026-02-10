@@ -6,7 +6,7 @@ from django.utils.dateparse import parse_date
 from datetime import timezone as dt_timezone
 from datetime import date, timedelta
 from datetime import datetime
-from django.core.files.storage import FileSystemStorage
+# from django.core.files.storage import FileSystemStorage
 import os,json
 from django.http import Http404
 from .decorators import login_required_custom
@@ -942,8 +942,8 @@ def dictfetchone(cursor):
         return None
     columns = [col[0] for col in cursor.description]
     return dict(zip(columns, row))
-APPROVE_PENDING = 7
 
+APPROVE_PENDING = 7
 @login_required_custom
 @role_required_role_id([1, 2, 3])
 def tickets_detail_erp(request, ticket_id):
@@ -958,8 +958,13 @@ def tickets_detail_erp(request, ticket_id):
     # -----------------------------
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT t.id, t.title, t.description,
-                   u.username, t.create_at ,t.status_id    
+            SELECT
+                t.id,
+                t.title,
+                t.description,
+                u.username,
+                t.create_at,
+                t.status_id
             FROM tickets.tickets t
             JOIN tickets.users u ON u.id = t.user_id
             WHERE t.id = %s
@@ -967,23 +972,28 @@ def tickets_detail_erp(request, ticket_id):
 
         row = cursor.fetchone()
 
+    if not row:
+        raise Http404("Ticket not found")
+
     ticket = {
         "id": row[0],
         "title": row[1],
         "description": row[2],
         "user_name": row[3],
         "create_at": row[4],
+        "status_id": row[5],
     }
 
     # -----------------------------
-    # current level
+    # current pending level
     # -----------------------------
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT level
             FROM tickets.ticket_approval_status
             WHERE ticket_id = %s
-              AND status_id = %s
+              AND status_id = %s   -- PENDING
+            ORDER BY level
             LIMIT 1
         """, [ticket_id, APPROVE_PENDING])
 
@@ -992,7 +1002,7 @@ def tickets_detail_erp(request, ticket_id):
     current_level = row[0] if row else None
 
     # -----------------------------
-    # category + team
+    # check approver (ตามสาย)
     # -----------------------------
     can_approve = False
     my_level = None
@@ -1017,16 +1027,35 @@ def tickets_detail_erp(request, ticket_id):
             category_id, team_id = row
             flow = get_approve_line_dict_all_flows(category_id, team_id)
 
-            if user_id in flow.get(current_level, set()):
+            if user_id in flow.get(current_level, []):
                 can_approve = True
                 my_level = current_level
 
-    return render(request, "tickets_form/tickets_detail_erp.html", {
-        "ticket": ticket,
-        "can_approve": can_approve,
-        "my_level": my_level,
-        "is_admin": is_admin,
-    }) 
+    # -----------------------------
+    # has pending approve (ADMIN)
+    # -----------------------------
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT 1
+            FROM tickets.ticket_approval_status
+            WHERE ticket_id = %s
+            AND status_id IN (6, 7)   -- Waiting / Pending เท่านั้น
+            LIMIT 1
+        """, [ticket_id])
+
+        has_pending_approve = cursor.fetchone() is not None
+
+    return render(
+        request,
+        "tickets_form/tickets_detail_erp.html",
+        {
+            "ticket": ticket,
+            "can_approve": can_approve,
+            "my_level": my_level,
+            "is_admin": is_admin,
+            "has_pending_approve": has_pending_approve,
+        }
+    )
 @login_required_custom
 @role_required_role_id([1, 2, 3])
 def tickets_detail_vpn(request, ticket_id):
@@ -2662,7 +2691,7 @@ def approve_ticket_flow(
     with connection.cursor() as cursor:
 
         # ===============================
-        # ADMIN → รับงาน (Accepting work)
+        # ADMIN → รับงาน
         # ===============================
         if is_admin:
             cursor.execute("""
@@ -2680,7 +2709,7 @@ def approve_ticket_flow(
             FROM tickets.ticket_approval_status
             WHERE ticket_id = %s
               AND user_id = %s
-              AND status_id = 7   -- Pending
+              AND status_id = 7
             FOR UPDATE
         """, [ticket_id, approver_user_id])
 
@@ -2693,7 +2722,7 @@ def approve_ticket_flow(
         # approve ทั้ง level
         cursor.execute("""
             UPDATE tickets.ticket_approval_status
-            SET status_id = 2,   -- Approved
+            SET status_id = 2,
                 action_time = %s,
                 remark = %s
             WHERE ticket_id = %s
@@ -2715,7 +2744,7 @@ def approve_ticket_flow(
               AND status_id = 6
         """, [ticket_id, current_level + 1])
 
-        # ถ้ายังมี pending → In Progress
+        # เช็คว่ายังมี pending ไหม
         cursor.execute("""
             SELECT 1
             FROM tickets.ticket_approval_status
@@ -2725,18 +2754,21 @@ def approve_ticket_flow(
         """, [ticket_id])
 
         if cursor.fetchone():
+            # ยังมีคนต้อง approve ต่อ
             cursor.execute("""
                 UPDATE tickets.tickets
                 SET status_id = 4   -- In Progress
                 WHERE id = %s
             """, [ticket_id])
         else:
-            # รอ Admin รับงาน
+            # ✔️ approve ครบแล้ว → รอ Admin
             cursor.execute("""
                 UPDATE tickets.tickets
-                SET status_id = 8   -- Accepting work
+                SET status_id = 4   -- ยังไม่รับงาน
                 WHERE id = %s
-            """, [ticket_id])      
+            """, [ticket_id])
+
+                 
 def get_approve_line_dict_all_flows(category_id, team_id):
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -2779,39 +2811,64 @@ def admin_accept_work(request, ticket_id):
     if not user or user["role_id"] != 1:
         return redirect("login")
 
-    messages.success(request, "รับงานเรียบร้อยแล้ว")
-    return redirect("tickets_list")
-
-@require_POST
-def admin_complete_ticket(request, ticket_id):
-    user = request.session.get("user")
-    if not user or user["role_id"] != 1:
-        return redirect("login")
-
     with connection.cursor() as cursor:
         cursor.execute("""
             UPDATE tickets.tickets
-            SET status_id = 5   -- Completed
+            SET status_id = 8   -- Accepting work
             WHERE id = %s
-              AND status_id = 4
         """, [ticket_id])
 
-    messages.success(request, "งานเสร็จสมบูรณ์แล้ว")
-    return redirect("tickets_list")
+    messages.success(request, "รับงานเรียบร้อยแล้ว")
+    return redirect("tickets_accepting_work")
 
 @require_POST
 def admin_complete_ticket(request, ticket_id):
 
     user = request.session.get("user")
-    if not user or user["role_id"] != 1:
-        raise PermissionDenied
+
+    if not user or user.get("role_id") != 1:
+        return HttpResponseForbidden("Admin only")
 
     with connection.cursor() as cursor:
         cursor.execute("""
             UPDATE tickets.tickets
-            SET status_id = 5   -- Completed
+            SET status_id = 5  -- Completed
             WHERE id = %s
         """, [ticket_id])
 
     messages.success(request, "ปิดงานเรียบร้อยแล้ว")
     return redirect("tickets_list")
+
+#--------------หน้างานที่รับไปแล้ว--------------
+@login_required_custom
+@role_required_role_id([1])  # admin เท่านั้น
+def tickets_accepting_work(request):
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                t.id,
+                t.title,
+                t.description,
+                t.create_at,
+                t.status_id,
+                u.username,
+                tt.name AS ticket_type
+            FROM tickets.tickets t
+            JOIN tickets.users u ON u.id = t.user_id
+            JOIN tickets.ticket_type tt ON tt.id = t.ticket_type_id
+            WHERE t.status_id = 8   -- Accepting work
+            ORDER BY t.create_at DESC
+        """)
+
+        tickets = dictfetchall(cursor)
+        
+        
+        
+    return render(
+        request,
+        "accepting_work/tickets_accepting_work.html",
+        {
+            "tickets": tickets
+        }
+    )

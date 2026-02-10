@@ -93,7 +93,7 @@
             {% endif %}
 
             {# ---------- APPROVE ตามสาย ---------- #}
-            {% if can_approve %}
+            {% if can_approve and ticket.status_id != 2 %}
             <form method="post" action="{% url 'approve_ticket' ticket.id %}" class="mb-2">
                 {% csrf_token %}
                 <textarea name="remark" class="form-control mb-2" rows="2" placeholder="หมายเหตุ (ถ้ามี)"></textarea>
@@ -104,34 +104,14 @@
             {% endif %}
 
             {# ---------- ADMIN รับงาน ---------- #}
-            {% if is_admin and ticket.status_id != 4 and ticket.status_id != 5 %}
-            <form method="post" action="{% url 'approve_ticket' ticket.id %}" class="mb-2">
+            {% if is_admin and has_pending_approve %}
+            <form method="post" action="{% url 'approve_ticket' ticket.id %}">
                 {% csrf_token %}
                 <input type="hidden" name="admin_override" value="1">
-                <button type="submit" class="btn btn-danger">
+                <button class="btn btn-danger">
                     🚀 Admin รับงาน
                 </button>
             </form>
-            {% endif %}
-
-            {# ---------- ADMIN เสร็จงาน ---------- #}
-            {% if is_admin and ticket.status_id == 8 %}
-            <div class="card shadow-sm border-primary mb-4">
-                <div class="card-body text-center">
-
-                    <div class="fw-semibold text-primary mb-2">
-                        🛠 กำลังดำเนินงาน
-                    </div>
-
-                    <form method="post" action="{% url 'admin_complete_ticket' ticket.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            ✅ ทำเสร็จแล้ว
-                        </button>
-                    </form>
-
-                </div>
-            </div>
             {% endif %}
         </div>
     </div>

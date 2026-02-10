@@ -67,29 +67,16 @@ urlpatterns = [
     path("team/<int:team_id>/add-user/", views.team_adduser, name="team_adduser"),
     path("team/<int:team_id>/remove-user/<int:user_id>/", views.team_removeuser, name="team_removeuser"),
 
-    path(
-        "approval/add-line/",
-        views.add_approve_line,
-        name="add_approve_line"
-    ),
-
-    path( 
-        "approval/flow/<int:category_id>/<int:team_id>/",
-        views.approval_flow_detail,
-        name="approval_flow_detail"
-    ),
+    path("approval/add-line/",views.add_approve_line,name="add_approve_line"),
+    path( "approval/flow/<int:category_id>/<int:team_id>/",views.approval_flow_detail,name="approval_flow_detail"),
+    
     path("manage/users/", views.manage_user, name="manage_user"),
     
     path("tickets/delete/<int:ticket_id>/", views.delete_ticket, name="delete_ticket"),
-    path(
-    "tickets/approve/<int:ticket_id>/",
-    views.approve_ticket,
-    name="approve_ticket"
-    ),
+    path("tickets/approve/<int:ticket_id>/",views.approve_ticket,name="approve_ticket"),
+    
+    path("tickets/admin-complete/<int:ticket_id>/",views.admin_complete_ticket,name="admin_complete_ticket"),
+    path("tickets/accepting-work/", views.tickets_accepting_work, name="tickets_accepting_work"),
+    path("tickets/admin-accept/<int:ticket_id>/", views.admin_accept_work, name="admin_accept_work"),
 
-    path(
-        "tickets/admin-complete/<int:ticket_id>/",
-        views.admin_complete_ticket,
-        name="admin_complete_ticket"
-),
 ] 
