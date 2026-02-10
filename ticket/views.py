@@ -2639,14 +2639,16 @@ def approve_ticket(request, ticket_id):
     if not user:
         return redirect("login")
 
+    is_admin = (user["role_id"] == 1)
+
     approve_ticket_flow(
         ticket_id=ticket_id,
         approver_user_id=user["id"],
         remark=request.POST.get("remark", ""),
-        is_admin=(user["role_id"] == 1)   # 👈 ส่ง flag admin
+        is_admin=is_admin
     )
 
-    messages.success(request, "อนุมัติคำร้องเรียบร้อยแล้ว")
+    messages.success(request, "ดำเนินการเรียบร้อยแล้ว")
     return redirect("tickets_list")
 
 @transaction.atomic
@@ -2659,24 +2661,26 @@ def approve_ticket_flow(
 ):
     with connection.cursor() as cursor:
 
-        # ================= ADMIN OVERRIDE =================
+        # ===============================
+        # ADMIN → รับงาน (Accepting work)
+        # ===============================
         if is_admin:
-            # ทำให้ ticket เป็น In Progress (รับงาน)
             cursor.execute("""
                 UPDATE tickets.tickets
-                SET status_id = 4  -- IN_PROGRESS
+                SET status_id = 8   -- Accepting work
                 WHERE id = %s
             """, [ticket_id])
+            return
 
-            return  
-
-        # ================= APPROVER ปกติ =================
+        # ===============================
+        # USER → approve ตามสาย
+        # ===============================
         cursor.execute("""
             SELECT level
             FROM tickets.ticket_approval_status
             WHERE ticket_id = %s
               AND user_id = %s
-              AND status_id = 7   -- PENDING
+              AND status_id = 7   -- Pending
             FOR UPDATE
         """, [ticket_id, approver_user_id])
 
@@ -2689,7 +2693,7 @@ def approve_ticket_flow(
         # approve ทั้ง level
         cursor.execute("""
             UPDATE tickets.ticket_approval_status
-            SET status_id = 2,
+            SET status_id = 2,   -- Approved
                 action_time = %s,
                 remark = %s
             WHERE ticket_id = %s
@@ -2709,12 +2713,9 @@ def approve_ticket_flow(
             WHERE ticket_id = %s
               AND level = %s
               AND status_id = 6
-        """, [
-            ticket_id,
-            current_level + 1
-        ])
+        """, [ticket_id, current_level + 1])
 
-        # update ticket status
+        # ถ้ายังมี pending → In Progress
         cursor.execute("""
             SELECT 1
             FROM tickets.ticket_approval_status
@@ -2726,17 +2727,16 @@ def approve_ticket_flow(
         if cursor.fetchone():
             cursor.execute("""
                 UPDATE tickets.tickets
-                SET status_id = 4  -- IN_PROGRESS
+                SET status_id = 4   -- In Progress
                 WHERE id = %s
             """, [ticket_id])
         else:
+            # รอ Admin รับงาน
             cursor.execute("""
                 UPDATE tickets.tickets
-                SET status_id = 5  -- COMPLETED
+                SET status_id = 8   -- Accepting work
                 WHERE id = %s
-            """, [ticket_id])
-
-         
+            """, [ticket_id])      
 def get_approve_line_dict_all_flows(category_id, team_id):
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -2804,14 +2804,13 @@ def admin_complete_ticket(request, ticket_id):
 
     user = request.session.get("user")
     if not user or user["role_id"] != 1:
-        raise Exception("เฉพาะ Admin เท่านั้น")
+        raise PermissionDenied
 
     with connection.cursor() as cursor:
         cursor.execute("""
             UPDATE tickets.tickets
-            SET status_id = 5   -- COMPLETED
+            SET status_id = 5   -- Completed
             WHERE id = %s
-              AND status_id = 4
         """, [ticket_id])
 
     messages.success(request, "ปิดงานเรียบร้อยแล้ว")

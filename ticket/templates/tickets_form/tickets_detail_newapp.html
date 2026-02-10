@@ -73,15 +73,24 @@
                 {% endif %}
 
                 {# ---------- ADMIN เสร็จงาน ---------- #}
-                {% if is_admin and ticket.status_id == 4 %}
-                <form method="post" action="{% url 'admin_complete_ticket' ticket.id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-primary">
-                        ✅ ทำเสร็จแล้ว
-                    </button>
-                </form>
-                {% endif %}
+                {% if is_admin and ticket.status_id == 8 %}
+                <div class="card shadow-sm border-primary mb-4">
+                    <div class="card-body text-center">
 
+                        <div class="fw-semibold text-primary mb-2">
+                            🛠 กำลังดำเนินงาน
+                        </div>
+
+                        <form method="post" action="{% url 'admin_complete_ticket' ticket.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                ✅ ทำเสร็จแล้ว
+                            </button>
+                        </form>
+
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
         {% endif %}
