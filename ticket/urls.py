@@ -79,14 +79,12 @@ urlpatterns = [
         name="approval_flow_detail"
     ),
     path("manage/users/", views.manage_user, name="manage_user"),
-
-
-    # approve
+    
+    path("tickets/delete/<int:ticket_id>/", views.delete_ticket, name="delete_ticket"),
     path(
-        "tickets/approve/<int:ticket_id>/",
-        views.approve_ticket,
-        name="approve_ticket"
-    ),
-   path("tickets/delete/<int:ticket_id>/", views.delete_ticket, name="delete_ticket"),
+    "tickets/approve/<int:ticket_id>/",
+    views.approve_ticket,
+    name="approve_ticket",
+),
 
 ] 
