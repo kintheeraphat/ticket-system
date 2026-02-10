@@ -943,6 +943,9 @@ def dictfetchone(cursor):
     columns = [col[0] for col in cursor.description]
     return dict(zip(columns, row))
 APPROVE_PENDING = 7
+
+@login_required_custom
+@role_required_role_id([1, 2, 3])
 def tickets_detail_erp(request, ticket_id):
 
     user = request.session["user"]
@@ -956,7 +959,7 @@ def tickets_detail_erp(request, ticket_id):
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT t.id, t.title, t.description,
-                   u.username, t.create_at
+                   u.username, t.create_at ,t.status_id    
             FROM tickets.tickets t
             JOIN tickets.users u ON u.id = t.user_id
             WHERE t.id = %s
@@ -1090,7 +1093,7 @@ def tickets_detail_vpn(request, ticket_id):
             SELECT level, status_id
             FROM tickets.ticket_approval_status
             WHERE ticket_id = %s
-              AND user_id = %s
+            AND user_id = %s
             LIMIT 1
         """, [ticket_id, user_id])
 
@@ -1099,11 +1102,9 @@ def tickets_detail_vpn(request, ticket_id):
     can_approve = False
     my_level = None
 
-    # กรณีเป็น approver ตาม flow
     if approve_row:
         my_level = approve_row[0]
         can_approve = (approve_row[1] == APPROVE_PENDING)
-
     # -----------------------------
     # ADMIN OVERRIDE
     # -----------------------------
@@ -1601,8 +1602,6 @@ def active_promotion_detail(request, ticket_id):
         "files": files,
     })
 
-
-
 def adjust_form(request):
     user = request.session.get("user")
     if not user:
@@ -1625,41 +1624,8 @@ def adjust_form(request):
         }
         adj_category = CATEGORY_MAP.get(ticket_type_id, "ไม่ระบุ")
 
-        # ---------------- GET LIST ----------------
-        source_cust = request.POST.getlist("source_cust[]")
-        source_name = request.POST.getlist("source_customer_name[]")
-        promo_info = request.POST.getlist("promo_info[]")
-        earn_master = request.POST.getlist("earn_master[]")
-        amount = request.POST.getlist("amount[]")
-
-        target_cust = request.POST.getlist("target_cust[]")
-        target_name = request.POST.getlist("target_customer_name[]")
-        target_promo = request.POST.getlist("target_promo_name[]")
-        target_earn = request.POST.getlist("target_earn_master[]")
-        target_amount = request.POST.getlist("target_amount[]")
-
-        # ---------------- BUILD ITEMS ----------------
-        items = []
-        for i in range(len(source_cust)):
-            if not (amount[i] or target_amount[i]):
-                continue
-
-            items.append({
-                "source": {
-                    "cust": source_cust[i],
-                    "name": source_name[i],
-                    "promo": promo_info[i],
-                    "earn_master": earn_master[i],
-                    "amount": float(amount[i] or 0),
-                },
-                "target": {
-                    "cust": target_cust[i],
-                    "name": target_name[i],
-                    "promo": target_promo[i],
-                    "earn_master": target_earn[i],
-                    "amount": float(target_amount[i] or 0),
-                }
-            })
+        # ---------------- BUILD ITEMS (แยกฟังก์ชัน) ----------------
+        items = build_adjust_items(request)
 
         if not items:
             return render(request, "tickets_form/adjust_form.html", {
@@ -1673,16 +1639,26 @@ def adjust_form(request):
                 (title, description, user_id, status_id, ticket_type_id)
                 VALUES (%s, %s, %s, %s, %s)
                 RETURNING id
-            """, [title, description, user_id, status_id, ticket_type_id])
+            """, [
+                title,
+                description,
+                user_id,
+                status_id,
+                ticket_type_id
+            ])
             ticket_id = cursor.fetchone()[0]
 
-        # ---------------- INSERT ADJUST DATA ----------------
+        # ---------------- INSERT ADJUST DATA (JSON draft) ----------------
         with connection.cursor() as cursor:
             cursor.execute("""
-                INSERT INTO tickets.ticket_data_adjust
+                INSERT INTO tickets.ticket_adjust_draft
                 (ticket_id, adj_category, items)
                 VALUES (%s, %s, %s)
-            """, [ticket_id, adj_category, json.dumps(items)])
+            """, [
+                ticket_id,
+                adj_category,
+                json.dumps(items)
+            ])
 
         # ---------------- FILE UPLOAD ----------------
         files = request.FILES.getlist("attachments[]")
@@ -1698,7 +1674,16 @@ def adjust_form(request):
             with connection.cursor() as cursor:
                 cursor.execute("""
                     INSERT INTO tickets.ticket_files
-                    (ticket_id, ref_type, file_name, file_path, file_type, file_size, uploaded_by, create_at)
+                    (
+                        ticket_id,
+                        ref_type,
+                        file_name,
+                        file_path,
+                        file_type,
+                        file_size,
+                        uploaded_by,
+                        create_at
+                    )
                     VALUES (%s,'ADJUST',%s,%s,%s,%s,%s,%s)
                 """, [
                     ticket_id,
@@ -1709,13 +1694,56 @@ def adjust_form(request):
                     user_id,
                     timezone.now()
                 ])
-                create_ticket_approval_by_ticket_type(
-    ticket_id=ticket_id,
-    ticket_type_id=ticket_type_id,
-    requester_user_id=user_id
-)
+
+        # ---------------- CREATE APPROVAL FLOW ----------------
+        create_ticket_approval_by_ticket_type(
+            ticket_id=ticket_id,
+            ticket_type_id=ticket_type_id,
+            requester_user_id=user_id
+        )
+
         return redirect("ticket_success")
+
     return render(request, "tickets_form/adjust_form.html")
+
+
+def build_adjust_items(request):
+    source_cust = request.POST.getlist("source_cust[]")
+    source_name = request.POST.getlist("source_customer_name[]")
+    promo_info = request.POST.getlist("promo_info[]")
+    earn_master = request.POST.getlist("earn_master[]")
+    amount = request.POST.getlist("amount[]")
+
+    target_cust = request.POST.getlist("target_cust[]")
+    target_name = request.POST.getlist("target_customer_name[]")
+    target_promo = request.POST.getlist("target_promo_name[]")
+    target_earn = request.POST.getlist("target_earn_master[]")
+    target_amount = request.POST.getlist("target_amount[]")
+
+    items = []
+
+    for i in range(len(source_cust)):
+        if not (amount[i] or target_amount[i]):
+            continue
+
+        items.append({
+            "source": {
+                "cust": source_cust[i],
+                "name": source_name[i],
+                "promo": promo_info[i],
+                "earn_master": earn_master[i],
+                "amount": float(amount[i] or 0),
+            },
+            "target": {
+                "cust": target_cust[i],
+                "name": target_name[i],
+                "promo": target_promo[i],
+                "earn_master": target_earn[i],
+                "amount": float(target_amount[i] or 0),
+            }
+        })
+
+    return items
 
 def app_form(request):
     # =========================
@@ -2505,54 +2533,80 @@ def delete_ticket(request, ticket_id):
             """, [ticket_id, user_id])
 
     messages.success(request, "ลบคำร้องเรียบร้อยแล้ว")
-    return redirect("manage_user")
+    return redirect("tickets_list")
 
 def create_ticket_approval_by_ticket_type(
+    *,
     ticket_id: int,
     ticket_type_id: int,
     requester_user_id: int
 ):
-    """
-    สร้างรายการอนุมัติสำหรับ ticket ตามประเภท ticket
-    """
     with connection.cursor() as cursor:
-        # ดึงข้อมูล category_id และ team_id ของ ticket_type
+
+        # 1) category จาก ticket_type
         cursor.execute("""
-            SELECT category_id, team_id
+            SELECT category
             FROM tickets.ticket_type
             WHERE id = %s
         """, [ticket_type_id])
         row = cursor.fetchone()
         if not row:
-            return  # ไม่พบ ticket_type
+            raise Exception("ไม่พบ ticket_type")
+        category_id = row[0]
 
-        category_id, team_id = row
-
-        # ดึง approve_line ตาม category_id และ team_id
+        # 2) team ของ requester
         cursor.execute("""
-            SELECT flow_no, level, user_id
+            SELECT tm.team_id
+            FROM tickets.team_members tm
+            JOIN tickets.approve_line al
+              ON al.team_id = tm.team_id
+             AND al.category_id = %s
+            WHERE tm.user_id = %s
+            LIMIT 1
+        """, [category_id, requester_user_id])
+        team_row = cursor.fetchone()
+        if not team_row:
+            raise Exception("ไม่พบ team สำหรับสายอนุมัติ")
+        team_id = team_row[0]
+
+        # 3) หา level แรก
+        cursor.execute("""
+            SELECT MIN(level)
             FROM tickets.approve_line
             WHERE category_id = %s
               AND team_id = %s
-            ORDER BY flow_no, level
         """, [category_id, team_id])
+        first_level = cursor.fetchone()[0]
 
-        approve_lines = dictfetchall(cursor)
-
-        # สร้างรายการ ticket_approvals
-        for line in approve_lines:
-            cursor.execute("""
-                INSERT INTO tickets.ticket_approvals
-                (ticket_id, flow_no, level, approver_user_id, status_id, create_at)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, [
+        # 4) INSERT ทุกคน ทุก level
+        cursor.execute("""
+            INSERT INTO tickets.ticket_approval_status
+            (
                 ticket_id,
-                line["flow_no"],
-                line["level"],
-                line["user_id"],
-                1,  # Waiting
-                timezone.now()
-            ])
+                approve_line_id,
+                level,
+                user_id,
+                status_id
+            )
+            SELECT
+                %s,
+                al.id,
+                al.level,
+                al.user_id,
+                CASE
+                    WHEN al.level = %s THEN 7   -- ทุกคนใน level แรก = PENDING
+                    ELSE 6                      -- level อื่น = WAITING
+                END
+            FROM tickets.approve_line al
+            WHERE al.category_id = %s
+              AND al.team_id = %s
+            ORDER BY al.level
+        """, [
+            ticket_id,
+            first_level,
+            category_id,
+            team_id
+        ])
 
 def get_approve_line_dict_all_flows(category_id, team_id):
     with connection.cursor() as cursor:
@@ -2578,84 +2632,187 @@ def get_approve_line_dict_all_flows(category_id, team_id):
         flow_dict[flow_no][level] = user_id
 
     return flow_dict
-
+@require_POST
 def approve_ticket(request, ticket_id):
 
     user = request.session.get("user")
     if not user:
         return redirect("login")
 
-    user_id = user["id"]
+    approve_ticket_flow(
+        ticket_id=ticket_id,
+        approver_user_id=user["id"],
+        remark=request.POST.get("remark", ""),
+        is_admin=(user["role_id"] == 1)   # 👈 ส่ง flag admin
+    )
 
-    if request.method == "POST":
-        remark = request.POST.get("remark", "").strip()
-        approve_ticket_flow(ticket_id=ticket_id, approver_user_id=user_id, remark=remark)
-        messages.success(request, "อนุมัติคำร้องเรียบร้อยแล้ว")
-        return redirect("manage_user")
+    messages.success(request, "อนุมัติคำร้องเรียบร้อยแล้ว")
+    return redirect("tickets_list")
 
-    return render(request, "approve_ticket.html", {
-        "ticket_id": ticket_id
-    })
-
-def approve_ticket_flow(ticket_id: int, approver_user_id: int, remark: str = ""):
-    """
-    ดำเนินการอนุมัติ ticket flow
-    """
+@transaction.atomic
+def approve_ticket_flow(
+    *,
+    ticket_id: int,
+    approver_user_id: int,
+    remark: str = "",
+    is_admin: bool = False
+):
     with connection.cursor() as cursor:
-        # หา ticket_approval ที่รออนุมัติจาก approver_user_id
+
+        # ================= ADMIN OVERRIDE =================
+        if is_admin:
+            # ทำให้ ticket เป็น In Progress (รับงาน)
+            cursor.execute("""
+                UPDATE tickets.tickets
+                SET status_id = 4  -- IN_PROGRESS
+                WHERE id = %s
+            """, [ticket_id])
+
+            return  
+
+        # ================= APPROVER ปกติ =================
         cursor.execute("""
-            SELECT id, flow_no, level
-            FROM tickets.ticket_approvals
+            SELECT level
+            FROM tickets.ticket_approval_status
             WHERE ticket_id = %s
-              AND approver_user_id = %s
-              AND status_id = 1  -- Waiting
-            ORDER BY flow_no, level
-            LIMIT 1
+              AND user_id = %s
+              AND status_id = 7   -- PENDING
+            FOR UPDATE
         """, [ticket_id, approver_user_id])
 
         row = cursor.fetchone()
         if not row:
-            return  # ไม่มีรายการรออนุมัติสำหรับผู้ใช้นี้
+            raise Exception("คุณไม่มีสิทธิ์อนุมัติ")
 
-        ticket_approval_id, flow_no, level = row
+        current_level = row[0]
 
-        # อนุมัติรายการนี้
+        # approve ทั้ง level
         cursor.execute("""
-            UPDATE tickets.ticket_approvals
-            SET status_id = 2,  -- Approved
-                remark = %s,
-                approved_at = %s
-            WHERE id = %s
-        """, [remark, timezone.now(), ticket_approval_id])
-
-        # ตรวจสอบว่ามีรายการถัดไปใน flow หรือไม่
-        cursor.execute("""
-            SELECT COUNT(*)
-            FROM tickets.ticket_approvals
+            UPDATE tickets.ticket_approval_status
+            SET status_id = 2,
+                action_time = %s,
+                remark = %s
             WHERE ticket_id = %s
-              AND flow_no = %s
-              AND level = %s + 1
-              AND status_id = 1  -- Waiting
-        """, [ticket_id, flow_no, level])
+              AND level = %s
+              AND status_id = 7
+        """, [
+            timezone.now(),
+            remark,
+            ticket_id,
+            current_level
+        ])
 
-        count_next = cursor.fetchone()[0]
+        # เปิด level ถัดไป
+        cursor.execute("""
+            UPDATE tickets.ticket_approval_status
+            SET status_id = 7
+            WHERE ticket_id = %s
+              AND level = %s
+              AND status_id = 6
+        """, [
+            ticket_id,
+            current_level + 1
+        ])
 
-        if count_next == 0:
-            # ถ้าไม่มีรายการถัดไปใน flow นี้ ให้ตรวจสอบ flow ถัดไป
+        # update ticket status
+        cursor.execute("""
+            SELECT 1
+            FROM tickets.ticket_approval_status
+            WHERE ticket_id = %s
+              AND status_id = 7
+            LIMIT 1
+        """, [ticket_id])
+
+        if cursor.fetchone():
             cursor.execute("""
-                SELECT COUNT(*)
-                FROM tickets.ticket_approvals
-                WHERE ticket_id = %s
-                  AND flow_no = %s + 1
-                  AND status_id = 1  -- Waiting
-            """, [ticket_id, flow_no])
+                UPDATE tickets.tickets
+                SET status_id = 4  -- IN_PROGRESS
+                WHERE id = %s
+            """, [ticket_id])
+        else:
+            cursor.execute("""
+                UPDATE tickets.tickets
+                SET status_id = 5  -- COMPLETED
+                WHERE id = %s
+            """, [ticket_id])
 
-            count_next_flow = cursor.fetchone()[0]
+         
+def get_approve_line_dict_all_flows(category_id, team_id):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT level, user_id
+            FROM tickets.approve_line
+            WHERE category_id = %s
+              AND team_id = %s
+            ORDER BY level
+        """, [category_id, team_id])
 
-            if count_next_flow == 0:
-                # ถ้าไม่มี flow ถัดไปแล้ว ให้เปลี่ยนสถานะ ticket เป็น Approved ทั้งหมด
-                cursor.execute("""
-                    UPDATE tickets.tickets
-                    SET status_id = 3  -- Approved
-                    WHERE id = %s
-                """, [ticket_id])
+        rows = cursor.fetchall()
+
+    result = {}
+    for level, user_id in rows:
+        result.setdefault(level, []).append(user_id)
+
+    return result
+
+def can_user_approve_ticket(ticket_id, user_id):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT level
+            FROM tickets.ticket_approval_status
+            WHERE ticket_id = %s
+              AND user_id = %s
+              AND status_id = 7  -- PENDING
+            LIMIT 1
+        """, [ticket_id, user_id])
+
+        row = cursor.fetchone()
+
+    if row:
+        return True, row[0]
+
+    return False, None
+
+@require_POST
+def admin_accept_work(request, ticket_id):
+    user = request.session.get("user")
+    if not user or user["role_id"] != 1:
+        return redirect("login")
+
+    messages.success(request, "รับงานเรียบร้อยแล้ว")
+    return redirect("tickets_list")
+
+@require_POST
+def admin_complete_ticket(request, ticket_id):
+    user = request.session.get("user")
+    if not user or user["role_id"] != 1:
+        return redirect("login")
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            UPDATE tickets.tickets
+            SET status_id = 5   -- Completed
+            WHERE id = %s
+              AND status_id = 4
+        """, [ticket_id])
+
+    messages.success(request, "งานเสร็จสมบูรณ์แล้ว")
+    return redirect("tickets_list")
+
+@require_POST
+def admin_complete_ticket(request, ticket_id):
+
+    user = request.session.get("user")
+    if not user or user["role_id"] != 1:
+        raise Exception("เฉพาะ Admin เท่านั้น")
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            UPDATE tickets.tickets
+            SET status_id = 5   -- COMPLETED
+            WHERE id = %s
+              AND status_id = 4
+        """, [ticket_id])
+
+    messages.success(request, "ปิดงานเรียบร้อยแล้ว")
+    return redirect("tickets_list")

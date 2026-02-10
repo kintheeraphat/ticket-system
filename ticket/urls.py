@@ -84,7 +84,12 @@ urlpatterns = [
     path(
     "tickets/approve/<int:ticket_id>/",
     views.approve_ticket,
-    name="approve_ticket",
-),
+    name="approve_ticket"
+    ),
 
+    path(
+        "tickets/admin-complete/<int:ticket_id>/",
+        views.admin_complete_ticket,
+        name="admin_complete_ticket"
+),
 ] 

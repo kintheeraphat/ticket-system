@@ -54,76 +54,56 @@
             </div>
         </div>
 
-        <!-- ================= APPROVE SECTION ================= -->
-        {% if can_approve %}
-        <div class="card shadow-sm border-success mb-4">
-            <div class="card-body">
-
-                <div class="fw-semibold text-success mb-2">
-                    คุณอยู่ในสายอนุมัติ (Level {{ my_level }})
-                </div>
-
-                <form method="post" action="{% url 'approve_ticket' ticket.id %}">
-                    {% csrf_token %}
-
-                    <div class="mb-3">
-                        <label class="form-label">หมายเหตุ (ถ้ามี)</label>
-                        <textarea name="remark" class="form-control" rows="2"></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-success">
-                        ✅ Approve
-                    </button>
-                </form>
-
-            </div>
-        </div>
-        {% endif %}
+        {# ================= APPROVE SECTION ================= #}
         {% if can_approve or is_admin %}
         <div class="card shadow-sm border-success mb-4">
             <div class="card-body">
 
+                {# ---------- INFO ---------- #}
                 {% if is_admin %}
                 <div class="fw-semibold text-danger mb-2">
-                    ⚠ Admin Override Approval
+                    ⚠ สิทธิ์ Admin
                 </div>
                 {% else %}
                 <div class="fw-semibold text-success mb-2">
-                    คุณอยู่ในสายอนุมัติ (Level {{ my_level }})
+                    คุณสามารถอนุมัติได้ (Level {{ my_level }})
                 </div>
                 {% endif %}
 
-                <form method="post" action="{% url 'approve_ticket' ticket.id %}">
+                {# ---------- APPROVE ตามสาย ---------- #}
+                {% if can_approve %}
+                <form method="post" action="{% url 'approve_ticket' ticket.id %}" class="mb-2">
                     {% csrf_token %}
-
-                    <div class="mb-3">
-                        <textarea name="remark" class="form-control" rows="2" placeholder="หมายเหตุ (ถ้ามี)"></textarea>
-                    </div>
-
-                    {% if is_admin %}
-                    <input type="hidden" name="admin_override" value="1">
-                    {% endif %}
-
-                    <button type="submit" class="btn {% if is_admin %}btn-danger{% else %}btn-success{% endif %}">
-                        {% if is_admin %}
-                        🚀 Admin Approve
-                        {% else %}
+                    <textarea name="remark" class="form-control mb-2" rows="2"
+                        placeholder="หมายเหตุ (ถ้ามี)"></textarea>
+                    <button type="submit" class="btn btn-success">
                         ✅ Approve
-                        {% endif %}
                     </button>
                 </form>
+                {% endif %}
+
+                {# ---------- ADMIN รับงาน ---------- #}
+                {% if is_admin and ticket.status_id != 4 and ticket.status_id != 5 %}
+                <form method="post" action="{% url 'approve_ticket' ticket.id %}" class="mb-2">
+                    {% csrf_token %}
+                    <input type="hidden" name="admin_override" value="1">
+                    <button type="submit" class="btn btn-danger">
+                        🚀 Admin รับงาน
+                    </button>
+                </form>
+                {% endif %}
+
+                {# ---------- ADMIN เสร็จงาน ---------- #}
+                {% if is_admin and ticket.status_id == 4 %}
+                <form method="post" action="{% url 'admin_complete_ticket' ticket.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">
+                        ✅ ทำเสร็จแล้ว
+                    </button>
+                </form>
+                {% endif %}
 
             </div>
         </div>
         {% endif %}
-        <!-- BACK -->
-        <div class="mt-4">
-            <a href="{% url 'tickets_list' %}" class="btn btn-secondary">
-                ← กลับหน้ารายการ
-            </a>
-        </div>
-
-    </div>
-
-</main>
-{% endblock %}
+        {%endblock %}
