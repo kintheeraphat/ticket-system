@@ -35,7 +35,18 @@
         </p>
     </div>
 </div>
-
+<!-- ================= FILTER BAR ================= -->
+<div class="row mb-3">
+    <div class="col-md-4">
+        <select id="statusFilter" class="form-select form-select-sm">
+            <option value="">ทุกสถานะ</option>
+            <option value="Waiting for Approve">Waiting for Approve</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+            <option value="Accepting work">Accepting work</option>
+        </select>
+    </div>
+</div>
 <!-- ================= TABLE ================= -->
 <div class="dashboard-table overflow-hidden">
     <div class="table-responsive">
@@ -214,6 +225,11 @@
             pageLength: 10,
             order: [[4, 'desc']],
             language: { zeroRecords: "ไม่พบข้อมูล" }
+        });
+
+        // filter ตาม status (column index 5)
+        $('#statusFilter').on('change', function () {
+            table.column(5).search(this.value).draw();
         });
 
         $('#ticketTable tbody').on('click', 'tr', function (e) {
