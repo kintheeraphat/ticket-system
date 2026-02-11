@@ -288,21 +288,71 @@ def manage_user(request):
             role_id = request.POST.get("role_id")
             is_active = request.POST.get("is_active") == "1"
 
+            # -----------------------------
+            # 1️⃣ ตรวจสอบกรอก username
+            # -----------------------------
             if not erp_username:
                 messages.error(request, "กรุณาระบุ ERP Username")
                 return redirect("manage_user")
 
+            # -----------------------------
+            # 2️⃣ เรียก ERP
+            # -----------------------------
             erp_data = call_erp_user_info(erp_username)
+
             if not erp_data:
                 messages.error(request, "ไม่พบผู้ใช้งานใน ERP")
                 return redirect("manage_user")
 
+            # -----------------------------
+            # 3️⃣ เช็ค ERP ส่ง login กลับมาหรือไม่
+            # -----------------------------
+            erp_login = erp_data.get("login")
+
+            if not erp_login:
+                messages.error(request, "ERP ไม่ส่งข้อมูล Username กลับมา")
+                return redirect("manage_user")
+
+            # -----------------------------
+            # 4️⃣ เช็ค username ตรงกับ ERP จริงไหม
+            # -----------------------------
+            if erp_login.lower().strip() != erp_username.lower().strip():
+                messages.error(
+                    request,
+                    f"Username ไม่ตรงกับ ERP (ERP = {erp_login})"
+                )
+                return redirect("manage_user")
+
+            # -----------------------------
+            # 5️⃣ ตรวจสอบซ้ำในระบบ
+            # -----------------------------
             with connection.cursor() as cursor:
 
-                # =====================
-                # UPSERT DEPARTMENT
-                # =====================
+                # ซ้ำด้วย username
+                cursor.execute("""
+                    SELECT id FROM tickets.users
+                    WHERE LOWER(username) = LOWER(%s)
+                """, [erp_login])
+
+                if cursor.fetchone():
+                    messages.error(request, "Username นี้มีอยู่ในระบบแล้ว")
+                    return redirect("manage_user")
+
+                # ซ้ำด้วย erp_user_id
+                cursor.execute("""
+                    SELECT id FROM tickets.users
+                    WHERE erp_user_id = %s
+                """, [erp_data["user_id"]])
+
+                if cursor.fetchone():
+                    messages.error(request, "ผู้ใช้งาน ERP นี้ถูกเพิ่มไว้แล้ว")
+                    return redirect("manage_user")
+
+                # -----------------------------
+                # 6️⃣ UPSERT DEPARTMENT
+                # -----------------------------
                 if erp_data.get("department_id"):
+
                     cursor.execute("""
                         SELECT id
                         FROM tickets.department
@@ -318,26 +368,18 @@ def manage_user(request):
                             erp_data.get("department_name")
                         ])
 
-                # =====================
-                # UPSERT USER
-                # =====================
+                # -----------------------------
+                # 7️⃣ INSERT USER
+                # -----------------------------
                 cursor.execute("""
                     INSERT INTO tickets.users
                         (erp_user_id, username, full_name,
-                         role_id, is_active, department_id)
+                        role_id, is_active, department_id)
                     VALUES (%s, %s, %s, %s, %s, %s)
-                    ON CONFLICT (erp_user_id)
-                    DO UPDATE SET
-                        username       = EXCLUDED.username,
-                        full_name     = EXCLUDED.full_name,
-                        role_id       = EXCLUDED.role_id,
-                        is_active     = EXCLUDED.is_active,
-                        department_id = EXCLUDED.department_id,
-                        updated_at    = NOW()
                 """, [
                     erp_data["user_id"],
-                    erp_data["login"],
-                    erp_data["name"],
+                    erp_login,
+                    erp_data.get("name"),
                     role_id,
                     is_active,
                     erp_data.get("department_id")
@@ -345,6 +387,7 @@ def manage_user(request):
 
             messages.success(request, "เพิ่มผู้ใช้งานจาก ERP เรียบร้อยแล้ว")
             return redirect("manage_user")
+
 
         # ==================================================
         # UPDATE USER (ROLE / ACTIVE)
