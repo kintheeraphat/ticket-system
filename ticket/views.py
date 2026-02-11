@@ -17,6 +17,7 @@ from functools import wraps
 from django.http import HttpResponseForbidden
 from django.views.decorators.http import require_POST
 from ticket.services.erp import call_erp_user_info
+from ticket.page_permission import page_permission_required
 
 ERP_API_URL = "http://172.17.1.55:8111/erpAuth/"
 
@@ -467,7 +468,7 @@ def logout_view(request):
     request.session.flush()
     return redirect("login")    
 
-
+@page_permission_required
 @login_required_custom
 @role_required_role_id([1, 2])  
 def dashboard(request):
@@ -579,6 +580,7 @@ def dashboard(request):
 
     return render(request, "dashboard.html", context)
 
+@page_permission_required
 @login_required_custom
 @role_required_role_id([1, 2, 3])
 def tickets_list(request):
@@ -748,7 +750,7 @@ def tickets_list(request):
         }
     )
 
-
+@page_permission_required
 @login_required_custom
 @role_required_role_id([1, 2, 3])  
 def tickets_create(req):
@@ -876,6 +878,8 @@ def erp_perm(request):
         return redirect("ticket_success")
        
     return render(request, "tickets_form/erp_perm.html")
+
+@page_permission_required
 @login_required_custom
 @role_required_role_id([3])  
 def my_tickets(request):
@@ -895,6 +899,7 @@ def my_tickets(request):
         "tickets": rows
     })
 
+@page_permission_required
 def vpn(request):
     if request.method == "POST":
 
@@ -1001,8 +1006,10 @@ def vpn(request):
 
     return render(request, "tickets_form/vpn.html")
 
+@page_permission_required
 def borrows(req):
     return render(req,'tickets_form/borrows.html')
+
 
 def dictfetchone(cursor):
     row = cursor.fetchone()
@@ -1011,7 +1018,9 @@ def dictfetchone(cursor):
     columns = [col[0] for col in cursor.description]
     return dict(zip(columns, row))
 
+
 APPROVE_PENDING = 7
+@page_permission_required
 @login_required_custom
 @role_required_role_id([1, 2, 3])
 def tickets_detail_erp(request, ticket_id):
@@ -1124,6 +1133,8 @@ def tickets_detail_erp(request, ticket_id):
             "has_pending_approve": has_pending_approve,
         }
     )
+    
+@page_permission_required
 @login_required_custom
 @role_required_role_id([1, 2, 3])
 def tickets_detail_vpn(request, ticket_id):
@@ -1230,6 +1241,8 @@ def tickets_detail_vpn(request, ticket_id):
             "is_admin": is_admin,
         }
     )
+    
+@page_permission_required
 @login_required_custom
 @role_required_role_id([1, 2, 3])
 def tickets_detail_repairs(request, ticket_id):
@@ -1331,6 +1344,8 @@ def tickets_detail_repairs(request, ticket_id):
             "is_admin": is_admin,
         }
     )
+    
+@page_permission_required
 @login_required_custom
 @role_required_role_id([1, 2, 3])
 def tickets_detail_report(request, ticket_id):
@@ -1437,6 +1452,7 @@ def tickets_detail_report(request, ticket_id):
         }
     )
 
+@page_permission_required
 @login_required_custom
 @role_required_role_id([1, 2, 3])
 def tickets_detail_newapp(request, ticket_id):
@@ -1537,6 +1553,7 @@ def tickets_detail_newapp(request, ticket_id):
     )
     
     
+@page_permission_required
 def repairs_form(request):
     if request.method == "POST":
 
@@ -1632,6 +1649,7 @@ def repairs_form(request):
         return redirect("ticket_success")
     return render(request, "tickets_form/repairs_form.html")
 
+@page_permission_required
 def active_promotion_detail(request, ticket_id):
 
     with connection.cursor() as cursor:
@@ -1699,6 +1717,7 @@ def active_promotion_detail(request, ticket_id):
         "files": files,
     })
 
+@page_permission_required
 def adjust_form(request):
     user = request.session.get("user")
     if not user:
@@ -1803,7 +1822,7 @@ def adjust_form(request):
 
     return render(request, "tickets_form/adjust_form.html")
 
-
+@page_permission_required
 def build_adjust_items(request):
     source_cust = request.POST.getlist("source_cust[]")
     source_name = request.POST.getlist("source_customer_name[]")
@@ -1842,6 +1861,7 @@ def build_adjust_items(request):
 
     return items
 
+@page_permission_required
 def app_form(request):
     # =========================
     # CHECK LOGIN
@@ -1975,6 +1995,8 @@ def app_form(request):
     # =========================
     return render(request, "tickets_form/app_form.html")
 
+
+@page_permission_required
 def report_form(request):
 
     # =========================
@@ -2075,8 +2097,10 @@ def report_form(request):
     # =========================
     return render(request, "tickets_form/report_form.html")
 
-def active_promotion_form(request):
 
+@page_permission_required
+def active_promotion_form(request):
+    
     if "user" not in request.session:
         return redirect("login")
 
@@ -2163,7 +2187,7 @@ def dictfetchall(cursor):
     return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 
-
+@page_permission_required
 def setting_team(request):
 
     user = request.session.get("user")
@@ -2330,7 +2354,8 @@ def setting_team(request):
         "departments": departments,
         "teams": teams
     })
-
+    
+@page_permission_required
 def team_adduser(request, team_id):
 
     with connection.cursor() as cursor:
@@ -2411,6 +2436,7 @@ def team_adduser(request, team_id):
         "users": users
     })
 
+@page_permission_required
 def team_removeuser(request, team_id, member_id):
 
     with connection.cursor() as cursor:
@@ -2571,7 +2597,7 @@ def add_approve_line(request):
         "category_filters": category_filters,
     })
 
-    
+@page_permission_required
 def approval_flow_detail(request, category_id, team_id):
 
     with connection.cursor() as cursor:
@@ -2604,6 +2630,7 @@ def approval_flow_detail(request, category_id, team_id):
         "team_id": team_id,
     })
 
+@page_permission_required
 def delete_ticket(request, ticket_id):
 
     user = request.session.get("user")
@@ -2729,6 +2756,7 @@ def get_approve_line_dict_all_flows(category_id, team_id):
         flow_dict[flow_no][level] = user_id
 
     return flow_dict
+
 @require_POST
 def approve_ticket(request, ticket_id):
 
@@ -2898,6 +2926,7 @@ def admin_complete_ticket(request, ticket_id):
     return redirect("tickets_list")
 
 #--------------หน้างานที่รับไปแล้ว--------------
+@page_permission_required
 @login_required_custom
 @role_required_role_id([1])  # admin เท่านั้น
 def tickets_accepting_work(request):
@@ -2930,3 +2959,45 @@ def tickets_accepting_work(request):
             "tickets": tickets
         }
     )
+#--------------การจัดโมดูลสิทธิ์การดูหน้าและปุ่ม--------------
+@page_permission_required
+def get_module_permission(role_id: int, module_name: str):
+    """
+    ดึงสิทธิ์ของ role ต่อ module
+    """
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                mp.can_view,
+                mp.can_create,
+                mp.can_edit,
+                mp.can_delete,
+                mp.can_approve
+            FROM tickets.module_permission mp
+            JOIN tickets.module m ON m.id = mp.module_id
+            WHERE mp.role_id = %s
+              AND m.module_name = %s
+            LIMIT 1
+        """, [role_id, module_name])
+
+        row = cursor.fetchone()
+
+    if not row:
+        return None
+
+    return {
+        "can_view": row[0],
+        "can_create": row[1],
+        "can_edit": row[2],
+        "can_delete": row[3],
+        "can_approve": row[4],
+    }
+
+
+def has_permission(role_id: int, module_name: str, action: str):
+    perm = get_module_permission(role_id, module_name)
+
+    if not perm:
+        return False
+
+    return perm.get(action, False)
