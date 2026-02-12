@@ -1,16 +1,13 @@
 {% extends "base.html" %}
-{% load tz %}
 {% block title %}จัดการสิทธิ์ผู้ใช้งาน{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
 
-    <!-- ===== HEADER ===== -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="fw-bold">จัดการสิทธิ์ผู้ใช้งาน</h4>
     </div>
 
-    <!-- ===== MESSAGE ===== -->
     {% if messages %}
         {% for message in messages %}
             <div class="alert alert-success alert-dismissible fade show">
@@ -24,11 +21,14 @@
     <div class="card shadow-sm mb-4">
         <div class="card-body">
 
-            <form method="get">
+            <form method="get" id="userForm">
                 <div class="row align-items-end">
                     <div class="col-md-4">
                         <label class="form-label fw-semibold">เลือก User</label>
-                        <select name="user_id" class="form-select" required>
+                        <select name="user_id"
+                                class="form-select"
+                                onchange="document.getElementById('userForm').submit();"
+                                required>
                             <option value="">-- เลือก User --</option>
                             {% for user in users %}
                                 <option value="{{ user.id }}"
@@ -38,12 +38,6 @@
                             {% endfor %}
                         </select>
                     </div>
-
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary">
-                            แสดงสิทธิ์
-                        </button>
-                    </div>
                 </div>
             </form>
 
@@ -52,31 +46,47 @@
 
     {% if selected_user_id %}
 
+    <!-- ================= SEARCH + SELECT ALL ================= -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-body d-flex justify-content-between align-items-center">
+
+            <input type="text"
+                   id="permissionSearch"
+                   class="form-control w-50"
+                   placeholder="ค้นหา Permission (ID / Code / URL Name)"
+                   onkeyup="filterPermissions()">
+
+            <div>
+                <button type="button"
+                        class="btn btn-sm btn-outline-primary"
+                        onclick="selectAllVisible()">
+                    เลือกทั้งหมด
+                </button>
+
+                <button type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        onclick="clearAllVisible()">
+                    ยกเลิกทั้งหมด
+                </button>
+            </div>
+
+        </div>
+    </div>
+
     <!-- ================= PERMISSION MATRIX ================= -->
     <div class="card shadow-sm">
         <div class="card-body">
-
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="fw-bold mb-0">กำหนดสิทธิ์ (เลือกได้หลายรายการ)</h6>
-
-                <div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAll()">
-                        เลือกทั้งหมด
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearAll()">
-                        ยกเลิกทั้งหมด
-                    </button>
-                </div>
-            </div>
 
             <form method="post">
                 {% csrf_token %}
                 <input type="hidden" name="user_id" value="{{ selected_user_id }}">
 
-                <div class="row">
+                <div class="row" id="permissionContainer">
 
                     {% for perm in permissions %}
-                    <div class="col-md-4 col-lg-3 mb-3">
+                    <div class="col-md-4 col-lg-3 mb-3 permission-item"
+                         data-search="{{ perm.id }} {{ perm.code|lower }} {{ perm.url_name|lower }}">
+
                         <div class="card border h-100">
                             <div class="card-body p-3">
 
@@ -90,7 +100,7 @@
 
                                     <label class="form-check-label w-100" for="perm{{ perm.id }}">
                                         <div class="fw-semibold">
-                                            {{ perm.code }}
+                                            ID: {{ perm.id }} | {{ perm.code }}
                                         </div>
                                         <small class="text-muted d-block">
                                             {{ perm.url_name }}
@@ -103,6 +113,7 @@
 
                             </div>
                         </div>
+
                     </div>
                     {% endfor %}
 
@@ -123,15 +134,41 @@
 
 </div>
 
-<!-- ===== SCRIPT ===== -->
+<!-- ================= SCRIPT ================= -->
 <script>
-function selectAll() {
-    document.querySelectorAll('.permission-checkbox').forEach(cb => cb.checked = true);
+
+function filterPermissions() {
+    let input = document.getElementById("permissionSearch").value.toLowerCase();
+    let items = document.querySelectorAll(".permission-item");
+
+    items.forEach(function(item) {
+        let text = item.getAttribute("data-search");
+        if (text.includes(input)) {
+            item.style.display = "";
+        } else {
+            item.style.display = "none";
+        }
+    });
 }
 
-function clearAll() {
-    document.querySelectorAll('.permission-checkbox').forEach(cb => cb.checked = false);
+// เลือกทั้งหมดเฉพาะที่มองเห็น
+function selectAllVisible() {
+    document.querySelectorAll(".permission-item").forEach(function(item) {
+        if (item.style.display !== "none") {
+            item.querySelector(".permission-checkbox").checked = true;
+        }
+    });
 }
+
+// ยกเลิกทั้งหมดเฉพาะที่มองเห็น
+function clearAllVisible() {
+    document.querySelectorAll(".permission-item").forEach(function(item) {
+        if (item.style.display !== "none") {
+            item.querySelector(".permission-checkbox").checked = false;
+        }
+    });
+}
+
 </script>
 
 {% endblock %}
