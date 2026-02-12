@@ -72,14 +72,14 @@
         </a>
       </li>
       {% endif %}
-      {% if request.session.user.role_id == 1 %}
+      {% comment %} {% if request.session.user.role_id == 1 %}
       <li>
         <a href="{% url 'manage_permission' %}">
           <i class="fa-solid fa-user-shield"></i>
           <span>manege_permission</span>
         </a>
       </li>
-      {% endif %}
+      {% endif %} {% endcomment %}
 
 
     <!-- ================= USER + ADMIN ================= -->

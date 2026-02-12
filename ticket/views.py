@@ -468,7 +468,7 @@ def logout_view(request):
     request.session.flush()
     return redirect("login")    
 
-@page_permission_required
+# @page_permission_required
 @login_required_custom
 @role_required_role_id([1, 2])  
 def dashboard(request):
@@ -580,7 +580,7 @@ def dashboard(request):
 
     return render(request, "dashboard.html", context)
 
-@page_permission_required
+# @page_permission_required
 @login_required_custom
 @role_required_role_id([1, 2, 3])
 def tickets_list(request):
@@ -607,7 +607,7 @@ def tickets_list(request):
 
             -- คนที่มีสิทธิ์กด approve ตอนนี้ (status_id = 7)
             (
-                SELECT STRING_AGG(u2.full_name, ', ')
+                SELECT STRING_AGG(DISTINCT u2.full_name, ', ')
                 FROM tickets.ticket_approval_status tas2
                 JOIN tickets.users u2 ON u2.id = tas2.user_id
                 WHERE tas2.ticket_id = t.id
@@ -757,7 +757,7 @@ def tickets_list(request):
         }
     )
 
-@page_permission_required
+# @page_permission_required
 @login_required_custom
 @role_required_role_id([1, 2, 3])  
 def tickets_create(req):
@@ -886,7 +886,7 @@ def erp_perm(request):
        
     return render(request, "tickets_form/erp_perm.html")
 
-@page_permission_required
+# @page_permission_required
 @login_required_custom
 @role_required_role_id([3])  
 def my_tickets(request):
@@ -906,7 +906,7 @@ def my_tickets(request):
         "tickets": rows
     })
 
-@page_permission_required
+# @page_permission_required
 def vpn(request):
     if request.method == "POST":
 
@@ -1013,7 +1013,7 @@ def vpn(request):
 
     return render(request, "tickets_form/vpn.html")
 
-@page_permission_required
+# @page_permission_required
 def borrows(req):
     return render(req,'tickets_form/borrows.html')
 
@@ -1027,7 +1027,7 @@ def dictfetchone(cursor):
 
 
 APPROVE_PENDING = 7
-@page_permission_required
+# @page_permission_required
 @login_required_custom
 @role_required_role_id([1, 2, 3])
 def tickets_detail_erp(request, ticket_id):
@@ -1141,7 +1141,7 @@ def tickets_detail_erp(request, ticket_id):
         }
     )
     
-@page_permission_required
+# @page_permission_required
 @login_required_custom
 @role_required_role_id([1, 2, 3])
 def tickets_detail_vpn(request, ticket_id):
@@ -1249,7 +1249,7 @@ def tickets_detail_vpn(request, ticket_id):
         }
     )
     
-@page_permission_required
+# @page_permission_required
 @login_required_custom
 @role_required_role_id([1, 2, 3])
 def tickets_detail_repairs(request, ticket_id):
@@ -1352,7 +1352,7 @@ def tickets_detail_repairs(request, ticket_id):
         }
     )
     
-@page_permission_required
+# @page_permission_required
 @login_required_custom
 @role_required_role_id([1, 2, 3])
 def tickets_detail_report(request, ticket_id):
@@ -1459,7 +1459,7 @@ def tickets_detail_report(request, ticket_id):
         }
     )
 
-@page_permission_required
+# @page_permission_required
 @login_required_custom
 @role_required_role_id([1, 2, 3])
 def tickets_detail_newapp(request, ticket_id):
@@ -1489,7 +1489,7 @@ def tickets_detail_newapp(request, ticket_id):
                 n.new_value 
             FROM tickets.ticket_data_erp_app n
             JOIN tickets.tickets t ON t.id = n.ticket_id
-            JOIN tickets.users u ON u.erp_user_id = t.user_id
+            JOIN tickets.users u ON u.id = t.user_id
             WHERE t.id = %s
         """, [ticket_id])
 
@@ -1560,7 +1560,7 @@ def tickets_detail_newapp(request, ticket_id):
     )
     
     
-@page_permission_required
+# @page_permission_required
 def repairs_form(request):
     if request.method == "POST":
 
@@ -1656,7 +1656,7 @@ def repairs_form(request):
         return redirect("ticket_success")
     return render(request, "tickets_form/repairs_form.html")
 
-@page_permission_required
+# @page_permission_required
 def active_promotion_detail(request, ticket_id):
 
     with connection.cursor() as cursor:
@@ -1724,7 +1724,7 @@ def active_promotion_detail(request, ticket_id):
         "files": files,
     })
 
-@page_permission_required
+# @page_permission_required
 def adjust_form(request):
     user = request.session.get("user")
     if not user:
@@ -1829,7 +1829,7 @@ def adjust_form(request):
 
     return render(request, "tickets_form/adjust_form.html")
 
-@page_permission_required
+# @page_permission_required
 def build_adjust_items(request):
     source_cust = request.POST.getlist("source_cust[]")
     source_name = request.POST.getlist("source_customer_name[]")
@@ -1868,7 +1868,7 @@ def build_adjust_items(request):
 
     return items
 
-@page_permission_required
+# @page_permission_required
 def app_form(request):
     # =========================
     # CHECK LOGIN
@@ -2003,7 +2003,7 @@ def app_form(request):
     return render(request, "tickets_form/app_form.html")
 
 
-@page_permission_required
+# @page_permission_required
 def report_form(request):
 
     # =========================
@@ -2105,7 +2105,7 @@ def report_form(request):
     return render(request, "tickets_form/report_form.html")
 
 
-@page_permission_required
+# @page_permission_required
 def active_promotion_form(request):
     
     if "user" not in request.session:
@@ -2194,7 +2194,7 @@ def dictfetchall(cursor):
     return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 
-@page_permission_required
+# @page_permission_required
 def setting_team(request):
 
     user = request.session.get("user")
@@ -2362,7 +2362,7 @@ def setting_team(request):
         "teams": teams
     })
     
-@page_permission_required
+# @page_permission_required
 def team_adduser(request, team_id):
 
     with connection.cursor() as cursor:
@@ -2443,7 +2443,7 @@ def team_adduser(request, team_id):
         "users": users
     })
 
-@page_permission_required
+# @page_permission_required
 def team_removeuser(request, team_id, member_id):
 
     with connection.cursor() as cursor:
@@ -2604,7 +2604,7 @@ def add_approve_line(request):
         "category_filters": category_filters,
     })
 
-@page_permission_required
+# @page_permission_required
 def approval_flow_detail(request, category_id, team_id):
 
     with connection.cursor() as cursor:
@@ -2637,7 +2637,7 @@ def approval_flow_detail(request, category_id, team_id):
         "team_id": team_id,
     })
 
-@page_permission_required
+# @page_permission_required
 def delete_ticket(request, ticket_id):
 
     user = request.session.get("user")
@@ -2933,7 +2933,7 @@ def admin_complete_ticket(request, ticket_id):
     return redirect("tickets_list")
 
 #--------------หน้างานที่รับไปแล้ว--------------
-@page_permission_required
+# @page_permission_required
 @login_required_custom
 @role_required_role_id([1])  # admin เท่านั้น
 def tickets_accepting_work(request):
@@ -2967,68 +2967,68 @@ def tickets_accepting_work(request):
         }
     )
 #--------------การจัดโมดูลสิทธิ์การดูหน้าและปุ่ม--------------
-@page_permission_required
-@login_required_custom
-def manage_permission(request):
+# @page_permission_required
+# @login_required_custom
+# def manage_permission(request):
 
-    selected_user_id = request.GET.get("user_id")
+#     selected_user_id = request.GET.get("user_id")
 
-    with connection.cursor() as cursor:
+#     with connection.cursor() as cursor:
 
-        cursor.execute("""
-            SELECT id, username
-            FROM tickets.users
-            ORDER BY username
-        """)
-        users = dictfetchall(cursor)
+#         cursor.execute("""
+#             SELECT id, username
+#             FROM tickets.users
+#             ORDER BY username
+#         """)
+#         users = dictfetchall(cursor)
 
-        cursor.execute("""
-            SELECT id, code, url_name, description
-            FROM tickets.permissions
-            ORDER BY code
-        """)
-        permissions = dictfetchall(cursor)
+#         cursor.execute("""
+#             SELECT id, code, url_name, description
+#             FROM tickets.permissions
+#             ORDER BY code
+#         """)
+#         permissions = dictfetchall(cursor)
 
-        user_permission_ids = []
+#         user_permission_ids = []
 
-        if selected_user_id:
-            cursor.execute("""
-                SELECT permission_id
-                FROM tickets.user_permissions
-                WHERE user_id = %s
-            """, [selected_user_id])
+#         if selected_user_id:
+#             cursor.execute("""
+#                 SELECT permission_id
+#                 FROM tickets.user_permissions
+#                 WHERE user_id = %s
+#             """, [selected_user_id])
 
-            user_permission_ids = [
-                row[0] for row in cursor.fetchall()
-            ]
+#             user_permission_ids = [
+#                 row[0] for row in cursor.fetchall()
+#             ]
 
-    # ================= SAVE =================
-    if request.method == "POST":
+#     # ================= SAVE =================
+#     if request.method == "POST":
 
-        user_id = request.POST.get("user_id")
-        selected_permissions = request.POST.getlist("permissions")
+#         user_id = request.POST.get("user_id")
+#         selected_permissions = request.POST.getlist("permissions")
 
-        with connection.cursor() as cursor:
+#         with connection.cursor() as cursor:
 
-            # ลบทั้งหมดก่อน
-            cursor.execute("""
-                DELETE FROM tickets.user_permissions
-                WHERE user_id = %s
-            """, [user_id])
+#             # ลบทั้งหมดก่อน
+#             cursor.execute("""
+#                 DELETE FROM tickets.user_permissions
+#                 WHERE user_id = %s
+#             """, [user_id])
 
-            # insert ใหม่
-            for perm_id in selected_permissions:
-                cursor.execute("""
-                    INSERT INTO tickets.user_permissions (user_id, permission_id, allow)
-                    VALUES (%s, %s, TRUE)
-                """, [user_id, perm_id])
+#             # insert ใหม่
+#             for perm_id in selected_permissions:
+#                 cursor.execute("""
+#                     INSERT INTO tickets.user_permissions (user_id, permission_id, allow)
+#                     VALUES (%s, %s, TRUE)
+#                 """, [user_id, perm_id])
 
-        messages.success(request, "บันทึกสิทธิ์เรียบร้อยแล้ว")
-        return redirect(f"/page-permission/?user_id={user_id}")
+#         messages.success(request, "บันทึกสิทธิ์เรียบร้อยแล้ว")
+#         return redirect(f"/page-permission/?user_id={user_id}")
 
-    return render(request, "admin/manage_permission.html", {
-        "users": users,
-        "permissions": permissions,
-        "user_permission_ids": user_permission_ids,
-        "selected_user_id": selected_user_id,
-    })
+#     return render(request, "admin/manage_permission.html", {
+#         "users": users,
+#         "permissions": permissions,
+#         "user_permission_ids": user_permission_ids,
+#         "selected_user_id": selected_user_id,
+#     })
