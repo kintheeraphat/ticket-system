@@ -17,7 +17,9 @@ from functools import wraps
 from django.http import HttpResponseForbidden
 from django.views.decorators.http import require_POST
 from ticket.services.erp import call_erp_user_info
-from ticket.templatetags.page_permission import page_permission_required
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+
 
 ERP_API_URL = "http://172.17.1.55:8111/erpAuth/"
 
@@ -3032,3 +3034,44 @@ def tickets_accepting_work(request):
 #         "user_permission_ids": user_permission_ids,
 #         "selected_user_id": selected_user_id,
 #     })
+
+# API สำหรับ Stocket IT ดึงรายชื่อ Admin
+
+@require_GET
+def api_admin_users(request):
+    api_key = request.headers.get("X-API-KEY")
+
+    if api_key != "passw0rd":
+        return JsonResponse(
+            {"error": "Unauthorized"},
+            status=403
+        )
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT id, username, full_name 
+                FROM tickets.users
+                WHERE role_id = 1
+            """)
+            rows = cursor.fetchall()
+
+        admin_list = [
+            {
+                "id": row[0],
+                "username": row[1],
+                "full_name": row[2],
+            }
+            for row in rows
+        ]
+
+        return JsonResponse(
+            {"admins": admin_list},
+            status=200
+        )
+
+    except Exception as e:
+        return JsonResponse(
+            {"error": str(e)},
+            status=500
+        )

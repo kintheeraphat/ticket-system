@@ -49,4 +49,7 @@ urlpatterns = [
 
     # ===== USER MANAGEMENT =====
     path("manage/users/", views.manage_user, name="manage_user"),
+    
+    # =====API LOGIN TO STOCKET_IT=====
+    path("api/admin-users/", views.api_admin_users, name="api_admin_users"),
 ]

@@ -11,11 +11,7 @@
       <span class="brand-text">TICKETS</span>
     </div>
 
-    <button
-      id="desktop-sidebar-toggle"
-      class="sidebar-collapse-btn"
-      title="ย่อ / ขยายเมนู"
-    >
+    <button id="desktop-sidebar-toggle" class="sidebar-collapse-btn" title="ย่อ / ขยายเมนู">
       <i class="fas fa-bars"></i>
     </button>
   </div>
@@ -38,7 +34,7 @@
         <span>Tickets</span>
       </a>
     </li>
-    {% if request.session.user.role_id == 1 or request.session.user.role_id == 2  or request.session.user.role_id == 3 %}
+    {% if request.session.user.role_id == 1 or request.session.user.role_id == 2 or request.session.user.role_id == 3 %}
 
     <li class="{% if request.path == '/' %}active{% endif %}">
       <a href="{% url 'setting_team' %}">
@@ -47,7 +43,7 @@
       </a>
     </li>
     {% endif %}
-        {% if request.session.user.role_id == 1 or request.session.user.role_id == 2  or request.session.user.role_id == 3 %}
+    {% if request.session.user.role_id == 1 or request.session.user.role_id == 2 or request.session.user.role_id == 3 %}
 
     <li class="{% if request.path == '/' %}active{% endif %}">
       <a href="{% url 'add_approve_line' %}">
@@ -64,23 +60,22 @@
       </a>
     </li>
     {% endif %}
-      {% if request.session.user.role_id == 1 %}
-      <li>
-        <a href="{% url 'tickets_accepting_work'%}">
-          <i class="fa-solid fa-handshake"></i>
-          <span>Accepting Work</span>
-        </a>
-      </li>
-      {% endif %}
-      {% comment %} {% if request.session.user.role_id == 1 %}
-      <li>
-        <a href="{% url 'manage_permission' %}">
-          <i class="fa-solid fa-user-shield"></i>
-          <span>manege_permission</span>
-        </a>
-      </li>
-      {% endif %} {% endcomment %}
-
+    {% if request.session.user.role_id == 1 %}
+    <li>
+      <a href="{% url 'tickets_accepting_work'%}">
+        <i class="fa-solid fa-handshake"></i>
+        <span>Accepting Work</span>
+      </a>
+    </li>
+    {% endif %}
+    {% comment %} {% if request.session.user.role_id == 1 %}
+    <li>
+      <a href="{% url 'manage_permission' %}">
+        <i class="fa-solid fa-user-shield"></i>
+        <span>manege_permission</span>
+      </a>
+    </li>
+    {% endif %} {% endcomment %}
 
     <!-- ================= USER + ADMIN ================= -->
     <li class="{% if request.path == '/create/' %}active{% endif %}">
@@ -89,7 +84,11 @@
         <span>Create Ticket</span>
       </a>
     </li>
-
+    <li>
+      <a href="http://localhost:3000/" target="_blank" rel="noopener noreferrer" class="btn btn-success">
+        เข้า Stock
+      </a>
+    </li>
     <!-- USER HISTORY -->
     {% comment %} {% if request.session.user.role_id == 1 %}
 
@@ -100,7 +99,7 @@
       </a>
     </li>
     {% endif %} {% endcomment %}
-      <!-- Logout -->
+    <!-- Logout -->
     <div class="sidebar-footer">
 
       <!-- ===== Current User ===== -->
@@ -115,11 +114,11 @@
           </div>
           <div class="user-role">
             {% if request.session.user.role_id == 1 %}
-              Administrator
+            Administrator
             {% elif request.session.user.role_id == 2 %}
-              Manager
+            Manager
             {% else %}
-              User
+            User
             {% endif %}
           </div>
         </div>
@@ -169,261 +168,263 @@
      CSS
 ================================ -->
 <style>
-/* ===== Layout ===== */
-.sidebar {
-  width: 260px;
-  background: #0f172a;
-  color: #e5e7eb;
-  padding: 16px;
-  transition: width .25s ease;
-}
+  /* ===== Layout ===== */
+  .sidebar {
+    width: 260px;
+    background: #0f172a;
+    color: #e5e7eb;
+    padding: 16px;
+    transition: width .25s ease;
+  }
 
-.sidebar.collapsed {
-  width: 72px;
-}
+  .sidebar.collapsed {
+    width: 72px;
+  }
 
-/* ===== Header ===== */
-.sidebar-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24px;
-}
+  /* ===== Header ===== */
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 700;
-}
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+  }
 
-.brand-text {
-  transition: opacity .2s ease;
-}
+  .brand-text {
+    transition: opacity .2s ease;
+  }
 
-.sidebar.collapsed .brand-text {
-  opacity: 0;
-  width: 0;
-  overflow: hidden;
-}
+  .sidebar.collapsed .brand-text {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+  }
 
-/* ===== Toggle Button ===== */
-.sidebar-collapse-btn {
-  background: rgba(255,255,255,.08);
-  border: none;
-  color: #fff;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-}
+  /* ===== Toggle Button ===== */
+  .sidebar-collapse-btn {
+    background: rgba(255, 255, 255, .08);
+    border: none;
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+  }
 
-.sidebar-collapse-btn:hover {
-  background: rgba(255,255,255,.18);
-}
+  .sidebar-collapse-btn:hover {
+    background: rgba(255, 255, 255, .18);
+  }
 
-/* ===== Menu ===== */
-.sidebar-menu li a {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border-radius: 10px;
-  color: #cbd5e1;
-  text-decoration: none;
-}
+  /* ===== Menu ===== */
+  .sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    color: #cbd5e1;
+    text-decoration: none;
+  }
 
-.sidebar-menu li.active a,
-.sidebar-menu li a:hover {
-  background: rgba(255,255,255,.1);
-  color: #fff;
-}
+  .sidebar-menu li.active a,
+  .sidebar-menu li a:hover {
+    background: rgba(255, 255, 255, .1);
+    color: #fff;
+  }
 
-.sidebar-menu li a span {
-  transition: opacity .2s ease;
-}
+  .sidebar-menu li a span {
+    transition: opacity .2s ease;
+  }
 
-.sidebar.collapsed .sidebar-menu li a {
-  justify-content: center;
-}
+  .sidebar.collapsed .sidebar-menu li a {
+    justify-content: center;
+  }
 
-.sidebar.collapsed .sidebar-menu li a span {
-  display: none;
-}
+  .sidebar.collapsed .sidebar-menu li a span {
+    display: none;
+  }
 
-.sidebar.collapsed .sidebar-menu li a i {
-  font-size: 1.25rem;
-}
+  .sidebar.collapsed .sidebar-menu li a i {
+    font-size: 1.25rem;
+  }
 
-/* ===== Footer ===== */
-.sidebar-footer a {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #f87171;
-  padding: 12px;
-  border-radius: 10px;
-}
+  /* ===== Footer ===== */
+  .sidebar-footer a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #f87171;
+    padding: 12px;
+    border-radius: 10px;
+  }
 
-/* ===== Mobile ===== */
-.mobile-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 56px;
-  background: #0f172a;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  z-index: 1200;
-  color: #fff;
-}
+  /* ===== Mobile ===== */
+  .mobile-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: #0f172a;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    z-index: 1200;
+    color: #fff;
+  }
 
-.mobile-toggle {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 1.2rem;
-}
+  .mobile-toggle {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+  }
 
-.mobile-sidebar {
-  position: fixed;
-  top: 0;
-  left: -260px;
-  height: 100%;
-  z-index: 1300;
-  transition: left .3s ease;
-}
+  .mobile-sidebar {
+    position: fixed;
+    top: 0;
+    left: -260px;
+    height: 100%;
+    z-index: 1300;
+    transition: left .3s ease;
+  }
 
-.mobile-sidebar.show {
-  left: 0;
-}
+  .mobile-sidebar.show {
+    left: 0;
+  }
 
-#sidebar-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.4);
-  display: none;
-  z-index: 1200;
-}
-/* ===== Sidebar Footer (Logout) ===== */
-.sidebar-footer {
-  margin-top: auto;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255,255,255,.08);
-}
+  #sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .4);
+    display: none;
+    z-index: 1200;
+  }
 
-.logout-btn {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border-radius: 10px;
-  color: #fca5a5; /* แดงสุภาพ */
-  text-decoration: none;
-  transition: background .2s ease, color .2s ease;
-}
+  /* ===== Sidebar Footer (Logout) ===== */
+  .sidebar-footer {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, .08);
+  }
 
-.logout-btn:hover {
-  background: rgba(239,68,68,.15);
-  color: #fecaca;
-}
+  .logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    color: #fca5a5;
+    /* แดงสุภาพ */
+    text-decoration: none;
+    transition: background .2s ease, color .2s ease;
+  }
 
-/* ตอน sidebar พับ */
-.sidebar.collapsed .logout-btn {
-  justify-content: center;
-}
+  .logout-btn:hover {
+    background: rgba(239, 68, 68, .15);
+    color: #fecaca;
+  }
 
-.sidebar.collapsed .logout-btn span {
-  display: none;
-}
+  /* ตอน sidebar พับ */
+  .sidebar.collapsed .logout-btn {
+    justify-content: center;
+  }
 
-.sidebar.collapsed .logout-btn i {
-  font-size: 1.25rem;
-}
-/* ===== Current User Box ===== */
-.current-user {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  margin-bottom: 8px;
-  border-radius: 10px;
-  background: rgba(255,255,255,.06);
-  color: #e5e7eb;
-}
+  .sidebar.collapsed .logout-btn span {
+    display: none;
+  }
 
-.user-avatar i {
-  font-size: 2rem;
-  color: #60a5fa;
-}
+  .sidebar.collapsed .logout-btn i {
+    font-size: 1.25rem;
+  }
 
-.user-info {
-  line-height: 1.2;
-}
+  /* ===== Current User Box ===== */
+  .current-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .06);
+    color: #e5e7eb;
+  }
 
-.user-name {
-  font-weight: 600;
-  font-size: 0.95rem;
-}
+  .user-avatar i {
+    font-size: 2rem;
+    color: #60a5fa;
+  }
 
-.user-role {
-  font-size: 0.75rem;
-  color: #94a3b8;
-}
+  .user-info {
+    line-height: 1.2;
+  }
 
-/* ตอน sidebar พับ */
-.sidebar.collapsed .current-user {
-  justify-content: center;
-}
+  .user-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
 
-.sidebar.collapsed .user-info {
-  display: none;
-}
+  .user-role {
+    font-size: 0.75rem;
+    color: #94a3b8;
+  }
 
+  /* ตอน sidebar พับ */
+  .sidebar.collapsed .current-user {
+    justify-content: center;
+  }
+
+  .sidebar.collapsed .user-info {
+    display: none;
+  }
 </style>
 
 <!-- ===============================
      JS
 ================================ -->
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("DOMContentLoaded", function () {
 
-  /* ===== Desktop collapse ===== */
-  const sidebar = document.querySelector(".sidebar.d-lg-flex");
-  const desktopToggle = document.getElementById("desktop-sidebar-toggle");
+    /* ===== Desktop collapse ===== */
+    const sidebar = document.querySelector(".sidebar.d-lg-flex");
+    const desktopToggle = document.getElementById("desktop-sidebar-toggle");
 
-  if (sidebar && desktopToggle) {
-    if (localStorage.getItem("sidebar_collapsed") === "true") {
-      sidebar.classList.add("collapsed");
+    if (sidebar && desktopToggle) {
+      if (localStorage.getItem("sidebar_collapsed") === "true") {
+        sidebar.classList.add("collapsed");
+      }
+
+      desktopToggle.addEventListener("click", () => {
+        sidebar.classList.toggle("collapsed");
+        localStorage.setItem(
+          "sidebar_collapsed",
+          sidebar.classList.contains("collapsed")
+        );
+      });
     }
 
-    desktopToggle.addEventListener("click", () => {
-      sidebar.classList.toggle("collapsed");
-      localStorage.setItem(
-        "sidebar_collapsed",
-        sidebar.classList.contains("collapsed")
-      );
-    });
-  }
+    /* ===== Mobile sidebar ===== */
+    const mobileSidebar = document.getElementById("mobile-sidebar");
+    const mobileToggle = document.getElementById("mobile-sidebar-toggle");
+    const overlay = document.getElementById("sidebar-overlay");
 
-  /* ===== Mobile sidebar ===== */
-  const mobileSidebar = document.getElementById("mobile-sidebar");
-  const mobileToggle = document.getElementById("mobile-sidebar-toggle");
-  const overlay = document.getElementById("sidebar-overlay");
+    if (mobileToggle) {
+      mobileToggle.addEventListener("click", () => {
+        mobileSidebar.classList.add("show");
+        overlay.style.display = "block";
+      });
+    }
 
-  if (mobileToggle) {
-    mobileToggle.addEventListener("click", () => {
-      mobileSidebar.classList.add("show");
-      overlay.style.display = "block";
-    });
-  }
+    overlay.addEventListener("click", closeMobile);
 
-  overlay.addEventListener("click", closeMobile);
-
-  function closeMobile() {
-    mobileSidebar.classList.remove("show");
-    overlay.style.display = "none";
-  }
-});
+    function closeMobile() {
+      mobileSidebar.classList.remove("show");
+      overlay.style.display = "none";
+    }
+  });
 </script>
