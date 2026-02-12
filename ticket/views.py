@@ -2962,76 +2962,63 @@ def tickets_accepting_work(request):
 #--------------การจัดโมดูลสิทธิ์การดูหน้าและปุ่ม--------------
 @page_permission_required
 @login_required_custom
-@role_required_role_id([1])  # admin only
 def manage_permission(request):
+
+    selected_user_id = request.GET.get("user_id")
 
     with connection.cursor() as cursor:
 
-        # ดึง roles
+        # ===== Users =====
         cursor.execute("""
-            SELECT id, role_name
-            FROM tickets.roles
-            ORDER BY id
+            SELECT id, username
+            FROM tickets.users
+            ORDER BY username
         """)
-        roles = dictfetchall(cursor)
+        users = dictfetchall(cursor)
 
-        # ดึง modules
+        # ===== Permissions =====
         cursor.execute("""
-            SELECT id, module_name, display_url, description
-            FROM tickets.module
-            ORDER BY id
-        """)
-        modules = dictfetchall(cursor)
-
-        # ดึง permission
-        cursor.execute("""
-            SELECT role_id, url_name, can_access
-            FROM tickets.page_permission
+            SELECT id, code, url_name, description
+            FROM tickets.permissions
+            ORDER BY code
         """)
         permissions = dictfetchall(cursor)
 
-    # สร้าง permission map
-    permission_map = {}
-    for p in permissions:
-        permission_map.setdefault(p["role_id"], {})[p["url_name"]] = p["can_access"]
+        user_permissions = []
 
-    # POST
+        # ===== สิทธิ์ของ user ที่เลือก =====
+        if selected_user_id:
+            cursor.execute("""
+                SELECT p.id, p.code, p.url_name, p.description
+                FROM tickets.user_permissions up
+                JOIN tickets.permissions p
+                    ON p.id = up.permission_id
+                WHERE up.user_id = %s
+                ORDER BY p.code
+            """, [selected_user_id])
+
+            user_permissions = dictfetchall(cursor)
+
+    # ================= ADD PERMISSION =================
     if request.method == "POST":
 
-        role_id = request.POST.get("role_id")
-        module_id = request.POST.get("module_id")
-
-        # ดึง url จาก module
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT display_url
-                FROM tickets.module
-                WHERE id = %s
-            """, [module_id])
-            row = cursor.fetchone()
-
-        if not row:
-            messages.error(request, "Module ไม่ถูกต้อง")
-            return redirect("manage_page_permission")
-
-        url_name = row[0]
-        can_access = request.POST.get("can_access") == "on"
+        user_id = request.POST.get("user_id")
+        permission_id = request.POST.get("permission_id")
 
         with connection.cursor() as cursor:
             cursor.execute("""
-                INSERT INTO tickets.page_permission (role_id, url_name, can_access)
-                VALUES (%s, %s, %s)
-                ON CONFLICT (role_id, url_name)
-                DO UPDATE SET
-                    can_access = EXCLUDED.can_access,
-                    update_at = NOW()
-            """, [role_id, url_name, can_access])
+                INSERT INTO tickets.user_permissions (user_id, permission_id, allow)
+                VALUES (%s, %s, TRUE)
+                ON CONFLICT (user_id, permission_id)
+                DO NOTHING
+            """, [user_id, permission_id])
 
-        messages.success(request, "บันทึกสิทธิ์เรียบร้อยแล้ว")
-        return redirect("manage_page_permission")
+        messages.success(request, "เพิ่มสิทธิ์เรียบร้อยแล้ว")
+        return redirect(f"/page-permission/?user_id={user_id}")
 
     return render(request, "admin/manage_permission.html", {
-        "roles": roles,
-        "modules": modules,
-        "permission_map": permission_map,
+        "users": users,
+        "permissions": permissions,
+        "user_permissions": user_permissions,
+        "selected_user_id": selected_user_id,
     })

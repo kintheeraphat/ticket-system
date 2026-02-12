@@ -1,117 +1,120 @@
 {% extends "base.html" %}
-{% load tz %}
-{% load custom_tags %}
-{% block title %}จัดการสิทธิ์การเข้าใช้งาน{% endblock %}
+{% block title %}จัดการสิทธิ์ผู้ใช้งาน{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold mb-1">จัดการสิทธิ์การเข้าใช้งานหน้า</h4>
-            <p class="text-muted small mb-0">
-                กำหนดว่า Role ไหนสามารถเข้าหน้าอะไรได้บ้าง
-            </p>
+    <h4 class="fw-bold mb-4">จัดการสิทธิ์ผู้ใช้งาน</h4>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- ================= SELECT USER ================= -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <form method="get">
+                <div class="row align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label">เลือก User</label>
+                        <select name="user_id" class="form-select" required>
+                            <option value="">-- เลือก User --</option>
+                            {% for user in users %}
+                                <option value="{{ user.id }}"
+                                    {% if selected_user_id == user.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ user.username }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary">
+                            แสดงสิทธิ์
+                        </button>
+                    </div>
+                </div>
+            </form>
+
         </div>
     </div>
 
+    {% if selected_user_id %}
+
+    <!-- ================= ADD PERMISSION ================= -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <h6 class="fw-bold mb-3">เพิ่มสิทธิ์ให้ผู้ใช้</h6>
+
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="user_id" value="{{ selected_user_id }}">
+
+                <div class="row align-items-end">
+                    <div class="col-md-6">
+                        <label class="form-label">เลือก Permission</label>
+                        <select name="permission_id" class="form-select" required>
+                            <option value="">-- เลือก Permission --</option>
+                            {% for perm in permissions %}
+                                <option value="{{ perm.id }}">
+                                    {{ perm.code }} ({{ perm.url_name }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-success">
+                            เพิ่มสิทธิ์
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- ================= CURRENT PERMISSIONS ================= -->
     <div class="card shadow-sm">
         <div class="card-body">
 
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-success">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
+            <h6 class="fw-bold mb-3">สิทธิ์ปัจจุบันของผู้ใช้</h6>
 
-            <div class="table-responsive">
-                <table class="table table-bordered align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width: 20%;">Role</th>
-                            <th style="width: 25%;">Module</th>
-                            <th style="width: 25%;">URL Name</th>
-                            <th style="width: 15%;" class="text-center">สถานะ</th>
-                            <th style="width: 15%;" class="text-center">บันทึก</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {% for role in roles %}
-                            {% for module in modules %}
-
-                            {% with role_permissions=permission_map|get:role.id %}
-                            {% with current_permission=role_permissions|get:module.display_url %}
-
-                            <tr>
-                                <td>
-                                    <span class="fw-semibold">
-                                        {{ role.role_name }}
-                                    </span>
-                                </td>
-
-                                <td>
-                                    <div class="fw-semibold">
-                                        {{ module.module_name }}
-                                    </div>
-                                    <small class="text-muted">
-                                        {{ module.description }}
-                                    </small>
-                                </td>
-
-                                <td>
-                                    <code>{{ module.display_url }}</code>
-                                </td>
-
-                                <td class="text-center">
-                                    {% if current_permission %}
-                                        <span class="badge bg-success">
-                                            อนุญาต
-                                        </span>
-                                    {% else %}
-                                        <span class="badge bg-danger">
-                                            ไม่อนุญาต
-                                        </span>
-                                    {% endif %}
-                                </td>
-
-                                <td>
-                                    <form method="post">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="role_id" value="{{ role.id }}">
-                                        <input type="hidden" name="module_id" value="{{ module.id }}">
-
-                                        <div class="form-check d-flex justify-content-center">
-                                            <input class="form-check-input"
-                                                   type="checkbox"
-                                                   name="can_access"
-                                                   {% if current_permission %}checked{% endif %}>
-                                        </div>
-
-                                        <div class="text-center mt-2">
-                                            <button type="submit"
-                                                    class="btn btn-sm btn-primary">
-                                                บันทึก
-                                            </button>
-                                        </div>
-                                    </form>
-                                </td>
-                            </tr>
-
-                            {% endwith %}
-                            {% endwith %}
-
-                            {% endfor %}
-                        {% endfor %}
-                    </tbody>
-
-                </table>
-            </div>
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Code</th>
+                        <th>URL Name</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for perm in user_permissions %}
+                    <tr>
+                        <td>{{ perm.code }}</td>
+                        <td><code>{{ perm.url_name }}</code></td>
+                        <td>{{ perm.description }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">
+                            ยังไม่มีสิทธิ์
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
 
         </div>
     </div>
+
+    {% endif %}
 
 </div>
 {% endblock %}
