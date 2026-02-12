@@ -1,173 +1,188 @@
 {% extends "base.html" %}
-{% block title %}จัดการสิทธิ์ผู้ใช้งาน{% endblock %}
+{% block title %}Permission Control Center{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold">จัดการสิทธิ์ผู้ใช้งาน</h4>
+<div class="row g-4">
+
+<!-- ================= LEFT : USER PANEL ================= -->
+<div class="col-lg-3">
+
+  <div class="card shadow-sm border-0 rounded-4">
+    <div class="card-header bg-white border-0">
+      <h6 class="fw-bold mb-0">Users</h6>
     </div>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-success alert-dismissible fade show">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
+    <div class="card-body pt-2">
+
+      <!-- SEARCH USER -->
+      <input type="text"
+             id="userSearch"
+             class="form-control form-control-sm mb-3"
+             placeholder="🔎 ค้นหา user">
+
+      <div class="user-scroll">
+
+        {% for user in users %}
+        <form method="get" class="mb-1 user-item"
+              data-search="{{ user.username|lower }}">
+
+          <input type="hidden" name="user_id" value="{{ user.id }}">
+
+          <button type="submit"
+                  class="btn w-100 text-start
+                  {% if selected_user_id == user.id|stringformat:'s' %}
+                      btn-primary
+                  {% else %}
+                      btn-light
+                  {% endif %}">
+              {{ user.username }}
+          </button>
+
+        </form>
         {% endfor %}
-    {% endif %}
 
-    <!-- ================= SELECT USER ================= -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
+      </div>
 
-            <form method="get" id="userForm">
-                <div class="row align-items-end">
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">เลือก User</label>
-                        <select name="user_id"
-                                class="form-select"
-                                onchange="document.getElementById('userForm').submit();"
-                                required>
-                            <option value="">-- เลือก User --</option>
-                            {% for user in users %}
-                                <option value="{{ user.id }}"
-                                    {% if selected_user_id == user.id|stringformat:"s" %}selected{% endif %}>
-                                    {{ user.username }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-            </form>
-
-        </div>
     </div>
-
-    {% if selected_user_id %}
-
-    <!-- ================= SEARCH + SELECT ALL ================= -->
-    <div class="card shadow-sm mb-3">
-        <div class="card-body d-flex justify-content-between align-items-center">
-
-            <input type="text"
-                   id="permissionSearch"
-                   class="form-control w-50"
-                   placeholder="ค้นหา Permission (ID / Code / URL Name)"
-                   onkeyup="filterPermissions()">
-
-            <div>
-                <button type="button"
-                        class="btn btn-sm btn-outline-primary"
-                        onclick="selectAllVisible()">
-                    เลือกทั้งหมด
-                </button>
-
-                <button type="button"
-                        class="btn btn-sm btn-outline-danger"
-                        onclick="clearAllVisible()">
-                    ยกเลิกทั้งหมด
-                </button>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- ================= PERMISSION MATRIX ================= -->
-    <div class="card shadow-sm">
-        <div class="card-body">
-
-            <form method="post">
-                {% csrf_token %}
-                <input type="hidden" name="user_id" value="{{ selected_user_id }}">
-
-                <div class="row" id="permissionContainer">
-
-                    {% for perm in permissions %}
-                    <div class="col-md-4 col-lg-3 mb-3 permission-item"
-                         data-search="{{ perm.id }} {{ perm.code|lower }} {{ perm.url_name|lower }}">
-
-                        <div class="card border h-100">
-                            <div class="card-body p-3">
-
-                                <div class="form-check">
-                                    <input class="form-check-input permission-checkbox"
-                                           type="checkbox"
-                                           name="permissions"
-                                           value="{{ perm.id }}"
-                                           id="perm{{ perm.id }}"
-                                           {% if perm.id in user_permission_ids %}checked{% endif %}>
-
-                                    <label class="form-check-label w-100" for="perm{{ perm.id }}">
-                                        <div class="fw-semibold">
-                                            ID: {{ perm.id }} | {{ perm.code }}
-                                        </div>
-                                        <small class="text-muted d-block">
-                                            {{ perm.url_name }}
-                                        </small>
-                                        <small class="text-secondary">
-                                            {{ perm.description }}
-                                        </small>
-                                    </label>
-                                </div>
-
-                            </div>
-                        </div>
-
-                    </div>
-                    {% endfor %}
-
-                </div>
-
-                <div class="mt-3 text-end">
-                    <button type="submit" class="btn btn-success">
-                        💾 บันทึกสิทธิ์ทั้งหมด
-                    </button>
-                </div>
-
-            </form>
-
-        </div>
-    </div>
-
-    {% endif %}
+  </div>
 
 </div>
+
+
+<!-- ================= RIGHT : PERMISSION PANEL ================= -->
+<div class="col-lg-9">
+
+{% if selected_user_id %}
+
+<div class="card shadow-sm border-0 rounded-4">
+
+  <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+
+    <div>
+      <h5 class="fw-bold mb-0">Permission Control</h5>
+      <small class="text-muted">User ID: {{ selected_user_id }}</small>
+    </div>
+
+    <span class="badge bg-success rounded-pill px-3">
+      Enabled: <span id="enabledCount">0</span>
+    </span>
+
+  </div>
+
+  <div class="card-body">
+
+    <!-- SEARCH PERMISSION -->
+    <div class="mb-3">
+      <input type="text"
+             id="permissionSearch"
+             class="form-control"
+             placeholder="🔎 ค้นหา permission">
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="user_id" value="{{ selected_user_id }}">
+
+      <div class="permission-scroll">
+
+        {% for perm in permissions %}
+        <div class="permission-row d-flex justify-content-between align-items-center py-2 px-3 border-bottom"
+             data-search="{{ perm.code|lower }} {{ perm.url_name|lower }} {{ perm.description|lower }}">
+
+          <div>
+            <div class="fw-semibold small">{{ perm.code }}</div>
+            <div class="text-muted small">{{ perm.url_name }}</div>
+          </div>
+
+          <div class="form-check form-switch">
+            <input class="form-check-input permission-checkbox"
+                   type="checkbox"
+                   name="permissions"
+                   value="{{ perm.id }}"
+                   {% if perm.id in user_permission_ids %}checked{% endif %}>
+          </div>
+
+        </div>
+        {% endfor %}
+
+      </div>
+
+      <div class="text-end mt-4">
+        <button type="submit" class="btn btn-success px-4">
+          💾 Save
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+{% else %}
+
+<div class="card shadow-sm border-0 rounded-4">
+  <div class="card-body text-center text-muted py-5">
+    กรุณาเลือก User ด้านซ้าย
+  </div>
+</div>
+
+{% endif %}
+
+</div>
+</div>
+</div>
+
+
+<!-- ================= STYLE ================= -->
+<style>
+.user-scroll {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.permission-scroll {
+  max-height: 600px;
+  overflow-y: auto;
+}
+</style>
+
 
 <!-- ================= SCRIPT ================= -->
 <script>
 
-function filterPermissions() {
-    let input = document.getElementById("permissionSearch").value.toLowerCase();
-    let items = document.querySelectorAll(".permission-item");
+// USER SEARCH
+document.getElementById("userSearch").addEventListener("keyup", function(){
+  let value = this.value.toLowerCase();
+  document.querySelectorAll(".user-item").forEach(function(item){
+    let text = item.getAttribute("data-search");
+    item.style.display = text.includes(value) ? "" : "none";
+  });
+});
 
-    items.forEach(function(item) {
-        let text = item.getAttribute("data-search");
-        if (text.includes(input)) {
-            item.style.display = "";
-        } else {
-            item.style.display = "none";
-        }
-    });
+// ENABLED COUNT
+function updateEnabledCount(){
+  let count = document.querySelectorAll(".permission-checkbox:checked").length;
+  document.getElementById("enabledCount").innerText = count;
 }
 
-// เลือกทั้งหมดเฉพาะที่มองเห็น
-function selectAllVisible() {
-    document.querySelectorAll(".permission-item").forEach(function(item) {
-        if (item.style.display !== "none") {
-            item.querySelector(".permission-checkbox").checked = true;
-        }
-    });
-}
+document.addEventListener("change", function(e){
+  if(e.target.classList.contains("permission-checkbox")){
+    updateEnabledCount();
+  }
+});
 
-// ยกเลิกทั้งหมดเฉพาะที่มองเห็น
-function clearAllVisible() {
-    document.querySelectorAll(".permission-item").forEach(function(item) {
-        if (item.style.display !== "none") {
-            item.querySelector(".permission-checkbox").checked = false;
-        }
-    });
-}
+updateEnabledCount();
+
+// PERMISSION SEARCH
+document.getElementById("permissionSearch")?.addEventListener("keyup", function(){
+  let value = this.value.toLowerCase();
+  document.querySelectorAll(".permission-row").forEach(function(row){
+    let text = row.getAttribute("data-search");
+    row.style.display = text.includes(value) ? "" : "none";
+  });
+});
 
 </script>
 
