@@ -2968,7 +2968,6 @@ def manage_permission(request):
 
     with connection.cursor() as cursor:
 
-        # ===== Users =====
         cursor.execute("""
             SELECT id, username
             FROM tickets.users
@@ -2976,7 +2975,6 @@ def manage_permission(request):
         """)
         users = dictfetchall(cursor)
 
-        # ===== Permissions =====
         cursor.execute("""
             SELECT id, code, url_name, description
             FROM tickets.permissions
@@ -2984,41 +2982,46 @@ def manage_permission(request):
         """)
         permissions = dictfetchall(cursor)
 
-        user_permissions = []
+        user_permission_ids = []
 
-        # ===== สิทธิ์ของ user ที่เลือก =====
         if selected_user_id:
             cursor.execute("""
-                SELECT p.id, p.code, p.url_name, p.description
-                FROM tickets.user_permissions up
-                JOIN tickets.permissions p
-                    ON p.id = up.permission_id
-                WHERE up.user_id = %s
-                ORDER BY p.code
+                SELECT permission_id
+                FROM tickets.user_permissions
+                WHERE user_id = %s
             """, [selected_user_id])
 
-            user_permissions = dictfetchall(cursor)
+            user_permission_ids = [
+                row[0] for row in cursor.fetchall()
+            ]
 
-    # ================= ADD PERMISSION =================
+    # ================= SAVE =================
     if request.method == "POST":
 
         user_id = request.POST.get("user_id")
-        permission_id = request.POST.get("permission_id")
+        selected_permissions = request.POST.getlist("permissions")
 
         with connection.cursor() as cursor:
-            cursor.execute("""
-                INSERT INTO tickets.user_permissions (user_id, permission_id, allow)
-                VALUES (%s, %s, TRUE)
-                ON CONFLICT (user_id, permission_id)
-                DO NOTHING
-            """, [user_id, permission_id])
 
-        messages.success(request, "เพิ่มสิทธิ์เรียบร้อยแล้ว")
+            # ลบทั้งหมดก่อน
+            cursor.execute("""
+                DELETE FROM tickets.user_permissions
+                WHERE user_id = %s
+            """, [user_id])
+
+            # insert ใหม่
+            for perm_id in selected_permissions:
+                cursor.execute("""
+                    INSERT INTO tickets.user_permissions (user_id, permission_id, allow)
+                    VALUES (%s, %s, TRUE)
+                """, [user_id, perm_id])
+
+        messages.success(request, "บันทึกสิทธิ์เรียบร้อยแล้ว")
         return redirect(f"/page-permission/?user_id={user_id}")
 
     return render(request, "admin/manage_permission.html", {
         "users": users,
         "permissions": permissions,
-        "user_permissions": user_permissions,
+        "user_permission_ids": user_permission_ids,
         "selected_user_id": selected_user_id,
     })

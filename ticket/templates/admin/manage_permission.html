@@ -1,15 +1,21 @@
 {% extends "base.html" %}
+{% load tz %}
 {% block title %}จัดการสิทธิ์ผู้ใช้งาน{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
 
-    <h4 class="fw-bold mb-4">จัดการสิทธิ์ผู้ใช้งาน</h4>
+    <!-- ===== HEADER ===== -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold">จัดการสิทธิ์ผู้ใช้งาน</h4>
+    </div>
 
+    <!-- ===== MESSAGE ===== -->
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-success">
+            <div class="alert alert-success alert-dismissible fade show">
                 {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         {% endfor %}
     {% endif %}
@@ -21,7 +27,7 @@
             <form method="get">
                 <div class="row align-items-end">
                     <div class="col-md-4">
-                        <label class="form-label">เลือก User</label>
+                        <label class="form-label fw-semibold">เลือก User</label>
                         <select name="user_id" class="form-select" required>
                             <option value="">-- เลือก User --</option>
                             {% for user in users %}
@@ -46,70 +52,69 @@
 
     {% if selected_user_id %}
 
-    <!-- ================= ADD PERMISSION ================= -->
-    <div class="card shadow-sm mb-4">
+    <!-- ================= PERMISSION MATRIX ================= -->
+    <div class="card shadow-sm">
         <div class="card-body">
 
-            <h6 class="fw-bold mb-3">เพิ่มสิทธิ์ให้ผู้ใช้</h6>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0">กำหนดสิทธิ์ (เลือกได้หลายรายการ)</h6>
+
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAll()">
+                        เลือกทั้งหมด
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearAll()">
+                        ยกเลิกทั้งหมด
+                    </button>
+                </div>
+            </div>
 
             <form method="post">
                 {% csrf_token %}
                 <input type="hidden" name="user_id" value="{{ selected_user_id }}">
 
-                <div class="row align-items-end">
-                    <div class="col-md-6">
-                        <label class="form-label">เลือก Permission</label>
-                        <select name="permission_id" class="form-select" required>
-                            <option value="">-- เลือก Permission --</option>
-                            {% for perm in permissions %}
-                                <option value="{{ perm.id }}">
-                                    {{ perm.code }} ({{ perm.url_name }})
-                                </option>
-                            {% endfor %}
-                        </select>
+                <div class="row">
+
+                    {% for perm in permissions %}
+                    <div class="col-md-4 col-lg-3 mb-3">
+                        <div class="card border h-100">
+                            <div class="card-body p-3">
+
+                                <div class="form-check">
+                                    <input class="form-check-input permission-checkbox"
+                                           type="checkbox"
+                                           name="permissions"
+                                           value="{{ perm.id }}"
+                                           id="perm{{ perm.id }}"
+                                           {% if perm.id in user_permission_ids %}checked{% endif %}>
+
+                                    <label class="form-check-label w-100" for="perm{{ perm.id }}">
+                                        <div class="fw-semibold">
+                                            {{ perm.code }}
+                                        </div>
+                                        <small class="text-muted d-block">
+                                            {{ perm.url_name }}
+                                        </small>
+                                        <small class="text-secondary">
+                                            {{ perm.description }}
+                                        </small>
+                                    </label>
+                                </div>
+
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-success">
-                            เพิ่มสิทธิ์
-                        </button>
-                    </div>
-                </div>
-            </form>
-
-        </div>
-    </div>
-
-    <!-- ================= CURRENT PERMISSIONS ================= -->
-    <div class="card shadow-sm">
-        <div class="card-body">
-
-            <h6 class="fw-bold mb-3">สิทธิ์ปัจจุบันของผู้ใช้</h6>
-
-            <table class="table table-bordered">
-                <thead class="table-light">
-                    <tr>
-                        <th>Code</th>
-                        <th>URL Name</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for perm in user_permissions %}
-                    <tr>
-                        <td>{{ perm.code }}</td>
-                        <td><code>{{ perm.url_name }}</code></td>
-                        <td>{{ perm.description }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="3" class="text-center text-muted">
-                            ยังไม่มีสิทธิ์
-                        </td>
-                    </tr>
                     {% endfor %}
-                </tbody>
-            </table>
+
+                </div>
+
+                <div class="mt-3 text-end">
+                    <button type="submit" class="btn btn-success">
+                        💾 บันทึกสิทธิ์ทั้งหมด
+                    </button>
+                </div>
+
+            </form>
 
         </div>
     </div>
@@ -117,4 +122,16 @@
     {% endif %}
 
 </div>
+
+<!-- ===== SCRIPT ===== -->
+<script>
+function selectAll() {
+    document.querySelectorAll('.permission-checkbox').forEach(cb => cb.checked = true);
+}
+
+function clearAll() {
+    document.querySelectorAll('.permission-checkbox').forEach(cb => cb.checked = false);
+}
+</script>
+
 {% endblock %}

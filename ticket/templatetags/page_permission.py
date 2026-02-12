@@ -4,6 +4,7 @@ from django.http import HttpResponseForbidden
 from django.db import connection
 
 
+
 def page_permission_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
@@ -12,25 +13,25 @@ def page_permission_required(view_func):
         if not user:
             return redirect("login")
 
-        role_id = user.get("role_id")
-
-        # ✅ ADMIN (role 1) เข้าได้ทุกหน้า
-        if role_id == 1:
-            return view_func(request, *args, **kwargs)
-
+        user_id = user.get("id")
         url_name = request.resolver_match.url_name
 
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT 1
-                FROM tickets.page_permission
-                WHERE role_id = %s
-                  AND url_name = %s
-                  AND can_access = TRUE
-            """, [role_id, url_name])
+                FROM tickets.user_permissions up
+                JOIN tickets.permissions p
+                    ON p.id = up.permission_id
+                WHERE up.user_id = %s
+                  AND p.url_name = %s
+                  AND COALESCE(up.allow, TRUE) = TRUE
+                LIMIT 1
+            """, [user_id, url_name])
 
-            if not cursor.fetchone():
-                return HttpResponseForbidden("ไม่มีสิทธิ์เข้าหน้านี้")
+            has_permission = cursor.fetchone()
+
+        if not has_permission:
+            return HttpResponseForbidden("ไม่มีสิทธิ์เข้าหน้านี้")
 
         return view_func(request, *args, **kwargs)
 
