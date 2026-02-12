@@ -1,9 +1,11 @@
+from functools import wraps
 from django.shortcuts import redirect
 from django.http import HttpResponseForbidden
 from django.db import connection
 
 
 def page_permission_required(view_func):
+    @wraps(view_func)
     def wrapper(request, *args, **kwargs):
 
         user = request.session.get("user")
@@ -11,6 +13,11 @@ def page_permission_required(view_func):
             return redirect("login")
 
         role_id = user.get("role_id")
+
+        # ✅ ADMIN (role 1) เข้าได้ทุกหน้า
+        if role_id == 1:
+            return view_func(request, *args, **kwargs)
+
         url_name = request.resolver_match.url_name
 
         with connection.cursor() as cursor:
