@@ -605,23 +605,32 @@ def tickets_list(request):
             s.name        AS ticket_status,
             t.user_id     AS ticket_owner_id,
 
-            -- level ที่ user อยู่ (ถ้าเป็นคิวของเรา)
+            -- คนที่มีสิทธิ์กด approve ตอนนี้ (status_id = 7)
+            (
+                SELECT STRING_AGG(u2.full_name, ', ')
+                FROM tickets.ticket_approval_status tas2
+                JOIN tickets.users u2 ON u2.id = tas2.user_id
+                WHERE tas2.ticket_id = t.id
+                AND tas2.status_id = 7
+            ) AS current_assignees,
+
+            -- level ที่ user อยู่
             (
                 SELECT tas.level
                 FROM tickets.ticket_approval_status tas
                 WHERE tas.ticket_id = t.id
-                  AND tas.user_id = %s
-                  AND tas.status_id = %s
+                AND tas.user_id = %s
+                AND tas.status_id = %s
                 LIMIT 1
             ) AS approve_level,
 
-            -- เคย approve แล้วหรือไม่ (ประวัติ)
+            -- เคย approve แล้วหรือไม่
             EXISTS (
                 SELECT 1
                 FROM tickets.ticket_approval_status tas
                 WHERE tas.ticket_id = t.id
-                  AND tas.user_id = %s
-                  AND tas.status_id = 2
+                AND tas.user_id = %s
+                AND tas.status_id = 2
             ) AS has_approved,
 
             -- ลบได้หรือไม่
@@ -641,9 +650,10 @@ def tickets_list(request):
         user_id,            # approve_level
         APPROVE_PENDING,
         user_id,            # has_approved
-        user_id,            # can_delete owner
+        user_id,            # can_delete
         DOC_WAITING_APPROVE
     ]
+
 
     # ===============================
     # ROLE-BASED VISIBILITY
@@ -734,12 +744,9 @@ def tickets_list(request):
             "created_at": created_at,
             "status": row[8],
             "ticket_owner_id": row[9],
-
-            "approve_level": row[10],
-            "is_my_turn": row[10] is not None,
-            "has_approved": row[11],
-            "can_delete": row[12],
+            "assignee": row[10],   # 👈 เพิ่มตรงนี้
         })
+
 
     return render(
         request,
