@@ -79,4 +79,6 @@ urlpatterns = [
     path("tickets/accepting-work/", views.tickets_accepting_work, name="tickets_accepting_work"),
     path("tickets/admin-accept/<int:ticket_id>/", views.admin_accept_work, name="admin_accept_work"),
 
+    # module permission
+    path("page-permission/", views.manage_permission, name="manage_permission"),
 ] 

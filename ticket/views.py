@@ -17,7 +17,7 @@ from functools import wraps
 from django.http import HttpResponseForbidden
 from django.views.decorators.http import require_POST
 from ticket.services.erp import call_erp_user_info
-from ticket.page_permission import page_permission_required
+from ticket.templatetags.page_permission import page_permission_required
 
 ERP_API_URL = "http://172.17.1.55:8111/erpAuth/"
 
@@ -2961,43 +2961,77 @@ def tickets_accepting_work(request):
     )
 #--------------การจัดโมดูลสิทธิ์การดูหน้าและปุ่ม--------------
 @page_permission_required
-def get_module_permission(role_id: int, module_name: str):
-    """
-    ดึงสิทธิ์ของ role ต่อ module
-    """
+@login_required_custom
+@role_required_role_id([1])  # admin only
+def manage_permission(request):
+
     with connection.cursor() as cursor:
+
+        # ดึง roles
         cursor.execute("""
-            SELECT
-                mp.can_view,
-                mp.can_create,
-                mp.can_edit,
-                mp.can_delete,
-                mp.can_approve
-            FROM tickets.module_permission mp
-            JOIN tickets.module m ON m.id = mp.module_id
-            WHERE mp.role_id = %s
-              AND m.module_name = %s
-            LIMIT 1
-        """, [role_id, module_name])
+            SELECT id, role_name
+            FROM tickets.roles
+            ORDER BY id
+        """)
+        roles = dictfetchall(cursor)
 
-        row = cursor.fetchone()
+        # ดึง modules
+        cursor.execute("""
+            SELECT id, module_name, display_url, description
+            FROM tickets.module
+            ORDER BY id
+        """)
+        modules = dictfetchall(cursor)
 
-    if not row:
-        return None
+        # ดึง permission
+        cursor.execute("""
+            SELECT role_id, url_name, can_access
+            FROM tickets.page_permission
+        """)
+        permissions = dictfetchall(cursor)
 
-    return {
-        "can_view": row[0],
-        "can_create": row[1],
-        "can_edit": row[2],
-        "can_delete": row[3],
-        "can_approve": row[4],
-    }
+    # สร้าง permission map
+    permission_map = {}
+    for p in permissions:
+        permission_map.setdefault(p["role_id"], {})[p["url_name"]] = p["can_access"]
 
+    # POST
+    if request.method == "POST":
 
-def has_permission(role_id: int, module_name: str, action: str):
-    perm = get_module_permission(role_id, module_name)
+        role_id = request.POST.get("role_id")
+        module_id = request.POST.get("module_id")
 
-    if not perm:
-        return False
+        # ดึง url จาก module
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT display_url
+                FROM tickets.module
+                WHERE id = %s
+            """, [module_id])
+            row = cursor.fetchone()
 
-    return perm.get(action, False)
+        if not row:
+            messages.error(request, "Module ไม่ถูกต้อง")
+            return redirect("manage_page_permission")
+
+        url_name = row[0]
+        can_access = request.POST.get("can_access") == "on"
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO tickets.page_permission (role_id, url_name, can_access)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (role_id, url_name)
+                DO UPDATE SET
+                    can_access = EXCLUDED.can_access,
+                    update_at = NOW()
+            """, [role_id, url_name, can_access])
+
+        messages.success(request, "บันทึกสิทธิ์เรียบร้อยแล้ว")
+        return redirect("manage_page_permission")
+
+    return render(request, "admin/manage_permission.html", {
+        "roles": roles,
+        "modules": modules,
+        "permission_map": permission_map,
+    })
