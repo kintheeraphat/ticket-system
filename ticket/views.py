@@ -3178,6 +3178,10 @@ from django.db import connection
 from django.shortcuts import render
 from django.http import Http404
 
+# ==============================
+# REPORT DASHBOARD
+# ==============================
+
 @login_required_custom
 @role_required_role_id([1, 2])
 def report_dashboard(request):
@@ -3186,103 +3190,124 @@ def report_dashboard(request):
     end_date = request.GET.get("end_date")
     status_id = request.GET.get("status_id")
 
-    base_query = """
+    query = """
+        SELECT
+            t.id,
+            t.title,
+            COALESCE(NULLIF(TRIM(t.department), ''), 'ไม่ระบุ') AS department,
+            u.full_name AS requester,
+            t.create_at,
+            s.name AS status_name,
+
+            (
+                SELECT action_time
+                FROM tickets.ticket_approval_status tas
+                WHERE tas.ticket_id = t.id
+                  AND tas.status_id = 2
+                ORDER BY action_time DESC
+                LIMIT 1
+            ) AS completed_at
+
         FROM tickets.tickets t
+        LEFT JOIN tickets.users u ON u.id = t.user_id
         LEFT JOIN tickets.status s ON s.id = t.status_id
         WHERE 1=1
     """
 
     params = []
 
-    if start_date and end_date:
-        base_query += " AND t.create_at::date BETWEEN %s AND %s"
+    if start_date and end_date and start_date != "None" and end_date != "None":
+        query += " AND t.create_at::date BETWEEN %s AND %s"
         params.extend([start_date, end_date])
 
-    if status_id:
-        base_query += " AND t.status_id = %s"
+    if status_id and status_id != "None":
+        query += " AND t.status_id = %s"
         params.append(status_id)
 
+    query += " ORDER BY t.create_at DESC"
+
     with connection.cursor() as cursor:
+        cursor.execute(query, params)
+        columns = [col[0] for col in cursor.description]
+        reports = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-        # ================= TABLE DATA =================
-        cursor.execute("""
-            SELECT
-                t.id,
-                t.title,
-                COALESCE(NULLIF(TRIM(t.department), ''), 'ไม่ระบุ') AS department,
-                t.create_at,
-                s.name
-        """ + base_query + " ORDER BY t.create_at DESC", params)
-
-        reports = dictfetchall(cursor)
-
-        # ================= STATUS SUMMARY =================
-        cursor.execute("""
-            SELECT s.name, COUNT(*)
-        """ + base_query + """
-            GROUP BY s.name
-            ORDER BY s.name
-        """, params)
-
-        chart_data = cursor.fetchall()
-
-        # ================= DEPARTMENT SUMMARY =================
-        cursor.execute("""
-            SELECT 
-                COALESCE(NULLIF(TRIM(t.department), ''), 'ไม่ระบุ') AS department,
-                COUNT(*)
-        """ + base_query + """
-            GROUP BY department
-            ORDER BY COUNT(*) DESC
-        """, params)
-
-        dept_data = cursor.fetchall()
-
-        # ================= STACKED DATA =================
-        cursor.execute("""
-            SELECT 
-                COALESCE(NULLIF(TRIM(t.department), ''), 'ไม่ระบุ') AS department,
-                s.name,
-                COUNT(*)
-        """ + base_query + """
-            GROUP BY department, s.name
-        """, params)
-
-        stacked_raw = cursor.fetchall()
-
-    # ===== Convert Chart Data =====
-    chart_labels = [c[0] for c in chart_data]
-    chart_values = [c[1] for c in chart_data]
-
-    dept_labels = [d[0] for d in dept_data]
-    dept_values = [d[1] for d in dept_data]
-
-    # ===== Convert Stacked =====
-    stacked_dict = defaultdict(lambda: defaultdict(int))
-
-    for dept, status, count in stacked_raw:
-        stacked_dict[dept][status] = count
-
-    statuses = list(set([s for _, s, _ in stacked_raw]))
-
-    stacked_data = []
-    for status in statuses:
-        stacked_data.append({
-            "label": status,
-            "data": [stacked_dict[d].get(status, 0) for d in dept_labels]
-        })
+    # คำนวณระยะเวลา
+    for r in reports:
+        if r["completed_at"]:
+            delta = r["completed_at"] - r["create_at"]
+            r["duration_days"] = delta.days
+        else:
+            r["duration_days"] = None
 
     return render(request, "report_dashboard.html", {
         "reports": reports,
-        "chart_labels": json.dumps(chart_labels),
-        "chart_values": json.dumps(chart_values),
-        "dept_labels": json.dumps(dept_labels),
-        "dept_values": json.dumps(dept_values),
-        "stacked_data": json.dumps(stacked_data),
-        "department_summary": dept_data,
-        "total": sum(dept_values),
+        "start_date": start_date,
+        "end_date": end_date,
+        "status_id": status_id
     })
 
+
+# ==============================
+# REPORT EXPORT
+# ==============================
+
+@login_required_custom
+@role_required_role_id([1, 2])
+def report_export_excel(request):
+
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+    status_id = request.GET.get("status_id")
+
+    query = """
+        SELECT
+            t.id,
+            t.title,
+            t.department,
+            u.full_name,
+            t.create_at,
+            s.name
+        FROM tickets.tickets t
+        LEFT JOIN tickets.users u ON u.id = t.user_id
+        LEFT JOIN tickets.status s ON s.id = t.status_id
+        WHERE 1=1
+    """
+
+    params = []
+
+    if start_date and end_date and start_date != "None" and end_date != "None":
+        query += " AND t.create_at::date BETWEEN %s AND %s"
+        params.extend([start_date, end_date])
+
+    if status_id and status_id != "None":
+        query += " AND t.status_id = %s"
+        params.append(status_id)
+
+    query += " ORDER BY t.create_at DESC"
+
+    with connection.cursor() as cursor:
+        cursor.execute(query, params)
+        rows = cursor.fetchall()
+
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = 'attachment; filename="report.xlsx"'
+
+    workbook = xlsxwriter.Workbook(response)
+    worksheet = workbook.add_worksheet("Report")
+
+    headers = ["ID", "Title", "Department", "Requester", "Created Date", "Status"]
+
+    for col, header in enumerate(headers):
+        worksheet.write(0, col, header)
+
+    for row_num, row in enumerate(rows, 1):
+        for col_num, value in enumerate(row):
+            worksheet.write(row_num, col_num, str(value))
+
+    workbook.close()
+    return response
 
 
 # ================================
