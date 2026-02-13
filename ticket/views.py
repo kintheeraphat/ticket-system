@@ -3383,3 +3383,135 @@ def report_export_excel(request):
 
     workbook.close()
     return response
+    
+def repairs_it_form(request):
+
+    if "user" not in request.session:
+        return redirect("login")
+
+    user_id = request.session["user"]["id"]
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id, name 
+            FROM tickets.it_category
+            WHERE is_active = true
+            ORDER BY name
+        """)
+        it_categories = cursor.fetchall()
+
+    if request.method == "POST":
+
+        it_category_id = request.POST.get("it_category_id")
+        problem_detail = request.POST.get("problem_detail", "").strip()
+
+        if not all([it_category_id, problem_detail]):
+            messages.error(request, "กรุณากรอกข้อมูลให้ครบถ้วน")
+            return render(request, "tickets_form/repairs_it_form.html", {
+                "it_categories": it_categories
+            })
+
+        with transaction.atomic():
+
+            type_id = 1  # IT
+
+            title = "แจ้งซ่อม IT"
+            description = problem_detail
+            status_id = 1
+            ticket_type_id = 13
+
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO tickets.tickets
+                    (title, description, user_id, status_id, ticket_type_id, create_at)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    RETURNING id
+                """, [
+                    title,
+                    description,
+                    user_id,
+                    status_id,
+                    ticket_type_id,
+                    timezone.now()
+                ])
+                ticket_id = cursor.fetchone()[0]
+
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO tickets.ticket_data_building_repair
+                    (ticket_id, user_id, type_id, it_category_id, problem_detail, building)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, [
+                    ticket_id,
+                    user_id,
+                    type_id,
+                    it_category_id,
+                    problem_detail,
+                    None  # ไม่มี building แล้ว
+                ])
+
+        create_ticket_approval_by_ticket_type(
+            ticket_id=ticket_id,
+            ticket_type_id=ticket_type_id,
+            requester_user_id=user_id
+        )
+
+        messages.success(request, "ส่งคำร้องซ่อม IT เรียบร้อยแล้ว")
+        return redirect("ticket_success")
+
+    return render(request, "tickets_form/repairs_it_form.html", {
+        "it_categories": it_categories
+    })
+def repairs_it_detail(request, ticket_id):
+
+    if "user" not in request.session:
+        return redirect("login")
+
+    user = request.session["user"]
+    user_id = user["id"]
+    is_admin = (user["role_id"] == 1)   # ✅ เพิ่มบรรทัดนี้
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                t.id,
+                t.title,
+                t.description,
+                t.create_at,
+                t.status_id,
+                u.username,
+                td.it_category_id,
+                ic.name AS it_category_name,
+                td.problem_detail
+            FROM tickets.tickets t
+            JOIN tickets.users u ON u.id = t.user_id
+            JOIN tickets.ticket_data_building_repair td ON td.ticket_id = t.id
+            LEFT JOIN tickets.it_category ic ON ic.id = td.it_category_id
+            WHERE t.id = %s
+        """, [ticket_id])
+
+        row = cursor.fetchone()
+
+    if not row:
+        raise Http404("ไม่พบคำร้อง")
+
+    ticket = {
+        "id": row[0],
+        "title": row[1],
+        "description": row[2],
+        "create_at": row[3],
+        "status_id": row[4],
+        "username": row[5],
+        "it_category_id": row[6],
+        "it_category_name": row[7],
+        "problem_detail": row[8],
+    }
+
+    can_approve, level = can_user_approve_ticket(ticket_id, user_id)
+
+    return render(request, "tickets_form/repairs_it_detail.html", {
+        "ticket": ticket,
+        "can_approve": can_approve,
+        "level": level,
+        "is_admin": is_admin,   # ✅ ส่งเข้า template
+    })

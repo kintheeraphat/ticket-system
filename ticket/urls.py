@@ -18,6 +18,7 @@ urlpatterns = [
     path("tickets/detail/report/<int:ticket_id>/", views.tickets_detail_report, name="tickets_detail_report"),
     path("tickets/detail/app/<int:ticket_id>/", views.tickets_detail_newapp, name="tickets_detail_newapp"),
     path("tickets/detail/promotion/<int:ticket_id>/", views.active_promotion_detail, name="active_promotion_detail"),
+    path("tickets/detail/repairs-it/<int:ticket_id>/", views.repairs_it_detail, name="repairs_it_detail"),
 
     # ===== CREATE =====
     path("create/", views.tickets_create, name="create"),
