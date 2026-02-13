@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load tz %}
+{% block title %}รายละเอียดแจ้งซ่อม IT{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="fw-bold mb-0">
+                รายละเอียดแจ้งซ่อม IT #{{ ticket.id }}
+            </h4>
+            <small class="text-muted">{{ ticket.title }}</small>
+        </div>
+        <a href="{% url 'tickets_list' %}" class="btn btn-outline-secondary btn-sm">
+            ← กลับหน้ารายการ
+        </a>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="text-muted small">ผู้แจ้ง</div>
+                    <div class="fw-semibold">{{ ticket.username }}</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="text-muted small">วันที่แจ้ง</div>
+                    <div>{{ ticket.create_at|date:"d/m/Y H:i" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DETAIL -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white fw-semibold">
+            ข้อมูลการแจ้งซ่อม IT
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm align-middle mb-0">
+                <tr>
+                    <th class="bg-light" style="width:250px;">ประเภทปัญหา</th>
+                    <td>{{ ticket.it_category_name }}</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">รายละเอียด</th>
+                    <td>{{ ticket.problem_detail|linebreaksbr }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    {# ================= APPROVE SECTION ================= #}
+    {% if can_approve or is_admin %}
+    <div class="card shadow-sm border-success mb-4">
+        <div class="card-body">
+
+            {# ---------- INFO ---------- #}
+            {% if is_admin %}
+            <div class="fw-semibold text-danger mb-2">
+                ⚠ สิทธิ์ Admin
+            </div>
+            {% else %}
+            <div class="fw-semibold text-success mb-2">
+                คุณสามารถอนุมัติได้ (Level {{ level }})
+            </div>
+            {% endif %}
+
+            {# ---------- APPROVE ตามสาย ---------- #}
+            {% if can_approve and ticket.status_id != 2 %}
+            <form method="post" action="{% url 'approve_ticket' ticket.id %}" class="mb-2">
+                {% csrf_token %}
+                <textarea name="remark" class="form-control mb-2" rows="2" placeholder="หมายเหตุ (ถ้ามี)"></textarea>
+                <button type="submit" class="btn btn-success">
+                    ✅ Approve
+                </button>
+            </form>
+            {% endif %}
+
+            {# ---------- ADMIN รับงาน ---------- #}
+            {% if is_admin %}
+            <form method="post" action="{% url 'approve_ticket' ticket.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="admin_override" value="1">
+                <button class="btn btn-danger">
+                    🚀 Admin รับงาน
+                </button>
+            </form>
+            {% endif %}
+
+        </div>
+    </div>
+    {% endif %}
+    {% if is_admin %}
+    <form method="post" action="{% url 'approve_ticket' ticket.id %}">
+        {% csrf_token %}
+
+        <div class="mb-2">
+            <label class="fw-semibold mb-1">Assign งานให้</label>
+            <select name="assign_user_id" class="form-select form-select-sm">
+                <option value="">-- เลือกผู้รับผิดชอบ --</option>
+                {% for u in assign_users %}
+                <option value="{{ u.0 }}">{{ u.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <input type="hidden" name="admin_override" value="1">
+
+        <button class="btn btn-danger">
+            🚀 Admin รับงาน & Assign
+        </button>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

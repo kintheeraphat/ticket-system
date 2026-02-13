@@ -76,10 +76,11 @@
                         {% url 'tickets_detail_report' t.id %}
                     {% elif t.ticket_type_id == 9 or t.ticket_type_id == 10 %}
                         {% url 'tickets_detail_newapp' t.id %}
+                    {% elif t.ticket_type_id == 13 or t.ticket_type_id == 13 %}
+                        {% url 'repairs_it_detail' t.id %}
                     {% else %}
                         {% url 'tickets_detail_erp' t.id %}
-                    {% endif %}
-                ">
+                    {% endif %}">
 
                     <!-- ID -->
                     <td class="text-center fw-bold text-muted">
@@ -142,12 +143,15 @@
                                 {% url 'tickets_detail_report' t.id %}
                             {% elif t.ticket_type_id == 9 or t.ticket_type_id == 10 %}
                                 {% url 'tickets_detail_newapp' t.id %}
+                            {% elif t.ticket_type_id == 13 %}
+                                {% url 'repairs_it_detail' t.id %}
                             {% else %}
                                 {% url 'tickets_detail_erp' t.id %}
                             {% endif %}
                         " class="btn btn-sm btn-outline-primary me-1">
                             <i class="fas fa-chevron-right"></i>
                         </a>
+
 
                         <!-- ลบ -->
                         {% if t.can_delete %}
