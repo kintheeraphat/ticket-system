@@ -22,9 +22,13 @@ from django.views.decorators.http import require_GET
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.db import connections
-from collections import namedtuple
 import json
+import calendar
+from collections import Counter
+from django.db import connection
+from django.shortcuts import render
+from django.http import HttpResponse, Http404
+from django.utils import timezone
 import datetime
 from django.http import HttpResponse
 import xlsxwriter
@@ -3059,20 +3063,113 @@ def api_admin_users(request):
             {"error": str(e)},
             status=500
         )
-  
+    
+def repairs_it_form(request):
+
+    if "user" not in request.session:
+        return redirect("login")
+
+    user_id = request.session["user"]["id"]
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id, name 
+            FROM tickets.it_category
+            WHERE is_active = true
+            ORDER BY name
+        """)
+        it_categories = cursor.fetchall()
+
+    if request.method == "POST":
+
+        it_category_id = request.POST.get("it_category_id")
+        problem_detail = request.POST.get("problem_detail", "").strip()
+        building = request.POST.get("building", "").strip()
+
+        if not all([it_category_id, problem_detail, building]):
+            messages.error(request, "กรุณากรอกข้อมูลให้ครบถ้วน")
+            return render(request, "tickets_form/repairs_it_form.html", {
+                "it_categories": it_categories
+            })
+
+        with transaction.atomic():
+
+            type_id = 1   # ✅ FIX เป็น IT (id = 1)
+
+            title = "แจ้งซ่อม IT"
+            description = problem_detail
+            status_id = 1
+            ticket_type_id = 3
+
+            # 🔹 สร้าง ticket หลัก
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO tickets.tickets
+                    (title, description, user_id, status_id, ticket_type_id, create_at)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    RETURNING id
+                """, [
+                    title,
+                    description,
+                    user_id,
+                    status_id,
+                    ticket_type_id,
+                    timezone.now()
+                ])
+                ticket_id = cursor.fetchone()[0]
+
+            # 🔹 insert detail table
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO tickets.ticket_data_building_repair
+                    (ticket_id, user_id, type_id, it_category_id, problem_detail, building)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, [
+                    ticket_id,
+                    user_id,
+                    type_id,           # ✅ เป็น 1 เสมอ
+                    it_category_id,
+                    problem_detail,
+                    building
+                ])
+
+        create_ticket_approval_by_ticket_type(
+            ticket_id=ticket_id,
+            ticket_type_id=ticket_type_id,
+            requester_user_id=user_id
+        )
+
+        messages.success(request, "ส่งคำร้องซ่อม IT เรียบร้อยแล้ว")
+        return redirect("ticket_success")
+
+    return render(request, "tickets_form/repairs_it_form.html", {
+        "it_categories": it_categories
+    })
 
 # ==============================
 # REPORT DASHBOARD
 # ==============================
 
+# =====================================
+# REPORT DASHBOARD
+# =====================================
 @login_required_custom
 @role_required_role_id([1, 2])
 def report_dashboard(request):
 
-    start_date = request.GET.get("start_date")
-    end_date = request.GET.get("end_date")
-    status_id = request.GET.get("status_id")
+    today = timezone.localdate()
+    current_year = today.year
 
+    # ===== รับค่า filter =====
+    selected_month = request.GET.get("month")
+    selected_title = request.GET.get("title", "all")
+
+    if not selected_month:
+        selected_month = today.strftime("%Y-%m")
+
+    year, month = selected_month.split("-")
+
+    # ===== Query หลัก =====
     query = """
         SELECT
             t.id,
@@ -3081,7 +3178,6 @@ def report_dashboard(request):
             u.full_name AS requester,
             t.create_at,
             s.name AS status_name,
-
             (
                 SELECT action_time
                 FROM tickets.ticket_approval_status tas
@@ -3090,22 +3186,18 @@ def report_dashboard(request):
                 ORDER BY action_time DESC
                 LIMIT 1
             ) AS completed_at
-
         FROM tickets.tickets t
         LEFT JOIN tickets.users u ON u.id = t.user_id
         LEFT JOIN tickets.status s ON s.id = t.status_id
-        WHERE 1=1
+        WHERE EXTRACT(YEAR FROM t.create_at) = %s
+          AND EXTRACT(MONTH FROM t.create_at) = %s
     """
 
-    params = []
+    params = [year, month]
 
-    if start_date and end_date and start_date != "None" and end_date != "None":
-        query += " AND t.create_at::date BETWEEN %s AND %s"
-        params.extend([start_date, end_date])
-
-    if status_id and status_id != "None":
-        query += " AND t.status_id = %s"
-        params.append(status_id)
+    if selected_title and selected_title != "all":
+        query += " AND t.title = %s"
+        params.append(selected_title)
 
     query += " ORDER BY t.create_at DESC"
 
@@ -3114,7 +3206,7 @@ def report_dashboard(request):
         columns = [col[0] for col in cursor.description]
         reports = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-    # คำนวณระยะเวลา
+    # ===== คำนวณจำนวนวัน =====
     for r in reports:
         if r["completed_at"]:
             delta = r["completed_at"] - r["create_at"]
@@ -3122,25 +3214,60 @@ def report_dashboard(request):
         else:
             r["duration_days"] = None
 
+    # ===== ดึงหัวข้อทั้งหมด (สำหรับ dropdown) =====
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT DISTINCT title FROM tickets.tickets ORDER BY title")
+        titles = [row[0] for row in cursor.fetchall()]
+
+    # ===== Chart Summary =====
+    status_counter = Counter(r["status_name"] for r in reports)
+    title_counter = Counter(r["title"] for r in reports)
+
+    chart_status_labels = list(status_counter.keys())
+    chart_status_data = list(status_counter.values())
+
+    chart_title_labels = list(title_counter.keys())
+    chart_title_data = list(title_counter.values())
+
+    # ===== เดือนเฉพาะปีปัจจุบัน =====
+    month_list = []
+    for m in range(1, 13):
+        month_value = f"{current_year}-{str(m).zfill(2)}"
+        month_label = f"{calendar.month_name[m]} {current_year}"
+        month_list.append({
+            "value": month_value,
+            "label": month_label
+        })
+
     return render(request, "report_dashboard.html", {
         "reports": reports,
-        "start_date": start_date,
-        "end_date": end_date,
-        "status_id": status_id
+        "titles": titles,
+        "selected_month": selected_month,
+        "selected_title": selected_title,
+        "month_list": month_list,
+        "chart_status_labels": json.dumps(chart_status_labels),
+        "chart_status_data": json.dumps(chart_status_data),
+        "chart_title_labels": json.dumps(chart_title_labels),
+        "chart_title_data": json.dumps(chart_title_data),
     })
 
 
-# ==============================
-# REPORT EXPORT
-# ==============================
-
+# =====================================
+# EXPORT EXCEL (ตรงกับ filter จริง)
+# =====================================
 @login_required_custom
 @role_required_role_id([1, 2])
 def report_export_excel(request):
 
-    start_date = request.GET.get("start_date")
-    end_date = request.GET.get("end_date")
-    status_id = request.GET.get("status_id")
+    selected_month = request.GET.get("month")
+    selected_title = request.GET.get("title", "all")
+
+    today = timezone.localdate()
+
+    if not selected_month:
+        selected_month = today.strftime("%Y-%m")
+
+    year, month = selected_month.split("-")
 
     query = """
         SELECT
@@ -3153,18 +3280,15 @@ def report_export_excel(request):
         FROM tickets.tickets t
         LEFT JOIN tickets.users u ON u.id = t.user_id
         LEFT JOIN tickets.status s ON s.id = t.status_id
-        WHERE 1=1
+        WHERE EXTRACT(YEAR FROM t.create_at) = %s
+          AND EXTRACT(MONTH FROM t.create_at) = %s
     """
 
-    params = []
+    params = [year, month]
 
-    if start_date and end_date and start_date != "None" and end_date != "None":
-        query += " AND t.create_at::date BETWEEN %s AND %s"
-        params.extend([start_date, end_date])
-
-    if status_id and status_id != "None":
-        query += " AND t.status_id = %s"
-        params.append(status_id)
+    if selected_title and selected_title != "all":
+        query += " AND t.title = %s"
+        params.append(selected_title)
 
     query += " ORDER BY t.create_at DESC"
 
@@ -3191,6 +3315,7 @@ def report_export_excel(request):
 
     workbook.close()
     return response
+
 
 
 # ================================
@@ -3225,7 +3350,6 @@ def report_detail(request, ticket_id):
     return render(request, "report_detail.html", {
         "report": report
     })
-
 
 @login_required_custom
 @role_required_role_id([1, 2])
