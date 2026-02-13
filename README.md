@@ -15,3 +15,4 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_SCHEMA=tickets
 
+pip install XlsxWriter==3.0.9

@@ -55,4 +55,7 @@ urlpatterns = [
     path("api/admin-users/", views.api_admin_users, name="api_admin_users"),
     path("report-dashboard/", views.report_dashboard, name="report_dashboard"),
     path("report-detail/<int:ticket_id>/", views.report_detail, name="report_detail"),
+    path("report-export/", views.report_export_excel, name="report_export_excel"),
+    path("report/<int:ticket_id>/", views.report_detail, name="report_detail"),
+
 ]
