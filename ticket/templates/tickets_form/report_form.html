@@ -17,52 +17,30 @@
     <!-- Department -->
     <div class="mb-3">
       <label class="form-label">แผนก</label>
-      <input
-        type="text"
-        name="department"
-        class="form-control"
-        placeholder="ระบุแผนก"
-        required
-      >
+      <input type="text" name="department" class="form-control" placeholder="ระบุแผนก" required>
     </div>
 
     <!-- Report Detail (ใช้เป็น description) -->
     <div class="mb-3">
       <label class="form-label">รายละเอียดรายงานที่ต้องการ</label>
-      <textarea
-        name="report_detail"
-        class="form-control"
-        rows="4"
-        placeholder="เช่น รูปแบบรายงาน เงื่อนไขข้อมูล"
-      ></textarea>
+      <textarea name="report_detail" class="form-control" rows="4"
+        placeholder="เช่น รูปแบบรายงาน เงื่อนไขข้อมูล"></textarea>
     </div>
 
     <!-- Objective (ไม่เก็บใน tickets) -->
     <div class="mb-3">
       <label class="form-label">วัตถุประสงค์ของรายงาน</label>
-      <textarea
-        name="report_objective"
-        class="form-control"
-        rows="3"
-      ></textarea>
+      <textarea name="report_objective" class="form-control" rows="3"></textarea>
     </div>
 
     <!-- Fields / Condition -->
     <div class="mb-4">
       <label class="form-label">ข้อมูลที่ต้องการ (Field / เงื่อนไข)</label>
-      <textarea
-        name="report_fields"
-        class="form-control"
-        rows="4"
-      ></textarea>
+      <textarea name="report_fields" class="form-control" rows="4"></textarea>
     </div>
 
     <div class="text-end border-top pt-3">
-      <button
-        type="button"
-        class="btn btn-outline-secondary"
-        onclick="history.back()"
-      >
+      <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
         <i class="fas fa-arrow-left me-1"></i> กลับ
       </button>
       <button type="submit" class="btn btn-primary px-5 fw-bold">
@@ -71,4 +49,8 @@
     </div>
   </form>
 </div>
+{% block extra_js %}
+<script src="{% static 'script/script.js' %}"></script>
+{% endblock %}
+
 {% endblock %}

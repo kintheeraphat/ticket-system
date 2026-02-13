@@ -29,7 +29,15 @@ from django.db import connection
 from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from django.utils import timezone
+import datetime
+from django.http import HttpResponse
 import xlsxwriter
+from ticket.templatetags.page_permission import page_permission_required
+import json
+from collections import defaultdict
+from django.db import connection
+from django.shortcuts import render
+from django.http import Http404
 
 ERP_API_URL = "http://172.17.1.55:8111/erpAuth/"
 
@@ -1594,10 +1602,8 @@ def repairs_form(request):
             return render(request, "tickets_form/repairs_form.html", {
                 "error": "กรุณากรอกข้อมูลให้ครบถ้วน"
             })
-
-        # -----------------------------
-        # INSERT tickets.tickets
-        # -----------------------------
+            
+            # คำขอฝ่ายอาคาร ลงในtickets
         with connection.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO tickets.tickets
@@ -1617,18 +1623,18 @@ def repairs_form(request):
     ticket_type_id=ticket_type_id,
     requester_user_id=user_id
 )
-        # -----------------------------
-        # INSERT ticket_data_building_repair
-        # -----------------------------
+            type_id = 2  # อาคาร
+        # insert คำขอฝ่ายอาตาร
         with connection.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO tickets.ticket_data_building_repair
-                (ticket_id, user_id, problem_detail, department, building, created_at)
+                (ticket_id, user_id, type_id, problem_detail, department, building, created_at )
                 VALUES (%s, %s, %s, %s, %s, %s)
             """, [
                 ticket_id,
                 user_id,
                 description,
+                type_id,
                 department,
                 building,
                 timezone.now()
@@ -2979,71 +2985,71 @@ def tickets_accepting_work(request):
         }
     )
 #--------------การจัดโมดูลสิทธิ์การดูหน้าและปุ่ม--------------
-# @page_permission_required
-# @login_required_custom
-# def manage_permission(request):
+@page_permission_required
+@login_required_custom
+def manage_permission(request):
 
-#     selected_user_id = request.GET.get("user_id")
+    selected_user_id = request.GET.get("user_id")
 
-#     with connection.cursor() as cursor:
+    with connection.cursor() as cursor:
 
-#         cursor.execute("""
-#             SELECT id, username
-#             FROM tickets.users
-#             ORDER BY username
-#         """)
-#         users = dictfetchall(cursor)
+        cursor.execute("""
+            SELECT id, username
+            FROM tickets.users
+            ORDER BY username
+        """)
+        users = dictfetchall(cursor)
 
-#         cursor.execute("""
-#             SELECT id, code, url_name, description
-#             FROM tickets.permissions
-#             ORDER BY code
-#         """)
-#         permissions = dictfetchall(cursor)
+        cursor.execute("""
+            SELECT id, code, url_name, description
+            FROM tickets.permissions
+            ORDER BY code
+        """)
+        permissions = dictfetchall(cursor)
 
-#         user_permission_ids = []
+        user_permission_ids = []
 
-#         if selected_user_id:
-#             cursor.execute("""
-#                 SELECT permission_id
-#                 FROM tickets.user_permissions
-#                 WHERE user_id = %s
-#             """, [selected_user_id])
+        if selected_user_id:
+            cursor.execute("""
+                SELECT permission_id
+                FROM tickets.user_permissions
+                WHERE user_id = %s
+            """, [selected_user_id])
 
-#             user_permission_ids = [
-#                 row[0] for row in cursor.fetchall()
-#             ]
+            user_permission_ids = [
+                row[0] for row in cursor.fetchall()
+            ]
 
-#     # ================= SAVE =================
-#     if request.method == "POST":
+    # ================= SAVE =================
+    if request.method == "POST":
 
-#         user_id = request.POST.get("user_id")
-#         selected_permissions = request.POST.getlist("permissions")
+        user_id = request.POST.get("user_id")
+        selected_permissions = request.POST.getlist("permissions")
 
-#         with connection.cursor() as cursor:
+        with connection.cursor() as cursor:
 
-#             # ลบทั้งหมดก่อน
-#             cursor.execute("""
-#                 DELETE FROM tickets.user_permissions
-#                 WHERE user_id = %s
-#             """, [user_id])
+            # ลบทั้งหมดก่อน
+            cursor.execute("""
+                DELETE FROM tickets.user_permissions
+                WHERE user_id = %s
+            """, [user_id])
 
-#             # insert ใหม่
-#             for perm_id in selected_permissions:
-#                 cursor.execute("""
-#                     INSERT INTO tickets.user_permissions (user_id, permission_id, allow)
-#                     VALUES (%s, %s, TRUE)
-#                 """, [user_id, perm_id])
+            # insert ใหม่
+            for perm_id in selected_permissions:
+                cursor.execute("""
+                    INSERT INTO tickets.user_permissions (user_id, permission_id, allow)
+                    VALUES (%s, %s, TRUE)
+                """, [user_id, perm_id])
 
-#         messages.success(request, "บันทึกสิทธิ์เรียบร้อยแล้ว")
-#         return redirect(f"/page-permission/?user_id={user_id}")
+        messages.success(request, "บันทึกสิทธิ์เรียบร้อยแล้ว")
+        return redirect(f"/page-permission/?user_id={user_id}")
 
-#     return render(request, "admin/manage_permission.html", {
-#         "users": users,
-#         "permissions": permissions,
-#         "user_permission_ids": user_permission_ids,
-#         "selected_user_id": selected_user_id,
-#     })
+    return render(request, "admin/manage_permission.html", {
+        "users": users,
+        "permissions": permissions,
+        "user_permission_ids": user_permission_ids,
+        "selected_user_id": selected_user_id,
+    })
 
 # API สำหรับ Stocket IT ดึงรายชื่อ Admin
 
@@ -3085,6 +3091,7 @@ def api_admin_users(request):
             {"error": str(e)},
             status=500
         )
+    
 def repairs_it_form(request):
 
     if "user" not in request.session:
