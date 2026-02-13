@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Report Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4" style="background:#e6d6c7; min-height:100vh;">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold">Report Dashboard</h3>
+
+        <form method="get" class="d-flex gap-2">
+            <input type="date" name="start_date" class="form-control">
+            <input type="date" name="end_date" class="form-control">
+            <button class="btn btn-primary">ค้นหา</button>
+        </form>
+    </div>
+
+    <!-- TOP CHARTS -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-lg-6">
+            <div class="card shadow rounded-4 p-4">
+                <h5 class="text-center fw-bold">สัดส่วนตามแผนก</h5>
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow rounded-4 p-4">
+                <h5 class="text-center fw-bold">จำนวนคำร้องตามแผนก</h5>
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- BOTTOM -->
+    <div class="row g-4">
+
+        <div class="col-lg-6">
+            <div class="card shadow rounded-4 p-4">
+                <h5 class="fw-bold">Department Summary</h5>
+
+                <table class="table table-borderless mt-3">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Department</th>
+                            <th class="text-end">Record Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in department_summary %}
+                        <tr>
+                            <td>{{ d.0 }}</td>
+                            <td class="text-end">{{ d.1 }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="fw-bold border-top">
+                            <td>รวมทั้งหมด</td>
+                            <td class="text-end">{{ total }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow rounded-4 p-4">
+                <h5 class="text-center fw-bold">เปรียบเทียบสถานะรายแผนก</h5>
+                <canvas id="stackedChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+new Chart(document.getElementById('pieChart'), {
+    type: 'pie',
+    data: {
+        labels: {{ dept_labels|safe }},
+        datasets: [{
+            data: {{ dept_values|safe }},
+            backgroundColor: ['#4f46e5','#10b981','#f59e0b','#ef4444','#6366f1','#22c55e']
+        }]
+    }
+});
+
+new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ dept_labels|safe }},
+        datasets: [{
+            label: 'Record Count',
+            data: {{ dept_values|safe }},
+            backgroundColor: '#4f46e5'
+        }]
+    }
+});
+
+new Chart(document.getElementById('stackedChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ dept_labels|safe }},
+        datasets: {{ stacked_data|safe }}
+    },
+    options: {
+        responsive: true,
+        scales: {
+            x: { stacked: true },
+            y: { stacked: true }
+        }
+    }
+});
+
+</script>
+{% endblock %}
