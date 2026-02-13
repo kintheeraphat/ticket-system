@@ -3,7 +3,6 @@
 
 {% block content %}
 <div class="container-fluid py-4">
-
 <div class="row g-4">
 
 <!-- ================= LEFT : USER PANEL ================= -->
@@ -16,7 +15,6 @@
 
     <div class="card-body pt-2">
 
-      <!-- SEARCH USER -->
       <input type="text"
              id="userSearch"
              class="form-control form-control-sm mb-3"
@@ -27,7 +25,6 @@
         {% for user in users %}
         <form method="get" class="mb-1 user-item"
               data-search="{{ user.username|lower }}">
-
           <input type="hidden" name="user_id" value="{{ user.id }}">
 
           <button type="submit"
@@ -39,15 +36,12 @@
                   {% endif %}">
               {{ user.username }}
           </button>
-
         </form>
         {% endfor %}
 
       </div>
-
     </div>
   </div>
-
 </div>
 
 
@@ -59,7 +53,6 @@
 <div class="card shadow-sm border-0 rounded-4">
 
   <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
-
     <div>
       <h5 class="fw-bold mb-0">Permission Control</h5>
       <small class="text-muted">User ID: {{ selected_user_id }}</small>
@@ -68,10 +61,32 @@
     <span class="badge bg-success rounded-pill px-3">
       Enabled: <span id="enabledCount">0</span>
     </span>
-
   </div>
 
   <div class="card-body">
+
+    <!-- 🔥 ROLE PRESET BUTTONS -->
+    <div class="mb-3 d-flex gap-2 flex-wrap">
+
+      <button type="button"
+              class="btn btn-danger btn-sm"
+              onclick="setAdminPermissions()">
+        🔴 Admin (All Access)
+      </button>
+
+      <button type="button"
+              class="btn btn-primary btn-sm"
+              onclick="setUserPermissions()">
+        🔵 User / Manager
+      </button>
+
+      <button type="button"
+              class="btn btn-outline-secondary btn-sm"
+              onclick="clearPermissions()">
+        ❌ Clear
+      </button>
+
+    </div>
 
     <!-- SEARCH PERMISSION -->
     <div class="mb-3">
@@ -116,7 +131,6 @@
       </div>
 
     </form>
-
   </div>
 </div>
 
@@ -135,13 +149,11 @@
 </div>
 
 
-<!-- ================= STYLE ================= -->
 <style>
 .user-scroll {
   max-height: 500px;
   overflow-y: auto;
 }
-
 .permission-scroll {
   max-height: 600px;
   overflow-y: auto;
@@ -149,10 +161,9 @@
 </style>
 
 
-<!-- ================= SCRIPT ================= -->
 <script>
 
-// USER SEARCH
+/* ================= USER SEARCH ================= */
 document.getElementById("userSearch").addEventListener("keyup", function(){
   let value = this.value.toLowerCase();
   document.querySelectorAll(".user-item").forEach(function(item){
@@ -161,7 +172,8 @@ document.getElementById("userSearch").addEventListener("keyup", function(){
   });
 });
 
-// ENABLED COUNT
+
+/* ================= ENABLED COUNT ================= */
 function updateEnabledCount(){
   let count = document.querySelectorAll(".permission-checkbox:checked").length;
   document.getElementById("enabledCount").innerText = count;
@@ -175,7 +187,8 @@ document.addEventListener("change", function(e){
 
 updateEnabledCount();
 
-// PERMISSION SEARCH
+
+/* ================= PERMISSION SEARCH ================= */
 document.getElementById("permissionSearch")?.addEventListener("keyup", function(){
   let value = this.value.toLowerCase();
   document.querySelectorAll(".permission-row").forEach(function(row){
@@ -183,6 +196,51 @@ document.getElementById("permissionSearch")?.addEventListener("keyup", function(
     row.style.display = text.includes(value) ? "" : "none";
   });
 });
+
+
+/* ================= ROLE PRESETS ================= */
+
+function setAdminPermissions(){
+  document.querySelectorAll(".permission-checkbox")
+      .forEach(cb => cb.checked = true);
+  updateEnabledCount();
+}
+
+
+function setUserPermissions(){
+
+  const allowedKeywords = [
+    "create_ticket",
+    "tickets_list",
+    "detail",
+    "delete_ticket",
+    "edit_ticket"
+  ];
+
+  document.querySelectorAll(".permission-row").forEach(row => {
+
+      const searchText = row.getAttribute("data-search");
+      const checkbox = row.querySelector(".permission-checkbox");
+
+      checkbox.checked = false;
+
+      allowedKeywords.forEach(key => {
+          if(searchText.includes(key)){
+              checkbox.checked = true;
+          }
+      });
+
+  });
+
+  updateEnabledCount();
+}
+
+
+function clearPermissions(){
+  document.querySelectorAll(".permission-checkbox")
+      .forEach(cb => cb.checked = false);
+  updateEnabledCount();
+}
 
 </script>
 
