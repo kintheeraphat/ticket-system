@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}แจ้งซ่อม IT{% endblock %}
+
+{% block content %}
+<div class="dashboard-table shadow-sm p-4 bg-white rounded">
+
+    <div class="mb-4">
+        <h4 class="fw-bold text-primary">
+            <i class="fas fa-desktop me-2"></i>แจ้งซ่อมอุปกรณ์ IT
+        </h4>
+        <p class="text-muted small">
+            กรุณากรอกข้อมูลให้ครบถ้วน
+        </p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- หมวดหมู่ IT -->
+        <div class="mb-4">
+            <label class="fw-bold mb-2">ประเภทปัญหา</label>
+            <select name="it_category_id" class="form-select" required>
+                <option value="">-- เลือกประเภท --</option>
+                {% for cat in it_categories %}
+                    <option value="{{ cat.0 }}">{{ cat.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- รายละเอียด -->
+        <div class="mb-4">
+            <label class="fw-bold mb-2">รายละเอียดปัญหา</label>
+            <textarea name="problem_detail"
+                      rows="4"
+                      class="form-control"
+                      required></textarea>
+        </div>
+
+        <div class="text-end border-top pt-3">
+            <button type="reset" class="btn btn-light border me-2">
+                ล้างข้อมูล
+            </button>
+            <button type="submit" class="btn btn-primary px-5 fw-bold">
+                ส่งแจ้งซ่อม
+            </button>
+        </div>
+
+    </form>
+</div>
+{% endblock %}

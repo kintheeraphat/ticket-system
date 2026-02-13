@@ -22,6 +22,7 @@ urlpatterns = [
     # ===== CREATE =====
     path("create/", views.tickets_create, name="create"),
     path("create/erp-perm/", views.erp_perm, name="erp_perm"),
+    path("create/repairs_it/", views.repairs_it_form, name="repairs_it_form"),
     path("create/repairs/", views.repairs_form, name="repairs_form"),
     path("create/adjust/", views.adjust_form, name="adjust_form"),
     path("create/app/", views.app_form, name="app_form"),

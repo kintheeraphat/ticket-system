@@ -3075,3 +3075,84 @@ def api_admin_users(request):
             {"error": str(e)},
             status=500
         )
+def repairs_it_form(request):
+
+    if "user" not in request.session:
+        return redirect("login")
+
+    user_id = request.session["user"]["id"]
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id, name 
+            FROM tickets.it_category
+            WHERE is_active = true
+            ORDER BY name
+        """)
+        it_categories = cursor.fetchall()
+
+    if request.method == "POST":
+
+        it_category_id = request.POST.get("it_category_id")
+        problem_detail = request.POST.get("problem_detail", "").strip()
+        building = request.POST.get("building", "").strip()
+
+        if not all([it_category_id, problem_detail, building]):
+            messages.error(request, "กรุณากรอกข้อมูลให้ครบถ้วน")
+            return render(request, "tickets_form/repairs_it_form.html", {
+                "it_categories": it_categories
+            })
+
+        with transaction.atomic():
+
+            type_id = 1   # ✅ FIX เป็น IT (id = 1)
+
+            title = "แจ้งซ่อม IT"
+            description = problem_detail
+            status_id = 1
+            ticket_type_id = 3
+
+            # 🔹 สร้าง ticket หลัก
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO tickets.tickets
+                    (title, description, user_id, status_id, ticket_type_id, create_at)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    RETURNING id
+                """, [
+                    title,
+                    description,
+                    user_id,
+                    status_id,
+                    ticket_type_id,
+                    timezone.now()
+                ])
+                ticket_id = cursor.fetchone()[0]
+
+            # 🔹 insert detail table
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO tickets.ticket_data_building_repair
+                    (ticket_id, user_id, type_id, it_category_id, problem_detail, building)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, [
+                    ticket_id,
+                    user_id,
+                    type_id,           # ✅ เป็น 1 เสมอ
+                    it_category_id,
+                    problem_detail,
+                    building
+                ])
+
+        create_ticket_approval_by_ticket_type(
+            ticket_id=ticket_id,
+            ticket_type_id=ticket_type_id,
+            requester_user_id=user_id
+        )
+
+        messages.success(request, "ส่งคำร้องซ่อม IT เรียบร้อยแล้ว")
+        return redirect("ticket_success")
+
+    return render(request, "tickets_form/repairs_it_form.html", {
+        "it_categories": it_categories
+    })
