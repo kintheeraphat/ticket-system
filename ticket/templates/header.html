@@ -4,146 +4,120 @@
 ================================ -->
 <aside class="sidebar d-none d-lg-flex flex-column">
 
-  <!-- Brand -->
+  <!-- ===== Brand ===== -->
   <div class="sidebar-header">
     <div class="brand">
       <i class="fas fa-ticket-alt"></i>
       <span class="brand-text">TICKETS</span>
     </div>
 
-    <button id="desktop-sidebar-toggle" class="sidebar-collapse-btn" title="ย่อ / ขยายเมนู">
+    <button id="desktop-sidebar-toggle"
+            class="sidebar-collapse-btn"
+            title="ย่อ / ขยายเมนู">
       <i class="fas fa-bars"></i>
     </button>
   </div>
 
-  <!-- Menu -->
+  <!-- ===== MENU ===== -->
   <ul class="sidebar-menu list-unstyled flex-grow-1">
 
-    <!-- ================= ADMIN / MANAGER ================= -->
-    {% if request.session.user.role_id == 1 or request.session.user.role_id == 2 %}
-    <li class="{% if request.path == '/' %}active{% endif %}">
+    {% if "dashboard" in user_permissions %}
+    <li class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
       <a href="{% url 'dashboard' %}">
         <i class="fas fa-gauge-high"></i>
         <span>Dashboard</span>
       </a>
     </li>
     {% endif %}
-    <li class="{% if request.path == '/tickets/' %}active{% endif %}">
+
+    {% if "tickets_list" in user_permissions %}
+    <li class="{% if request.resolver_match.url_name == 'tickets_list' %}active{% endif %}">
       <a href="{% url 'tickets_list' %}">
         <i class="fas fa-ticket"></i>
         <span>Tickets</span>
       </a>
     </li>
-    {% if request.session.user.role_id == 1 or request.session.user.role_id == 2 or request.session.user.role_id == 3 %}
+    {% endif %}
 
-    <li class="{% if request.path == '/' %}active{% endif %}">
+    {% if "create" in user_permissions %}
+    <li class="{% if request.resolver_match.url_name == 'create' %}active{% endif %}">
+      <a href="{% url 'create' %}">
+        <i class="fas fa-file-circle-plus"></i>
+        <span>Create Ticket</span>
+      </a>
+    </li>
+    {% endif %}
+
+    {% if "setting_team" in user_permissions %}
+    <li class="{% if request.resolver_match.url_name == 'setting_team' %}active{% endif %}">
       <a href="{% url 'setting_team' %}">
         <i class="fa-solid fa-people-group"></i>
         <span>Teams</span>
       </a>
     </li>
     {% endif %}
-    {% if request.session.user.role_id == 1 or request.session.user.role_id == 2 or request.session.user.role_id == 3 %}
 
-    <li class="{% if request.path == '/' %}active{% endif %}">
+    {% if "add_approve_line" in user_permissions %}
+    <li class="{% if request.resolver_match.url_name == 'add_approve_line' %}active{% endif %}">
       <a href="{% url 'add_approve_line' %}">
         <i class="fa-solid fa-arrow-down-up-lock"></i>
         <span>Approve Line</span>
       </a>
     </li>
     {% endif %}
-    {% if request.session.user.role_id == 1 %}
-    <li>
+
+    {% if "manage_user" in user_permissions %}
+    <li class="{% if request.resolver_match.url_name == 'manage_user' %}active{% endif %}">
       <a href="{% url 'manage_user' %}">
         <i class="fa-solid fa-users-gear"></i>
         <span>Manage Users</span>
       </a>
     </li>
     {% endif %}
-    {% if request.session.user.role_id == 1 %}
-    <li>
+
+    {% if "manage_permission" in user_permissions %}
+    <li class="{% if request.resolver_match.url_name == 'manage_permission' %}active{% endif %}">
       <a href="{% url 'manage_permission' %}">
         <i class="fa-solid fa-user-shield"></i>
         <span>Manage Permission</span>
       </a>
     </li>
     {% endif %}
-    {% if request.session.user.role_id == 1 %}
-    <li>
-      <a href="{% url 'tickets_accepting_work'%}">
+
+    {% if "tickets_accepting_work" in user_permissions %}
+    <li class="{% if request.resolver_match.url_name == 'tickets_accepting_work' %}active{% endif %}">
+      <a href="{% url 'tickets_accepting_work' %}">
         <i class="fa-solid fa-handshake"></i>
         <span>Accepting Work</span>
       </a>
     </li>
     {% endif %}
-    {% if request.session.user.role_id == 1 %}
-    <li>
-      <a href="{% url 'manage_permission' %}">
-        <i class="fa-solid fa-user-shield"></i>
-        <span>manege_permission</span>
-      </a>
-    </li>
-    {% endif %} 
-
-    <!-- ================= USER + ADMIN ================= -->
-    <li class="{% if request.path == '/create/' %}active{% endif %}">
-      <a href="{% url 'create' %}">
-        <i class="fas fa-file-circle-plus"></i>
-        <span>Create Ticket</span>
-      </a>
-    </li>
-    <li>
-      <a href="http://localhost:3000/" target="_blank" rel="noopener noreferrer" class="btn btn-success">
-        เข้า Stock
-      </a>
-    </li>
-    <!-- USER HISTORY -->
-    {% comment %} {% if request.session.user.role_id == 1 %}
-
-    <li class="{% if request.path == '/my-tickets/' %}active{% endif %}">
-      <a href="{% url 'my_tickets' %}">
-        <i class="fas fa-list"></i>
-        <span>My Tickets</span>
-      </a>
-    </li>
-    {% endif %} {% endcomment %}
-    <!-- Logout -->
-    <div class="sidebar-footer">
-
-      <!-- ===== Current User ===== -->
-      <div class="current-user">
-        <div class="user-avatar">
-          <i class="fas fa-user-circle"></i>
-        </div>
-
-        <div class="user-info">
-          <div class="user-name">
-            {{ request.session.user.full_name|default:request.session.user.username }}
-          </div>
-          <div class="user-role">
-            {% if request.session.user.role_id == 1 %}
-            Administrator
-            {% elif request.session.user.role_id == 2 %}
-            Manager
-            {% else %}
-            User
-            {% endif %}
-          </div>
-        </div>
-      </div>
-
-      <!-- Logout -->
-      <a href="{% url 'logout' %}" class="logout-btn">
-        <i class="fas fa-right-from-bracket"></i>
-        <span>Logout</span>
-      </a>
-
-    </div>
 
   </ul>
+
+  <!-- ===== FOOTER ===== -->
+  <div class="sidebar-footer">
+
+    <div class="current-user">
+      <div class="user-avatar">
+        <i class="fas fa-user-circle"></i>
+      </div>
+      <div class="user-info">
+        <div class="user-name">
+          {{ request.session.user.full_name|default:request.session.user.username }}
+        </div>
+      </div>
+    </div>
+
+    <a href="{% url 'logout' %}" class="logout-btn">
+      <i class="fas fa-right-from-bracket"></i>
+      <span>Logout</span>
+    </a>
+
+  </div>
+
 </aside>
 {% endif %}
-
 
 
 <!-- ===============================
@@ -158,19 +132,54 @@
   </span>
 </header>
 
+
 <!-- ===============================
      MOBILE SIDEBAR
 ================================ -->
 <aside id="mobile-sidebar" class="sidebar mobile-sidebar d-lg-none">
   <ul class="sidebar-menu list-unstyled">
-    <li><a href="/"><i class="fas fa-gauge-high"></i> Dashboard</a></li>
-    <li><a href="/tickets/"><i class="fas fa-ticket"></i> Tickets</a></li>
-    <li><a href="/create/"><i class="fas fa-file-circle-plus"></i> Create Ticket</a></li>
-    <li class="mt-4"><a href="/logout/"><i class="fas fa-right-from-bracket"></i> Logout</a></li>
+
+    {% if "dashboard" in user_permissions %}
+    <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    {% endif %}
+
+    {% if "tickets_list" in user_permissions %}
+    <li><a href="{% url 'tickets_list' %}">Tickets</a></li>
+    {% endif %}
+
+    {% if "create" in user_permissions %}
+    <li><a href="{% url 'create' %}">Create Ticket</a></li>
+    {% endif %}
+
+    {% if "setting_team" in user_permissions %}
+    <li><a href="{% url 'setting_team' %}">Teams</a></li>
+    {% endif %}
+
+    {% if "add_approve_line" in user_permissions %}
+    <li><a href="{% url 'add_approve_line' %}">Approve Line</a></li>
+    {% endif %}
+
+    {% if "manage_user" in user_permissions %}
+    <li><a href="{% url 'manage_user' %}">Manage Users</a></li>
+    {% endif %}
+
+    {% if "manage_permission" in user_permissions %}
+    <li><a href="{% url 'manage_permission' %}">Manage Permission</a></li>
+    {% endif %}
+
+    {% if "tickets_accepting_work" in user_permissions %}
+    <li><a href="{% url 'tickets_accepting_work' %}">Accepting Work</a></li>
+    {% endif %}
+
+    <li class="mt-3">
+      <a href="{% url 'logout' %}">Logout</a>
+    </li>
+
   </ul>
 </aside>
 
 <div id="sidebar-overlay"></div>
+
 
 <!-- ===============================
      CSS

@@ -210,11 +210,17 @@ function setAdminPermissions(){
 function setUserPermissions(){
 
   const allowedKeywords = [
-    "create_ticket",
+    "create",
     "tickets_list",
     "detail",
     "delete_ticket",
-    "edit_ticket"
+    "edit_ticket",
+    "form",
+    "borrows",
+    "vpn",
+    "erp_perm",
+    "building_repair",
+    "ticket_sussess",
   ];
 
   document.querySelectorAll(".permission-row").forEach(row => {

@@ -4,7 +4,6 @@ from django.http import HttpResponseForbidden
 from django.db import connection
 
 
-
 def page_permission_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
@@ -12,6 +11,10 @@ def page_permission_required(view_func):
         user = request.session.get("user")
         if not user:
             return redirect("login")
+
+        # 🔥 ADMIN BYPASS
+        if user.get("role_id") == 1:
+            return view_func(request, *args, **kwargs)
 
         user_id = user.get("id")
         url_name = request.resolver_match.url_name

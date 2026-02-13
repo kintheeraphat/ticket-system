@@ -66,6 +66,7 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
+                'ticket.context_processors.user_permissions',
                 'django.contrib.messages.context_processors.messages',
             ],
         },

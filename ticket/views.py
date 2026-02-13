@@ -279,15 +279,11 @@ def login_view(request):
 
 #     return render(request, "login.html")
 
-
+@page_permission_required
+@login_required_custom
 def manage_user(request):
 
-    # =====================
-    # ADMIN ONLY
-    # =====================
     session_user = request.session.get("user")
-    if not session_user or session_user.get("role_id") != 1:
-        raise Http404("Not allowed")
 
     # =====================
     # POST
@@ -305,34 +301,22 @@ def manage_user(request):
             role_id = request.POST.get("role_id")
             is_active = request.POST.get("is_active") == "1"
 
-            # -----------------------------
-            # 1️⃣ ตรวจสอบกรอก username
-            # -----------------------------
             if not erp_username:
                 messages.error(request, "กรุณาระบุ ERP Username")
                 return redirect("manage_user")
 
-            # -----------------------------
-            # 2️⃣ เรียก ERP
-            # -----------------------------
             erp_data = call_erp_user_info(erp_username)
 
             if not erp_data:
                 messages.error(request, "ไม่พบผู้ใช้งานใน ERP")
                 return redirect("manage_user")
 
-            # -----------------------------
-            # 3️⃣ เช็ค ERP ส่ง login กลับมาหรือไม่
-            # -----------------------------
             erp_login = erp_data.get("login")
 
             if not erp_login:
                 messages.error(request, "ERP ไม่ส่งข้อมูล Username กลับมา")
                 return redirect("manage_user")
 
-            # -----------------------------
-            # 4️⃣ เช็ค username ตรงกับ ERP จริงไหม
-            # -----------------------------
             if erp_login.lower().strip() != erp_username.lower().strip():
                 messages.error(
                     request,
@@ -340,12 +324,9 @@ def manage_user(request):
                 )
                 return redirect("manage_user")
 
-            # -----------------------------
-            # 5️⃣ ตรวจสอบซ้ำในระบบ
-            # -----------------------------
             with connection.cursor() as cursor:
 
-                # ซ้ำด้วย username
+                # duplicate username
                 cursor.execute("""
                     SELECT id FROM tickets.users
                     WHERE LOWER(username) = LOWER(%s)
@@ -355,7 +336,7 @@ def manage_user(request):
                     messages.error(request, "Username นี้มีอยู่ในระบบแล้ว")
                     return redirect("manage_user")
 
-                # ซ้ำด้วย erp_user_id
+                # duplicate ERP ID
                 cursor.execute("""
                     SELECT id FROM tickets.users
                     WHERE erp_user_id = %s
@@ -365,9 +346,7 @@ def manage_user(request):
                     messages.error(request, "ผู้ใช้งาน ERP นี้ถูกเพิ่มไว้แล้ว")
                     return redirect("manage_user")
 
-                # -----------------------------
-                # 6️⃣ UPSERT DEPARTMENT
-                # -----------------------------
+                # UPSERT department
                 if erp_data.get("department_id"):
 
                     cursor.execute("""
@@ -385,13 +364,11 @@ def manage_user(request):
                             erp_data.get("department_name")
                         ])
 
-                # -----------------------------
-                # 7️⃣ INSERT USER
-                # -----------------------------
+                # INSERT user
                 cursor.execute("""
                     INSERT INTO tickets.users
                         (erp_user_id, username, full_name,
-                        role_id, is_active, department_id)
+                         role_id, is_active, department_id)
                     VALUES (%s, %s, %s, %s, %s, %s)
                 """, [
                     erp_data["user_id"],
@@ -405,9 +382,8 @@ def manage_user(request):
             messages.success(request, "เพิ่มผู้ใช้งานจาก ERP เรียบร้อยแล้ว")
             return redirect("manage_user")
 
-
         # ==================================================
-        # UPDATE USER (ROLE / ACTIVE)
+        # UPDATE USER
         # ==================================================
         if action == "update_user":
 
@@ -432,7 +408,6 @@ def manage_user(request):
     # =====================
     with connection.cursor() as cursor:
 
-        # -------- USERS --------
         cursor.execute("""
             SELECT
                 u.id,
@@ -451,7 +426,6 @@ def manage_user(request):
         """)
         users = dictfetchall(cursor)
 
-        # -------- ROLES --------
         cursor.execute("""
             SELECT id, role_name
             FROM tickets.roles
@@ -459,7 +433,6 @@ def manage_user(request):
         """)
         roles = dictfetchall(cursor)
 
-        # -------- DEPARTMENTS (for filter) --------
         cursor.execute("""
             SELECT DISTINCT dept_name AS department_name
             FROM tickets.department
@@ -475,7 +448,7 @@ def manage_user(request):
     })
 
 @login_required_custom
-@role_required_role_id([1, 2, 3])  
+@page_permission_required
 def ticket_success(request):
     return render(request, "tickets_form/ticket_success.html")
 
@@ -484,9 +457,8 @@ def logout_view(request):
     request.session.flush()
     return redirect("login")    
 
-# @page_permission_required
-@login_required_custom
-@role_required_role_id([1, 2])  
+@login_required_custom 
+@page_permission_required
 def dashboard(request):
 
     # =====================
@@ -596,9 +568,8 @@ def dashboard(request):
 
     return render(request, "dashboard.html", context)
 
-# @page_permission_required
 @login_required_custom
-@role_required_role_id([1, 2, 3])
+@page_permission_required
 def tickets_list(request):
 
     user = request.session["user"]
@@ -773,12 +744,12 @@ def tickets_list(request):
         }
     )
 
-# @page_permission_required
 @login_required_custom
-@role_required_role_id([1, 2, 3])  
+@page_permission_required
 def tickets_create(req):
     return render(req,'tickets_create.html')
 
+@page_permission_required
 def erp_perm(request):
     if request.method == "POST":
 
@@ -902,7 +873,7 @@ def erp_perm(request):
        
     return render(request, "tickets_form/erp_perm.html")
 
-# @page_permission_required
+
 @login_required_custom
 @role_required_role_id([3])  
 def my_tickets(request):
@@ -922,7 +893,7 @@ def my_tickets(request):
         "tickets": rows
     })
 
-# @page_permission_required
+@page_permission_required
 def vpn(request):
     if request.method == "POST":
 
@@ -1029,7 +1000,7 @@ def vpn(request):
 
     return render(request, "tickets_form/vpn.html")
 
-# @page_permission_required
+@page_permission_required
 def borrows(req):
     return render(req,'tickets_form/borrows.html')
 
@@ -1043,9 +1014,9 @@ def dictfetchone(cursor):
 
 
 APPROVE_PENDING = 7
-# @page_permission_required
+
 @login_required_custom
-@role_required_role_id([1, 2, 3])
+@page_permission_required
 def tickets_detail_erp(request, ticket_id):
 
     user = request.session["user"]
@@ -1157,9 +1128,9 @@ def tickets_detail_erp(request, ticket_id):
         }
     )
     
-# @page_permission_required
+
 @login_required_custom
-@role_required_role_id([1, 2, 3])
+@page_permission_required
 def tickets_detail_vpn(request, ticket_id):
 
     user = request.session["user"]
@@ -1265,9 +1236,8 @@ def tickets_detail_vpn(request, ticket_id):
         }
     )
     
-# @page_permission_required
 @login_required_custom
-@role_required_role_id([1, 2, 3])
+@page_permission_required
 def tickets_detail_repairs(request, ticket_id):
 
     user = request.session["user"]
@@ -1368,9 +1338,9 @@ def tickets_detail_repairs(request, ticket_id):
         }
     )
     
-# @page_permission_required
+
 @login_required_custom
-@role_required_role_id([1, 2, 3])
+@page_permission_required
 def tickets_detail_report(request, ticket_id):
 
     user = request.session["user"]
@@ -1475,9 +1445,9 @@ def tickets_detail_report(request, ticket_id):
         }
     )
 
-# @page_permission_required
+
 @login_required_custom
-@role_required_role_id([1, 2, 3])
+@page_permission_required
 def tickets_detail_newapp(request, ticket_id):
 
     user = request.session["user"]
@@ -1576,7 +1546,7 @@ def tickets_detail_newapp(request, ticket_id):
     )
     
     
-# @page_permission_required
+@page_permission_required
 def repairs_form(request):
     if request.method == "POST":
 
@@ -1670,7 +1640,7 @@ def repairs_form(request):
         return redirect("ticket_success")
     return render(request, "tickets_form/repairs_form.html")
 
-# @page_permission_required
+@page_permission_required
 def active_promotion_detail(request, ticket_id):
 
     with connection.cursor() as cursor:
@@ -1738,7 +1708,7 @@ def active_promotion_detail(request, ticket_id):
         "files": files,
     })
 
-# @page_permission_required
+@page_permission_required
 def adjust_form(request):
     user = request.session.get("user")
     if not user:
@@ -1843,7 +1813,7 @@ def adjust_form(request):
 
     return render(request, "tickets_form/adjust_form.html")
 
-# @page_permission_required
+@page_permission_required
 def build_adjust_items(request):
     source_cust = request.POST.getlist("source_cust[]")
     source_name = request.POST.getlist("source_customer_name[]")
@@ -1882,7 +1852,7 @@ def build_adjust_items(request):
 
     return items
 
-# @page_permission_required
+@page_permission_required
 def app_form(request):
     # =========================
     # CHECK LOGIN
@@ -2017,7 +1987,7 @@ def app_form(request):
     return render(request, "tickets_form/app_form.html")
 
 
-# @page_permission_required
+@page_permission_required
 def report_form(request):
 
     # =========================
@@ -2119,7 +2089,7 @@ def report_form(request):
     return render(request, "tickets_form/report_form.html")
 
 
-# @page_permission_required
+@page_permission_required
 def active_promotion_form(request):
     
     if "user" not in request.session:
@@ -2208,7 +2178,7 @@ def dictfetchall(cursor):
     return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 
-# @page_permission_required
+@page_permission_required
 def setting_team(request):
 
     user = request.session.get("user")
@@ -2376,7 +2346,7 @@ def setting_team(request):
         "teams": teams
     })
     
-# @page_permission_required
+@page_permission_required
 def team_adduser(request, team_id):
 
     with connection.cursor() as cursor:
@@ -2457,7 +2427,7 @@ def team_adduser(request, team_id):
         "users": users
     })
 
-# @page_permission_required
+@page_permission_required
 def team_removeuser(request, team_id, member_id):
 
     with connection.cursor() as cursor:
@@ -2470,6 +2440,7 @@ def team_removeuser(request, team_id, member_id):
     messages.success(request, "ลบสมาชิกออกจากทีมเรียบร้อยแล้ว")
     return redirect("team_adduser", team_id=team_id)
 
+@page_permission_required
 def add_approve_line(request):
 
     user = request.session.get("user")
@@ -2618,7 +2589,7 @@ def add_approve_line(request):
         "category_filters": category_filters,
     })
 
-# @page_permission_required
+@page_permission_required
 def approval_flow_detail(request, category_id, team_id):
 
     with connection.cursor() as cursor:
@@ -2651,7 +2622,7 @@ def approval_flow_detail(request, category_id, team_id):
         "team_id": team_id,
     })
 
-# @page_permission_required
+@page_permission_required
 def delete_ticket(request, ticket_id):
 
     user = request.session.get("user")
@@ -2779,6 +2750,7 @@ def get_approve_line_dict_all_flows(category_id, team_id):
     return flow_dict
 
 @require_POST
+@page_permission_required
 def approve_ticket(request, ticket_id):
 
     user = request.session.get("user")
@@ -2947,9 +2919,9 @@ def admin_complete_ticket(request, ticket_id):
     return redirect("tickets_list")
 
 #--------------หน้างานที่รับไปแล้ว--------------
-# @page_permission_required
+
 @login_required_custom
-@role_required_role_id([1])  # admin เท่านั้น
+@page_permission_required
 def tickets_accepting_work(request):
 
     with connection.cursor() as cursor:
@@ -2981,8 +2953,8 @@ def tickets_accepting_work(request):
         }
     )
 #--------------การจัดโมดูลสิทธิ์การดูหน้าและปุ่ม--------------
-@page_permission_required
 @login_required_custom
+@page_permission_required
 def manage_permission(request):
 
     selected_user_id = request.GET.get("user_id")
@@ -3038,7 +3010,7 @@ def manage_permission(request):
                 """, [user_id, perm_id])
 
         messages.success(request, "บันทึกสิทธิ์เรียบร้อยแล้ว")
-        return redirect(f"/page-permission/?user_id={user_id}")
+        return redirect(f"/manage/permissions/?user_id={user_id}")
 
     return render(request, "admin/manage_permission.html", {
         "users": users,
@@ -3319,7 +3291,8 @@ def report_export_excel(request):
 
     workbook.close()
     return response
-    
+
+@page_permission_required
 def repairs_it_form(request):
 
     if "user" not in request.session:
@@ -3398,6 +3371,8 @@ def repairs_it_form(request):
     return render(request, "tickets_form/repairs_it_form.html", {
         "it_categories": it_categories
     })
+    
+@page_permission_required
 def repairs_it_detail(request, ticket_id):
 
     if "user" not in request.session:
