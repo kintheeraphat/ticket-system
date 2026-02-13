@@ -27,9 +27,13 @@ from collections import namedtuple
 import json
 import datetime
 from django.http import HttpResponse
-import pytz
-import urllib.parse
 import xlsxwriter
+from ticket.templatetags.page_permission import page_permission_required
+import json
+from collections import defaultdict
+from django.db import connection
+from django.shortcuts import render
+from django.http import Http404
 
 ERP_API_URL = "http://172.17.1.55:8111/erpAuth/"
 
@@ -1594,10 +1598,8 @@ def repairs_form(request):
             return render(request, "tickets_form/repairs_form.html", {
                 "error": "กรุณากรอกข้อมูลให้ครบถ้วน"
             })
-
-        # -----------------------------
-        # INSERT tickets.tickets
-        # -----------------------------
+            
+            # คำขอฝ่ายอาคาร ลงในtickets
         with connection.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO tickets.tickets
@@ -1617,18 +1619,18 @@ def repairs_form(request):
     ticket_type_id=ticket_type_id,
     requester_user_id=user_id
 )
-        # -----------------------------
-        # INSERT ticket_data_building_repair
-        # -----------------------------
+            type_id = 2  # อาคาร
+        # insert คำขอฝ่ายอาตาร
         with connection.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO tickets.ticket_data_building_repair
-                (ticket_id, user_id, problem_detail, department, building, created_at)
+                (ticket_id, user_id, type_id, problem_detail, department, building, created_at )
                 VALUES (%s, %s, %s, %s, %s, %s)
             """, [
                 ticket_id,
                 user_id,
                 description,
+                type_id,
                 department,
                 building,
                 timezone.now()
@@ -2979,71 +2981,71 @@ def tickets_accepting_work(request):
         }
     )
 #--------------การจัดโมดูลสิทธิ์การดูหน้าและปุ่ม--------------
-# @page_permission_required
-# @login_required_custom
-# def manage_permission(request):
+@page_permission_required
+@login_required_custom
+def manage_permission(request):
 
-#     selected_user_id = request.GET.get("user_id")
+    selected_user_id = request.GET.get("user_id")
 
-#     with connection.cursor() as cursor:
+    with connection.cursor() as cursor:
 
-#         cursor.execute("""
-#             SELECT id, username
-#             FROM tickets.users
-#             ORDER BY username
-#         """)
-#         users = dictfetchall(cursor)
+        cursor.execute("""
+            SELECT id, username
+            FROM tickets.users
+            ORDER BY username
+        """)
+        users = dictfetchall(cursor)
 
-#         cursor.execute("""
-#             SELECT id, code, url_name, description
-#             FROM tickets.permissions
-#             ORDER BY code
-#         """)
-#         permissions = dictfetchall(cursor)
+        cursor.execute("""
+            SELECT id, code, url_name, description
+            FROM tickets.permissions
+            ORDER BY code
+        """)
+        permissions = dictfetchall(cursor)
 
-#         user_permission_ids = []
+        user_permission_ids = []
 
-#         if selected_user_id:
-#             cursor.execute("""
-#                 SELECT permission_id
-#                 FROM tickets.user_permissions
-#                 WHERE user_id = %s
-#             """, [selected_user_id])
+        if selected_user_id:
+            cursor.execute("""
+                SELECT permission_id
+                FROM tickets.user_permissions
+                WHERE user_id = %s
+            """, [selected_user_id])
 
-#             user_permission_ids = [
-#                 row[0] for row in cursor.fetchall()
-#             ]
+            user_permission_ids = [
+                row[0] for row in cursor.fetchall()
+            ]
 
-#     # ================= SAVE =================
-#     if request.method == "POST":
+    # ================= SAVE =================
+    if request.method == "POST":
 
-#         user_id = request.POST.get("user_id")
-#         selected_permissions = request.POST.getlist("permissions")
+        user_id = request.POST.get("user_id")
+        selected_permissions = request.POST.getlist("permissions")
 
-#         with connection.cursor() as cursor:
+        with connection.cursor() as cursor:
 
-#             # ลบทั้งหมดก่อน
-#             cursor.execute("""
-#                 DELETE FROM tickets.user_permissions
-#                 WHERE user_id = %s
-#             """, [user_id])
+            # ลบทั้งหมดก่อน
+            cursor.execute("""
+                DELETE FROM tickets.user_permissions
+                WHERE user_id = %s
+            """, [user_id])
 
-#             # insert ใหม่
-#             for perm_id in selected_permissions:
-#                 cursor.execute("""
-#                     INSERT INTO tickets.user_permissions (user_id, permission_id, allow)
-#                     VALUES (%s, %s, TRUE)
-#                 """, [user_id, perm_id])
+            # insert ใหม่
+            for perm_id in selected_permissions:
+                cursor.execute("""
+                    INSERT INTO tickets.user_permissions (user_id, permission_id, allow)
+                    VALUES (%s, %s, TRUE)
+                """, [user_id, perm_id])
 
-#         messages.success(request, "บันทึกสิทธิ์เรียบร้อยแล้ว")
-#         return redirect(f"/page-permission/?user_id={user_id}")
+        messages.success(request, "บันทึกสิทธิ์เรียบร้อยแล้ว")
+        return redirect(f"/page-permission/?user_id={user_id}")
 
-#     return render(request, "admin/manage_permission.html", {
-#         "users": users,
-#         "permissions": permissions,
-#         "user_permission_ids": user_permission_ids,
-#         "selected_user_id": selected_user_id,
-#     })
+    return render(request, "admin/manage_permission.html", {
+        "users": users,
+        "permissions": permissions,
+        "user_permission_ids": user_permission_ids,
+        "selected_user_id": selected_user_id,
+    })
 
 # API สำหรับ Stocket IT ดึงรายชื่อ Admin
 
@@ -3085,98 +3087,7 @@ def api_admin_users(request):
             {"error": str(e)},
             status=500
         )
-def repairs_it_form(request):
-
-    if "user" not in request.session:
-        return redirect("login")
-
-    user_id = request.session["user"]["id"]
-
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT id, name 
-            FROM tickets.it_category
-            WHERE is_active = true
-            ORDER BY name
-        """)
-        it_categories = cursor.fetchall()
-
-    if request.method == "POST":
-
-        it_category_id = request.POST.get("it_category_id")
-        problem_detail = request.POST.get("problem_detail", "").strip()
-        building = request.POST.get("building", "").strip()
-
-        if not all([it_category_id, problem_detail, building]):
-            messages.error(request, "กรุณากรอกข้อมูลให้ครบถ้วน")
-            return render(request, "tickets_form/repairs_it_form.html", {
-                "it_categories": it_categories
-            })
-
-        with transaction.atomic():
-
-            type_id = 1   # ✅ FIX เป็น IT (id = 1)
-
-            title = "แจ้งซ่อม IT"
-            description = problem_detail
-            status_id = 1
-            ticket_type_id = 3
-
-            # 🔹 สร้าง ticket หลัก
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO tickets.tickets
-                    (title, description, user_id, status_id, ticket_type_id, create_at)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                    RETURNING id
-                """, [
-                    title,
-                    description,
-                    user_id,
-                    status_id,
-                    ticket_type_id,
-                    timezone.now()
-                ])
-                ticket_id = cursor.fetchone()[0]
-
-            # 🔹 insert detail table
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO tickets.ticket_data_building_repair
-                    (ticket_id, user_id, type_id, it_category_id, problem_detail, building)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                """, [
-                    ticket_id,
-                    user_id,
-                    type_id,           # ✅ เป็น 1 เสมอ
-                    it_category_id,
-                    problem_detail,
-                    building
-                ])
-
-        create_ticket_approval_by_ticket_type(
-            ticket_id=ticket_id,
-            ticket_type_id=ticket_type_id,
-            requester_user_id=user_id
-        )
-
-        messages.success(request, "ส่งคำร้องซ่อม IT เรียบร้อยแล้ว")
-        return redirect("ticket_success")
-
-    return render(request, "tickets_form/repairs_it_form.html", {
-        "it_categories": it_categories
-    })
-
-    
-# ================================
-# REPORT DASHBOARD
-# ================================
-
-import json
-from collections import defaultdict
-from django.db import connection
-from django.shortcuts import render
-from django.http import Http404
+  
 
 # ==============================
 # REPORT DASHBOARD
