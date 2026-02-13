@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Report Detail{% endblock %}
+
+{% block content %}
+
+<h3 class="fw-bold mb-4">รายละเอียดคำร้อง</h3>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <p><strong>หัวข้อฟอร์มงาน:</strong> {{ report.title }}</p>
+        <p><strong>รายละเอียด:</strong> {{ report.description }}</p>
+        <p><strong>แผนก:</strong> {{ report.department }}</p>
+        <p><strong>ผู้ร้องขอ:</strong> {{ report.requester }}</p>
+        <p><strong>วันที่ร้องขอ:</strong> {{ report.create_at|date:"d/m/Y H:i" }}</p>
+        <p><strong>สถานะ:</strong> {{ report.status_name }}</p>
+
+        <hr>
+
+        <p><strong>วันที่เสร็จสิ้น:</strong>
+            {% if report.completed_at %}
+                {{ report.completed_at|date:"d/m/Y H:i" }}
+            {% else %}
+                ยังไม่เสร็จสิ้น
+            {% endif %}
+        </p>
+
+        <p><strong>ผู้ปิดงาน:</strong>
+            {{ report.completed_by|default:"-" }}
+        </p>
+
+    </div>
+</div>
+
+{% endblock %}

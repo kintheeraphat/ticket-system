@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Report Dashboard{% endblock %}
+
+{% block content %}
+
+<h3 class="fw-bold mb-4">รายงานคำร้องทั้งหมด</h3>
+
+<div class="card shadow-sm">
+    <div class="card-body table-responsive">
+
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>หัวข้อฟอร์มงาน</th>
+                    <th>แผนก</th>
+                    <th>ผู้ร้องขอ</th>
+                    <th>วันที่ร้องขอ</th>
+                    <th>สถานะ</th>
+                    <th>วันที่เสร็จสิ้น</th>
+                    <th>ผู้ปิดงาน</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in reports %}
+                <tr>
+                    <td>{{ r.id }}</td>
+                    <td>{{ r.title }}</td>
+                    <td>{{ r.department }}</td>
+                    <td>{{ r.requester }}</td>
+                    <td>{{ r.create_at|date:"d/m/Y H:i" }}</td>
+                    <td>{{ r.status_name }}</td>
+                    <td>
+                        {% if r.completed_at %}
+                            {{ r.completed_at|date:"d/m/Y H:i" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>{{ r.completed_by|default:"-" }}</td>
+                    <td>
+                        <a href="{% url 'report_detail' r.id %}" class="btn btn-sm btn-primary">
+                            ดูรายละเอียด
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+</div>
+
+{% endblock %}

@@ -53,4 +53,6 @@ urlpatterns = [
     
     # =====API LOGIN TO STOCKET_IT=====
     path("api/admin-users/", views.api_admin_users, name="api_admin_users"),
+    path("report-dashboard/", views.report_dashboard, name="report_dashboard"),
+    path("report-detail/<int:ticket_id>/", views.report_detail, name="report_detail"),
 ]

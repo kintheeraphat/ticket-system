@@ -3156,3 +3156,163 @@ def repairs_it_form(request):
     return render(request, "tickets_form/repairs_it_form.html", {
         "it_categories": it_categories
     })
+
+    
+# ================================
+# REPORT DASHBOARD
+# ================================
+
+@login_required_custom
+@role_required_role_id([1, 2])
+def report_dashboard(request):
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                t.id,
+                t.title,
+                t.department,
+                u.full_name AS requester,
+                t.create_at,
+                t.status_id,
+                s.name AS status_name,
+
+                -- วันที่เสร็จสิ้น (Completed)
+                (
+                    SELECT action_time
+                    FROM tickets.ticket_approval_status tas
+                    WHERE tas.ticket_id = t.id
+                      AND tas.status_id = 2
+                    ORDER BY action_time DESC
+                    LIMIT 1
+                ) AS completed_at,
+
+                -- ใครเป็นคนอนุมัติล่าสุด
+                (
+                    SELECT u2.full_name
+                    FROM tickets.ticket_approval_status tas
+                    JOIN tickets.users u2 ON u2.id = tas.user_id
+                    WHERE tas.ticket_id = t.id
+                      AND tas.status_id = 2
+                    ORDER BY tas.action_time DESC
+                    LIMIT 1
+                ) AS completed_by
+
+            FROM tickets.tickets t
+            LEFT JOIN tickets.users u ON u.id = t.user_id
+            LEFT JOIN tickets.status s ON s.id = t.status_id
+            ORDER BY t.create_at DESC
+        """)
+
+        reports = dictfetchall(cursor)
+
+    return render(request, "report_dashboard.html", {
+        "reports": reports
+    })
+
+
+# ================================
+# REPORT DASHBOARD
+# ================================
+
+@login_required_custom
+@role_required_role_id([1, 2])
+def report_dashboard(request):
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                t.id,
+                t.title,
+                t.department,
+                u.full_name AS requester,
+                t.create_at,
+                t.status_id,
+                s.name AS status_name,
+
+                -- วันที่เสร็จสิ้น (Completed)
+                (
+                    SELECT action_time
+                    FROM tickets.ticket_approval_status tas
+                    WHERE tas.ticket_id = t.id
+                      AND tas.status_id = 2
+                    ORDER BY action_time DESC
+                    LIMIT 1
+                ) AS completed_at,
+
+                -- ใครเป็นคนอนุมัติล่าสุด
+                (
+                    SELECT u2.full_name
+                    FROM tickets.ticket_approval_status tas
+                    JOIN tickets.users u2 ON u2.id = tas.user_id
+                    WHERE tas.ticket_id = t.id
+                      AND tas.status_id = 2
+                    ORDER BY tas.action_time DESC
+                    LIMIT 1
+                ) AS completed_by
+
+            FROM tickets.tickets t
+            LEFT JOIN tickets.users u ON u.id = t.user_id
+            LEFT JOIN tickets.status s ON s.id = t.status_id
+            ORDER BY t.create_at DESC
+        """)
+
+        reports = dictfetchall(cursor)
+
+    return render(request, "report_dashboard.html", {
+        "reports": reports
+    })
+
+
+# ================================
+# REPORT DETAIL
+# ================================
+
+@login_required_custom
+@role_required_role_id([1, 2])
+def report_detail(request, ticket_id):
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                t.id,
+                t.title,
+                t.description,
+                t.department,
+                u.full_name AS requester,
+                t.create_at,
+                s.name AS status_name,
+
+                (
+                    SELECT action_time
+                    FROM tickets.ticket_approval_status tas
+                    WHERE tas.ticket_id = t.id
+                      AND tas.status_id = 2
+                    ORDER BY action_time DESC
+                    LIMIT 1
+                ) AS completed_at,
+
+                (
+                    SELECT u2.full_name
+                    FROM tickets.ticket_approval_status tas
+                    JOIN tickets.users u2 ON u2.id = tas.user_id
+                    WHERE tas.ticket_id = t.id
+                      AND tas.status_id = 2
+                    ORDER BY tas.action_time DESC
+                    LIMIT 1
+                ) AS completed_by
+
+            FROM tickets.tickets t
+            LEFT JOIN tickets.users u ON u.id = t.user_id
+            LEFT JOIN tickets.status s ON s.id = t.status_id
+            WHERE t.id = %s
+        """, [ticket_id])
+
+        report = dictfetchone(cursor)
+
+    if not report:
+        raise Http404("ไม่พบข้อมูล")
+
+    return render(request, "report_detail.html", {
+        "report": report
+    })
