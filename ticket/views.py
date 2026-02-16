@@ -3146,13 +3146,7 @@ def repairs_it_form(request):
         "it_categories": it_categories
     })
 
-# ==============================
-# REPORT DASHBOARD
-# ==============================
 
-# =====================================
-# REPORT DASHBOARD
-# =====================================
 @login_required_custom
 @page_permission_required
 def report_dashboard(request):
