@@ -17,6 +17,7 @@ def user_permissions(request):
         """, [user["id"]])
 
         permissions = [row[0] for row in cursor.fetchall()]
+    print("🔥 CONTEXT PROCESSOR RUNNING")
 
     return {
         "user_permissions": permissions

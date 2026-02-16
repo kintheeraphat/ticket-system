@@ -16,4 +16,7 @@ DB_PORT=5432
 DB_SCHEMA=tickets
 
 pip install XlsxWriter==3.0.9
-'ticket.context_processors.user_permissions',
+
+>>> from django.conf import settings
+>>> settings.TEMPLATES[0]["OPTIONS"]["context_processors"]
+['django.template.context_processors.request', 'django.contrib.auth.context_processors.auth', 'ticket.context_processors.user_permissions', 'django.contrib.messages.context_processors.messages']
