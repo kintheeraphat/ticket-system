@@ -3154,7 +3154,7 @@ def repairs_it_form(request):
 # REPORT DASHBOARD
 # =====================================
 @login_required_custom
-@role_required_role_id([1, 2])
+@page_permission_required
 def report_dashboard(request):
 
     today = timezone.localdate()
@@ -3256,7 +3256,7 @@ def report_dashboard(request):
 # EXPORT EXCEL (ตรงกับ filter จริง)
 # =====================================
 @login_required_custom
-@role_required_role_id([1, 2])
+@page_permission_required
 def report_export_excel(request):
 
     selected_month = request.GET.get("month")
@@ -3323,7 +3323,7 @@ def report_export_excel(request):
 # ================================
 
 @login_required_custom
-@role_required_role_id([1, 2])
+@page_permission_required
 def report_detail(request, ticket_id):
 
     with connection.cursor() as cursor:
