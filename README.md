@@ -21,3 +21,5 @@ SELECT *
 FROM tickets.user_permissions up
 JOIN tickets.permissions p ON p.id = up.permission_id
 WHERE up.user_id = 1;
+
+https://gamma.app/docs/Django-PostgreSQL-3kvzdumwl1t69na?mode=doc
