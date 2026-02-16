@@ -12,10 +12,8 @@ def page_permission_required(view_func):
         if not user:
             return redirect("login")
 
-        # 🔥 ADMIN BYPASS
         if user.get("role_id") == 1:
             return view_func(request, *args, **kwargs)
-
         user_id = user.get("id")
         url_name = request.resolver_match.url_name
 

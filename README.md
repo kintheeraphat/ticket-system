@@ -17,6 +17,7 @@ DB_SCHEMA=tickets
 
 pip install XlsxWriter==3.0.9
 
->>> from django.conf import settings
->>> settings.TEMPLATES[0]["OPTIONS"]["context_processors"]
-['django.template.context_processors.request', 'django.contrib.auth.context_processors.auth', 'ticket.context_processors.user_permissions', 'django.contrib.messages.context_processors.messages']
+SELECT *
+FROM tickets.user_permissions up
+JOIN tickets.permissions p ON p.id = up.permission_id
+WHERE up.user_id = 1;
