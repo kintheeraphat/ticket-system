@@ -1347,7 +1347,7 @@ def borrow_detail(request, ticket_id):
     with connection.cursor() as cursor:
 
         # -------------------------
-        # BORROW HEADER
+        # BORROW HEADER + USER NAME
         # -------------------------
         cursor.execute("""
             SELECT 
@@ -1357,28 +1357,67 @@ def borrow_detail(request, ticket_id):
                 b.remark,
                 b.request_item,
                 t.department,
-                t.create_at
+                t.create_at,
+                u.full_name
             FROM tickets.borrow_requests b
             JOIN tickets.tickets t ON t.id = b.ticket_id
+            JOIN tickets.users u ON u.id = b.user_id
             WHERE b.ticket_id = %s
         """, [ticket_id])
 
-        borrow = cursor.fetchone()
+        row = cursor.fetchone()
 
-        if not borrow:
+        if not row:
             return redirect("dashboard")
 
-        # -------------------------
-        # EQUIPMENT LIST
-        # (สมมุติว่ามี table borrow_items)
-        # -------------------------
-        cursor.execute("""
-            SELECT item_name, details, quantity
-            FROM tickets.borrow_items
-            WHERE borrow_request_id = %s
-        """, [borrow[0]])
+        borrow = {
+            "id": row[0],
+            "borrow_date": row[1],
+            "return_date": row[2],
+            "remark": row[3],
+            "request_item": row[4],
+            "department": row[5],
+            "create_at": row[6],
+            "full_name": row[7],
+        }
 
-        items = cursor.fetchall()
+        # -------------------------
+        # PARSE ITEMS (3 คอลัมน์)
+        # -------------------------
+        items = []
+
+        if borrow["request_item"]:
+            lines = borrow["request_item"].split("\n")
+
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
+
+                # ตัดเลขลำดับหน้าออก เช่น 1.
+                if ". " in line:
+                    line = line.split(". ", 1)[1]
+
+                # แยกจำนวน (x 2)
+                qty = ""
+                if " x " in line:
+                    parts = line.rsplit(" x ", 1)
+                    line = parts[0]
+                    qty = parts[1].strip()
+
+                # แยกชื่อ กับ สเปค
+                name = line
+                spec = ""
+
+                if "(" in line and ")" in line:
+                    name = line.split("(", 1)[0].strip()
+                    spec = line.split("(", 1)[1].rsplit(")", 1)[0].strip()
+
+                items.append({
+                    "name": name,
+                    "spec": spec,
+                    "qty": qty
+                })
 
         # -------------------------
         # FILES
@@ -1392,11 +1431,16 @@ def borrow_detail(request, ticket_id):
 
         files = cursor.fetchall()
 
-    return render(request, "tickets_form/borrow_detail.html", {
-        "borrow": borrow,
-        "items": items,
-        "files": files,
-    })
+    return render(
+        request,
+        "tickets_form/borrow_detail.html",
+        {
+            "borrow": borrow,
+            "files": files,
+            "items": items,
+        }
+    )
+
 
 
 @login_required_custom

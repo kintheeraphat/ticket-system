@@ -14,17 +14,17 @@
 
             <div class="col-md-4">
                 <label class="fw-bold">วันที่จัดทำ</label>
-                <input type="text" class="form-control" value="{{ ticket.create_at|date:'d/m/Y' }}" readonly>
+                <input type="text" class="form-control" value="{{ borrow.create_at|date:'d/m/Y' }}" readonly>
             </div>
 
             <div class="col-md-4">
                 <label class="fw-bold">วันที่ยืม</label>
-                <input type="text" class="form-control" value="{{ detail.borrow_date|date:'d/m/Y' }}" readonly>
+                <input type="text" class="form-control" value="{{ borrow.borrow_date|date:'d/m/Y' }}" readonly>
             </div>
 
             <div class="col-md-4">
                 <label class="fw-bold">วันที่คืน</label>
-                <input type="text" class="form-control" value="{{ detail.return_date|date:'d/m/Y' }}" readonly>
+                <input type="text" class="form-control" value="{{ borrow.return_date|date:'d/m/Y' }}" readonly>
             </div>
 
         </div>
@@ -34,12 +34,12 @@
     <div class="row mb-3">
         <div class="col-md-6">
             <label class="fw-bold">แผนก</label>
-            <input type="text" class="form-control" value="{{ detail.department }}" readonly>
+            <input type="text" class="form-control" value="{{ borrow.department }}" readonly>
         </div>
 
         <div class="col-md-6">
             <label class="fw-bold">ผู้ขอ</label>
-            <input type="text" class="form-control" value="{{ ticket.user_name }}" readonly>
+            <input type="text" class="form-control" value="{{ borrow.full_name }}" readonly>
         </div>
         <!-- EQUIPMENT TABLE -->
         <div class="mb-3">
