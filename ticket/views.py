@@ -1344,6 +1344,10 @@ def borrow_detail(request, ticket_id):
     if "user" not in request.session:
         return redirect("login")
 
+    user = request.session["user"]
+    user_id = user["id"]
+    role_id = user["role_id"]
+
     with connection.cursor() as cursor:
 
         # -------------------------
@@ -1382,7 +1386,7 @@ def borrow_detail(request, ticket_id):
         }
 
         # -------------------------
-        # PARSE ITEMS (3 คอลัมน์)
+        # PARSE ITEMS
         # -------------------------
         items = []
 
@@ -1394,18 +1398,15 @@ def borrow_detail(request, ticket_id):
                 if not line:
                     continue
 
-                # ตัดเลขลำดับหน้าออก เช่น 1.
                 if ". " in line:
                     line = line.split(". ", 1)[1]
 
-                # แยกจำนวน (x 2)
                 qty = ""
                 if " x " in line:
                     parts = line.rsplit(" x ", 1)
                     line = parts[0]
                     qty = parts[1].strip()
 
-                # แยกชื่อ กับ สเปค
                 name = line
                 spec = ""
 
@@ -1431,6 +1432,22 @@ def borrow_detail(request, ticket_id):
 
         files = cursor.fetchall()
 
+    # =========================
+    # APPROVAL PERMISSION
+    # =========================
+    is_admin = (role_id == 1)
+
+    can_approve_flag = False
+    my_level = None
+
+    if not is_admin:
+        can_approve_flag, my_level = can_approve(
+            ticket_id=ticket_id,
+            user_id=user_id
+        )
+    else:
+        can_approve_flag = True
+
     return render(
         request,
         "tickets_form/borrow_detail.html",
@@ -1438,10 +1455,12 @@ def borrow_detail(request, ticket_id):
             "borrow": borrow,
             "files": files,
             "items": items,
+            "can_approve": can_approve_flag,
+            "my_level": my_level,
+            "is_admin": is_admin,
+            "ticket": {"id": ticket_id},
         }
     )
-
-
 
 @login_required_custom
 @page_permission_required
