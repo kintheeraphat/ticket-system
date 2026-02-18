@@ -62,4 +62,6 @@ urlpatterns = [
     # ===== PERMISSION MANAGEMENT =====
     path("manage/permissions/", views.manage_permission, name="manage_permission"),
 
+    path("preview/<path:path>/", views.preview_media, name="preview_media"),
+
 ]

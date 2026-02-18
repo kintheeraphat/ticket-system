@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.contrib import messages
 from django.utils.dateparse import parse_date
 from datetime import timezone as dt_timezone
-# from django.core.files.storage import FileSystemStorage
+from django.views.decorators.clickjacking import xframe_options_exempt
 import os,json
 from django.http import Http404
 from .decorators import login_required_custom
@@ -26,7 +26,7 @@ import calendar
 from collections import Counter
 from django.db import connection
 from django.shortcuts import render
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404,FileResponse
 from django.utils import timezone
 from django.http import HttpResponse
 import xlsxwriter
@@ -3875,3 +3875,12 @@ def repairs_it_detail(request, ticket_id):
         "level": level,
         "is_admin": is_admin,   # ✅ ส่งเข้า template
     })
+
+@xframe_options_exempt
+def preview_media(request, path):
+    file_path = os.path.join(settings.MEDIA_ROOT, path)
+
+    if os.path.exists(file_path):
+        return FileResponse(open(file_path, 'rb'), content_type='application/pdf')
+
+    raise Http404("File not found")
