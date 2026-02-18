@@ -1,11 +1,10 @@
+from datetime import date, datetime, time, timedelta
 from django.shortcuts import render, redirect
 from django.db import connection ,transaction
 from django.utils import timezone
 from django.contrib import messages
 from django.utils.dateparse import parse_date
 from datetime import timezone as dt_timezone
-from datetime import date, timedelta
-from datetime import datetime
 # from django.core.files.storage import FileSystemStorage
 import os,json
 from django.http import Http404
@@ -29,7 +28,6 @@ from django.db import connection
 from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from django.utils import timezone
-import datetime
 from django.http import HttpResponse
 import xlsxwriter
 from ticket.templatetags.page_permission import page_permission_required
@@ -42,6 +40,21 @@ from django.http import Http404
 ERP_API_URL = "http://172.17.1.55:8111/erpAuth/"
 
 DOC_WAITING_APPROVE = 1
+
+class ApprovalTeamNotFound(Exception):
+    pass
+
+def handle_approval_error(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        try:
+            return view_func(request, *args, **kwargs)
+        except ApprovalTeamNotFound as e:
+            messages.error(request, str(e))
+            return redirect(request.path)  # เด้งกลับหน้าเดิมอัตโนมัติ
+    return wrapper
+
+
 @csrf_exempt
 def erp_auth(username, password):
     """
@@ -461,7 +474,8 @@ def logout_view(request):
     request.session.flush()
     return redirect("login")    
 
-@login_required_custom 
+
+@login_required_custom
 @page_permission_required
 def dashboard(request):
 
@@ -478,15 +492,20 @@ def dashboard(request):
     end_date = request.GET.get("end_date")
 
     if not start_date or not end_date:
-        end_date = date.today()
-        start_date = end_date - timedelta(days=30)
+        today = date.today()
+        start_date = today.replace(day=1)   # วันที่ 1 ของเดือนปัจจุบัน
+        end_date = today
     else:
         start_date = date.fromisoformat(start_date)
         end_date = date.fromisoformat(end_date)
 
-    # 👉 แปลงวันที่เป็นข้อความไทย
+    # แปลงวันที่เป็นภาษาไทย (สำหรับแสดงผล)
     start_date_th = thai_date(start_date)
     end_date_th = thai_date(end_date)
+
+    # ⚠️ สำคัญ: แปลงเป็น datetime ให้ครอบคลุมทั้งวัน
+    start_dt = datetime.combine(start_date, time.min)
+    end_dt   = datetime.combine(end_date, time.max)
 
     # =====================
     # DB QUERY
@@ -499,9 +518,9 @@ def dashboard(request):
             FROM tickets.tickets
             WHERE create_at BETWEEN %s AND %s
             GROUP BY status_id
-        """, [start_date, end_date])
-        rows = cursor.fetchall()
+        """, [start_dt, end_dt])
 
+        rows = cursor.fetchall()
         status_counts = {sid: cnt for sid, cnt in rows}
 
         waiting_approve = status_counts.get(1, 0)
@@ -522,9 +541,9 @@ def dashboard(request):
             GROUP BY tt.name
             ORDER BY total DESC
             LIMIT 1
-        """, [start_date, end_date])
-        top1 = cursor.fetchone()
+        """, [start_dt, end_dt])
 
+        top1 = cursor.fetchone()
         top_category_name  = top1[0] if top1 else "-"
         top_category_count = top1[1] if top1 else 0
 
@@ -537,9 +556,9 @@ def dashboard(request):
                AND t.create_at BETWEEN %s AND %s
             GROUP BY tt.name
             ORDER BY total DESC
-        """, [start_date, end_date])
-        category_rows = cursor.fetchall()
+        """, [start_dt, end_dt])
 
+        category_rows = cursor.fetchall()
         chart_labels = [row[0] for row in category_rows]
         chart_values = [row[1] for row in category_rows]
 
@@ -547,11 +566,11 @@ def dashboard(request):
     # CONTEXT
     # =====================
     context = {
-        # DATE (ใช้กับ input)
+        # DATE (input)
         "start_date": start_date,
         "end_date": end_date,
 
-        # DATE (แสดงผลภาษาไทย)
+        # DATE (display)
         "start_date_th": start_date_th,
         "end_date_th": end_date_th,
 
@@ -752,129 +771,135 @@ def tickets_list(request):
 @page_permission_required
 def tickets_create(req):
     return render(req,'tickets_create.html')
-
 @page_permission_required
+@handle_approval_error
 def erp_perm(request):
+
     if request.method == "POST":
 
-        # -----------------------------
-        # REQUEST TYPE
-        # -----------------------------
-        request_type = request.POST.get("request_type")
+        try:
+            with transaction.atomic():
 
-        # -----------------------------
-        # DEFAULT VALUE (กัน NameError)
-        # -----------------------------
-        title = "คำร้อง ERP"
-        ticket_type_id = 1   # default
-        status_id = 1        # Waiting for Approve
+                # -----------------------------
+                # REQUEST TYPE
+                # -----------------------------
+                request_type = request.POST.get("request_type")
 
-        if request_type == "open_user":
-            title = "ขอเปิด User ใหม่"
-            ticket_type_id = 2
+                title = "คำร้อง ERP"
+                ticket_type_id = 1
+                status_id = 1
 
-        elif request_type == "adjust_perm":
-            title = "ปรับปรุงสิทธิ์เดิม"
-            ticket_type_id = 1
+                if request_type == "open_user":
+                    title = "ขอเปิด User ใหม่"
+                    ticket_type_id = 2
 
-        # -----------------------------
-        # OTHER DATA
-        # -----------------------------
-        description = request.POST.get("remark", "")
-        user_id = request.session["user"]["id"]
-        department = request.POST.getlist("department[]")
+                elif request_type == "adjust_perm":
+                    title = "ปรับปรุงสิทธิ์เดิม"
+                    ticket_type_id = 1
 
-        # -----------------------------
-        # INSERT TICKET
-        # -----------------------------
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                INSERT INTO tickets.tickets
-                (title, description, user_id, status_id, ticket_type_id,department)
-                VALUES (%s, %s, %s, %s, %s, %s)
-                RETURNING id
-            """, [
-                title,
-                description,
-                user_id,
-                status_id,
-                ticket_type_id,
-                department
-            ])
-            ticket_id = cursor.fetchone()[0]
-            create_ticket_approval_by_ticket_type(
-    ticket_id=ticket_id,
-    ticket_type_id=ticket_type_id,
-    requester_user_id=user_id
-)
-        # -----------------------------
-        # PREPARE ERP DATA
-        # -----------------------------
-        module_access = True
-        perm_change = (request_type == "adjust_perm")
+                description = request.POST.get("remark", "")
+                user_id = request.session["user"]["id"]
+                department = request.POST.getlist("department[]")
 
-        # รายชื่อผู้ขอ (หลายคน)
-        names = request.POST.getlist("name_en[]")
-        requester_names = "\n".join([n.strip() for n in names if n.strip()])
+                # -----------------------------
+                # INSERT TICKET
+                # -----------------------------
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO tickets.tickets
+                        (title, description, user_id, status_id, ticket_type_id, department)
+                        VALUES (%s, %s, %s, %s, %s, %s)
+                        RETURNING id
+                    """, [
+                        title,
+                        description,
+                        user_id,
+                        status_id,
+                        ticket_type_id,
+                        department
+                    ])
+                    ticket_id = cursor.fetchone()[0]
 
-        # module ERP (หลาย module)
-        modules = request.POST.getlist("erp_module[]")
-        requested_modules = "\n".join([m.strip() for m in modules if m.strip()])
+                # -----------------------------
+                # CREATE APPROVAL
+                # -----------------------------
+                create_ticket_approval_by_ticket_type(
+                    ticket_id=ticket_id,
+                    ticket_type_id=ticket_type_id,
+                    requester_user_id=user_id
+                )
 
-        # -----------------------------
-        # INSERT ticket_data_erp_app
-        # -----------------------------
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                INSERT INTO tickets.ticket_data_erp_app
-                (ticket_id, module_access, perm_change,
-                 requester_names, module_name)
-                VALUES (%s, %s, %s, %s, %s)
-                RETURNING id
-            """, [
-                ticket_id,
-                module_access,
-                perm_change,
-                requester_names,
-                requested_modules
-            ])
-            erp_data_id = cursor.fetchone()[0]
+                # -----------------------------
+                # PREPARE ERP DATA
+                # -----------------------------
+                module_access = True
+                perm_change = (request_type == "adjust_perm")
 
-        # -----------------------------
-        # UPLOAD FILES → ticket_files
-        # -----------------------------
-        files = request.FILES.getlist("attachments[]")
-        upload_dir = f"uploads/erp/{ticket_id}"
-        os.makedirs(upload_dir, exist_ok=True)
+                names = request.POST.getlist("name_en[]")
+                requester_names = "\n".join([n.strip() for n in names if n.strip()])
 
-        for f in files:
-            file_path = f"{upload_dir}/{f.name}"
+                modules = request.POST.getlist("erp_module[]")
+                requested_modules = "\n".join([m.strip() for m in modules if m.strip()])
 
-            with open(file_path, "wb+") as destination:
-                for chunk in f.chunks():
-                    destination.write(chunk)
+                # -----------------------------
+                # INSERT ERP DATA
+                # -----------------------------
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO tickets.ticket_data_erp_app
+                        (ticket_id, module_access, perm_change,
+                         requester_names, module_name)
+                        VALUES (%s, %s, %s, %s, %s)
+                        RETURNING id
+                    """, [
+                        ticket_id,
+                        module_access,
+                        perm_change,
+                        requester_names,
+                        requested_modules
+                    ])
+                    erp_data_id = cursor.fetchone()[0]
 
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO tickets.ticket_files
-                    (ticket_id, ref_type, ref_id,
-                     file_name, file_path, file_type,
-                     file_size, uploaded_by, create_at)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """, [
-                    ticket_id,
-                    "ERP_APP",
-                    erp_data_id,
-                    f.name,
-                    file_path,
-                    f.content_type,
-                    f.size,
-                    user_id,
-                    timezone.now()
-                ])
+                # -----------------------------
+                # FILE UPLOAD
+                # -----------------------------
+                files = request.FILES.getlist("attachments[]")
+                upload_dir = f"uploads/erp/{ticket_id}"
+                os.makedirs(upload_dir, exist_ok=True)
 
+                for f in files:
+                    file_path = f"{upload_dir}/{f.name}"
+
+                    with open(file_path, "wb+") as destination:
+                        for chunk in f.chunks():
+                            destination.write(chunk)
+
+                    with connection.cursor() as cursor:
+                        cursor.execute("""
+                            INSERT INTO tickets.ticket_files
+                            (ticket_id, ref_type, ref_id,
+                             file_name, file_path, file_type,
+                             file_size, uploaded_by, create_at)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        """, [
+                            ticket_id,
+                            "ERP_APP",
+                            erp_data_id,
+                            f.name,
+                            file_path,
+                            f.content_type,
+                            f.size,
+                            user_id,
+                            timezone.now()
+                        ])
+
+        except ApprovalTeamNotFound as e:
+            messages.error(request, str(e))
+            return redirect(request.path)
+
+        messages.success(request, "สร้างคำร้องสำเร็จ")
         return redirect("ticket_success")
-       
+
     return render(request, "tickets_form/erp_perm.html")
 
 
@@ -898,113 +923,125 @@ def my_tickets(request):
     })
 
 @page_permission_required
+@handle_approval_error
 def vpn(request):
+
     if request.method == "POST":
 
-        # -----------------------------
-        # BASIC TICKET INFO
-        # -----------------------------
-        title = "ขออนุมัติใช้งาน Virtual Private Network (VPN)"
-        description = request.POST.get("reason", "")
-        ticket_type_id = 3      
-        status_id = 1           
-        user_id = request.session["user"]["id"]
+        try:
+            with transaction.atomic():
 
-        # รวมแผนก (กรณีหลายคน → เก็บเป็น text)
-        departments = request.POST.getlist("department[]")
-        department_text = ", ".join([d.strip() for d in departments if d.strip()])
+                # -----------------------------
+                # BASIC TICKET INFO
+                # -----------------------------
+                title = "ขออนุมัติใช้งาน Virtual Private Network (VPN)"
+                description = request.POST.get("reason", "")
+                ticket_type_id = 3
+                status_id = 1
+                user_id = request.session["user"]["id"]
 
-        # -----------------------------
-        # INSERT tickets.tickets
-        # -----------------------------
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                INSERT INTO tickets.tickets
-                (title, description, user_id, status_id, ticket_type_id, department)
-                VALUES (%s, %s, %s, %s, %s, %s)
-                RETURNING id
-            """, [
-                title,
-                description,
-                user_id,
-                status_id,
-                ticket_type_id,
-                department_text
-            ])
-            ticket_id = cursor.fetchone()[0]
+                departments = request.POST.getlist("department[]")
+                department_text = ", ".join([d.strip() for d in departments if d.strip()])
 
-        # -----------------------------
-        # PREPARE VPN DATA
-        # -----------------------------
-        start_date = request.POST.get("start_date")
-        end_date = request.POST.get("end_date")
-        vpn_reason = request.POST.get("reason", "")
+                # -----------------------------
+                # INSERT tickets.tickets
+                # -----------------------------
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO tickets.tickets
+                        (title, description, user_id, status_id, ticket_type_id, department)
+                        VALUES (%s, %s, %s, %s, %s, %s)
+                        RETURNING id
+                    """, [
+                        title,
+                        description,
+                        user_id,
+                        status_id,
+                        ticket_type_id,
+                        department_text
+                    ])
+                    ticket_id = cursor.fetchone()[0]
 
-        # รายชื่อผู้ใช้ VPN (หลายคน)
-        names = request.POST.getlist("user_names[]")
-        uservpn = "\n".join([n.strip() for n in names if n.strip()])
+                # -----------------------------
+                # PREPARE VPN DATA
+                # -----------------------------
+                start_date = request.POST.get("start_date")
+                end_date = request.POST.get("end_date")
+                vpn_reason = request.POST.get("reason", "")
 
-        # -----------------------------
-        # INSERT ticket_data_vpn
-        # -----------------------------
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                INSERT INTO tickets.ticket_data_vpn
-                (ticket_id, start_date, end_date, vpn_reason, uservpn)
-                VALUES (%s, %s, %s, %s, %s)
-                RETURNING id
-            """, [
-                ticket_id,
-                start_date,
-                end_date,
-                vpn_reason,
-                uservpn
-            ])
-            vpn_data_id = cursor.fetchone()[0]
-            create_ticket_approval_by_ticket_type(
-    ticket_id=ticket_id,
-    ticket_type_id=ticket_type_id,
-    requester_user_id=user_id
-)
+                names = request.POST.getlist("user_names[]")
+                uservpn = "\n".join([n.strip() for n in names if n.strip()])
 
-        # -----------------------------
-        # UPLOAD FILES
-        # -----------------------------
-        files = request.FILES.getlist("order_file[]")
-        upload_dir = f"media/uploads/vpn/{ticket_id}"
-        os.makedirs(upload_dir, exist_ok=True)
+                # -----------------------------
+                # INSERT ticket_data_vpn
+                # -----------------------------
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO tickets.ticket_data_vpn
+                        (ticket_id, start_date, end_date, vpn_reason, uservpn)
+                        VALUES (%s, %s, %s, %s, %s)
+                        RETURNING id
+                    """, [
+                        ticket_id,
+                        start_date,
+                        end_date,
+                        vpn_reason,
+                        uservpn
+                    ])
+                    vpn_data_id = cursor.fetchone()[0]
 
-        for f in files:
-            file_path = f"{upload_dir}/{f.name}"
+                # -----------------------------
+                # CREATE APPROVAL (ถ้าไม่มีจะ raise)
+                # -----------------------------
+                create_ticket_approval_by_ticket_type(
+                    ticket_id=ticket_id,
+                    ticket_type_id=ticket_type_id,
+                    requester_user_id=user_id
+                )
 
-            with open(file_path, "wb+") as destination:
-                for chunk in f.chunks():
-                    destination.write(chunk)
+                # -----------------------------
+                # UPLOAD FILES
+                # -----------------------------
+                files = request.FILES.getlist("order_file[]")
+                upload_dir = f"media/uploads/vpn/{ticket_id}"
+                os.makedirs(upload_dir, exist_ok=True)
 
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO tickets.ticket_files
-                    (ticket_id, ref_type, ref_id,
-                     file_name, file_path, file_type,
-                     file_size, uploaded_by, create_at)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """, [
-                    ticket_id,
-                    "VPN",
-                    vpn_data_id,
-                    f.name,
-                    file_path,
-                    f.content_type,
-                    f.size,
-                    user_id,
-                    timezone.now()
-                ])
+                for f in files:
+                    file_path = f"{upload_dir}/{f.name}"
+
+                    with open(file_path, "wb+") as destination:
+                        for chunk in f.chunks():
+                            destination.write(chunk)
+
+                    with connection.cursor() as cursor:
+                        cursor.execute("""
+                            INSERT INTO tickets.ticket_files
+                            (ticket_id, ref_type, ref_id,
+                             file_name, file_path, file_type,
+                             file_size, uploaded_by, create_at)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        """, [
+                            ticket_id,
+                            "VPN",
+                            vpn_data_id,
+                            f.name,
+                            file_path,
+                            f.content_type,
+                            f.size,
+                            user_id,
+                            timezone.now()
+                        ])
+
+        except ApprovalTeamNotFound as e:
+            messages.error(request, str(e))
+            return redirect(request.path)
 
         return redirect("ticket_success")
 
     return render(request, "tickets_form/vpn.html")
 
 @page_permission_required
+@handle_approval_error
 def borrows(req):
     return render(req,'tickets_form/borrows.html')
 
@@ -1549,90 +1586,166 @@ def tickets_detail_newapp(request, ticket_id):
         }
     )
     
-    
 @page_permission_required
+@handle_approval_error
 def repairs_form(request):
+
     if request.method == "POST":
 
-        # -----------------------------
-        # BASIC TICKET INFO
-        # -----------------------------
-        title = "แจ้งซ่อมอาคาร"
-        description = request.POST.get("problem_detail")
-        user_id = request.session["user"]["id"]
+        try:
+            with transaction.atomic():
 
-        status_id = 1        # Waiting
-        ticket_type_id = 4   # Building Repair
+                # -----------------------------
+                # BASIC TICKET INFO
+                # -----------------------------
+                title = "แจ้งซ่อมอาคาร"
+                description = request.POST.get("problem_detail")
+                user_id = request.session["user"]["id"]
 
-        department = request.POST.get("department")
-        building = request.POST.get("building")
+                status_id = 1
+                ticket_type_id = 4
 
-        # กัน error กรณีฟอร์มไม่ครบ
-        if not department or not building:
-            return render(request, "tickets_form/repairs_form.html", {
-                "error": "กรุณากรอกข้อมูลให้ครบถ้วน"
-            })
-            
-            # คำขอฝ่ายอาคาร ลงในtickets
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                INSERT INTO tickets.tickets
-                (title, description, user_id, status_id, ticket_type_id)
-                VALUES (%s, %s, %s, %s, %s)
-                RETURNING id
-            """, [
-                title,
-                description,
-                user_id,
-                status_id,
-                ticket_type_id
-            ])
-            ticket_id = cursor.fetchone()[0]
-            create_ticket_approval_by_ticket_type(
-    ticket_id=ticket_id,
-    ticket_type_id=ticket_type_id,
-    requester_user_id=user_id
-)
-            type_id = 2  # อาคาร
-        # insert คำขอฝ่ายอาตาร
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                INSERT INTO tickets.ticket_data_building_repair
-                (ticket_id, user_id, type_id, problem_detail, department, building, created_at )
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, [
-                ticket_id,
-                user_id,
-                description,
-                type_id,
-                department,
-                building,
-                timezone.now()
-            ])
+                department = request.POST.get("department")
+                building = request.POST.get("building")
 
-        # -----------------------------
-        # UPLOAD FILES
-        # -----------------------------
+                if not department or not building:
+                    return render(request, "tickets_form/repairs_form.html", {
+                        "error": "กรุณากรอกข้อมูลให้ครบถ้วน"
+                    })
+
+                # -----------------------------
+                # INSERT tickets.tickets
+                # -----------------------------
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO tickets.tickets
+                        (title, description, user_id, status_id, ticket_type_id)
+                        VALUES (%s, %s, %s, %s, %s)
+                        RETURNING id
+                    """, [
+                        title,
+                        description,
+                        user_id,
+                        status_id,
+                        ticket_type_id
+                    ])
+                    ticket_id = cursor.fetchone()[0]
+
+                # -----------------------------
+                # INSERT detail table
+                # -----------------------------
+                type_id = 2  # อาคาร
+
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO tickets.ticket_data_building_repair
+                        (ticket_id, user_id, type_id, problem_detail, department, building, created_at)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """, [
+                        ticket_id,
+                        user_id,
+                        type_id,
+                        description,
+                        department,
+                        building,
+                        timezone.now()
+                    ])
+
+                # -----------------------------
+                # CREATE APPROVAL
+                # ถ้าไม่มี team จะ raise แล้ว rollback ทั้งหมด
+                # -----------------------------
+                create_ticket_approval_by_ticket_type(
+                    ticket_id=ticket_id,
+                    ticket_type_id=ticket_type_id,
+                    requester_user_id=user_id
+                )
+
+                # -----------------------------
+                # UPLOAD FILES (ยังอยู่ใน transaction)
+                # -----------------------------
+                files = request.FILES.getlist("attachments[]")
+                upload_dir = f"media/uploads/repairs/{ticket_id}"
+                os.makedirs(upload_dir, exist_ok=True)
+
+                for f in files:
+                    file_path = f"{upload_dir}/{f.name}"
+
+                    with open(file_path, "wb+") as destination:
+                        for chunk in f.chunks():
+                            destination.write(chunk)
+
+                    with connection.cursor() as cursor:
+                        cursor.execute("""
+                            INSERT INTO tickets.ticket_files
+                            (ticket_id, ref_type, file_name, file_path,
+                             file_type, file_size, uploaded_by, create_at)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                        """, [
+                            ticket_id,
+                            "BUILDING_REPAIR",
+                            f.name,
+                            file_path,
+                            f.content_type,
+                            f.size,
+                            user_id,
+                            timezone.now()
+                        ])
+
+        except ApprovalTeamNotFound as e:
+            messages.error(request, str(e))
+            return redirect(request.path)
+
+        return redirect("ticket_success")
+
+    return render(request, "tickets_form/repairs_form.html")
+
+@page_permission_required
+@handle_approval_error
+def active_promotion_detail(request, ticket_id):
+
+    # =============================
+    # UPLOAD FILE (POST)
+    # =============================
+    if request.method == "POST":
+
         files = request.FILES.getlist("attachments[]")
-        upload_dir = f"media/uploads/repairs/{ticket_id}"
+
+        if not files:
+            messages.error(request, "กรุณาเลือกไฟล์ก่อนอัปโหลด")
+            return redirect(request.path)
+
+        upload_dir = f"media/uploads/active_promotion/{ticket_id}"
         os.makedirs(upload_dir, exist_ok=True)
+
+        user_id = request.session["user"]["id"]
 
         for f in files:
             file_path = f"{upload_dir}/{f.name}"
 
+            # save file to disk
             with open(file_path, "wb+") as destination:
                 for chunk in f.chunks():
                     destination.write(chunk)
 
+            # insert DB
             with connection.cursor() as cursor:
                 cursor.execute("""
                     INSERT INTO tickets.ticket_files
-                    (ticket_id, ref_type, file_name, file_path,
-                     file_type, file_size, uploaded_by, create_at)
+                    (
+                        ticket_id,
+                        ref_type,
+                        file_name,
+                        file_path,
+                        file_type,
+                        file_size,
+                        uploaded_by,
+                        create_at
+                    )
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 """, [
                     ticket_id,
-                    "BUILDING_REPAIR",
+                    "ACTIVE_PROMOTION",
                     f.name,
                     file_path,
                     f.content_type,
@@ -1640,13 +1753,13 @@ def repairs_form(request):
                     user_id,
                     timezone.now()
                 ])
-                
-        return redirect("ticket_success")
-    return render(request, "tickets_form/repairs_form.html")
 
-@page_permission_required
-def active_promotion_detail(request, ticket_id):
+        messages.success(request, "อัปโหลดไฟล์เรียบร้อยแล้ว")
+        return redirect(request.path)
 
+    # =============================
+    # LOAD MAIN DATA
+    # =============================
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT 
@@ -1695,11 +1808,14 @@ def active_promotion_detail(request, ticket_id):
 
         files = dictfetchall(cursor)
 
+    # =============================
+    # RENDER
+    # =============================
     return render(request, "tickets_form/active_promotion_detail.html", {
         "ticket": {
             "id": data["ticket_id"],
             "title": data["title"],
-            "description": data["description"],      # ✅ ใช้ตรงนี้
+            "description": data["description"],
             "create_at": data["ticket_create_at"],
             "user_name": data["requester_name"],
             "status": data["status"],
@@ -1712,106 +1828,117 @@ def active_promotion_detail(request, ticket_id):
         "files": files,
     })
 
-@page_permission_required
 def adjust_form(request):
+
     user = request.session.get("user")
     if not user:
         return redirect("login")
 
     if request.method == "POST":
 
-        # ---------------- BASIC TICKET ----------------
-        title = "ปรับยอดสะสม"
-        description = request.POST.get("remark", "")
-        user_id = user["id"]
-        status_id = 1  # Waiting
-        ticket_type_id = int(request.POST.get("adj_category"))
+        try:
+            with transaction.atomic():
 
-        CATEGORY_MAP = {
-            5: "ยอดยกจากเดิม",
-            6: "แก้ไขยอด",
-            7: "โอนระหว่างร้าน",
-            8: "โอนระหว่างโปรโมชั่น",
-        }
-        adj_category = CATEGORY_MAP.get(ticket_type_id, "ไม่ระบุ")
+                # ---------------- BASIC TICKET ----------------
+                title = "ปรับยอดสะสม"
+                description = request.POST.get("remark", "")
+                user_id = user["id"]
+                status_id = 1
+                ticket_type_id = int(request.POST.get("adj_category"))
 
-        # ---------------- BUILD ITEMS (แยกฟังก์ชัน) ----------------
-        items = build_adjust_items(request)
+                CATEGORY_MAP = {
+                    5: "ยอดยกจากเดิม",
+                    6: "แก้ไขยอด",
+                    7: "โอนระหว่างร้าน",
+                    8: "โอนระหว่างโปรโมชั่น",
+                }
 
-        if not items:
-            return render(request, "tickets_form/adjust_form.html", {
-                "error": "กรุณากรอกอย่างน้อย 1 รายการ"
-            })
+                adj_category = CATEGORY_MAP.get(ticket_type_id, "ไม่ระบุ")
 
-        # ---------------- INSERT TICKET ----------------
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                INSERT INTO tickets.tickets
-                (title, description, user_id, status_id, ticket_type_id)
-                VALUES (%s, %s, %s, %s, %s)
-                RETURNING id
-            """, [
-                title,
-                description,
-                user_id,
-                status_id,
-                ticket_type_id
-            ])
-            ticket_id = cursor.fetchone()[0]
+                # ---------------- BUILD ITEMS ----------------
+                items = build_adjust_items(request)
 
-        # ---------------- INSERT ADJUST DATA (JSON draft) ----------------
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                INSERT INTO tickets.ticket_adjust_draft
-                (ticket_id, adj_category, items)
-                VALUES (%s, %s, %s)
-            """, [
-                ticket_id,
-                adj_category,
-                json.dumps(items)
-            ])
+                if not items:
+                    return render(request, "tickets_form/adjust_form.html", {
+                        "error": "กรุณากรอกอย่างน้อย 1 รายการ"
+                    })
 
-        # ---------------- FILE UPLOAD ----------------
-        files = request.FILES.getlist("attachments[]")
-        upload_dir = f"media/uploads/adjust/{ticket_id}"
-        os.makedirs(upload_dir, exist_ok=True)
+                # ---------------- INSERT TICKET ----------------
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO tickets.tickets
+                        (title, description, user_id, status_id, ticket_type_id)
+                        VALUES (%s, %s, %s, %s, %s)
+                        RETURNING id
+                    """, [
+                        title,
+                        description,
+                        user_id,
+                        status_id,
+                        ticket_type_id
+                    ])
+                    ticket_id = cursor.fetchone()[0]
 
-        for f in files:
-            file_path = f"{upload_dir}/{f.name}"
-            with open(file_path, "wb+") as dest:
-                for chunk in f.chunks():
-                    dest.write(chunk)
-
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO tickets.ticket_files
-                    (
+                # ---------------- INSERT ADJUST DATA ----------------
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO tickets.ticket_adjust_draft
+                        (ticket_id, adj_category, items)
+                        VALUES (%s, %s, %s)
+                    """, [
                         ticket_id,
-                        ref_type,
-                        file_name,
-                        file_path,
-                        file_type,
-                        file_size,
-                        uploaded_by,
-                        create_at
-                    )
-                    VALUES (%s,'ADJUST',%s,%s,%s,%s,%s,%s)
-                """, [
-                    ticket_id,
-                    f.name,
-                    file_path,
-                    f.content_type,
-                    f.size,
-                    user_id,
-                    timezone.now()
-                ])
+                        adj_category,
+                        json.dumps(items)
+                    ])
 
-        # ---------------- CREATE APPROVAL FLOW ----------------
-        create_ticket_approval_by_ticket_type(
-            ticket_id=ticket_id,
-            ticket_type_id=ticket_type_id,
-            requester_user_id=user_id
-        )
+                # ---------------- CREATE APPROVAL ----------------
+                # ถ้าไม่มี team จะ raise แล้ว rollback ทั้งหมด
+                create_ticket_approval_by_ticket_type(
+                    ticket_id=ticket_id,
+                    ticket_type_id=ticket_type_id,
+                    requester_user_id=user_id
+                )
+
+                # ---------------- UPLOAD FILES ----------------
+                files = request.FILES.getlist("attachments[]")
+                upload_dir = f"media/uploads/adjust/{ticket_id}"
+                os.makedirs(upload_dir, exist_ok=True)
+
+                for f in files:
+                    file_path = f"{upload_dir}/{f.name}"
+
+                    with open(file_path, "wb+") as destination:
+                        for chunk in f.chunks():
+                            destination.write(chunk)
+
+                    with connection.cursor() as cursor:
+                        cursor.execute("""
+                            INSERT INTO tickets.ticket_files
+                            (
+                                ticket_id,
+                                ref_type,
+                                file_name,
+                                file_path,
+                                file_type,
+                                file_size,
+                                uploaded_by,
+                                create_at
+                            )
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                        """, [
+                            ticket_id,
+                            "ADJUST",
+                            f.name,
+                            file_path,
+                            f.content_type,
+                            f.size,
+                            user_id,
+                            timezone.now()
+                        ])
+
+        except ApprovalTeamNotFound as e:
+            messages.error(request, str(e))
+            return redirect(request.path)
 
         return redirect("ticket_success")
 
@@ -1857,10 +1984,9 @@ def build_adjust_items(request):
     return items
 
 @page_permission_required
+@handle_approval_error
 def app_form(request):
-    # =========================
-    # CHECK LOGIN
-    # =========================
+
     if "user" not in request.session:
         return redirect("login")
 
@@ -1868,234 +1994,172 @@ def app_form(request):
     user_id = user["id"]
     requester_name = user.get("full_name") or user.get("username", "")
 
-    # =========================
-    # POST
-    # =========================
     if request.method == "POST":
 
-        app_type = request.POST.get("app_type")           # new / update
-        department = request.POST.get("department", "").strip()
-        app_detail = request.POST.get("app_detail", "").strip()
-        objective = request.POST.get("objective", "").strip()
-        deadline_raw = request.POST.get("deadline")
+        try:
+            with transaction.atomic():
 
-        if not department:
-            messages.error(request, "กรุณาระบุแผนก")
-            return render(request, "tickets_form/app_form.html")
+                app_type = request.POST.get("app_type")
+                department = request.POST.get("department", "").strip()
+                app_detail = request.POST.get("app_detail", "").strip()
+                objective = request.POST.get("objective", "").strip()
+                deadline_raw = request.POST.get("deadline")
 
-        # =========================
-        # TITLE + TYPE
-        # =========================
-        if app_type == "new":
-            title = "Request Application (New)"
-            app_new = True
-            app_edit = False
-            ticket_type_id = 9
-        elif app_type == "update":
-            title = "Request Application (Update)"
-            app_new = False
-            app_edit = True
-            ticket_type_id = 10
-        else:
-            messages.error(request, "ประเภทคำขอไม่ถูกต้อง")
-            return render(request, "tickets_form/app_form.html")
+                if not department:
+                    messages.error(request, "กรุณาระบุแผนก")
+                    return render(request, "tickets_form/app_form.html")
 
-        status_id = 1  # Waiting
+                if app_type == "new":
+                    title = "Request Application (New)"
+                    app_new = True
+                    app_edit = False
+                    ticket_type_id = 9
+                elif app_type == "update":
+                    title = "Request Application (Update)"
+                    app_new = False
+                    app_edit = True
+                    ticket_type_id = 10
+                else:
+                    messages.error(request, "ประเภทคำขอไม่ถูกต้อง")
+                    return render(request, "tickets_form/app_form.html")
 
-        # =========================
-        # DESCRIPTION
-        # =========================
-        # เก็บเฉพาะรายละเอียด application
-        description = app_detail
+                status_id = 1
+                description = app_detail
 
-        # =========================
-        # DUE DATE
-        # =========================
-        due_date = None
-        if deadline_raw:
-            try:
-                naive_dt = datetime.strptime(deadline_raw, "%Y-%m-%dT%H:%M")
-                due_date = timezone.make_aware(
-                    naive_dt,
-                    timezone.get_current_timezone()
+                due_date = None
+                if deadline_raw:
+                    naive_dt = datetime.strptime(deadline_raw, "%Y-%m-%dT%H:%M")
+                    due_date = timezone.make_aware(
+                        naive_dt,
+                        timezone.get_current_timezone()
+                    )
+
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO tickets.tickets
+                        (title, description, user_id, status_id, ticket_type_id,
+                         department, create_at, due_date)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                        RETURNING id
+                    """, [
+                        title,
+                        description,
+                        user_id,
+                        status_id,
+                        ticket_type_id,
+                        department,
+                        timezone.now(),
+                        due_date
+                    ])
+                    ticket_id = cursor.fetchone()[0]
+
+                    cursor.execute("""
+                        INSERT INTO tickets.ticket_data_erp_app
+                        (ticket_id, app_new, app_edit,
+                         old_value, new_value, end_date)
+                        VALUES (%s, %s, %s, %s, %s, %s)
+                    """, [
+                        ticket_id,
+                        app_new,
+                        app_edit,
+                        None,
+                        objective or None,
+                        timezone.now().date()
+                    ])
+
+                create_ticket_approval_by_ticket_type(
+                    ticket_id=ticket_id,
+                    ticket_type_id=ticket_type_id,
+                    requester_user_id=user_id
                 )
-            except ValueError:
-                messages.error(request, "รูปแบบวันเวลาไม่ถูกต้อง")
-                return render(request, "tickets_form/app_form.html")
 
-        with connection.cursor() as cursor:
-
-            # =========================
-            # 1) INSERT tickets.tickets
-            # =========================
-            cursor.execute("""
-                INSERT INTO tickets.tickets
-                (
-                    title,
-                    description,
-                    user_id,
-                    status_id,
-                    ticket_type_id,
-                    department,
-                    create_at,
-                    due_date
-                )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                RETURNING id
-            """, [
-                title,
-                description,
-                user_id,          # ✅ user จริง
-                status_id,
-                ticket_type_id,
-                department,
-                timezone.now(),
-                due_date
-            ])
-
-            ticket_id = cursor.fetchone()[0]
-            create_ticket_approval_by_ticket_type(
-    ticket_id=ticket_id,
-    ticket_type_id=ticket_type_id,
-    requester_user_id=user_id
-)
-            # =========================
-            # 2) INSERT ticket_data_erp_app
-            # =========================
-            cursor.execute("""
-                INSERT INTO tickets.ticket_data_erp_app
-                (
-                    ticket_id,
-                    app_new,
-                    app_edit,
-                    old_value,
-                    new_value,
-                    end_date
-                )
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, [
-                ticket_id,
-                app_new,
-                app_edit,
-                None,                 # ❌ ไม่ใช้ old_value
-                objective or None,    # ✅ เก็บ objective ไว้ใน new_value
-                timezone.now().date()
-            ])
+        except ApprovalTeamNotFound as e:
+            messages.error(request, str(e))
+            return redirect(request.path)
 
         messages.success(request, "ส่งคำร้อง Request Application เรียบร้อยแล้ว")
         return redirect("ticket_success")
 
-    # =========================
-    # GET
-    # =========================
     return render(request, "tickets_form/app_form.html")
 
-
 @page_permission_required
+@handle_approval_error
 def report_form(request):
 
-    # =========================
-    # CHECK LOGIN
-    # =========================
     if "user" not in request.session:
         return redirect("login")
 
     user = request.session["user"]
     user_id = user["id"]
-    requester_name = user.get("full_name") or user.get("username", "")
 
-    # =========================
-    # POST
-    # =========================
     if request.method == "POST":
 
-        department = request.POST.get("department", "").strip()
-        report_detail = request.POST.get("report_detail", "").strip()
-        report_objective = request.POST.get("report_objective", "").strip()
-        report_fields = request.POST.get("report_fields", "").strip()
+        try:
+            with transaction.atomic():
 
-        if not department:
-            messages.error(request, "กรุณาระบุแผนก")
-            return render(request, "tickets_form/report_form.html")
+                department = request.POST.get("department", "").strip()
+                report_detail = request.POST.get("report_detail", "").strip()
+                report_objective = request.POST.get("report_objective", "").strip()
+                report_fields = request.POST.get("report_fields", "").strip()
 
-        # =========================
-        # BASIC TICKET INFO
-        # =========================
-        title = "Request Report / ERP Data"
-        status_id = 1        # Waiting
-        ticket_type_id = 11  # Report
+                if not department:
+                    messages.error(request, "กรุณาระบุแผนก")
+                    return render(request, "tickets_form/report_form.html")
 
-        # description เก็บเฉพาะ report_detail
-        description = report_detail
+                title = "Request Report / ERP Data"
+                status_id = 1
+                ticket_type_id = 11
 
-        with connection.cursor() as cursor:
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO tickets.tickets
+                        (title, description, user_id, status_id,
+                         ticket_type_id, department, create_at)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        RETURNING id
+                    """, [
+                        title,
+                        report_detail,
+                        user_id,
+                        status_id,
+                        ticket_type_id,
+                        department,
+                        timezone.now()
+                    ])
+                    ticket_id = cursor.fetchone()[0]
 
-            # =========================
-            # 1) INSERT tickets.tickets
-            # =========================
-            cursor.execute("""
-                INSERT INTO tickets.tickets
-                (
-                    title,
-                    description,
-                    user_id,
-                    status_id,
-                    ticket_type_id,
-                    department,
-                    create_at
+                    cursor.execute("""
+                        INSERT INTO tickets.ticket_data_erp_app
+                        (ticket_id, report_access,
+                         old_value, new_value, target_date)
+                        VALUES (%s, %s, %s, %s, %s)
+                    """, [
+                        ticket_id,
+                        True,
+                        report_fields or None,
+                        report_detail or None,
+                        timezone.now().date()
+                    ])
+
+                create_ticket_approval_by_ticket_type(
+                    ticket_id=ticket_id,
+                    ticket_type_id=ticket_type_id,
+                    requester_user_id=user_id
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-                RETURNING id
-            """, [
-                title,
-                description,
-                user_id,
-                status_id,
-                ticket_type_id,
-                department,
-                timezone.now()
-            ])
 
-            ticket_id = cursor.fetchone()[0]
-
-            # =========================
-            # 2) INSERT ticket_data_erp_app
-            # =========================
-            cursor.execute("""
-                INSERT INTO tickets.ticket_data_erp_app
-                (
-                    ticket_id,
-                    report_access,
-                    old_value,
-                    new_value,
-                    target_date
-                )
-                VALUES (%s, %s, %s, %s, %s)
-            """, [
-                ticket_id,
-                True,                       # report_access
-                report_fields or None,      # old_value
-                report_detail or None,      # new_value
-                timezone.now().date()
-            ])
-            create_ticket_approval_by_ticket_type(
-    ticket_id=ticket_id,
-    ticket_type_id=ticket_type_id,
-    requester_user_id=user_id
-)
+        except ApprovalTeamNotFound as e:
+            messages.error(request, str(e))
+            return redirect(request.path)
 
         messages.success(request, "ส่งคำร้องขอรายงานเรียบร้อยแล้ว")
         return redirect("ticket_success")
 
-    # =========================
-    # GET
-    # =========================
     return render(request, "tickets_form/report_form.html")
 
-
 @page_permission_required
+@handle_approval_error
 def active_promotion_form(request):
-    
+
     if "user" not in request.session:
         return redirect("login")
 
@@ -2103,77 +2167,66 @@ def active_promotion_form(request):
 
     if request.method == "POST":
 
-        promo_name  = request.POST.get("promo_name", "").strip()
-        start_raw   = request.POST.get("start_date")
-        end_raw     = request.POST.get("end_date")
-        department = request.POST.get("department", "").strip()
-        reason     = request.POST.get("reason", "").strip()
-
-        if not all([promo_name, start_raw, end_raw, department, reason]):
-            messages.error(request, "กรุณากรอกข้อมูลให้ครบถ้วน")
-            return render(request, "tickets_form/active_promotion_form.html")
-
         try:
-            start_date = datetime.strptime(start_raw, "%d/%m/%Y").date()
-            end_date   = datetime.strptime(end_raw, "%d/%m/%Y").date()
-        except ValueError:
-            messages.error(request, "รูปแบบวันที่ไม่ถูกต้อง")
-            return render(request, "tickets_form/active_promotion_form.html")
+            with transaction.atomic():
 
-        title = "Active Promotion Package"
-        description = f"""Promotion: {promo_name}
-แผนก: {department}
-ช่วงเวลา: {start_raw} - {end_raw}
+                promo_name = request.POST.get("promo_name", "").strip()
+                start_raw = request.POST.get("start_date")
+                end_raw = request.POST.get("end_date")
+                department = request.POST.get("department", "").strip()
+                reason = request.POST.get("reason", "").strip()
 
-เหตุผล:
-{reason}
-""".strip()
+                start_date = datetime.strptime(start_raw, "%d/%m/%Y").date()
+                end_date = datetime.strptime(end_raw, "%d/%m/%Y").date()
 
-        status_id = 1
-        ticket_type_id = 12
+                title = "Active Promotion Package"
+                status_id = 1
+                ticket_type_id = 12
 
-        with connection.cursor() as cursor:
-            # 1️⃣ insert tickets
-            cursor.execute("""
-                INSERT INTO tickets.tickets
-                (title, description, user_id, status_id, ticket_type_id, department, create_at)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-                RETURNING id
-            """, [
-                title,
-                description,
-                user_id,
-                status_id,
-                ticket_type_id,
-                department,
-                timezone.now()
-            ])
-            ticket_id = cursor.fetchone()[0]
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO tickets.tickets
+                        (title, description, user_id, status_id,
+                         ticket_type_id, department, create_at)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        RETURNING id
+                    """, [
+                        title,
+                        reason,
+                        user_id,
+                        status_id,
+                        ticket_type_id,
+                        department,
+                        timezone.now()
+                    ])
+                    ticket_id = cursor.fetchone()[0]
 
-            # 2️⃣ insert promotion data
-            cursor.execute("""
-                INSERT INTO tickets.ticket_data_erp_app
-                (ticket_id, promo_name, start_date, end_date, reason)
-                VALUES (%s, %s, %s, %s, %s)
-            """, [
-                ticket_id,
-                promo_name,
-                start_date,
-                end_date,
-                reason
-            ])
+                    cursor.execute("""
+                        INSERT INTO tickets.ticket_data_erp_app
+                        (ticket_id, promo_name, start_date, end_date, reason)
+                        VALUES (%s, %s, %s, %s, %s)
+                    """, [
+                        ticket_id,
+                        promo_name,
+                        start_date,
+                        end_date,
+                        reason
+                    ])
 
-        create_ticket_approval_by_ticket_type(
-            ticket_id=ticket_id,
-            ticket_type_id=ticket_type_id,
-            requester_user_id=user_id
-        )
+                create_ticket_approval_by_ticket_type(
+                    ticket_id=ticket_id,
+                    ticket_type_id=ticket_type_id,
+                    requester_user_id=user_id
+                )
+
+        except ApprovalTeamNotFound as e:
+            messages.error(request, str(e))
+            return redirect(request.path)
 
         messages.success(request, "ส่งคำร้อง Active Promotion เรียบร้อยแล้ว")
         return redirect("ticket_success")
 
     return render(request, "tickets_form/active_promotion_form.html")
-
 
     
 
@@ -2686,7 +2739,9 @@ def create_ticket_approval_by_ticket_type(
         """, [category_id, requester_user_id])
         team_row = cursor.fetchone()
         if not team_row:
-            raise Exception("ไม่พบ team สำหรับสายอนุมัติ")
+            raise ApprovalTeamNotFound(
+        "ไม่พบ Team อนุมัติ กรุณาติดต่อผู้ดูแลระบบ"
+    )
         team_id = team_row[0]
 
         # 3) หา level แรก
@@ -2727,6 +2782,8 @@ def create_ticket_approval_by_ticket_type(
             category_id,
             team_id
         ])
+
+
 
 def get_approve_line_dict_all_flows(category_id, team_id):
     with connection.cursor() as cursor:
@@ -3411,6 +3468,7 @@ def report_export_excel(request):
     return response
 
 @page_permission_required
+@handle_approval_error
 def repairs_it_form(request):
 
     if "user" not in request.session:

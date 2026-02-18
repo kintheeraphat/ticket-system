@@ -53,19 +53,6 @@
             </div>
         </div>
     </div>
-
-    <div class="dashboard-card card-closed">
-        <div class="d-flex justify-content-between">
-            <div>
-                <p class="card-label">อนุมัติแล้ว</p>
-                <h3 class="card-value">{{ approved }}</h3>
-            </div>
-            <div class="icon-box bg-success-soft">
-                <i class="fas fa-check-circle"></i>
-            </div>
-        </div>
-    </div>
-
     <div class="dashboard-card" style="border-left: 6px solid var(--primary);">
         <div class="d-flex justify-content-between">
             <div>
@@ -77,7 +64,17 @@
             </div>
         </div>
     </div>
-
+    <div class="dashboard-card card-closed">
+        <div class="d-flex justify-content-between">
+            <div>
+                <p class="card-label">อนุมัติแล้ว</p>
+                <h3 class="card-value">{{ approved }}</h3>
+            </div>
+            <div class="icon-box bg-success-soft">
+                <i class="fas fa-check-circle"></i>
+            </div>
+        </div>
+    </div>
     <div class="dashboard-card card-closed">
         <div class="d-flex justify-content-between">
             <div>
@@ -96,26 +93,11 @@
                 <p class="card-label">ทั้งหมด</p>
                 <h3 class="card-value">{{ total }}</h3>
             </div>
-            <div class="icon-box bg-primary-soft"
-                 style="background-color: rgba(79, 70, 229, 0.1); color: #4f46e5;">
+            <div class="icon-box bg-primary-soft" style="background-color: rgba(79, 70, 229, 0.1); color: #4f46e5;">
                 <i class="fas fa-list-ul"></i>
             </div>
         </div>
     </div>
-
-    <!-- ✅ เพิ่มการ์ดรายงาน -->
-    <div class="dashboard-card" style="border-left: 6px solid #6366f1;">
-        <div class="d-flex justify-content-between">
-            <div>
-                <p class="card-label">รายงานทั้งหมด</p>
-                <h3 class="card-value text-primary">{{ total }}</h3>
-            </div>
-            <div class="icon-box bg-primary-soft">
-                <i class="fas fa-file-alt"></i>
-            </div>
-        </div>
-    </div>
-
 </div>
 
 <!-- ================= CHART ================= -->
@@ -144,9 +126,12 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
 
-    const ctx = document.getElementById('ticketChart').getContext('2d');
+    const canvas = document.getElementById('ticketChart');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
     const chartLabels = {{ chart_labels|safe }};
     const chartValues = {{ chart_values|safe }};
 

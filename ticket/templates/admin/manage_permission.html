@@ -65,19 +65,18 @@
 
   <div class="card-body">
 
-    <!-- 🔥 ROLE PRESET BUTTONS -->
     <div class="mb-3 d-flex gap-2 flex-wrap">
 
       <button type="button"
               class="btn btn-danger btn-sm"
               onclick="setAdminPermissions()">
-        🔴 Admin (All Access)
+         Admin (All Access)
       </button>
 
       <button type="button"
               class="btn btn-primary btn-sm"
               onclick="setUserPermissions()">
-        🔵 User / Manager
+         User / Manager
       </button>
 
       <button type="button"
@@ -93,7 +92,7 @@
       <input type="text"
              id="permissionSearch"
              class="form-control"
-             placeholder="🔎 ค้นหา permission">
+             placeholder="ค้นหา permission">
     </div>
 
     <form method="post">
@@ -247,10 +246,29 @@ function setUserPermissions(){
 
 function clearPermissions(){
   document.querySelectorAll(".permission-checkbox")
-      .forEach(cb => cb.checked = false);
+      .forEach(cb => cb.checked = false);T
   updateEnabledCount();
 }
+//เลือกแล้วไม่ต้องเลื่อนกลับไปด้านบน
+document.addEventListener("DOMContentLoaded", function(){
 
+  const userScroll = document.querySelector(".user-scroll");
+
+  const savedScroll = sessionStorage.getItem("userScrollTop");
+  if(userScroll && savedScroll !== null){
+      userScroll.scrollTop = parseInt(savedScroll);
+      sessionStorage.removeItem("userScrollTop");
+  }
+
+  document.querySelectorAll(".user-item button").forEach(btn => {
+      btn.addEventListener("click", function(){
+          if(userScroll){
+              sessionStorage.setItem("userScrollTop", userScroll.scrollTop);
+          }
+      });
+  });
+
+});
 </script>
 
 {% endblock %}
