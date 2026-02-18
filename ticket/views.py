@@ -1039,12 +1039,181 @@ def vpn(request):
         return redirect("ticket_success")
 
     return render(request, "tickets_form/vpn.html")
-
 @page_permission_required
 @handle_approval_error
-def borrow(req):
-    return render(req,'tickets_form/borrows.html')
+def borrow(request):
 
+    if "user" not in request.session:
+        return redirect("login")
+
+    user = request.session["user"]
+    user_id = user["id"]
+    department = user.get("department", "")
+
+    if request.method == "POST":
+
+        try:
+            with transaction.atomic():
+
+                # -----------------------------
+                # BASIC TICKET
+                # -----------------------------
+                title = "คำร้องขอยืมอุปกรณ์"
+                description = request.POST.get("remark", "")
+                ticket_type_id = 14
+                status_id = 1
+
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO tickets.tickets
+                        (
+                            title,
+                            description,
+                            user_id,
+                            status_id,
+                            ticket_type_id,
+                            department,
+                            create_at
+                        )
+                        VALUES (%s,%s,%s,%s,%s,%s,%s)
+                        RETURNING id
+                    """, [
+                        title,
+                        description,
+                        user_id,
+                        status_id,
+                        ticket_type_id,
+                        department,
+                        timezone.now()
+                    ])
+                    ticket_id = cursor.fetchone()[0]
+
+                # -----------------------------
+                # DATE CONVERT
+                # -----------------------------
+                borrow_date = datetime.strptime(
+                    request.POST.get("borrow_date"),
+                    "%d/%m/%Y"
+                ).date()
+
+                return_date = datetime.strptime(
+                    request.POST.get("return_date"),
+                    "%d/%m/%Y"
+                ).date()
+
+                # -----------------------------
+                # 🔥 GET ITEMS FROM TABLE
+                # -----------------------------
+                item_names = request.POST.getlist("item_name[]")
+                details = request.POST.getlist("details[]")
+                quantities = request.POST.getlist("quantity[]")
+
+                item_lines = []
+
+                for i in range(len(item_names)):
+                    name = item_names[i]
+                    detail = details[i]
+                    qty = quantities[i]
+
+                    line = f"{i+1}. {name} ({detail}) x {qty}"
+                    item_lines.append(line)
+
+                request_item_text = "\n".join(item_lines)
+
+                # -----------------------------
+                # INSERT borrow_requests
+                # -----------------------------
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO tickets.borrow_requests
+                        (
+                            ticket_id,
+                            user_id,
+                            remark,
+                            request_item,
+                            borrow_date,
+                            return_date
+                        )
+                        VALUES (%s,%s,%s,%s,%s,%s)
+                        RETURNING id
+                    """, [
+                        ticket_id,
+                        user_id,
+                        description,
+                        request_item_text,   # 🔥 เก็บรายการตรงนี้
+                        borrow_date,
+                        return_date
+                    ])
+                    borrow_request_id = cursor.fetchone()[0]
+
+                # -----------------------------
+                # APPROVAL FLOW
+                # -----------------------------
+                create_ticket_approval_by_ticket_type(
+                    ticket_id=ticket_id,
+                    ticket_type_id=ticket_type_id,
+                    requester_user_id=user_id
+                )
+
+                # -----------------------------
+                # FILE UPLOAD
+                # -----------------------------
+                files = request.FILES.getlist("order_file[]")
+                upload_dir = f"media/uploads/borrows/{ticket_id}"
+                os.makedirs(upload_dir, exist_ok=True)
+
+                for f in files:
+
+                    file_path = f"{upload_dir}/{f.name}"
+
+                    with open(file_path, "wb+") as destination:
+                        for chunk in f.chunks():
+                            destination.write(chunk)
+
+                    with connection.cursor() as cursor:
+                        cursor.execute("""
+                            INSERT INTO tickets.ticket_files
+                            (
+                                ticket_id,
+                                ref_type,
+                                ref_id,
+                                file_name,
+                                file_path,
+                                file_type,
+                                file_size,
+                                uploaded_by,
+                                create_at
+                            )
+                            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                        """, [
+                            ticket_id,
+                            "BORROW",
+                            borrow_request_id,
+                            f.name,
+                            file_path,
+                            f.content_type,
+                            f.size,
+                            user_id,
+                            timezone.now()
+                        ])
+
+            messages.success(request, "ส่งคำร้องขอยืมอุปกรณ์เรียบร้อยแล้ว")
+            return redirect("ticket_success")
+
+        except Exception as e:
+            messages.error(request, str(e))
+            return redirect(request.path)
+
+    today = timezone.localdate()
+
+    return render(
+        request,
+        "tickets_form/borrows.html",
+        {
+            "today": today,
+            "department": department,
+        }
+    )
 
 def dictfetchone(cursor):
     row = cursor.fetchone()
@@ -1186,7 +1355,7 @@ def borrow_detail(request, ticket_id):
                 b.borrow_date,
                 b.return_date,
                 b.remark,
-                b.requester_name,
+                b.request_item,
                 t.department,
                 t.create_at
             FROM tickets.borrow_requests b
