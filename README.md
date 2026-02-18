@@ -1,5 +1,5 @@
 เพื่อเก็บรายชื่อไลบรารี (packages)
- pip list --format=freeze > requirements.txt
+pip list --format=freeze > requirements.txt
 
 เมื่อต้องการติดตั้งจากไฟล์นี้ในเครื่องอื่น
 pip install -r requirements.txt

@@ -719,10 +719,15 @@ def tickets_list(request):
     # ===============================
     query += """
         ORDER BY 
-            (t.user_id = %s) DESC,
+            CASE 
+                WHEN s.name = 'Waiting for Approve' THEN 1
+                WHEN s.name = 'In Progress' THEN 2
+                WHEN s.name = 'Accepting work' THEN 3
+                WHEN s.name = 'Completed' THEN 4
+                ELSE 5
+            END,
             t.create_at DESC
     """
-    params.append(user_id)
 
     # ===============================
     # EXECUTE
@@ -743,6 +748,12 @@ def tickets_list(request):
         if created_at:
             created_at = timezone.localtime(created_at)
 
+        assignee_raw = row[10]
+        assignee_list = []
+
+        if assignee_raw:
+            assignee_list = [name.strip() for name in assignee_raw.split(",")]
+
         tickets_data.append({
             "id": row[0],
             "title": row[1],
@@ -754,9 +765,8 @@ def tickets_list(request):
             "created_at": created_at,
             "status": row[8],
             "ticket_owner_id": row[9],
-            "assignee": row[10],   # 👈 เพิ่มตรงนี้
+            "assignee_list": assignee_list,
         })
-
 
     return render(
         request,
