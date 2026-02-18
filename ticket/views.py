@@ -2026,7 +2026,7 @@ def active_promotion_detail(request, ticket_id):
                    u.full_name as user_name,
                    s.name as status
             FROM tickets.tickets t
-            LEFT JOIN users u ON t.user_id = u.id
+            LEFT JOIN tickets.users u ON t.user_id = u.id
             LEFT JOIN tickets.status s ON t.status_id = s.id
             WHERE t.id = %s
         """, [ticket_id])
