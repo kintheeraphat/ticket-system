@@ -528,6 +528,7 @@ def dashboard(request):
         rejected        = status_counts.get(3, 0)
         in_progress     = status_counts.get(4, 0)
         completed       = status_counts.get(5, 0)
+        accepting_work  = status_counts.get(8, 0)
 
         total = sum(status_counts.values())
 
@@ -579,6 +580,7 @@ def dashboard(request):
         "approved": approved,
         "rejected": rejected,
         "in_progress": in_progress,
+        "accepting_work": accepting_work,
         "completed": completed,
         "total": total,
 
@@ -1441,7 +1443,7 @@ def borrow_detail(request, ticket_id):
     my_level = None
 
     if not is_admin:
-        can_approve_flag, my_level = can_approve(
+        can_approve_flag, my_level = can_user_approve_ticket(
             ticket_id=ticket_id,
             user_id=user_id
         )
@@ -3349,9 +3351,10 @@ def manage_permission(request):
 
         with connection.cursor() as cursor:
 
-            # ลบทั้งหมดก่อน
+            # เปลี่ยนสิทธิ์เป็น False หมดก่อน
             cursor.execute("""
-                DELETE FROM tickets.user_permissions
+                UPDATE tickets.user_permissions
+                SET allow = FALSE
                 WHERE user_id = %s
             """, [user_id])
 
@@ -3361,7 +3364,7 @@ def manage_permission(request):
                     INSERT INTO tickets.user_permissions (user_id, permission_id, allow)
                     VALUES (%s, %s, TRUE)
                 """, [user_id, perm_id])
-
+                
         messages.success(request, "บันทึกสิทธิ์เรียบร้อยแล้ว")
         return redirect(f"/manage/permissions/?user_id={user_id}")
 
