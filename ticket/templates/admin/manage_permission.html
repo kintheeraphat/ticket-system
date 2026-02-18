@@ -290,6 +290,67 @@ document.getElementById("permissionSearch")?.addEventListener("keyup", function 
     row.style.display = text.includes(value) ? "" : "none";
   });
 });
+
+function setAdminPermissions() {
+  document.querySelectorAll(".permission-checkbox")
+    .forEach(cb => cb.checked = true);
+
+  updateEnabledCount();
+}
+
+
+/* 🔵 USER / MANAGER = เปิดเฉพาะ Form + Detail ของ Form */
+function setUserPermissions() {
+
+  // คำที่ถือว่าเป็นหน้าฟอร์ม
+  const formKeywords = [
+    "_form",
+    "form",
+    "create",
+    "approve_ticket",
+    "delete_ticket",
+    "ticket_success",
+    "ticket_reject",
+    "ticket_list",
+    "vpn",
+    "borrow",
+  ];
+
+  // คำที่ถือว่าเป็นหน้ารายละเอียด
+  const detailKeywords = [
+    "_detail",
+    "detail",
+  ];
+
+  document.querySelectorAll(".permission-row").forEach(row => {
+
+    const searchText = row.getAttribute("data-search").toLowerCase();
+    const checkbox = row.querySelector(".permission-checkbox");
+
+    // reset ก่อน
+    checkbox.checked = false;
+
+    let isForm = formKeywords.some(key => searchText.includes(key));
+    let isDetail = detailKeywords.some(key => searchText.includes(key));
+
+    if (isForm || isDetail) {
+      checkbox.checked = true;
+    }
+
+  });
+
+  updateEnabledCount();
+}
+
+
+/* ❌ CLEAR */
+function clearPermissions() {
+  document.querySelectorAll(".permission-checkbox")
+    .forEach(cb => cb.checked = false);
+
+  updateEnabledCount();
+}
+
 </script>
 
 {% endblock %}
