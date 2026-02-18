@@ -2016,127 +2016,70 @@ def repairs_form(request):
 @handle_approval_error
 def active_promotion_detail(request, ticket_id):
 
-    # =============================
-    # UPLOAD FILE (POST)
-    # =============================
-    if request.method == "POST":
-
-        files = request.FILES.getlist("attachments[]")
-
-        if not files:
-            messages.error(request, "กรุณาเลือกไฟล์ก่อนอัปโหลด")
-            return redirect(request.path)
-
-        upload_dir = f"media/uploads/active_promotion/{ticket_id}"
-        os.makedirs(upload_dir, exist_ok=True)
-
-        user_id = request.session["user"]["id"]
-
-        for f in files:
-            file_path = f"{upload_dir}/{f.name}"
-
-            # save file to disk
-            with open(file_path, "wb+") as destination:
-                for chunk in f.chunks():
-                    destination.write(chunk)
-
-            # insert DB
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO tickets.ticket_files
-                    (
-                        ticket_id,
-                        ref_type,
-                        file_name,
-                        file_path,
-                        file_type,
-                        file_size,
-                        uploaded_by,
-                        create_at
-                    )
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                """, [
-                    ticket_id,
-                    "ACTIVE_PROMOTION",
-                    f.name,
-                    file_path,
-                    f.content_type,
-                    f.size,
-                    user_id,
-                    timezone.now()
-                ])
-
-        messages.success(request, "อัปโหลดไฟล์เรียบร้อยแล้ว")
-        return redirect(request.path)
-
-    # =============================
-    # LOAD MAIN DATA
-    # =============================
     with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT 
-                t.id                AS ticket_id,
-                t.title,
-                t.description,
-                t.create_at         AS ticket_create_at,
-                u.full_name         AS requester_name,
-                tt.name             AS type,
-                s.name              AS status,
 
-                e.promo_name,
-                e.start_date,
-                e.end_date
+        # ================= TICKET =================
+        cursor.execute("""
+            SELECT t.id,
+                   t.description,
+                   t.create_at,
+                   u.full_name as user_name,
+                   s.name as status
             FROM tickets.tickets t
-            JOIN tickets.users u ON u.id = t.user_id
-            JOIN tickets.ticket_type tt ON t.ticket_type_id = tt.id
-            JOIN tickets.status s ON t.status_id = s.id
-            LEFT JOIN tickets.ticket_data_erp_app e
-                ON e.ticket_id = t.id
+            LEFT JOIN users u ON t.user_id = u.id
+            LEFT JOIN tickets.status s ON t.status_id = s.id
             WHERE t.id = %s
         """, [ticket_id])
 
-        data = dictfetchone(cursor)
+        row = cursor.fetchone()
 
-    if not data:
-        raise Http404("Active Promotion Ticket not found")
+        if not row:
+            return redirect("tickets_list")
 
-    # =============================
-    # FILES
-    # =============================
-    with connection.cursor() as cursor:
+        ticket = {
+            "id": row[0],
+            "description": row[1],
+            "create_at": row[2],
+            "user_name": row[3],
+            "status": row[4],
+        }
+
+        # ================= PROMOTION =================
         cursor.execute("""
-            SELECT
-                id,
-                file_name,
-                file_path,
-                file_type,
-                file_size,
-                create_at
-            FROM tickets.ticket_files
+            SELECT promo_name, start_date, end_date
+            FROM tickets.ticket_data_erp_app
             WHERE ticket_id = %s
-              AND ref_type = 'ACTIVE_PROMOTION'
-            ORDER BY create_at
         """, [ticket_id])
 
-        files = dictfetchall(cursor)
+        promo = cursor.fetchone()
 
-    # =============================
-    # RENDER
-    # =============================
+        promotion = {
+            "promo_name": promo[0],
+            "start_date": promo[1],
+            "end_date": promo[2],
+        } if promo else None
+
+        # ================= FILES =================
+        cursor.execute("""
+            SELECT id, file_name, file_path, file_type
+            FROM tickets.ticket_files
+            WHERE ticket_id = %s
+            ORDER BY id
+        """, [ticket_id])
+
+        files = []
+
+        for f in cursor.fetchall():
+            files.append({
+                "id": f[0],
+                "file_name": f[1],
+                "file_path": f[2].replace("media/", ""),  # กัน path ซ้ำ
+                "file_type": f[3],
+            })
+
     return render(request, "tickets_form/active_promotion_detail.html", {
-        "ticket": {
-            "id": data["ticket_id"],
-            "title": data["title"],
-            "description": data["description"],
-            "create_at": data["ticket_create_at"],
-            "user_name": data["requester_name"],
-            "status": data["status"],
-        },
-        "promotion": {
-            "promo_name": data["promo_name"],
-            "start_date": data["start_date"],
-            "end_date": data["end_date"],
-        },
+        "ticket": ticket,
+        "promotion": promotion,
         "files": files,
     })
 
@@ -2495,6 +2438,7 @@ def active_promotion_form(request):
                 status_id = 1
                 ticket_type_id = 12
 
+                # ================= INSERT TICKET =================
                 with connection.cursor() as cursor:
                     cursor.execute("""
                         INSERT INTO tickets.tickets
@@ -2513,18 +2457,70 @@ def active_promotion_form(request):
                     ])
                     ticket_id = cursor.fetchone()[0]
 
+                    # ================= INSERT ERP DATA =================
                     cursor.execute("""
                         INSERT INTO tickets.ticket_data_erp_app
-                        (ticket_id, promo_name, start_date, end_date, reason)
-                        VALUES (%s, %s, %s, %s, %s)
+                        (ticket_id, promo_name, start_date, end_date)
+                        VALUES (%s, %s, %s, %s)
                     """, [
                         ticket_id,
                         promo_name,
                         start_date,
                         end_date,
-                        reason
                     ])
 
+                # ================= SAVE FILES =================
+                files = request.FILES.getlist("files")
+
+                if files:
+                    upload_root = os.path.join(
+                        settings.MEDIA_ROOT,
+                        "uploads",
+                        "active_promotion",
+                        str(ticket_id)
+                    )
+
+                    os.makedirs(upload_root, exist_ok=True)
+
+                    with connection.cursor() as cursor:
+                        for f in files:
+
+                            file_path = os.path.join(upload_root, f.name)
+
+                            # save file
+                            with open(file_path, "wb+") as destination:
+                                for chunk in f.chunks():
+                                    destination.write(chunk)
+
+                            # relative path for DB
+                            relative_path = os.path.join(
+                                "media",
+                                "uploads",
+                                "active_promotion",
+                                str(ticket_id),
+                                f.name
+                            )
+
+                            cursor.execute("""
+                                INSERT INTO tickets.ticket_files
+                                (ticket_id, ref_type, ref_id,
+                                 file_name, file_path,
+                                 file_type, file_size, create_at)
+                                VALUES (%s, %s, %s,
+                                        %s, %s,
+                                        %s, %s, %s)
+                            """, [
+                                ticket_id,
+                                "ACTIVE_PROMOTION",   # ref_type
+                                ticket_id,           # ref_id
+                                f.name,
+                                relative_path,
+                                f.content_type,
+                                f.size,
+                                timezone.now()
+                            ])
+
+                # ================= CREATE APPROVAL =================
                 create_ticket_approval_by_ticket_type(
                     ticket_id=ticket_id,
                     ticket_type_id=ticket_type_id,
@@ -2539,7 +2535,6 @@ def active_promotion_form(request):
         return redirect("ticket_success")
 
     return render(request, "tickets_form/active_promotion_form.html")
-
     
 
 def dictfetchall(cursor):
@@ -3978,9 +3973,10 @@ def repairs_it_detail(request, ticket_id):
 
 @xframe_options_exempt
 def preview_media(request, path):
-    file_path = os.path.join(settings.MEDIA_ROOT, path)
 
-    if os.path.exists(file_path):
-        return FileResponse(open(file_path, 'rb'), content_type='application/pdf')
+    full_path = os.path.join(settings.BASE_DIR, path)
 
-    raise Http404("File not found")
+    if not os.path.exists(full_path):
+        raise Http404()
+
+    return FileResponse(open(full_path, "rb"))
