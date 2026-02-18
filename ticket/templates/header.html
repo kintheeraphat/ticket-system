@@ -11,9 +11,7 @@
       <span class="brand-text">TICKETS</span>
     </div>
 
-    <button id="desktop-sidebar-toggle"
-            class="sidebar-collapse-btn"
-            title="ย่อ / ขยายเมนู">
+    <button id="desktop-sidebar-toggle" class="sidebar-collapse-btn" title="ย่อ / ขยายเมนู">
       <i class="fas fa-bars"></i>
     </button>
   </div>
@@ -89,6 +87,14 @@
       <a href="{% url 'tickets_accepting_work' %}">
         <i class="fa-solid fa-handshake"></i>
         <span>Accepting Work</span>
+      </a>
+    </li>
+    {% endif %}
+    {% if "IT_Stock" in user_permissions %}
+    <li>
+      <a href="http://127.0.0.1:3000/admin_dash/items/">
+        <i class="fa-solid fa-boxes-stacked"></i>
+        <span>IT Stock</span>
       </a>
     </li>
     {% endif %}
@@ -169,6 +175,10 @@
 
     {% if "tickets_accepting_work" in user_permissions %}
     <li><a href="{% url 'tickets_accepting_work' %}">Accepting Work</a></li>
+    {% endif %}
+
+    {% if "IT_Stock" in user_permissions %}
+    <li><a href="http://127.0.0.1:3000/admin_dash/items/">นับสต๊อก</a></li>
     {% endif %}
 
     <li class="mt-3">

@@ -3426,7 +3426,6 @@ def manage_permission(request):
 
     with connection.cursor() as cursor:
 
-        # ================= USERS =================
         cursor.execute("""
             SELECT id, username
             FROM tickets.users
@@ -3434,7 +3433,6 @@ def manage_permission(request):
         """)
         users = dictfetchall(cursor)
 
-        # ================= PERMISSIONS =================
         cursor.execute("""
             SELECT id, code, url_name, description
             FROM tickets.permissions
@@ -3452,36 +3450,76 @@ def manage_permission(request):
                 AND allow = TRUE
             """, [selected_user_id])
 
-            user_permission_ids = [
-                row[0] for row in cursor.fetchall()
-            ]
+            user_permission_ids = [row[0] for row in cursor.fetchall()]
 
-    # ================= SAVE =================
+    # ================= POST HANDLER =================
     if request.method == "POST":
 
-        user_id = request.POST.get("user_id")
-        selected_permissions = request.POST.getlist("permissions")
+        action = request.POST.get("action")
 
-        with connection.cursor() as cursor:
+        # ------------------------------------------------
+        # 1) SAVE USER PERMISSION
+        # ------------------------------------------------
+        if action == "save_user_permission":
 
-            # ปิดสิทธิ์ทั้งหมดก่อน
-            cursor.execute("""
-                UPDATE tickets.user_permissions
-                SET allow = FALSE
-                WHERE user_id = %s
-            """, [user_id])
+            user_id = request.POST.get("user_id")
+            selected_permissions = request.POST.getlist("permissions")
 
-            # เปิดเฉพาะที่เลือก
-            for perm_id in selected_permissions:
+            if not user_id:
+                messages.error(request, "ไม่พบ User")
+                return redirect("/manage/permissions/")
+
+            with connection.cursor() as cursor:
+
                 cursor.execute("""
-                    INSERT INTO tickets.user_permissions (user_id, permission_id, allow)
-                    VALUES (%s, %s, TRUE)
-                    ON CONFLICT (user_id, permission_id)
-                    DO UPDATE SET allow = TRUE
-                """, [user_id, perm_id])
+                    UPDATE tickets.user_permissions
+                    SET allow = FALSE
+                    WHERE user_id = %s
+                """, [user_id])
 
-        messages.success(request, "บันทึกสิทธิ์เรียบร้อยแล้ว")
-        return redirect(f"/manage/permissions/?user_id={user_id}")
+                for perm_id in selected_permissions:
+                    cursor.execute("""
+                        INSERT INTO tickets.user_permissions
+                        (user_id, permission_id, allow)
+                        VALUES (%s, %s, TRUE)
+                        ON CONFLICT (user_id, permission_id)
+                        DO UPDATE SET allow = TRUE
+                    """, [user_id, perm_id])
+
+            messages.success(request, "บันทึกสิทธิ์เรียบร้อยแล้ว")
+            return redirect(f"/manage/permissions/?user_id={user_id}")
+
+        # ------------------------------------------------
+        # 2) ADD / EDIT PERMISSION (MASTER TABLE)
+        # ------------------------------------------------
+        if action == "save_permission":
+
+            perm_id = request.POST.get("perm_id")
+            code = request.POST.get("code")
+            url_name = request.POST.get("url_name")
+            description = request.POST.get("description")
+
+            with connection.cursor() as cursor:
+
+                if perm_id:  # EDIT
+                    cursor.execute("""
+                        UPDATE tickets.permissions
+                        SET code=%s, url_name=%s, description=%s
+                        WHERE id=%s
+                    """, [code, url_name, description, perm_id])
+
+                    messages.success(request, "แก้ไข Permission เรียบร้อยแล้ว")
+
+                else:  # ADD
+                    cursor.execute("""
+                        INSERT INTO tickets.permissions
+                        (code, url_name, description)
+                        VALUES (%s,%s,%s)
+                    """, [code, url_name, description])
+
+                    messages.success(request, "เพิ่ม Permission ใหม่เรียบร้อยแล้ว")
+
+            return redirect("/manage/permissions/")
 
     return render(request, "admin/manage_permission.html", {
         "users": users,
