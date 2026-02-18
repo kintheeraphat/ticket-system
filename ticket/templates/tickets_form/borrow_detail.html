@@ -1,145 +1,230 @@
 {% extends "base.html" %}
+{% load tz %}
 {% block title %}รายละเอียดคำร้องขอยืมอุปกรณ์{% endblock %}
 
 {% block content %}
 <div class="dashboard-table shadow-sm p-4 bg-white rounded">
 
     <h4 class="fw-bold text-primary mb-4">
-        <i class="fas fa-box-open me-2"></i>รายละเอียดคำร้องขอยืมอุปกรณ์
+        <i class="fas fa-box-open me-2"></i>
+        รายละเอียดคำร้องขอยืมอุปกรณ์ #{{ ticket.id }}
     </h4>
 
-    <!-- HEADER INFO -->
+    <!-- ================= HEADER INFO ================= -->
     <div class="mb-4 p-3 bg-light rounded border">
         <div class="row g-3">
 
             <div class="col-md-4">
                 <label class="fw-bold">วันที่จัดทำ</label>
-                <input type="text" class="form-control" value="{{ borrow.create_at|date:'d/m/Y' }}" readonly>
+                <input type="text" class="form-control"
+                       value="{{ borrow.create_at|date:'d/m/Y' }}" readonly>
             </div>
 
             <div class="col-md-4">
                 <label class="fw-bold">วันที่ยืม</label>
-                <input type="text" class="form-control" value="{{ borrow.borrow_date|date:'d/m/Y' }}" readonly>
+                <input type="text" class="form-control"
+                       value="{{ borrow.borrow_date|date:'d/m/Y' }}" readonly>
             </div>
 
             <div class="col-md-4">
                 <label class="fw-bold">วันที่คืน</label>
-                <input type="text" class="form-control" value="{{ borrow.return_date|date:'d/m/Y' }}" readonly>
+                <input type="text" class="form-control"
+                       value="{{ borrow.return_date|date:'d/m/Y' }}" readonly>
             </div>
 
         </div>
     </div>
 
-    <!-- USER INFO -->
-    <div class="row mb-3">
+    <!-- ================= USER INFO ================= -->
+    <div class="row mb-4">
         <div class="col-md-6">
             <label class="fw-bold">ผู้ขอ</label>
-            <input type="text" class="form-control" value="{{ borrow.full_name }}" readonly>
+            <input type="text" class="form-control"
+                   value="{{ borrow.full_name }}" readonly>
         </div>
+
         <div class="col-md-6">
             <label class="fw-bold">แผนก</label>
-            <input type="text" class="form-control" value="{{ borrow.department }}" readonly>
+            <input type="text" class="form-control"
+                   value="{{ borrow.department }}" readonly>
+        </div>
+    </div>
+
+    <!-- ================= EQUIPMENT TABLE ================= -->
+    <div class="mb-4">
+        <label class="fw-bold mb-2">
+            <i class="fas fa-list me-1"></i> รายการอุปกรณ์
+        </label>
+
+        <div class="table-responsive border rounded">
+            <table class="table table-bordered align-middle mb-0">
+                <thead class="table-primary text-center">
+                    <tr>
+                        <th style="width:50px;">#</th>
+                        <th>ชื่ออุปกรณ์</th>
+                        <th>สเปค</th>
+                        <th style="width:100px;">จำนวน</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td class="text-center">{{ forloop.counter }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.spec }}</td>
+                        <td class="text-center">{{ item.qty }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">
+                            ไม่มีรายการอุปกรณ์
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ================= REMARK ================= -->
+    <div class="mb-4">
+        <label class="fw-bold">หมายเหตุ</label>
+        <textarea class="form-control" rows="3" readonly>
+{{ borrow.remark }}
+        </textarea>
+    </div>
+
+    <hr class="my-4">
+
+    <!-- ================= FILES ================= -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light fw-semibold">
+            <i class="fas fa-paperclip me-2 text-secondary"></i>
+            เอกสารแนบ
         </div>
 
-        <!-- EQUIPMENT TABLE -->
-        <div class="mb-3">
-            <label class="fw-bold mb-2">
-                <i class="fas fa-list me-1"></i> รายการอุปกรณ์
-            </label>
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-3">
 
-            <div class="table-responsive border rounded">
-                <table class="table table-bordered align-middle mb-0">
-                    <thead class="table-primary text-center">
-                        <tr>
-                            <th style="width:50px;">#</th>
-                            <th>ชื่ออุปกรณ์</th>
-                            <th>สเปค</th>
-                            <th style="width:100px;">จำนวน</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in items %}
-                        <tr>
-                            <td class="text-center">{{ forloop.counter }}</td>
-                            <td>{{ item.name }}</td>
-                            <td>{{ item.spec }}</td>
-                            <td class="text-center">{{ item.qty }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="text-center text-muted">
-                                ไม่มีรายการอุปกรณ์
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                {% for f in files %}
+                <div style="width:150px;">
 
-        <div class="mb-3">
-            <label class="fw-bold">หมายเหตุ</label>
-            <textarea class="form-control" rows="3" readonly>{{ detail.remark }}</textarea>
-        </div>
+                    <div class="border rounded shadow-sm p-2 text-center"
+                         style="cursor:pointer;"
+                         onclick="previewFile('{% url "preview_media" f.file_path %}', '{{ f.file_type }}')">
 
-        <hr class="my-4">
+                        {% if "image" in f.file_type %}
+                            <img src="{% url 'preview_media' f.file_path %}"
+                                 class="img-fluid rounded mb-2"
+                                 style="height:110px;object-fit:cover;">
+                        {% elif "pdf" in f.file_type %}
+                            <div style="height:110px;display:flex;align-items:center;justify-content:center;">
+                                <i class="fas fa-file-pdf text-danger fs-1"></i>
+                            </div>
+                        {% else %}
+                            <div style="height:110px;display:flex;align-items:center;justify-content:center;">
+                                <i class="fas fa-file text-secondary fs-1"></i>
+                            </div>
+                        {% endif %}
 
-        <!-- FILE SECTION -->
-        <div class="mb-4">
-            <label class="fw-bold mb-3">ไฟล์แนบ</label>
+                        <div class="small fw-semibold text-truncate">
+                            {{ f.file_name }}
+                        </div>
 
-            {% if files %}
-            {% for file in files %}
-            <div class="mb-4">
+                    </div>
 
-                <div class="mb-2">
-                    <a href="/{{ file.1 }}" target="_blank" class="fw-bold text-decoration-none">
-                        {{ file.0 }}
-                    </a>
                 </div>
-
-                {% if file.0|lower|slice:"-3:" == "pdf" %}
-                <iframe src="/{{ file.1 }}" width="100%" height="600px" style="border:1px solid #ddd;">
-                </iframe>
-                {% endif %}
+                {% empty %}
+                <div class="text-muted">ไม่มีเอกสารแนบ</div>
+                {% endfor %}
 
             </div>
-            {% endfor %}
-            {% else %}
-            <p class="text-muted">ไม่มีไฟล์แนบ</p>
-            {% endif %}
         </div>
-        {% if can_approve or is_admin %}
-        <div class="card shadow-sm border-success mb-4">
-            <div class="card-body">
+    </div>
 
-                {% if is_admin %}
+    <!-- ================= APPROVE SECTION ================= -->
+    {% if can_approve or is_admin %}
+    <div class="card shadow-sm border-success mb-4">
+        <div class="card-body">
+
+            {% if is_admin %}
                 <div class="fw-semibold text-danger mb-2">
                     ⚠ สิทธิ์ Admin
                 </div>
-                {% else %}
+            {% else %}
                 <div class="fw-semibold text-success mb-2">
                     คุณสามารถอนุมัติได้ (Level {{ my_level }})
                 </div>
-                {% endif %}
+            {% endif %}
 
-                <form method="post" action="{% url 'approve_ticket' ticket.id %}">
-                    {% csrf_token %}
-                    <textarea name="remark" class="form-control mb-2" rows="2"
-                        placeholder="หมายเหตุ (ถ้ามี)"></textarea>
-                    <button type="submit" class="btn btn-success">
-                        ✅ Approve
-                    </button>
-                </form>
+            <form method="post" action="{% url 'approve_ticket' ticket.id %}">
+                {% csrf_token %}
+                <textarea name="remark"
+                          class="form-control mb-2"
+                          rows="2"
+                          placeholder="หมายเหตุ (ถ้ามี)"></textarea>
 
-            </div>
+                <button type="submit" class="btn btn-success">
+                    ✅ Approve
+                </button>
+            </form>
+
         </div>
-        {% endif %}
-        <div class="text-end border-top pt-3">
-            <a href="{% url 'dashboard' %}" class="btn btn-secondary">
-                กลับหน้าหลัก
-            </a>
-        </div>
-
     </div>
-    {% endblock %}
+    {% endif %}
+
+    <div class="text-end border-top pt-3">
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+            กลับหน้าหลัก
+        </a>
+    </div>
+
+</div>
+{% endblock %}
+
+<!-- ================= FILE MODAL ================= -->
+<div class="modal fade" id="fileModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title">ดูเอกสารแนบ</h6>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center p-0">
+        <img id="previewImage" class="img-fluid d-none" style="max-height:85vh;">
+        <embed id="previewFrame"
+               type="application/pdf"
+               class="d-none"
+               style="width:100%;height:85vh;">
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+function previewFile(url, fileType) {
+
+    const img = document.getElementById("previewImage");
+    const frame = document.getElementById("previewFrame");
+
+    img.classList.add("d-none");
+    frame.classList.add("d-none");
+    img.src = "";
+    frame.src = "";
+
+    if (fileType.includes("image")) {
+        img.src = url;
+        img.classList.remove("d-none");
+    } else {
+        frame.src = url;
+        frame.classList.remove("d-none");
+    }
+
+    const modal = new bootstrap.Modal(
+        document.getElementById("fileModal")
+    );
+    modal.show();
+}
+</script>
+{% endblock %}

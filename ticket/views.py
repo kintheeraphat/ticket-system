@@ -1059,6 +1059,7 @@ def vpn(request):
         return redirect("ticket_success")
 
     return render(request, "tickets_form/vpn.html")
+
 @page_permission_required
 @handle_approval_error
 def borrow(request):
@@ -1179,43 +1180,55 @@ def borrow(request):
                 # FILE UPLOAD
                 # -----------------------------
                 files = request.FILES.getlist("order_file[]")
-                upload_dir = f"media/uploads/borrows/{ticket_id}"
-                os.makedirs(upload_dir, exist_ok=True)
 
-                for f in files:
+                if files:
 
-                    file_path = f"{upload_dir}/{f.name}"
+                    upload_root = os.path.join(
+                        settings.MEDIA_ROOT,
+                        "uploads",
+                        "borrows",
+                        str(ticket_id)
+                    )
 
-                    with open(file_path, "wb+") as destination:
-                        for chunk in f.chunks():
-                            destination.write(chunk)
+                    os.makedirs(upload_root, exist_ok=True)
 
                     with connection.cursor() as cursor:
-                        cursor.execute("""
-                            INSERT INTO tickets.ticket_files
-                            (
+                        for f in files:
+
+                            file_path = os.path.join(upload_root, f.name)
+
+                            with open(file_path, "wb+") as destination:
+                                for chunk in f.chunks():
+                                    destination.write(chunk)
+
+                            relative_path = f"uploads/borrows/{ticket_id}/{f.name}"
+
+                            cursor.execute("""
+                                INSERT INTO tickets.ticket_files
+                                (
+                                    ticket_id,
+                                    ref_type,
+                                    ref_id,
+                                    file_name,
+                                    file_path,
+                                    file_type,
+                                    file_size,
+                                    uploaded_by,
+                                    create_at
+                                )
+                                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                            """, [
                                 ticket_id,
-                                ref_type,
-                                ref_id,
-                                file_name,
-                                file_path,
-                                file_type,
-                                file_size,
-                                uploaded_by,
-                                create_at
-                            )
-                            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                        """, [
-                            ticket_id,
-                            "BORROW",
-                            borrow_request_id,
-                            f.name,
-                            file_path,
-                            f.content_type,
-                            f.size,
-                            user_id,
-                            timezone.now()
-                        ])
+                                "BORROW",
+                                borrow_request_id,
+                                f.name,
+                                relative_path,
+                                f.content_type,
+                                f.size,
+                                user_id,
+                                timezone.now()
+                            ])
+
 
             messages.success(request, "ส่งคำร้องขอยืมอุปกรณ์เรียบร้อยแล้ว")
             return redirect("ticket_success")
@@ -1500,13 +1513,23 @@ def borrow_detail(request, ticket_id):
         # FILES
         # -------------------------
         cursor.execute("""
-            SELECT file_name, file_path
+            SELECT id, file_name, file_path, file_type
             FROM tickets.ticket_files
             WHERE ticket_id = %s
-              AND ref_type = 'BORROW'
+            AND ref_type = 'BORROW'
+            ORDER BY id
         """, [ticket_id])
 
-        files = cursor.fetchall()
+        files = []
+
+        for f in cursor.fetchall():
+            files.append({
+                "id": f[0],
+                "file_name": f[1],
+                "file_path": f[2].replace("\\", "/"),
+                "file_type": f[3],
+            })
+
 
     # =========================
     # APPROVAL PERMISSION
