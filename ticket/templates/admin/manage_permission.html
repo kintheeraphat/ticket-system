@@ -3,273 +3,292 @@
 
 {% block content %}
 <div class="container-fluid py-4">
-<div class="row g-4">
+  <div class="row g-4">
 
-<!-- ================= LEFT : USER PANEL ================= -->
-<div class="col-lg-3">
+    <!-- ================= LEFT : USER PANEL ================= -->
+    <div class="col-lg-3">
 
-  <div class="card shadow-sm border-0 rounded-4">
-    <div class="card-header bg-white border-0">
-      <h6 class="fw-bold mb-0">Users</h6>
-    </div>
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-white border-0">
+          <h6 class="fw-bold mb-0">Users</h6>
+        </div>
 
-    <div class="card-body pt-2">
+        <div class="card-body pt-2">
 
-      <input type="text"
-             id="userSearch"
-             class="form-control form-control-sm mb-3"
-             placeholder="🔎 ค้นหา user">
+          <input type="text" id="userSearch"
+                 class="form-control form-control-sm mb-3"
+                 placeholder="🔎 ค้นหา user">
 
-      <div class="user-scroll">
+          <div class="user-scroll">
 
-        {% for user in users %}
-        <form method="get" class="mb-1 user-item"
-              data-search="{{ user.username|lower }}">
-          <input type="hidden" name="user_id" value="{{ user.id }}">
+            {% for user in users %}
+            <form method="get"
+                  class="mb-1 user-item"
+                  data-search="{{ user.username|lower }}">
+              <input type="hidden" name="user_id" value="{{ user.id }}">
 
-          <button type="submit"
-                  class="btn w-100 text-start
+              <button type="submit"
+                      class="btn w-100 text-start
                   {% if selected_user_id == user.id|stringformat:'s' %}
                       btn-primary
                   {% else %}
                       btn-light
                   {% endif %}">
-              {{ user.username }}
-          </button>
-        </form>
-        {% endfor %}
+                {{ user.username }}
+              </button>
+            </form>
+            {% endfor %}
 
+          </div>
+        </div>
       </div>
+    </div>
+
+
+    <!-- ================= RIGHT : PERMISSION PANEL ================= -->
+    <div class="col-lg-9">
+
+      {% if selected_user_id %}
+
+      <div class="card shadow-sm border-0 rounded-4">
+
+        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="fw-bold mb-0">Permission Control</h5>
+            <small class="text-muted">User ID: {{ selected_user_id }}</small>
+          </div>
+
+          <div class="d-flex gap-2">
+
+            <span class="badge bg-success rounded-pill px-3">
+              Enabled: <span id="enabledCount">0</span>
+            </span>
+
+            <!-- ADD BUTTON -->
+            <button class="btn btn-sm btn-outline-success"
+                    onclick="openPermissionModal()">
+              ➕ เพิ่ม Permission
+            </button>
+
+          </div>
+        </div>
+
+        <div class="card-body">
+
+          <div class="mb-3 d-flex gap-2 flex-wrap">
+
+            <button type="button"
+                    class="btn btn-danger btn-sm"
+                    onclick="setAdminPermissions()">
+              Admin (All Access)
+            </button>
+
+            <button type="button"
+                    class="btn btn-primary btn-sm"
+                    onclick="setUserPermissions()">
+              User / Manager
+            </button>
+
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    onclick="clearPermissions()">
+              ❌ Clear
+            </button>
+
+          </div>
+
+          <!-- SEARCH PERMISSION -->
+          <div class="mb-3">
+            <input type="text"
+                   id="permissionSearch"
+                   class="form-control"
+                   placeholder="ค้นหา permission">
+          </div>
+
+          <!-- SAVE USER PERMISSION -->
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="save_user_permission">
+            <input type="hidden" name="user_id" value="{{ selected_user_id }}">
+
+            <div class="permission-scroll">
+
+              {% for perm in permissions %}
+              <div class="permission-row d-flex justify-content-between align-items-center py-2 px-3 border-bottom"
+                   data-search="{{ perm.code|lower }} {{ perm.url_name|lower }} {{ perm.description|lower }}">
+
+                <div>
+                  <div class="fw-semibold small">{{ perm.description }}</div>
+                  <div class="text-muted small">{{ perm.url_name }}</div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+
+                  <!-- EDIT BUTTON -->
+                  <button type="button"
+                          class="btn btn-sm btn-outline-primary"
+                          onclick="openPermissionModal(
+                              '{{ perm.id }}',
+                              '{{ perm.code }}',
+                              '{{ perm.url_name }}',
+                              '{{ perm.description|default:'' }}'
+                          )">
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+
+                  <div class="form-check form-switch">
+                    <input class="form-check-input permission-checkbox"
+                           type="checkbox"
+                           name="permissions"
+                           value="{{ perm.id }}"
+                           {% if perm.id in user_permission_ids %}checked{% endif %}>
+                  </div>
+
+                </div>
+
+              </div>
+              {% endfor %}
+
+            </div>
+
+            <div class="text-end mt-4">
+              <button type="submit"
+                      class="btn btn-success px-4">
+                💾 Save
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+      {% else %}
+
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body text-center text-muted py-5">
+          กรุณาเลือก User ด้านซ้าย
+        </div>
+      </div>
+
+      {% endif %}
+
     </div>
   </div>
 </div>
 
 
-<!-- ================= RIGHT : PERMISSION PANEL ================= -->
-<div class="col-lg-9">
+<!-- ================= ADD / EDIT PERMISSION MODAL ================= -->
+<div class="modal fade" id="permissionModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
 
-{% if selected_user_id %}
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_permission">
+        <input type="hidden" name="perm_id" id="perm_id">
 
-<div class="card shadow-sm border-0 rounded-4">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold" id="modalTitle">
+            เพิ่ม Permission
+          </h5>
+          <button type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"></button>
+        </div>
 
-  <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
-    <div>
-      <h5 class="fw-bold mb-0">Permission Control</h5>
-      <small class="text-muted">User ID: {{ selected_user_id }}</small>
-    </div>
+        <div class="modal-body">
 
-    <span class="badge bg-success rounded-pill px-3">
-      Enabled: <span id="enabledCount">0</span>
-    </span>
-  </div>
-
-  <div class="card-body">
-
-    <div class="mb-3 d-flex gap-2 flex-wrap">
-
-      <button type="button"
-              class="btn btn-danger btn-sm"
-              onclick="setAdminPermissions()">
-         Admin (All Access)
-      </button>
-
-      <button type="button"
-              class="btn btn-primary btn-sm"
-              onclick="setUserPermissions()">
-         User / Manager
-      </button>
-
-      <button type="button"
-              class="btn btn-outline-secondary btn-sm"
-              onclick="clearPermissions()">
-        ❌ Clear
-      </button>
-
-    </div>
-
-    <!-- SEARCH PERMISSION -->
-    <div class="mb-3">
-      <input type="text"
-             id="permissionSearch"
-             class="form-control"
-             placeholder="ค้นหา permission">
-    </div>
-
-    <form method="post">
-      {% csrf_token %}
-      <input type="hidden" name="user_id" value="{{ selected_user_id }}">
-
-      <div class="permission-scroll">
-
-        {% for perm in permissions %}
-        <div class="permission-row d-flex justify-content-between align-items-center py-2 px-3 border-bottom"
-             data-search="{{ perm.code|lower }} {{ perm.url_name|lower }} {{ perm.description|lower }}">
-
-          <div>
-            <div class="fw-semibold small">{{ perm.code }}</div>
-            <div class="text-muted small">{{ perm.url_name }}</div>
+          <div class="mb-3">
+            <label class="fw-semibold">Code</label>
+            <input type="text"
+                   name="code"
+                   id="perm_code"
+                   class="form-control"
+                   required>
           </div>
 
-          <div class="form-check form-switch">
-            <input class="form-check-input permission-checkbox"
-                   type="checkbox"
-                   name="permissions"
-                   value="{{ perm.id }}"
-                   {% if perm.id in user_permission_ids %}checked{% endif %}>
+          <div class="mb-3">
+            <label class="fw-semibold">URL Name</label>
+            <input type="text"
+                   name="url_name"
+                   id="perm_url"
+                   class="form-control"
+                   required>
+          </div>
+
+          <div class="mb-3">
+            <label class="fw-semibold">Description</label>
+            <input type="text"
+                   name="description"
+                   id="perm_desc"
+                   class="form-control">
           </div>
 
         </div>
-        {% endfor %}
 
-      </div>
+        <div class="modal-footer">
+          <button type="submit"
+                  class="btn btn-success">
+            💾 บันทึก
+          </button>
+        </div>
 
-      <div class="text-end mt-4">
-        <button type="submit" class="btn btn-success px-4">
-          💾 Save
-        </button>
-      </div>
+      </form>
 
-    </form>
+    </div>
   </div>
-</div>
-
-{% else %}
-
-<div class="card shadow-sm border-0 rounded-4">
-  <div class="card-body text-center text-muted py-5">
-    กรุณาเลือก User ด้านซ้าย
-  </div>
-</div>
-
-{% endif %}
-
-</div>
-</div>
 </div>
 
 
 <style>
-.user-scroll {
-  max-height: 500px;
-  overflow-y: auto;
-}
-.permission-scroll {
-  max-height: 600px;
-  overflow-y: auto;
-}
+.user-scroll { max-height: 500px; overflow-y: auto; }
+.permission-scroll { max-height: 600px; overflow-y: auto; }
 </style>
 
 
 <script>
+function openPermissionModal(id="", code="", url="", desc=""){
+  document.getElementById("perm_id").value = id;
+  document.getElementById("perm_code").value = code;
+  document.getElementById("perm_url").value = url;
+  document.getElementById("perm_desc").value = desc;
 
-/* ================= USER SEARCH ================= */
-document.getElementById("userSearch").addEventListener("keyup", function(){
+  document.getElementById("modalTitle").innerText =
+      id ? "แก้ไข Permission" : "เพิ่ม Permission";
+
+  new bootstrap.Modal(
+      document.getElementById("permissionModal")
+  ).show();
+}
+
+/* USER SEARCH */
+document.getElementById("userSearch").addEventListener("keyup", function () {
   let value = this.value.toLowerCase();
-  document.querySelectorAll(".user-item").forEach(function(item){
+  document.querySelectorAll(".user-item").forEach(function (item) {
     let text = item.getAttribute("data-search");
     item.style.display = text.includes(value) ? "" : "none";
   });
 });
 
-
-/* ================= ENABLED COUNT ================= */
-function updateEnabledCount(){
+/* ENABLED COUNT */
+function updateEnabledCount() {
   let count = document.querySelectorAll(".permission-checkbox:checked").length;
   document.getElementById("enabledCount").innerText = count;
 }
-
-document.addEventListener("change", function(e){
-  if(e.target.classList.contains("permission-checkbox")){
+document.addEventListener("change", function (e) {
+  if (e.target.classList.contains("permission-checkbox")) {
     updateEnabledCount();
   }
 });
-
 updateEnabledCount();
 
-
-/* ================= PERMISSION SEARCH ================= */
-document.getElementById("permissionSearch")?.addEventListener("keyup", function(){
+/* PERMISSION SEARCH */
+document.getElementById("permissionSearch")?.addEventListener("keyup", function () {
   let value = this.value.toLowerCase();
-  document.querySelectorAll(".permission-row").forEach(function(row){
+  document.querySelectorAll(".permission-row").forEach(function (row) {
     let text = row.getAttribute("data-search");
     row.style.display = text.includes(value) ? "" : "none";
   });
-});
-
-
-/* ================= ROLE PRESETS ================= */
-
-function setAdminPermissions(){
-  document.querySelectorAll(".permission-checkbox")
-      .forEach(cb => cb.checked = true);
-  updateEnabledCount();
-}
-
-
-function setUserPermissions(){
-
-  const allowedKeywords = [
-    "create",
-    "tickets_list",
-    "detail",
-    "delete_ticket",
-    "edit_ticket",
-    "form",
-    "borrows",
-    "vpn",
-    "erp_perm",
-    "building_repair",
-    "ticket_sussess",
-    "approve_ticket",
-    "reject",
-    "ticket_success",
-    'borrow',
-    'report_form',
-  ];
-
-  document.querySelectorAll(".permission-row").forEach(row => {
-
-      const searchText = row.getAttribute("data-search");
-      const checkbox = row.querySelector(".permission-checkbox");
-
-      checkbox.checked = false;
-
-      allowedKeywords.forEach(key => {
-          if(searchText.includes(key)){
-              checkbox.checked = true;
-          }
-      });
-
-  });
-
-  updateEnabledCount();
-}
-
-
-function clearPermissions(){
-  document.querySelectorAll(".permission-checkbox")
-      .forEach(cb => cb.checked = false);T
-  updateEnabledCount();
-}
-//เลือกแล้วไม่ต้องเลื่อนกลับไปด้านบน
-document.addEventListener("DOMContentLoaded", function(){
-
-  const userScroll = document.querySelector(".user-scroll");
-
-  const savedScroll = sessionStorage.getItem("userScrollTop");
-  if(userScroll && savedScroll !== null){
-      userScroll.scrollTop = parseInt(savedScroll);
-      sessionStorage.removeItem("userScrollTop");
-  }
-
-  document.querySelectorAll(".user-item button").forEach(btn => {
-      btn.addEventListener("click", function(){
-          if(userScroll){
-              sessionStorage.setItem("userScrollTop", userScroll.scrollTop);
-          }
-      });
-  });
-
 });
 </script>
 
