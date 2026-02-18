@@ -801,7 +801,8 @@ def erp_perm(request):
 
                 description = request.POST.get("remark", "")
                 user_id = request.session["user"]["id"]
-                department = request.POST.getlist("department[]")
+                departments = request.POST.getlist("department[]")
+                department = ", ".join(departments)
 
                 # -----------------------------
                 # INSERT TICKET
@@ -863,37 +864,54 @@ def erp_perm(request):
                     erp_data_id = cursor.fetchone()[0]
 
                 # -----------------------------
-                # FILE UPLOAD
+                # FILE UPLOAD (STANDARD)
                 # -----------------------------
-                files = request.FILES.getlist("attachments[]")
-                upload_dir = f"uploads/erp/{ticket_id}"
-                os.makedirs(upload_dir, exist_ok=True)
+                files = request.FILES.getlist("files")
 
-                for f in files:
-                    file_path = f"{upload_dir}/{f.name}"
+                if files:
 
-                    with open(file_path, "wb+") as destination:
-                        for chunk in f.chunks():
-                            destination.write(chunk)
+                    upload_root = os.path.join(
+                        settings.MEDIA_ROOT,
+                        "uploads",
+                        "erp",
+                        str(ticket_id)
+                    )
+
+                    os.makedirs(upload_root, exist_ok=True)
 
                     with connection.cursor() as cursor:
-                        cursor.execute("""
-                            INSERT INTO tickets.ticket_files
-                            (ticket_id, ref_type, ref_id,
-                             file_name, file_path, file_type,
-                             file_size, uploaded_by, create_at)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                        """, [
-                            ticket_id,
-                            "ERP_APP",
-                            erp_data_id,
-                            f.name,
-                            file_path,
-                            f.content_type,
-                            f.size,
-                            user_id,
-                            timezone.now()
-                        ])
+                        for f in files:
+
+                            file_path = os.path.join(upload_root, f.name)
+
+                            with open(file_path, "wb+") as destination:
+                                for chunk in f.chunks():
+                                    destination.write(chunk)
+
+                            relative_path = f"uploads/erp/{ticket_id}/{f.name}"
+
+                            cursor.execute("""
+                                INSERT INTO tickets.ticket_files
+                                (ticket_id, ref_type, ref_id,
+                                file_name, file_path,
+                                file_type, file_size,
+                                uploaded_by, create_at)
+                                VALUES (%s, %s, %s,
+                                        %s, %s,
+                                        %s, %s,
+                                        %s, %s)
+                            """, [
+                                ticket_id,
+                                "ERP_APP",
+                                ticket_id,
+                                f.name,
+                                relative_path,
+                                f.content_type,
+                                f.size,
+                                user_id,          # ✅ ตรงกับ uploaded_by
+                                timezone.now()
+                            ])
+
 
         except ApprovalTeamNotFound as e:
             messages.error(request, str(e))
@@ -1247,10 +1265,13 @@ def tickets_detail_erp(request, ticket_id):
                 t.description,
                 u.username,
                 t.create_at,
+                s.name AS status_name,
                 t.status_id
             FROM tickets.tickets t
             JOIN tickets.users u ON u.id = t.user_id
+            JOIN tickets.status s ON s.id = t.status_id
             WHERE t.id = %s
+
         """, [ticket_id])
 
         row = cursor.fetchone()
@@ -1264,8 +1285,10 @@ def tickets_detail_erp(request, ticket_id):
         "description": row[2],
         "user_name": row[3],
         "create_at": row[4],
-        "status_id": row[5],
+        "status": row[5],      # ← ชื่อสถานะ
+        "status_id": row[6],
     }
+
 
     # -----------------------------
     # current pending level
@@ -1328,6 +1351,52 @@ def tickets_detail_erp(request, ticket_id):
 
         has_pending_approve = cursor.fetchone() is not None
 
+    # -----------------------------
+    # FILES
+    # -----------------------------
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id, file_name, file_path, file_type
+            FROM tickets.ticket_files
+            WHERE ticket_id = %s
+            ORDER BY id
+        """, [ticket_id])
+
+        files = []
+
+        for f in cursor.fetchall():
+            files.append({
+                "id": f[0],
+                "file_name": f[1],
+                "file_path": f[2].replace("\\", "/"),  # กัน windows path
+                "file_type": f[3],
+            })
+
+    # -----------------------------
+    # ERP DATA
+    # -----------------------------
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT module_access,
+                perm_change,
+                requester_names,
+                module_name
+            FROM tickets.ticket_data_erp_app
+            WHERE ticket_id = %s
+        """, [ticket_id])
+
+        row = cursor.fetchone()
+
+    erp_data = None
+    if row:
+        erp_data = {
+            "module_access": row[0],
+            "perm_change": row[1],
+            "requester_names": row[2],
+            "module_name": row[3],
+        }
+
+
     return render(
         request,
         "tickets_form/tickets_detail_erp.html",
@@ -1337,8 +1406,13 @@ def tickets_detail_erp(request, ticket_id):
             "my_level": my_level,
             "is_admin": is_admin,
             "has_pending_approve": has_pending_approve,
+
+            # ✅ เพิ่มสองตัวนี้
+            "files": files,
+            "erp_data": erp_data,
         }
     )
+
     
 @page_permission_required
 def borrow_detail(request, ticket_id):
@@ -3971,12 +4045,12 @@ def repairs_it_detail(request, ticket_id):
         "is_admin": is_admin,   # ✅ ส่งเข้า template
     })
 
-@xframe_options_exempt
 def preview_media(request, path):
 
-    full_path = os.path.join(settings.BASE_DIR, path)
+    # path ที่ส่งมาเป็น uploads/erp/148/xxx.jpg
+    full_path = os.path.join(settings.MEDIA_ROOT, path)
 
     if not os.path.exists(full_path):
-        raise Http404()
+        raise Http404("File not found")
 
     return FileResponse(open(full_path, "rb"))
