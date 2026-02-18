@@ -80,8 +80,9 @@
                         {% url 'repairs_it_detail' t.id %}
                     {% elif t.ticket_type_id == 12 %}
                         {% url 'active_promotion_detail' t.id %}
+                        {% elif t.ticket_type_id == 14 %}
                     {% else %}
-                        {% url 'borrow_detail' t.id %}
+                        {% url 'tickets_detail_erp' t.id %}
                     {% endif %}">
 
                     <!-- ID -->

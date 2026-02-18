@@ -3316,6 +3316,7 @@ def manage_permission(request):
 
     with connection.cursor() as cursor:
 
+        # ================= USERS =================
         cursor.execute("""
             SELECT id, username
             FROM tickets.users
@@ -3323,6 +3324,7 @@ def manage_permission(request):
         """)
         users = dictfetchall(cursor)
 
+        # ================= PERMISSIONS =================
         cursor.execute("""
             SELECT id, code, url_name, description
             FROM tickets.permissions
@@ -3337,6 +3339,7 @@ def manage_permission(request):
                 SELECT permission_id
                 FROM tickets.user_permissions
                 WHERE user_id = %s
+                AND allow = TRUE
             """, [selected_user_id])
 
             user_permission_ids = [
@@ -3351,20 +3354,22 @@ def manage_permission(request):
 
         with connection.cursor() as cursor:
 
-            # เปลี่ยนสิทธิ์เป็น False หมดก่อน
+            # ปิดสิทธิ์ทั้งหมดก่อน
             cursor.execute("""
                 UPDATE tickets.user_permissions
                 SET allow = FALSE
                 WHERE user_id = %s
             """, [user_id])
 
-            # insert ใหม่
+            # เปิดเฉพาะที่เลือก
             for perm_id in selected_permissions:
                 cursor.execute("""
                     INSERT INTO tickets.user_permissions (user_id, permission_id, allow)
                     VALUES (%s, %s, TRUE)
+                    ON CONFLICT (user_id, permission_id)
+                    DO UPDATE SET allow = TRUE
                 """, [user_id, perm_id])
-                
+
         messages.success(request, "บันทึกสิทธิ์เรียบร้อยแล้ว")
         return redirect(f"/manage/permissions/?user_id={user_id}")
 
@@ -3373,6 +3378,61 @@ def manage_permission(request):
         "permissions": permissions,
         "user_permission_ids": user_permission_ids,
         "selected_user_id": selected_user_id,
+    })
+
+@login_required_custom
+@page_permission_required
+def add_permission(request):
+
+    if request.method == "POST":
+
+        code = request.POST.get("code")
+        url_name = request.POST.get("url_name")
+        description = request.POST.get("description")
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO tickets.permissions (code, url_name, description)
+                VALUES (%s, %s, %s)
+            """, [code, url_name, description])
+
+        messages.success(request, "เพิ่ม Permission เรียบร้อยแล้ว")
+
+    return redirect("/manage/permissions/")
+
+@login_required_custom
+@page_permission_required
+def edit_permission(request, perm_id):
+
+    with connection.cursor() as cursor:
+
+        if request.method == "POST":
+
+            code = request.POST.get("code")
+            url_name = request.POST.get("url_name")
+            description = request.POST.get("description")
+
+            cursor.execute("""
+                UPDATE tickets.permissions
+                SET code = %s,
+                    url_name = %s,
+                    description = %s
+                WHERE id = %s
+            """, [code, url_name, description, perm_id])
+
+            messages.success(request, "แก้ไข Permission เรียบร้อยแล้ว")
+            return redirect("/manage/permissions/")
+
+        cursor.execute("""
+            SELECT id, code, url_name, description
+            FROM tickets.permissions
+            WHERE id = %s
+        """, [perm_id])
+
+        perm = dictfetchone(cursor)
+
+    return render(request, "admin/edit_permission.html", {
+        "perm": perm
     })
 
 # API สำหรับ Stocket IT ดึงรายชื่อ Admin
