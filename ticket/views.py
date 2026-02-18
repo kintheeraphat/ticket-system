@@ -1052,8 +1052,163 @@ def vpn(request):
 
 @page_permission_required
 @handle_approval_error
-def borrows(req):
-    return render(req,'tickets_form/borrows.html')
+def borrows(request):
+
+    # -----------------------------
+    # CHECK LOGIN
+    # -----------------------------
+    if "user" not in request.session:
+        return redirect("login")
+
+    user = request.session["user"]
+    user_id = user["id"]
+    requester_name = user.get("full_name") or user.get("username")
+    department = user.get("department", "")
+
+    # -----------------------------
+    # POST
+    # -----------------------------
+    if request.method == "POST":
+
+        try:
+            with transaction.atomic():
+
+                # -----------------------------
+                # BASIC TICKET INFO
+                # -----------------------------
+                title = "คำร้องขอยืมอุปกรณ์"
+                description = request.POST.get("remark", "")
+                ticket_type_id = 13   # 🔥 ต้องตรงกับ ticket_type ใน DB
+                status_id = 1
+
+                # -----------------------------
+                # INSERT tickets.tickets
+                # -----------------------------
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO tickets.tickets
+                        (
+                            title,
+                            description,
+                            user_id,
+                            status_id,
+                            ticket_type_id,
+                            department,
+                            create_at
+                        )
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        RETURNING id
+                    """, [
+                        title,
+                        description,
+                        user_id,
+                        status_id,
+                        ticket_type_id,
+                        department,
+                        timezone.now()
+                    ])
+                    ticket_id = cursor.fetchone()[0]
+
+                # -----------------------------
+                # BORROW INFO
+                # -----------------------------
+                borrow_date = request.POST.get("borrow_date")
+                return_date = request.POST.get("return_date")
+
+                # -----------------------------
+                # INSERT borrow_requests
+                # -----------------------------
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO tickets.borrow_requests
+                        (
+                            ticket_id,
+                            user_id,
+                            request_date,
+                            remark,
+                            requester_name,
+                            borrow_date,
+                            return_date
+                        )
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        RETURNING id
+                    """, [
+                        ticket_id,
+                        user_id,
+                        timezone.now(),
+                        description,
+                        requester_name,
+                        borrow_date,
+                        return_date
+                    ])
+                    borrow_request_id = cursor.fetchone()[0]
+
+                # -----------------------------
+                # CREATE APPROVAL FLOW
+                # -----------------------------
+                create_ticket_approval_by_ticket_type(
+                    ticket_id=ticket_id,
+                    ticket_type_id=ticket_type_id,
+                    requester_user_id=user_id
+                )
+
+                # -----------------------------
+                # UPLOAD FILES
+                # -----------------------------
+                files = request.FILES.getlist("order_file[]")
+                upload_dir = f"media/uploads/borrows/{ticket_id}"
+                os.makedirs(upload_dir, exist_ok=True)
+
+                for f in files:
+                    file_path = f"{upload_dir}/{f.name}"
+
+                    with open(file_path, "wb+") as destination:
+                        for chunk in f.chunks():
+                            destination.write(chunk)
+
+                    with connection.cursor() as cursor:
+                        cursor.execute("""
+                            INSERT INTO tickets.ticket_files
+                            (
+                                ticket_id,
+                                ref_type,
+                                ref_id,
+                                file_name,
+                                file_path,
+                                file_type,
+                                file_size,
+                                uploaded_by,
+                                create_at
+                            )
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        """, [
+                            ticket_id,
+                            "BORROW",
+                            borrow_request_id,
+                            f.name,
+                            file_path,
+                            f.content_type,
+                            f.size,
+                            user_id,
+                            timezone.now()
+                        ])
+
+        except ApprovalTeamNotFound as e:
+            messages.error(request, str(e))
+            return redirect(request.path)
+
+        messages.success(request, "ส่งคำร้องขอยืมอุปกรณ์เรียบร้อยแล้ว")
+        return redirect("ticket_success")
+
+    # -----------------------------
+    # GET
+    # -----------------------------
+    today = timezone.localdate()
+
+    return render(request, "tickets_form/borrows.html", {
+        "today": today,
+        "department": department,
+    })
 
 
 def dictfetchone(cursor):
