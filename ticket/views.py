@@ -1170,6 +1170,66 @@ def tickets_detail_erp(request, ticket_id):
     )
     
 
+@page_permission_required
+def borrow_detail(request, ticket_id):
+
+    if "user" not in request.session:
+        return redirect("login")
+
+    with connection.cursor() as cursor:
+
+        # -------------------------
+        # BORROW HEADER
+        # -------------------------
+        cursor.execute("""
+            SELECT 
+                b.id,
+                b.borrow_date,
+                b.return_date,
+                b.remark,
+                b.requester_name,
+                t.department,
+                t.create_at
+            FROM tickets.borrow_requests b
+            JOIN tickets.tickets t ON t.id = b.ticket_id
+            WHERE b.ticket_id = %s
+        """, [ticket_id])
+
+        borrow = cursor.fetchone()
+
+        if not borrow:
+            return redirect("dashboard")
+
+        # -------------------------
+        # EQUIPMENT LIST
+        # (สมมุติว่ามี table borrow_items)
+        # -------------------------
+        cursor.execute("""
+            SELECT item_name, details, quantity
+            FROM tickets.borrow_items
+            WHERE borrow_request_id = %s
+        """, [borrow[0]])
+
+        items = cursor.fetchall()
+
+        # -------------------------
+        # FILES
+        # -------------------------
+        cursor.execute("""
+            SELECT file_name, file_path
+            FROM tickets.ticket_files
+            WHERE ticket_id = %s
+              AND ref_type = 'BORROW'
+        """, [ticket_id])
+
+        files = cursor.fetchall()
+
+    return render(request, "tickets_form/borrow_detail.html", {
+        "borrow": borrow,
+        "items": items,
+        "files": files,
+    })
+
 @login_required_custom
 @page_permission_required
 def tickets_detail_vpn(request, ticket_id):

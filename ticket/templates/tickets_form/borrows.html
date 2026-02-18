@@ -22,7 +22,7 @@
 
     {% if messages %}
     {% for message in messages %}
-    <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3">
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3" role="alert">
         {{ message }}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -32,16 +32,12 @@
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <!-- DATE SECTION -->
+        <!-- DATE -->
         <div class="mb-4 p-3 bg-light rounded border">
-            <h6 class="fw-bold mb-3 text-primary">
-                <i class="fas fa-calendar-alt me-2"></i>ช่วงวันที่ยืมอุปกรณ์
-            </h6>
-
             <div class="row g-3">
 
                 <div class="col-md-4">
-                    <label class="form-label">วันที่จัดทำ</label>
+                    <label class="fw-bold mb-1">วันที่จัดทำ</label>
                     <input type="text"
                            class="form-control bg-white"
                            value="{{ today|date:'d/m/Y' }}"
@@ -49,19 +45,19 @@
                 </div>
 
                 <div class="col-md-4">
-                    <label class="form-label">วันที่ยืม</label>
+                    <label class="fw-bold mb-1">วันที่ยืม</label>
                     <input type="text"
                            id="borrow_date"
                            name="borrow_date"
-                           class="form-control"
                            value="{{ today|date:'d/m/Y' }}"
+                           class="form-control"
                            placeholder="วัน / เดือน / ปี"
                            autocomplete="off"
                            required>
                 </div>
 
                 <div class="col-md-4">
-                    <label class="form-label">วันที่คืน</label>
+                    <label class="fw-bold mb-1">วันที่คืน</label>
                     <input type="text"
                            id="return_date"
                            name="return_date"
@@ -75,98 +71,91 @@
         </div>
 
         <!-- USER INFO -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <label class="fw-bold">แผนก</label>
-                <input type="text"
-                       class="form-control"
-                       value="{{ department }}"
-                       readonly>
-            </div>
+        <div class="col-md-6 mb-3">
+            <label class="fw-bold">แผนก</label>
+            <input type="text"
+                   name="department"
+                   class="form-control"
+                   value="{{ department }}"
+                   readonly>
         </div>
 
-        <!-- REMARK -->
-        <div class="mb-4">
+        <hr class="my-4">
+
+        <!-- EQUIPMENT TABLE -->
+        <div class="mb-3">
             <label class="fw-bold mb-2">
-                <i class="fas fa-comment-dots me-1"></i>รายละเอียดคำขอ
+                <i class="fas fa-list me-1"></i> รายการอุปกรณ์
             </label>
-            <textarea name="remark"
-                      rows="4"
-                      class="form-control"></textarea>
+
+            <div class="table-responsive border rounded">
+                <table class="table table-bordered align-middle mb-0">
+                    <thead class="table-primary text-center">
+                        <tr>
+                            <th style="width:50px;">#</th>
+                            <th>ชื่ออุปกรณ์</th>
+                            <th>รายละเอียด</th>
+                            <th style="width:90px;">จำนวน</th>
+                            <th style="width:50px;">ลบ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="equipment-tbody">
+                        <tr>
+                            <td class="row-index text-center">1</td>
+                            <td class="position-relative">
+                                <input type="text" name="item_name[]" class="form-control item-autocomplete" required>
+                                <div class="item-selected-name small text-primary mt-1"></div>
+                            </td>
+                            <td>
+                                <input type="text" name="details[]" class="form-control">
+                            </td>
+                            <td>
+                                <input type="number" name="quantity[]" value="1" min="1" class="form-control">
+                            </td>
+                            <td class="text-center">
+                                <button type="button"
+                                        onclick="deleteRow(this)"
+                                        class="btn btn-sm btn-outline-danger">×</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <button type="button"
+                    id="add-row-btn"
+                    class="btn btn-outline-secondary btn-sm mt-2">
+                <i class="fas fa-plus me-1"></i> เพิ่มรายการ
+            </button>
         </div>
+
+        <hr class="my-4">
 
         <!-- FILE -->
         <div class="mb-4">
-            <label class="fw-bold mb-2">
-                <i class="fas fa-paperclip me-1"></i>แนบไฟล์เอกสาร (ถ้ามี)
-            </label>
-            <input type="file" name="order_file[]" multiple class="form-control">
+            <label class="fw-bold mb-2">แนบไฟล์เอกสาร (ถ้ามี)</label>
+            <input type="file"
+                   name="order_file[]"
+                   multiple
+                   class="form-control">
         </div>
 
+        <!-- ACTION -->
         <div class="text-end border-top pt-3">
-            <button type="reset" class="btn btn-light me-2 border">
-                ล้างข้อมูล
-            </button>
+            <button type="reset" class="btn btn-light me-2 border">ล้างข้อมูล</button>
             <button type="submit" class="btn btn-primary px-5 fw-bold shadow-sm">
                 <i class="fas fa-paper-plane me-2"></i>ส่งคำขอ
             </button>
         </div>
 
     </form>
-
 </div>
-{% endblock %}
 
+{{ items|json_script:"items-data" }}
+{% endblock %}
 
 {% block extra_js %}
 
-<!-- ===================== SAFE EQUIPMENT JS ===================== -->
-<script>
-document.addEventListener("DOMContentLoaded", function(){
-
-    const tbody = document.getElementById("equipment-tbody");
-    const addBtn = document.getElementById("add-row-btn");
-
-    if(tbody && addBtn){   // ✅ ป้องกัน error
-
-        function updateRowIndices(){
-            tbody.querySelectorAll(".row-index")
-                 .forEach((c,i)=>c.textContent=i+1);
-        }
-
-        window.deleteRow = function(btn){
-            if(tbody.rows.length===1){
-                alert("ต้องมีอย่างน้อย 1 รายการ");
-                return;
-            }
-            btn.closest("tr").remove();
-            updateRowIndices();
-        }
-
-        function createNewRow(){
-            const tr=document.createElement("tr");
-            tr.innerHTML=`
-                <td class="row-index text-center"></td>
-                <td><input type="text" name="item_name[]" class="form-control"></td>
-                <td><input type="text" name="details[]" class="form-control"></td>
-                <td><input type="number" name="quantity[]" value="1" min="1" class="form-control"></td>
-                <td class="text-center">
-                    <button type="button" onclick="deleteRow(this)"
-                        class="btn btn-sm btn-outline-danger">×</button>
-                </td>`;
-            tbody.appendChild(tr);
-            updateRowIndices();
-        }
-
-        addBtn.addEventListener("click", createNewRow);
-        updateRowIndices();
-    }
-
-});
-</script>
-
-
-<!-- ===================== FLATPICKR ===================== -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
 
@@ -191,6 +180,80 @@ document.addEventListener("DOMContentLoaded", function(){
     });
 
 });
+</script>
+
+<script>
+const tbody = document.getElementById("equipment-tbody");
+const addBtn = document.getElementById("add-row-btn");
+const itemsList = JSON.parse(document.getElementById("items-data").textContent);
+
+function updateRowIndices(){
+    tbody.querySelectorAll(".row-index").forEach((c,i)=>c.textContent=i+1);
+}
+
+function deleteRow(btn){
+    if(tbody.rows.length===1){
+        alert("ต้องมีอย่างน้อย 1 รายการ");
+        return;
+    }
+    btn.closest("tr").remove();
+    updateRowIndices();
+}
+
+function createNewRow(){
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+        <td class="row-index text-center"></td>
+        <td class="position-relative">
+            <input type="text" name="item_name[]" class="form-control item-autocomplete" required>
+            <div class="item-selected-name small text-primary mt-1"></div>
+        </td>
+        <td><input type="text" name="details[]" class="form-control"></td>
+        <td><input type="number" name="quantity[]" value="1" min="1" class="form-control"></td>
+        <td class="text-center">
+            <button type="button" onclick="deleteRow(this)" class="btn btn-sm btn-outline-danger">×</button>
+        </td>`;
+    tbody.appendChild(tr);
+    setupAutocomplete(tr.querySelector(".item-autocomplete"));
+    updateRowIndices();
+}
+
+function setupAutocomplete(input){
+    const selected=input.parentNode.querySelector(".item-selected-name");
+    input.addEventListener("input",()=>{
+        document.querySelectorAll(".autocomplete-items").forEach(e=>e.remove());
+        const val=input.value.toLowerCase();
+        if(!val) return;
+        const list=document.createElement("div");
+        list.className="autocomplete-items list-group position-absolute w-100 shadow";
+        list.style.zIndex=1000;
+        input.parentNode.appendChild(list);
+        itemsList.forEach(item=>{
+            if(item.thainame.toLowerCase().includes(val)){
+                const d=document.createElement("button");
+                d.type="button";
+                d.className="list-group-item list-group-item-action";
+                d.textContent=item.thainame;
+                d.onclick=()=>{
+                    input.value=item.thainame;
+                    selected.textContent="เลือกจากรายการ: "+item.thainame;
+                    list.remove();
+                };
+                list.appendChild(d);
+            }
+        });
+    });
+}
+
+if(document.querySelector(".item-autocomplete")){
+    setupAutocomplete(document.querySelector(".item-autocomplete"));
+}
+
+if(addBtn){
+    addBtn.addEventListener("click",createNewRow);
+}
+
+updateRowIndices();
 </script>
 
 {% endblock %}
