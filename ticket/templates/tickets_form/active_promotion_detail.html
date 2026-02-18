@@ -1,128 +1,144 @@
 {% extends "base.html" %}
 {% load static %}
+{% load tz %}
 {% block title %}Active Promotion Detail{% endblock %}
 
 {% block content %}
-<div class="dashboard-table shadow-sm p-4 bg-white rounded">
+<div class="container-fluid">
 
   <!-- ================= HEADER ================= -->
-  <div class="mb-4">
-    <h4 class="mb-1">
-      <i class="fas fa-bullhorn me-2 text-danger"></i>
-      รายละเอียดคำขอ Active Promotion Package
-    </h4>
-    <small class="text-muted">
-      Ticket ID: {{ ticket.id }}
-    </small>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-bold mb-1">
+        <i class="fas fa-bullhorn text-danger me-2"></i>
+        Active Promotion Package
+      </h4>
+      <small class="text-muted">
+        Ticket ID: #{{ ticket.id }}
+      </small>
+    </div>
+
+    <a href="{% url 'tickets_list' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-arrow-left me-1"></i> กลับหน้ารายการ
+    </a>
   </div>
 
-  <!-- ================= REQUESTER ================= -->
-  <div class="mb-4 p-3 border rounded">
-    <h6 class="fw-bold text-primary mb-3">
-      <i class="fas fa-user me-1"></i> ข้อมูลผู้ร้องขอ
-    </h6>
+  <!-- ================= SUMMARY CARD ================= -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="text-muted small">ผู้ร้องขอ</div>
+          <div class="fw-semibold">{{ ticket.user_name }}</div>
+        </div>
 
-    <div class="row">
-      <div class="col-md-6">
-        <p><b>ชื่อผู้ร้องขอ:</b> {{ ticket.user_name }}</p>
-        <p><b>แผนก:</b> {{ promotion.department }}</p>
-      </div>
-      <div class="col-md-6">
-        <p><b>วันที่สร้างคำร้อง:</b> {{ ticket.create_at }}</p>
-        <p><b>สถานะ:</b>
+        <div class="col-md-3">
+          <div class="text-muted small">วันที่สร้าง</div>
+          <div>{{ ticket.create_at|date:"d/m/Y H:i" }}</div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="text-muted small">สถานะ</div>
           <span class="badge bg-warning text-dark">
             {{ ticket.status_name }}
           </span>
-        </p>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- ================= PROMOTION INFO ================= -->
-  <div class="mb-4 p-3 border rounded">
-    <h6 class="fw-bold text-danger mb-3">
-      <i class="fas fa-tag me-1"></i> ข้อมูล Promotion
-    </h6>
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-light fw-semibold">
+      <i class="fas fa-tag me-2 text-danger"></i>
+      ข้อมูล Promotion
+    </div>
 
-    <div class="row">
-      <div class="col-md-6 mb-2">
-        <b>ชื่อ Promotion:</b><br>
-        {{ promotion.promo_name }}
-      </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <div class="text-muted small">ชื่อ Promotion</div>
+          <div class="fw-semibold">{{ promotion.promo_name }}</div>
+        </div>
 
-      <div class="col-md-3 mb-2">
-        <b>วันที่เริ่ม:</b><br>
-        {{ promotion.start_date }}
-      </div>
+        <div class="col-md-3 mb-3">
+          <div class="text-muted small">วันที่เริ่ม</div>
+          <div>{{ promotion.start_date|date:"d/m/Y" }}</div>
+        </div>
 
-      <div class="col-md-3 mb-2">
-        <b>วันที่สิ้นสุด:</b><br>
-        {{ promotion.end_date }}
+        <div class="col-md-3 mb-3">
+          <div class="text-muted small">วันที่สิ้นสุด</div>
+          <div>{{ promotion.end_date|date:"d/m/Y" }}</div>
+        </div>
+
+        <div class="col-md-12">
+          <div class="text-muted small">แผนก</div>
+          <div>{{ promotion.department }}</div>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- ================= REASON ================= -->
-  <div class="mb-4 p-3 border rounded bg-light">
-    <h6 class="fw-bold text-success mb-2">
-      <i class="fas fa-comment-dots me-1"></i> เหตุผลในการขอ Active
-    </h6>
-    <div class="p-2 bg-white rounded border">
-      {{ promotion.reason|linebreaks }}
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-light fw-semibold">
+      <i class="fas fa-comment-dots me-2 text-success"></i>
+      เหตุผลในการขอ Active
+    </div>
+
+    <div class="card-body">
+      <div class="p-3 bg-light rounded border">
+        {{ promotion.reason|linebreaks }}
+      </div>
     </div>
   </div>
 
   <!-- ================= FILE ATTACHMENTS ================= -->
-  <div class="mb-4 p-3 border rounded">
-    <h6 class="fw-bold text-secondary mb-3">
-      <i class="fas fa-paperclip me-1"></i> เอกสารแนบ
-    </h6>
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-light fw-semibold">
+      <i class="fas fa-paperclip me-2 text-secondary"></i>
+      เอกสารแนบ
+    </div>
 
-    {% if files %}
-      <div class="list-group">
+    <div class="card-body">
 
-        {% for f in files %}
-        <div class="list-group-item d-flex justify-content-between align-items-center">
+      {% if files %}
+        <div class="list-group list-group-flush">
 
-          <div>
-            <i class="fas fa-file me-2"></i>
-            {{ f.file_name }}
-            <br>
-            <small class="text-muted">
-              {{ f.file_size|filesizeformat }}
-            </small>
+          {% for f in files %}
+          <div class="list-group-item d-flex justify-content-between align-items-center">
+
+            <div>
+              <i class="fas fa-file-alt text-primary me-2"></i>
+              <span class="fw-semibold">{{ f.file_name }}</span>
+              <div class="small text-muted">
+                {{ f.file_size|filesizeformat }}
+              </div>
+            </div>
+
+            <div class="btn-group">
+              <a href="{{ MEDIA_URL }}{{ f.file_path }}"
+                 target="_blank"
+                 class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-eye me-1"></i> ดู
+              </a>
+
+              <a href="{{ MEDIA_URL }}{{ f.file_path }}"
+                 download
+                 class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-download me-1"></i> ดาวน์โหลด
+              </a>
+            </div>
+
           </div>
-
-          <div class="btn-group">
-            <a href="{{ MEDIA_URL }}{{ f.file_path }}"
-               target="_blank"
-               class="btn btn-sm btn-outline-primary">
-              <i class="fas fa-eye"></i> ดู
-            </a>
-
-            <a href="{{ MEDIA_URL }}{{ f.file_path }}"
-               download
-               class="btn btn-sm btn-outline-secondary">
-              <i class="fas fa-download"></i> ดาวน์โหลด
-            </a>
-          </div>
+          {% endfor %}
 
         </div>
-        {% endfor %}
+      {% else %}
+        <div class="text-muted">ไม่มีเอกสารแนบ</div>
+      {% endif %}
 
-      </div>
-    {% else %}
-      <p class="text-muted mb-0">ไม่มีเอกสารแนบ</p>
-    {% endif %}
-  </div>
-
-  <!-- ================= ACTION ================= -->
-  <div class="text-end border-top pt-3">
-    <button type="button"
-            class="btn btn-outline-secondary"
-            onclick="history.back()">
-      <i class="fas fa-arrow-left me-1"></i> กลับ
-    </button>
+    </div>
   </div>
 
 </div>
