@@ -1686,6 +1686,7 @@ def tickets_detail_vpn(request, ticket_id):
     )
 
     
+
 @login_required_custom
 @page_permission_required
 def tickets_detail_repairs(request, ticket_id):
@@ -1693,65 +1694,85 @@ def tickets_detail_repairs(request, ticket_id):
     user = request.session["user"]
     user_id = user["id"]
     role_id = user["role_id"]
-
-    # -----------------------------
-    # เช็ค admin
-    # -----------------------------
     is_admin = (role_id == 1)
 
     # -----------------------------
-    # ดึงข้อมูล ticket แจ้งซ่อม
+    # ดึง ticket + repair detail
     # -----------------------------
-    query = """
-        SELECT
-            t.id,
-            t.title,
-            t.description,
-            t.create_at,
-            u.full_name,
-            b.department,
-            t.ticket_type_id,
-            b.problem_detail,
-            b.building
-        FROM tickets.ticket_data_building_repair b
-        JOIN tickets.tickets t
-            ON t.id = b.ticket_id
-        JOIN tickets.users u
-            ON u.erp_user_id = t.user_id
-        WHERE t.id = %s
-    """
-
     with connection.cursor() as cursor:
-        cursor.execute(query, [ticket_id])
+        cursor.execute("""
+            SELECT
+                t.id,
+                t.title,
+                t.description,
+                t.create_at,
+                u.full_name,
+                t.department,
+                t.ticket_type_id,
+                s.name,               -- ✅ ใช้ name
+                b.problem_detail,
+                b.building,
+                t.status_id
+            FROM tickets.tickets t
+            JOIN tickets.ticket_data_building_repair b
+                ON t.id = b.ticket_id
+            JOIN tickets.users u
+                ON u.id = t.user_id
+            JOIN tickets.status s
+                ON s.id = t.status_id
+            WHERE t.id = %s
+        """, [ticket_id])
+
         row = cursor.fetchone()
 
-    if not row:
-        return render(request, "404.html", status=404)
 
-    # timezone
-    created_at = row[3]
-    if created_at and timezone.is_naive(created_at):
-        created_at = timezone.make_aware(created_at, dt_timezone.utc)
-    created_at = timezone.localtime(created_at)
+    if not row:
+        raise Http404("Ticket not found")
 
     ticket = {
         "id": row[0],
         "title": row[1],
         "description": row[2],
-        "created_at": created_at,
+        "created_at": row[3],
         "user_name": row[4],
         "department": row[5],
         "ticket_type_id": row[6],
+        "status_name": row[7],   # ✅ ชื่อสถานะ
+        "status_id": row[10],    # ✅ id สถานะ
     }
 
     detail = {
-        "problem_detail": row[7],
-        "building": row[8],
+        "problem_detail": row[8],
+        "building": row[9],
     }
 
+
     # -----------------------------
-    # ตรวจสิทธิ์ approve (ตามสาย)
+    # FILES
     # -----------------------------
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id, file_name, file_path, file_type
+            FROM tickets.ticket_files
+            WHERE ticket_id = %s
+            ORDER BY id
+        """, [ticket_id])
+
+        files = []
+        for f in cursor.fetchall():
+            files.append({
+                "id": f[0],
+                "file_name": f[1],
+                "file_path": f[2].replace("\\", "/"),
+                "file_type": f[3],
+            })
+
+    # -----------------------------
+    # APPROVE CHECK
+    # -----------------------------
+    can_approve = False
+    my_level = None
+
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT level, status_id
@@ -1763,16 +1784,10 @@ def tickets_detail_repairs(request, ticket_id):
 
         approval_row = cursor.fetchone()
 
-    can_approve = False
-    my_level = None
-
     if approval_row:
         my_level = approval_row[0]
         can_approve = (approval_row[1] == APPROVE_PENDING)
 
-    # -----------------------------
-    # ADMIN OVERRIDE
-    # -----------------------------
     if is_admin:
         can_approve = True
 
@@ -1782,6 +1797,7 @@ def tickets_detail_repairs(request, ticket_id):
         {
             "ticket": ticket,
             "detail": detail,
+            "files": files,
             "can_approve": can_approve,
             "my_level": my_level,
             "is_admin": is_admin,
@@ -2048,14 +2064,13 @@ def repairs_form(request):
                 with connection.cursor() as cursor:
                     cursor.execute("""
                         INSERT INTO tickets.ticket_data_building_repair
-                        (ticket_id, user_id, type_id, problem_detail, department, building, created_at)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        (ticket_id, user_id, type_id, problem_detail, building, created_at)
+                        VALUES (%s, %s, %s, %s, %s, %s)
                     """, [
                         ticket_id,
                         user_id,
                         type_id,
                         description,
-                        department,
                         building,
                         timezone.now()
                     ])
@@ -2071,35 +2086,54 @@ def repairs_form(request):
                 )
 
                 # -----------------------------
-                # UPLOAD FILES (ยังอยู่ใน transaction)
+                # FILE UPLOAD (STANDARD)
                 # -----------------------------
                 files = request.FILES.getlist("attachments[]")
-                upload_dir = f"media/uploads/repairs/{ticket_id}"
-                os.makedirs(upload_dir, exist_ok=True)
 
-                for f in files:
-                    file_path = f"{upload_dir}/{f.name}"
+                if files:
 
-                    with open(file_path, "wb+") as destination:
-                        for chunk in f.chunks():
-                            destination.write(chunk)
+                    upload_root = os.path.join(
+                        settings.MEDIA_ROOT,
+                        "uploads",
+                        "repairs",
+                        str(ticket_id)
+                    )
+
+                    os.makedirs(upload_root, exist_ok=True)
 
                     with connection.cursor() as cursor:
-                        cursor.execute("""
-                            INSERT INTO tickets.ticket_files
-                            (ticket_id, ref_type, file_name, file_path,
-                             file_type, file_size, uploaded_by, create_at)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                        """, [
-                            ticket_id,
-                            "BUILDING_REPAIR",
-                            f.name,
-                            file_path,
-                            f.content_type,
-                            f.size,
-                            user_id,
-                            timezone.now()
-                        ])
+                        for f in files:
+
+                            file_path = os.path.join(upload_root, f.name)
+
+                            with open(file_path, "wb+") as destination:
+                                for chunk in f.chunks():
+                                    destination.write(chunk)
+
+                            relative_path = f"uploads/repairs/{ticket_id}/{f.name}"
+
+                            cursor.execute("""
+                                INSERT INTO tickets.ticket_files
+                                (ticket_id, ref_type, ref_id,
+                                file_name, file_path,
+                                file_type, file_size,
+                                uploaded_by, create_at)
+                                VALUES (%s, %s, %s,
+                                        %s, %s,
+                                        %s, %s,
+                                        %s, %s)
+                            """, [
+                                ticket_id,
+                                "BUILDING_REPAIR",
+                                ticket_id,
+                                f.name,
+                                relative_path,
+                                f.content_type,
+                                f.size,
+                                user_id,
+                                timezone.now()
+                            ])
+
 
         except ApprovalTeamNotFound as e:
             messages.error(request, str(e))

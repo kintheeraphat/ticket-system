@@ -5,113 +5,196 @@
 
 {% block content %}
 
-    <div class="container mt-4">
+    <h3 class="fw-bold mb-3">
+        รายละเอียดแจ้งซ่อมอาคาร #{{ ticket.id }}
+    </h3>
 
-        <h3 class="fw-bold mb-3">รายละเอียดแจ้งซ่อมอาคาร</h3>
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
 
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <strong>เลขที่คำขอ</strong><br>
-                        #{{ detail.id }}
-                    </div>
-                    <div class="col-md-6">
-                        <strong>วันที่แจ้ง</strong><br>
-                        {{ detail.created_at|localtime|date:"d M Y H:i" }} น.
-                    </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>เลขที่คำขอ</strong><br>
+                    #{{ ticket.id }}
                 </div>
-
-                <hr>
-
-                <div class="mb-3">
-                    <strong>ผู้แจ้ง</strong><br>
-                    {{ detail.full_name }}
-                </div>
-
-                <div class="mb-3">
-                    <strong>แผนก</strong><br>
-                    {{ detail.department }}
-                </div>
-
-                <div class="mb-3">
-                    <strong>อาคาร</strong><br>
-                    {{ detail.building }}
-                </div>
-
-                <div class="mb-3">
-                    <strong>หัวข้อ</strong><br>
-                    {{ detail.title }}
-                </div>
-
-                <div class="mb-3">
-                    <strong>รายละเอียดปัญหา</strong>
-                    <div class="border rounded p-3 bg-light mt-1">
-                        {{ detail.problem_detail|linebreaksbr }}
-                    </div>
+                <div class="col-md-6">
+                    <strong>วันที่แจ้ง</strong><br>
+                    {{ ticket.created_at|date:"d/m/Y H:i" }} น.
                 </div>
             </div>
-        </div>
-        {# ================= APPROVE SECTION ================= #}
-        {% if can_approve or is_admin %}
-        <div class="card shadow-sm border-success mb-4">
-            <div class="card-body">
 
-                {# ---------- INFO ---------- #}
-                {% if is_admin %}
+            <hr>
+
+            <div class="mb-3">
+                <strong>ผู้แจ้ง</strong><br>
+                {{ ticket.user_name }}
+            </div>
+
+            <div class="mb-3">
+                <strong>แผนก</strong><br>
+                {{ ticket.department }}
+            </div>
+
+            <div class="mb-3">
+                <strong>อาคาร</strong><br>
+                {{ detail.building }}
+            </div>
+
+            <div class="mb-3">
+                <strong>หัวข้อ</strong><br>
+                {{ ticket.title }}
+            </div>
+
+            <div class="mb-3">
+                <strong>รายละเอียดปัญหา</strong>
+                <div class="border rounded p-3 bg-light mt-1">
+                    {{ detail.problem_detail|linebreaksbr }}
+                </div>
+            </div>
+
+            <!-- STATUS -->
+            <div class="mb-3">
+                <strong>สถานะ</strong><br>
+                <span class="badge bg-info">
+                    {{ ticket.status_name }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================= FILES ================= -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light fw-semibold">
+            <i class="fas fa-paperclip me-2 text-secondary"></i>
+            เอกสารแนบ
+        </div>
+
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-3">
+
+                {% for f in files %}
+                <div style="width:150px;">
+                    <div class="border rounded shadow-sm p-2 text-center"
+                         style="cursor:pointer;"
+                         onclick="previewFile('{% url 'preview_media' f.file_path %}', '{{ f.file_type }}')">
+
+                        {% if "image" in f.file_type %}
+                            <img src="{% url 'preview_media' f.file_path %}"
+                                 class="img-fluid rounded mb-2"
+                                 style="height:110px;object-fit:cover;">
+                        {% elif "pdf" in f.file_type %}
+                            <div style="height:110px;display:flex;align-items:center;justify-content:center;">
+                                <i class="fas fa-file-pdf text-danger fs-1"></i>
+                            </div>
+                        {% else %}
+                            <div style="height:110px;display:flex;align-items:center;justify-content:center;">
+                                <i class="fas fa-file text-secondary fs-1"></i>
+                            </div>
+                        {% endif %}
+
+                        <div class="small fw-semibold text-truncate">
+                            {{ f.file_name }}
+                        </div>
+
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-muted">ไม่มีเอกสารแนบ</div>
+                {% endfor %}
+
+            </div>
+        </div>
+    </div>
+    <!-- FILE MODAL -->
+    <div class="modal fade" id="fileModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h6 class="modal-title">ดูเอกสารแนบ</h6>
+            <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center p-0">
+            <img id="previewImage" class="img-fluid d-none" style="max-height:85vh;">
+            <embed id="previewFrame"
+                type="application/pdf"
+                class="d-none"
+                style="width:100%;height:85vh;">
+        </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- ================= APPROVE SECTION ================= -->
+    {% if can_approve or is_admin %}
+    <div class="card shadow-sm border-success mb-4">
+        <div class="card-body">
+
+            {% if is_admin %}
                 <div class="fw-semibold text-danger mb-2">
                     ⚠ สิทธิ์ Admin
                 </div>
-                {% else %}
+            {% else %}
                 <div class="fw-semibold text-success mb-2">
                     คุณสามารถอนุมัติได้ (Level {{ my_level }})
                 </div>
-                {% endif %}
+            {% endif %}
 
-                {# ---------- APPROVE ตามสาย ---------- #}
-                {% if can_approve %}
-                <form method="post" action="{% url 'approve_ticket' ticket.id %}" class="mb-2">
-                    {% csrf_token %}
-                    <textarea name="remark" class="form-control mb-2" rows="2"
-                        placeholder="หมายเหตุ (ถ้ามี)"></textarea>
-                    <button type="submit" class="btn btn-success">
-                        ✅ Approve
-                    </button>
-                </form>
-                {% endif %}
+            {% if can_approve %}
+            <form method="post" action="{% url 'approve_ticket' ticket.id %}" class="mb-2">
+                {% csrf_token %}
+                <textarea name="remark"
+                          class="form-control mb-2"
+                          rows="2"
+                          placeholder="หมายเหตุ (ถ้ามี)"></textarea>
+                <button type="submit" class="btn btn-success">
+                    ✅ Approve
+                </button>
+            </form>
+            {% endif %}
 
-                {# ---------- ADMIN รับงาน ---------- #}
-                {% if is_admin and ticket.status_id != 4 and ticket.status_id != 5 %}
-                <form method="post" action="{% url 'approve_ticket' ticket.id %}" class="mb-2">
-                    {% csrf_token %}
-                    <input type="hidden" name="admin_override" value="1">
-                    <button type="submit" class="btn btn-danger">
-                        🚀 Admin รับงาน
-                    </button>
-                </form>
-                {% endif %}
+            {% if is_admin and ticket.status_id == 8 %}
+            <form method="post" action="{% url 'admin_complete_ticket' ticket.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">
+                    ✅ ทำเสร็จแล้ว
+                </button>
+            </form>
+            {% endif %}
 
-                {# ---------- ADMIN เสร็จงาน ---------- #}
-                {% if is_admin and ticket.status_id == 8 %}
-                <div class="card shadow-sm border-primary mb-4">
-                    <div class="card-body text-center">
-
-                        <div class="fw-semibold text-primary mb-2">
-                            🛠 กำลังดำเนินงาน
-                        </div>
-
-                        <form method="post" action="{% url 'admin_complete_ticket' ticket.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                ✅ ทำเสร็จแล้ว
-                            </button>
-                        </form>
-
-                    </div>
-                </div>
-                {% endif %}
-            </div>
         </div>
-        {% endif %}
-        {%endblock %}
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+
+
+
+{% block extra_js %}
+<script>
+function previewFile(url, fileType) {
+
+    const img = document.getElementById("previewImage");
+    const frame = document.getElementById("previewFrame");
+
+    img.classList.add("d-none");
+    frame.classList.add("d-none");
+    img.src = "";
+    frame.src = "";
+
+    if (fileType.includes("image")) {
+        img.src = url;
+        img.classList.remove("d-none");
+    } else {
+        frame.src = url;
+        frame.classList.remove("d-none");
+    }
+
+    new bootstrap.Modal(
+        document.getElementById("fileModal")
+    ).show();
+}
+</script>
+{% endblock %}

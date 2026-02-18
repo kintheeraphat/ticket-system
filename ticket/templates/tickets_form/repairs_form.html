@@ -54,11 +54,27 @@
         <div class="mb-4">
             <label class="fw-bold mb-2">แนบรูปภาพ</label>
             <input type="file"
-                   name="attachments[]"
-                   class="form-control"
-                   accept="image/*"
-                   multiple>
+                id="imageInput"
+                name="attachments[]"
+                class="form-control"
+                accept="image/*"
+                multiple>
+            <div id="previewContainer" class="d-flex flex-wrap gap-3 mt-3"></div>
         </div>
+        <div class="modal fade" id="fileModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">ดูรูป</h6>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="previewImage" class="img-fluid">
+            </div>
+            </div>
+        </div>
+        </div>
+
 
         <div class="text-end border-top pt-3">
             <button type="reset" class="btn btn-light border me-2">
@@ -72,3 +88,54 @@
     </form>
 </div>
 {% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+    const input = document.getElementById("imageInput");
+
+    if(!input) return;
+
+    input.addEventListener("change", function(e){
+
+        const container = document.getElementById("previewContainer");
+        container.innerHTML = "";
+
+        const files = e.target.files;
+
+        for(let i=0;i<files.length;i++){
+
+            if(!files[i].type.startsWith("image/")) continue;
+
+            const reader = new FileReader();
+
+            reader.onload = function(event){
+
+                const img = document.createElement("img");
+                img.src = event.target.result;
+                img.style.width = "150px";
+                img.style.height = "110px";
+                img.style.objectFit = "cover";
+                img.className = "rounded shadow-sm border";
+                img.style.cursor = "pointer";
+
+                img.onclick = function(){
+                    document.getElementById("previewImage").src = event.target.result;
+
+                    const modal = new bootstrap.Modal(
+                        document.getElementById("fileModal")
+                    );
+                    modal.show();
+                };
+
+                container.appendChild(img);
+            };
+
+            reader.readAsDataURL(files[i]);
+        }
+    });
+
+});
+</script>
+{% endblock %}
+
