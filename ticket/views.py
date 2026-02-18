@@ -1042,7 +1042,7 @@ def vpn(request):
 
 @page_permission_required
 @handle_approval_error
-def borrows(req):
+def borrow(req):
     return render(req,'tickets_form/borrows.html')
 
 
@@ -1169,7 +1169,6 @@ def tickets_detail_erp(request, ticket_id):
         }
     )
     
-
 @page_permission_required
 def borrow_detail(request, ticket_id):
 
@@ -1229,6 +1228,7 @@ def borrow_detail(request, ticket_id):
         "items": items,
         "files": files,
     })
+
 
 @login_required_custom
 @page_permission_required

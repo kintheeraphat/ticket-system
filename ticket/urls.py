@@ -30,7 +30,7 @@ urlpatterns = [
     path("create/report/", views.report_form, name="report_form"),
     path("create/active-promotion/", views.active_promotion_form, name="active_promotion_form"),
     path("create/vpn/", views.vpn, name="vpn"),
-    path("create/borrows/", views.borrows, name="borrows"),
+    path("create/borrow/", views.borrow, name="borrow"),
     path("ticket-success/", views.ticket_success, name="ticket_success"),
 
     # ===== TEAM =====
