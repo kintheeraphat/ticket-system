@@ -1004,7 +1004,7 @@ def vpn(request):
                 # -----------------------------
                 # UPLOAD FILES
                 # -----------------------------
-                files = request.FILES.getlist("order_file[]")
+                files = request.FILES.getlist("order_file")
                 upload_dir = f"media/uploads/vpn/{ticket_id}"
                 os.makedirs(upload_dir, exist_ok=True)
 
@@ -1547,6 +1547,23 @@ def tickets_detail_vpn(request, ticket_id):
     # -----------------------------
     if is_admin:
         can_approve = True
+    # -----------------------------
+    # FILES
+    # -----------------------------
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                id,
+                file_name,
+                file_path,
+                file_type
+            FROM tickets.ticket_files
+            WHERE ticket_id = %s
+            ORDER BY id
+        """, [ticket_id])
+
+        files = dictfetchall(cursor)
+
 
     return render(
         request,
@@ -1564,12 +1581,13 @@ def tickets_detail_vpn(request, ticket_id):
                 "vpn_users": vpn_users,
                 "vpn_reason": data["vpn_reason"],
             },
-            # 👇 สำคัญ
+            "files": files,  # ✅ เพิ่มตรงนี้
             "can_approve": can_approve,
             "my_level": my_level,
             "is_admin": is_admin,
         }
     )
+
     
 @login_required_custom
 @page_permission_required
@@ -2922,7 +2940,7 @@ def add_approve_line(request):
         teams = dictfetchall(cursor)
 
         cursor.execute("""
-            SELECT id, full_name
+            SELECT id, full_name, username
             FROM tickets.users
             WHERE is_active = true
             ORDER BY full_name

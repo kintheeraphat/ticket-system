@@ -194,9 +194,14 @@
 /* ===== USER AUTOCOMPLETE ===== */
 const USERS = [
   {% for u in users %}
-  { id: "{{ u.id }}", name: "{{ u.full_name }}" },
+  {
+    id: "{{ u.id }}",
+    name: "{{ u.full_name|escapejs }}",
+    username: "{{ u.username|escapejs }}"
+  },
   {% endfor %}
 ];
+
 
 function addRow() {
   const tbody = document.querySelector("#approveTable tbody");
@@ -250,16 +255,23 @@ function bindAutocomplete(input) {
       return;
     }
 
-    USERS.filter(u => u.name.toLowerCase().includes(q))
+    USERS.filter(u =>
+      u.name.toLowerCase().includes(q) ||
+      u.username.toLowerCase().includes(q)
+    )
       .forEach(u => {
         const div = document.createElement("div");
         div.className = "autocomplete-item";
-        div.textContent = u.name;
+        div.innerHTML = `
+          <div style="font-weight:600">${u.name}</div>
+          <div style="font-size:.75rem;color:#64748b">@${u.username}</div>
+        `;
         div.onclick = () => {
-          input.value = u.name;
+          input.value = `${u.name} (${u.username})`;
           hidden.value = u.id;
           box.style.display = "none";
         };
+
         box.appendChild(div);
       });
 
