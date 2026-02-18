@@ -6,16 +6,14 @@
 {% block content %}
 <div class="container-fluid">
 
-  <!-- ================= HEADER ================= -->
+  <!-- HEADER -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h4 class="fw-bold mb-1">
         <i class="fas fa-bullhorn text-danger me-2"></i>
         Active Promotion Package
       </h4>
-      <small class="text-muted">
-        Ticket ID: #{{ ticket.id }}
-      </small>
+      <small class="text-muted">Ticket ID: #{{ ticket.id }}</small>
     </div>
 
     <a href="{% url 'tickets_list' %}" class="btn btn-outline-secondary btn-sm">
@@ -23,7 +21,7 @@
     </a>
   </div>
 
-  <!-- ================= SUMMARY CARD ================= -->
+  <!-- SUMMARY -->
   <div class="card shadow-sm mb-4">
     <div class="card-body">
       <div class="row g-3">
@@ -31,12 +29,10 @@
           <div class="text-muted small">ผู้ร้องขอ</div>
           <div class="fw-semibold">{{ ticket.user_name }}</div>
         </div>
-
         <div class="col-md-3">
           <div class="text-muted small">วันที่สร้าง</div>
           <div>{{ ticket.create_at|date:"d/m/Y H:i" }}</div>
         </div>
-
         <div class="col-md-3">
           <div class="text-muted small">สถานะ</div>
           <span class="badge bg-warning text-dark">
@@ -47,30 +43,25 @@
     </div>
   </div>
 
-  <!-- ================= PROMOTION INFO ================= -->
+  <!-- PROMOTION INFO -->
   <div class="card shadow-sm mb-4">
     <div class="card-header bg-light fw-semibold">
-      <i class="fas fa-tag me-2 text-danger"></i>
-      ข้อมูล Promotion
+      <i class="fas fa-tag me-2 text-danger"></i> ข้อมูล Promotion
     </div>
-
     <div class="card-body">
       <div class="row">
         <div class="col-md-6 mb-3">
           <div class="text-muted small">ชื่อ Promotion</div>
           <div class="fw-semibold">{{ promotion.promo_name }}</div>
         </div>
-
         <div class="col-md-3 mb-3">
           <div class="text-muted small">วันที่เริ่ม</div>
           <div>{{ promotion.start_date|date:"d/m/Y" }}</div>
         </div>
-
         <div class="col-md-3 mb-3">
           <div class="text-muted small">วันที่สิ้นสุด</div>
           <div>{{ promotion.end_date|date:"d/m/Y" }}</div>
         </div>
-
         <div class="col-md-12">
           <div class="text-muted small">แผนก</div>
           <div>{{ promotion.department }}</div>
@@ -79,13 +70,12 @@
     </div>
   </div>
 
-  <!-- ================= REASON ================= -->
+  <!-- REASON -->
   <div class="card shadow-sm mb-4">
     <div class="card-header bg-light fw-semibold">
       <i class="fas fa-comment-dots me-2 text-success"></i>
       เหตุผลในการขอ Active
     </div>
-
     <div class="card-body">
       <div class="p-3 bg-light rounded border">
         {{ promotion.reason|linebreaks }}
@@ -93,7 +83,7 @@
     </div>
   </div>
 
-  <!-- ================= FILE ATTACHMENTS ================= -->
+  <!-- FILES -->
   <div class="card shadow-sm mb-4">
     <div class="card-header bg-light fw-semibold">
       <i class="fas fa-paperclip me-2 text-secondary"></i>
@@ -101,45 +91,92 @@
     </div>
 
     <div class="card-body">
+      <div class="row g-3">
 
-      {% if files %}
-        <div class="list-group list-group-flush">
+        {% for f in files %}
+        <div class="col-md-3">
+          <div class="border rounded p-3 text-center shadow-sm"
+              onclick="previewFile('/media/{{ f.file_path|cut:"media/" }}')"
+              style="cursor:pointer;">
+            {% with f.file_name|lower as filename %}
+              {% if ".jpg" in filename or ".png" in filename or ".jpeg" in filename %}
+                <img src="/media/{{ f.file_path|cut:"media/" }}"
+                    class="img-fluid mb-2"
+                    style="height:120px;object-fit:cover;">
+              {% else %}
+                <i class="fas fa-file-pdf text-danger fs-1 mb-2"></i>
+              {% endif %}
+            {% endwith %}
 
-          {% for f in files %}
-          <div class="list-group-item d-flex justify-content-between align-items-center">
-
-            <div>
-              <i class="fas fa-file-alt text-primary me-2"></i>
-              <span class="fw-semibold">{{ f.file_name }}</span>
-              <div class="small text-muted">
-                {{ f.file_size|filesizeformat }}
-              </div>
-            </div>
-
-            <div class="btn-group">
-              <a href="{{ MEDIA_URL }}{{ f.file_path }}"
-                 target="_blank"
-                 class="btn btn-sm btn-outline-primary">
-                <i class="fas fa-eye me-1"></i> ดู
-              </a>
-
-              <a href="{{ MEDIA_URL }}{{ f.file_path }}"
-                 download
-                 class="btn btn-sm btn-outline-secondary">
-                <i class="fas fa-download me-1"></i> ดาวน์โหลด
-              </a>
+            <div class="small fw-semibold text-truncate">
+              {{ f.file_name }}
             </div>
 
           </div>
-          {% endfor %}
-
         </div>
-      {% else %}
-        <div class="text-muted">ไม่มีเอกสารแนบ</div>
-      {% endif %}
 
+        {% empty %}
+        <div class="text-muted">ไม่มีเอกสารแนบ</div>
+        {% endfor %}
+
+      </div>
     </div>
   </div>
 
+
+
 </div>
+<!-- MODAL -->
+<div class="modal fade" id="fileModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title">ไฟล์แนบ</h6>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+
+        <img id="previewImage"
+             class="img-fluid d-none"
+             style="max-height:80vh;">
+
+        <div id="pdfMessage" class="d-none">
+          <p class="mb-3">ไฟล์ PDF จะเปิดในแท็บใหม่</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function previewFile(url) {
+
+    const lower = url.toLowerCase();
+
+    const img = document.getElementById("previewImage");
+    const pdfMsg = document.getElementById("pdfMessage");
+
+    img.classList.add("d-none");
+    pdfMsg.classList.add("d-none");
+
+    if (lower.endsWith(".jpg") || lower.endsWith(".png") || lower.endsWith(".jpeg")) {
+
+        img.src = url;
+        img.classList.remove("d-none");
+
+        const modal = new bootstrap.Modal(
+            document.getElementById("fileModal")
+        );
+        modal.show();
+
+    } else if (lower.endsWith(".pdf")) {
+
+        window.open(url, "_blank");
+
+    }
+}
+</script>
 {% endblock %}
