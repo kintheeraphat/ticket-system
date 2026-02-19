@@ -756,7 +756,7 @@ def tickets_list(request):
             "created_at": created_at,
             "status": row[8],
             "ticket_owner_id": row[9],
-            "assignee": row[10],   # 👈 เพิ่มตรงนี้
+            "assignee": row[10],   
         })
 
 
@@ -1451,7 +1451,8 @@ def borrow_detail(request, ticket_id):
                 b.request_item,
                 d.dept_name,
                 t.create_at,
-                u.full_name
+                u.full_name,
+                t.status_id
             FROM tickets.borrow_requests b
             JOIN tickets.tickets t ON t.id = b.ticket_id
             JOIN tickets.users u ON u.id = b.user_id
@@ -1473,6 +1474,7 @@ def borrow_detail(request, ticket_id):
             "department": row[5],
             "create_at": row[6],
             "full_name": row[7],
+            "status_id": row[8],
         }
 
         # -------------------------
@@ -1509,10 +1511,7 @@ def borrow_detail(request, ticket_id):
                     "spec": spec,
                     "qty": qty
                 })
-
-        # -------------------------
-        # FILES
-        # -------------------------
+                
         cursor.execute("""
             SELECT id, file_name, file_path, file_type
             FROM tickets.ticket_files
@@ -1531,10 +1530,6 @@ def borrow_detail(request, ticket_id):
                 "file_type": f[3],
             })
 
-
-    # =========================
-    # APPROVAL PERMISSION
-    # =========================
     is_admin = (role_id == 1)
 
     can_approve_flag = False
@@ -1558,10 +1553,9 @@ def borrow_detail(request, ticket_id):
             "can_approve": can_approve_flag,
             "my_level": my_level,
             "is_admin": is_admin,
-            "ticket": {"id": ticket_id},
+            "ticket": {"id": ticket_id, "status_id": borrow["status_id"]},
         }
     )
-
 @login_required_custom
 @page_permission_required
 def tickets_detail_vpn(request, ticket_id):
@@ -1570,81 +1564,83 @@ def tickets_detail_vpn(request, ticket_id):
     user_id = user["id"]
     role_id = user["role_id"]
 
-    # -----------------------------
-    # เช็ค admin
-    # -----------------------------
     is_admin = (role_id == 1)
 
     # -----------------------------
-    # VPN ticket หลัก
+    # VPN + TICKET
     # -----------------------------
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT
-                t.id            AS ticket_id,
+                t.id                AS ticket_id,
                 t.title,
                 t.description,
-                t.create_at     AS ticket_create_at,
+                t.create_at,
+                t.status_id,
+                s.name              AS status_name,
+
                 u.full_name,
-                t.department,
-                t.ticket_type_id,
+                d.dept_name,
+
                 v.uservpn,
                 v.vpn_reason
             FROM tickets.ticket_data_vpn v
             JOIN tickets.tickets t
                 ON t.id = v.ticket_id
             JOIN tickets.users u
-                ON u.id = t.user_id 
+                ON u.id = t.user_id
+            JOIN tickets.status s
+                ON s.id = t.status_id
+            LEFT JOIN tickets.department d
+                ON d.id = u.department_id
             WHERE t.id = %s
         """, [ticket_id])
 
         data = dictfetchone(cursor)
 
-        if not data:
-            raise Http404("VPN Ticket not found")
+    if not data:
+        raise Http404("VPN Ticket not found")
 
     # -----------------------------
-    # VPN users
+    # VPN USERS (parse)
     # -----------------------------
     vpn_users = []
     if data.get("uservpn"):
         vpn_user_list = [u.strip() for u in data["uservpn"].splitlines() if u.strip()]
-        dept_list = []
-
-        if data.get("department"):
-            dept_list = [d.strip() for d in data["department"].split(",") if d.strip()]
-
-        for i, name in enumerate(vpn_user_list):
+        for name in vpn_user_list:
             vpn_users.append({
-                "name": name,
-                "department": dept_list[i] if i < len(dept_list) else ""
+                "name": name
             })
 
     # -----------------------------
-    # ตรวจสิทธิ์ approve (ตามสาย)
+    # APPROVE PERMISSION
     # -----------------------------
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT level, status_id
-            FROM tickets.ticket_approval_status
-            WHERE ticket_id = %s
-            AND user_id = %s
-            LIMIT 1
-        """, [ticket_id, user_id])
-
-        approve_row = cursor.fetchone()
-
     can_approve = False
     my_level = None
 
-    if approve_row:
-        my_level = approve_row[0]
-        can_approve = (approve_row[1] == APPROVE_PENDING)
-    # -----------------------------
-    # ADMIN OVERRIDE
-    # -----------------------------
-    if is_admin:
+    if not is_admin:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT level, status_id
+                FROM tickets.ticket_approval_status
+                WHERE ticket_id = %s
+                AND user_id = %s
+                LIMIT 1
+            """, [ticket_id, user_id])
+
+            row = cursor.fetchone()
+
+        if row:
+            my_level = row[0]
+            can_approve = (row[1] == APPROVE_PENDING)
+    else:
         can_approve = True
+
+    # -----------------------------
+    # HIDE ACTION (🔥 สำคัญ)
+    # -----------------------------
+    hide_action = data["status_id"] in (3, 5, 8)
+
     # -----------------------------
     # FILES
     # -----------------------------
@@ -1662,7 +1658,9 @@ def tickets_detail_vpn(request, ticket_id):
 
         files = dictfetchall(cursor)
 
-
+    # -----------------------------
+    # RENDER
+    # -----------------------------
     return render(
         request,
         "tickets_form/tickets_detail_vpn.html",
@@ -1671,21 +1669,23 @@ def tickets_detail_vpn(request, ticket_id):
                 "id": data["ticket_id"],
                 "title": data["title"],
                 "description": data["description"],
-                "create_at": data["ticket_create_at"],
+                "create_at": data["create_at"],
+                "status_id": data["status_id"],
+                "status_name": data["status_name"],
                 "user_name": data["full_name"],
-                "ticket_type_id": data["ticket_type_id"],
+                "department": data["dept_name"],
             },
             "detail": {
                 "vpn_users": vpn_users,
                 "vpn_reason": data["vpn_reason"],
             },
-            "files": files,  # ✅ เพิ่มตรงนี้
+            "files": files,
             "can_approve": can_approve,
             "my_level": my_level,
             "is_admin": is_admin,
+            "hide_action": hide_action,   # 🔥 ส่งไปให้ template
         }
     )
-
     
 
 @login_required_custom
@@ -1830,8 +1830,9 @@ def tickets_detail_report(request, ticket_id):
                 t.description,
                 t.create_at     AS ticket_create_at,
                 COALESCE(u.full_name, '-') AS full_name,
-                t.department,
+                d.dept_name AS department,
                 t.ticket_type_id,
+                t.status_id,   
                 e.old_value,
                 e.new_value
             FROM tickets.ticket_data_erp_app e
@@ -1839,6 +1840,8 @@ def tickets_detail_report(request, ticket_id):
                 ON t.id = e.ticket_id
             LEFT JOIN tickets.users u 
                 ON u.id = t.user_id
+            LEFT JOIN tickets.department d
+                ON d.id = u.department_id
             WHERE e.report_access IS TRUE
               AND t.id = %s
             ORDER BY e.id DESC
@@ -1866,6 +1869,7 @@ def tickets_detail_report(request, ticket_id):
         "user_name": data["full_name"],
         "department": data["department"],
         "ticket_type_id": data["ticket_type_id"],
+        "status_id": data["status_id"],
     }
 
     detail = {
@@ -1939,6 +1943,7 @@ def tickets_detail_newapp(request, ticket_id):
                 u.full_name,
                 t.department,
                 t.ticket_type_id,
+                t.status_id,  
                 n.new_value 
             FROM tickets.ticket_data_erp_app n
             JOIN tickets.tickets t ON t.id = n.ticket_id
@@ -1967,6 +1972,7 @@ def tickets_detail_newapp(request, ticket_id):
         "user_name": data["full_name"],
         "department": data["department"],
         "ticket_type_id": data["ticket_type_id"],
+        "status_id": data["status_id"], 
     }
 
     detail = {
@@ -2031,14 +2037,7 @@ def repairs_form(request):
                 status_id = 1
                 ticket_type_id = 4
 
-                department = request.POST.get("department")
                 building = request.POST.get("building")
-
-                if not department or not building:
-                    return render(request, "tickets_form/repairs_form.html", {
-                        "error": "กรุณากรอกข้อมูลให้ครบถ้วน"
-                    })
-
                 # -----------------------------
                 # INSERT tickets.tickets
                 # -----------------------------
@@ -2143,20 +2142,31 @@ def repairs_form(request):
         return redirect("ticket_success")
 
     return render(request, "tickets_form/repairs_form.html")
-
+@login_required_custom
 @page_permission_required
 @handle_approval_error
 def active_promotion_detail(request, ticket_id):
+
+    if "user" not in request.session:
+        return redirect("login")
+
+    user = request.session["user"]
+    user_id = user["id"]
+    role_id = user["role_id"]
+
+    is_admin = (role_id == 1)
 
     with connection.cursor() as cursor:
 
         # ================= TICKET =================
         cursor.execute("""
-            SELECT t.id,
-                   t.description,
-                   t.create_at,
-                   u.full_name as user_name,
-                   s.name as status
+            SELECT
+                t.id,
+                t.description,
+                t.create_at,
+                u.full_name AS user_name,
+                t.status_id,
+                s.name AS status_name
             FROM tickets.tickets t
             LEFT JOIN tickets.users u ON t.user_id = u.id
             LEFT JOIN tickets.status s ON t.status_id = s.id
@@ -2173,7 +2183,8 @@ def active_promotion_detail(request, ticket_id):
             "description": row[1],
             "create_at": row[2],
             "user_name": row[3],
-            "status": row[4],
+            "status_id": row[4],
+            "status_name": row[5],
         }
 
         # ================= PROMOTION =================
@@ -2199,21 +2210,47 @@ def active_promotion_detail(request, ticket_id):
             ORDER BY id
         """, [ticket_id])
 
-        files = []
+        files = [{
+            "id": f[0],
+            "file_name": f[1],
+            "file_path": f[2].replace("media/", ""),
+            "file_type": f[3],
+        } for f in cursor.fetchall()]
 
-        for f in cursor.fetchall():
-            files.append({
-                "id": f[0],
-                "file_name": f[1],
-                "file_path": f[2].replace("media/", ""),  # กัน path ซ้ำ
-                "file_type": f[3],
-            })
+    # ================= APPROVAL PERMISSION =================
+    can_approve = False
+    my_level = None
 
-    return render(request, "tickets_form/active_promotion_detail.html", {
-        "ticket": ticket,
-        "promotion": promotion,
-        "files": files,
-    })
+    if not is_admin:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT level, status_id
+                FROM tickets.ticket_approval_status
+                WHERE ticket_id = %s
+                  AND user_id = %s
+                LIMIT 1
+            """, [ticket_id, user_id])
+
+            approval_row = cursor.fetchone()
+
+        if approval_row:
+            my_level = approval_row[0]
+            can_approve = (approval_row[1] == APPROVE_PENDING)
+    else:
+        can_approve = True
+
+    return render(
+        request,
+        "tickets_form/active_promotion_detail.html",
+        {
+            "ticket": ticket,
+            "promotion": promotion,
+            "files": files,
+            "can_approve": can_approve,
+            "my_level": my_level,
+            "is_admin": is_admin,
+        }
+    )
 
 def adjust_form(request):
 
@@ -2379,7 +2416,6 @@ def app_form(request):
 
     user = request.session["user"]
     user_id = user["id"]
-    requester_name = user.get("full_name") or user.get("username", "")
 
     if request.method == "POST":
 
@@ -2387,14 +2423,9 @@ def app_form(request):
             with transaction.atomic():
 
                 app_type = request.POST.get("app_type")
-                department = request.POST.get("department", "").strip()
                 app_detail = request.POST.get("app_detail", "").strip()
                 objective = request.POST.get("objective", "").strip()
                 deadline_raw = request.POST.get("deadline")
-
-                if not department:
-                    messages.error(request, "กรุณาระบุแผนก")
-                    return render(request, "tickets_form/app_form.html")
 
                 if app_type == "new":
                     title = "Request Application (New)"
@@ -2425,8 +2456,8 @@ def app_form(request):
                     cursor.execute("""
                         INSERT INTO tickets.tickets
                         (title, description, user_id, status_id, ticket_type_id,
-                         department, create_at, due_date)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                          create_at, due_date)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
                         RETURNING id
                     """, [
                         title,
@@ -2434,7 +2465,6 @@ def app_form(request):
                         user_id,
                         status_id,
                         ticket_type_id,
-                        department,
                         timezone.now(),
                         due_date
                     ])
@@ -2484,14 +2514,10 @@ def report_form(request):
         try:
             with transaction.atomic():
 
-                department = request.POST.get("department", "").strip()
                 report_detail = request.POST.get("report_detail", "").strip()
                 report_objective = request.POST.get("report_objective", "").strip()
                 report_fields = request.POST.get("report_fields", "").strip()
 
-                if not department:
-                    messages.error(request, "กรุณาระบุแผนก")
-                    return render(request, "tickets_form/report_form.html")
 
                 title = "Request Report / ERP Data"
                 status_id = 1
@@ -2501,8 +2527,8 @@ def report_form(request):
                     cursor.execute("""
                         INSERT INTO tickets.tickets
                         (title, description, user_id, status_id,
-                         ticket_type_id, department, create_at)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                         ticket_type_id, create_at)
+                        VALUES (%s, %s, %s, %s,  %s, %s)
                         RETURNING id
                     """, [
                         title,
@@ -2510,7 +2536,6 @@ def report_form(request):
                         user_id,
                         status_id,
                         ticket_type_id,
-                        department,
                         timezone.now()
                     ])
                     ticket_id = cursor.fetchone()[0]
@@ -2594,7 +2619,6 @@ def active_promotion_form(request):
                 promo_name = request.POST.get("promo_name", "").strip()
                 start_raw = request.POST.get("start_date")
                 end_raw = request.POST.get("end_date")
-                department = request.POST.get("department", "").strip()
                 reason = request.POST.get("reason", "").strip()
 
                 start_date = datetime.strptime(start_raw, "%d/%m/%Y").date()
@@ -2609,8 +2633,8 @@ def active_promotion_form(request):
                     cursor.execute("""
                         INSERT INTO tickets.tickets
                         (title, description, user_id, status_id,
-                         ticket_type_id, department, create_at)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                         ticket_type_id,  create_at)
+                        VALUES (%s, %s, %s, %s, %s, %s)
                         RETURNING id
                     """, [
                         title,
@@ -2618,7 +2642,6 @@ def active_promotion_form(request):
                         user_id,
                         status_id,
                         ticket_type_id,
-                        department,
                         timezone.now()
                     ])
                     ticket_id = cursor.fetchone()[0]
@@ -4016,6 +4039,7 @@ def repairs_it_detail(request, ticket_id):
                 t.status_id,
                 s.name AS status_name,
                 u.username,
+                d.dept_name,
                 t.assign_id,
                 assign_user.username AS assigned_to,
                 td.it_category_id,
@@ -4027,6 +4051,8 @@ def repairs_it_detail(request, ticket_id):
             JOIN tickets.ticket_data_building_repair td ON td.ticket_id = t.id
             LEFT JOIN tickets.it_category ic ON ic.id = td.it_category_id
             LEFT JOIN tickets.users assign_user ON assign_user.id = t.assign_id
+            LEFT JOIN tickets.department d ON d.id = u.department_id
+            
             WHERE t.id = %s
         """, [ticket_id])
 
@@ -4036,19 +4062,29 @@ def repairs_it_detail(request, ticket_id):
         raise Http404("ไม่พบคำร้อง")
 
     ticket = {
-        "id": row[0],
-        "title": row[1],
-        "description": row[2],
-        "create_at": row[3],
-        "status_id": row[4],
-        "status_name": row[5],
-        "username": row[6],
-        "assign_id": row[7],
-        "assigned_to": row[8],
-        "it_category_id": row[9],
-        "it_category_name": row[10],
-        "problem_detail": row[11],
-    }
+    "id": row[0],
+    "title": row[1],
+
+    # ข้อมูลการแจ้ง
+    "description": row[2],          # t.description
+    "problem_detail": row[12],      # td.problem_detail
+    "it_category_id": row[10],      # td.it_category_id
+    "it_category_name": row[11],    # ic.name
+
+    # สถานะ
+    "create_at": row[3],
+    "status_id": row[4],
+    "status_name": row[5],
+
+    # ผู้แจ้ง / แผนก
+    "username": row[6],
+    "department": row[7],
+
+    # ผู้รับงาน
+    "assign_id": row[8],
+    "assigned_to": row[9],
+}
+
 
     # FILES
     with connection.cursor() as cursor:
@@ -4069,7 +4105,7 @@ def repairs_it_detail(request, ticket_id):
             })
 
     can_approve, level = can_user_approve_ticket(ticket_id, user_id)
-
+    
     return render(request, "tickets_form/repairs_it_detail.html", {
         "ticket": ticket,
         "files": files,
@@ -4095,13 +4131,16 @@ def preview_media(request, path):
 def reject_ticket(request, ticket_id):
 
     if request.method != "POST":
-        return redirect("report_detail", ticket_id=ticket_id)
+        return redirect("borrow_detail", ticket_id=ticket_id)
 
     remark = request.POST.get("remark", "").strip()
 
     if not remark:
         messages.error(request, "กรุณาระบุเหตุผลในการ Reject")
-        return redirect("report_detail", ticket_id=ticket_id)
+        return redirect("borrow_detail", ticket_id=ticket_id)
+
+    user = request.session["user"]
+    user_id = user["id"]   
 
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -4113,11 +4152,11 @@ def reject_ticket(request, ticket_id):
                 reject_at = NOW()
             WHERE id = %s
         """, [
-            5,  # สมมติ 5 = Rejected
+            3,  #-- Rejected        
             remark,
-            request.session["user_id"],
+            user_id,
             ticket_id
         ])
 
-    messages.success(request, "Reject รายการเรียบร้อยแล้ว")
-    return redirect("report_detail", ticket_id=ticket_id)
+    messages.success(request, "Reject คำขอยืมอุปกรณ์เรียบร้อยแล้ว")
+    return redirect("tickets_list")
