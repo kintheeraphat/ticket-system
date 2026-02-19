@@ -2543,6 +2543,40 @@ def report_form(request):
 
     return render(request, "tickets_form/report_form.html")
 
+
+# ================================
+# REPORT DETAIL
+# ================================
+
+@login_required_custom
+@page_permission_required
+def report_detail(request, ticket_id):
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                t.id,
+                t.title,
+                t.description,
+                t.department,
+                u.full_name AS requester,
+                t.create_at,
+                s.name AS status_name
+            FROM tickets.tickets t
+            LEFT JOIN tickets.users u ON u.id = t.user_id
+            LEFT JOIN tickets.status s ON s.id = t.status_id
+            WHERE t.id = %s
+        """, [ticket_id])
+
+        report = dictfetchone(cursor)
+
+    if not report:
+        raise Http404("ไม่พบข้อมูล")
+
+    return render(request, "report_detail.html", {
+        "report": report
+    })
+
 @page_permission_required
 @handle_approval_error
 def active_promotion_form(request):
@@ -3678,7 +3712,7 @@ def report_dashboard(request):
         SELECT
             t.id,
             t.title,
-            COALESCE(NULLIF(TRIM(t.department), ''), 'ไม่ระบุ') AS department,
+            COALESCE(d.dept_name, 'ไม่ระบุ') AS department,
             u.full_name AS requester,
             t.create_at,
             s.name AS status_name,
@@ -3690,16 +3724,18 @@ def report_dashboard(request):
                 SELECT action_time
                 FROM tickets.ticket_approval_status tas
                 WHERE tas.ticket_id = t.id
-                  AND tas.status_id = 2
+                AND tas.status_id = 2
                 ORDER BY action_time DESC
                 LIMIT 1
             ) AS completed_at
         FROM tickets.tickets t
         LEFT JOIN tickets.users u ON u.id = t.user_id
+        LEFT JOIN tickets.department d ON d.id = u.department_id
         LEFT JOIN tickets.status s ON s.id = t.status_id
         WHERE EXTRACT(YEAR FROM t.create_at) = %s
-          AND EXTRACT(MONTH FROM t.create_at) = %s
+        AND EXTRACT(MONTH FROM t.create_at) = %s
     """
+
 
     params = [year, month]
 
@@ -3743,7 +3779,6 @@ def report_dashboard(request):
 
     # ===== เดือนปี 2025 + ปีปัจจุบัน =====
     month_list = []
-
     for y in [2025, today.year]:
         for m in range(1, 13):
             month_list.append({
@@ -3768,48 +3803,15 @@ def report_dashboard(request):
     })
 
 
-# ================================
-# REPORT DETAIL
-# ================================
-
-@login_required_custom
-@page_permission_required
-def report_detail(request, ticket_id):
-
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT
-                t.id,
-                t.title,
-                t.description,
-                t.department,
-                u.full_name AS requester,
-                t.create_at,
-                s.name AS status_name
-            FROM tickets.tickets t
-            LEFT JOIN tickets.users u ON u.id = t.user_id
-            LEFT JOIN tickets.status s ON s.id = t.status_id
-            WHERE t.id = %s
-        """, [ticket_id])
-
-        report = dictfetchone(cursor)
-
-    if not report:
-        raise Http404("ไม่พบข้อมูล")
-
-    return render(request, "report_detail.html", {
-        "report": report
-    })
-
 @login_required_custom
 @page_permission_required
 def report_export_excel(request):
 
-    today = timezone.localdate()
-
     selected_month = request.GET.get("month")
     selected_title = request.GET.get("title", "all")
     selected_status = request.GET.get("status", "all")
+
+    today = timezone.localdate()
 
     if not selected_month:
         selected_month = today.strftime("%Y-%m")
@@ -3820,24 +3822,26 @@ def report_export_excel(request):
         SELECT
             t.id,
             t.title,
-            COALESCE(NULLIF(TRIM(t.department), ''), 'ไม่ระบุ') AS department,
+            COALESCE(d.dept_name, 'ไม่ระบุ') AS department,
             u.full_name,
             t.create_at,
             s.name
         FROM tickets.tickets t
         LEFT JOIN tickets.users u ON u.id = t.user_id
+        LEFT JOIN tickets.department d ON d.id = u.department_id
         LEFT JOIN tickets.status s ON s.id = t.status_id
         WHERE EXTRACT(YEAR FROM t.create_at) = %s
-          AND EXTRACT(MONTH FROM t.create_at) = %s
+        AND EXTRACT(MONTH FROM t.create_at) = %s
     """
+
 
     params = [year, month]
 
-    if selected_title and selected_title != "all":
+    if selected_title != "all":
         query += " AND t.title = %s"
         params.append(selected_title)
 
-    if selected_status and selected_status != "all":
+    if selected_status != "all":
         query += " AND s.name = %s"
         params.append(selected_status)
 
@@ -3847,7 +3851,6 @@ def report_export_excel(request):
         cursor.execute(query, params)
         rows = cursor.fetchall()
 
-    # ===== Excel =====
     response = HttpResponse(
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
@@ -3856,10 +3859,7 @@ def report_export_excel(request):
     workbook = xlsxwriter.Workbook(response)
     worksheet = workbook.add_worksheet("Report")
 
-    headers = [
-        "ID", "Title", "Department",
-        "Requester", "Requested Date", "Status"
-    ]
+    headers = ["ID", "Title", "Department", "Requester", "Created Date", "Status"]
 
     for col, header in enumerate(headers):
         worksheet.write(0, col, header)
@@ -3870,6 +3870,8 @@ def report_export_excel(request):
 
     workbook.close()
     return response
+
+
 
 @page_permission_required
 @handle_approval_error
