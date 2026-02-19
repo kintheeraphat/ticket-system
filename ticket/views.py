@@ -2251,7 +2251,9 @@ def active_promotion_detail(request, ticket_id):
             "is_admin": is_admin,
         }
     )
-
+@login_required_custom
+@page_permission_required
+@handle_approval_error
 def adjust_form(request):
 
     user = request.session.get("user")
@@ -2263,12 +2265,19 @@ def adjust_form(request):
         try:
             with transaction.atomic():
 
-                # ---------------- BASIC TICKET ----------------
+                # ---------------- BASIC INFO ----------------
                 title = "ปรับยอดสะสม"
-                description = request.POST.get("remark", "")
+                description = request.POST.get("remark", "").strip()
                 user_id = user["id"]
                 status_id = 1
-                ticket_type_id = int(request.POST.get("adj_category"))
+
+                adj_category = request.POST.get("adj_category")
+
+                if not adj_category:
+                    messages.error(request, "กรุณาเลือกประเภทการปรับยอด")
+                    return redirect(request.path)
+
+                ticket_type_id = int(adj_category)
 
                 CATEGORY_MAP = {
                     5: "ยอดยกจากเดิม",
@@ -2277,29 +2286,99 @@ def adjust_form(request):
                     8: "โอนระหว่างโปรโมชั่น",
                 }
 
-                adj_category = CATEGORY_MAP.get(ticket_type_id, "ไม่ระบุ")
+                category_name = CATEGORY_MAP.get(ticket_type_id)
 
-                # ---------------- BUILD ITEMS ----------------
-                items = build_adjust_items(request)
+                if not category_name:
+                    messages.error(request, "ประเภทไม่ถูกต้อง")
+                    return redirect(request.path)
 
-                if not items:
-                    return render(request, "tickets_form/adjust_form.html", {
-                        "error": "กรุณากรอกอย่างน้อย 1 รายการ"
+                # ---------------- GET SOURCE ----------------
+                source_cust = request.POST.getlist("source_cust[]")
+                source_name = request.POST.getlist("source_customer_name[]")
+                promo_info = request.POST.getlist("promo_info[]")
+                earn_master = request.POST.getlist("earn_master[]")
+                amount = request.POST.getlist("amount[]")
+
+                # บังคับต้องมี 1 รายการ
+                if not source_cust or not source_cust[0].strip():
+                    messages.error(request, "กรุณากรอกข้อมูลต้นทางให้ครบ")
+                    return redirect(request.path)
+
+                if ticket_type_id in [5, 6] and len(source_cust) > 1:
+                    messages.error(request, "ประเภทนี้สามารถมีได้เพียง 1 รายการ")
+                    return redirect(request.path)
+
+                items = []
+
+                for i in range(len(source_cust)):
+
+                    if not all([
+                        source_cust[i].strip(),
+                        source_name[i].strip(),
+                        promo_info[i].strip(),
+                        earn_master[i].strip(),
+                        amount[i].strip()
+                    ]):
+                        messages.error(request, "กรุณากรอกข้อมูลต้นทางให้ครบทุกช่อง")
+                        return redirect(request.path)
+
+                    items.append({
+                        "type": "source",
+                        "cust_code": source_cust[i],
+                        "customer_name": source_name[i],
+                        "promo": promo_info[i],
+                        "earn_master": earn_master[i],
+                        "amount": float(amount[i])
                     })
+
+                # ---------------- TARGET (เฉพาะโอน) ----------------
+                if ticket_type_id in [7, 8]:
+
+                    target_cust = request.POST.getlist("target_cust[]")
+                    target_name = request.POST.getlist("target_customer_name[]")
+                    target_promo = request.POST.getlist("target_promo_name[]")
+                    target_earn = request.POST.getlist("target_earn_master[]")
+                    target_amount = request.POST.getlist("target_amount[]")
+
+                    if not target_cust or not target_cust[0].strip():
+                        messages.error(request, "กรุณากรอกข้อมูลปลายทาง")
+                        return redirect(request.path)
+
+                    for i in range(len(target_cust)):
+
+                        if not all([
+                            target_cust[i].strip(),
+                            target_name[i].strip(),
+                            target_promo[i].strip(),
+                            target_earn[i].strip(),
+                            target_amount[i].strip()
+                        ]):
+                            messages.error(request, "กรุณากรอกข้อมูลปลายทางให้ครบทุกช่อง")
+                            return redirect(request.path)
+
+                        items.append({
+                            "type": "target",
+                            "cust_code": target_cust[i],
+                            "customer_name": target_name[i],
+                            "promo": target_promo[i],
+                            "earn_master": target_earn[i],
+                            "amount": float(target_amount[i])
+                        })
 
                 # ---------------- INSERT TICKET ----------------
                 with connection.cursor() as cursor:
                     cursor.execute("""
                         INSERT INTO tickets.tickets
-                        (title, description, user_id, status_id, ticket_type_id)
-                        VALUES (%s, %s, %s, %s, %s)
+                        (title, description, user_id, status_id, ticket_type_id, create_at)
+                        VALUES (%s, %s, %s, %s, %s, %s)
                         RETURNING id
                     """, [
                         title,
                         description,
                         user_id,
                         status_id,
-                        ticket_type_id
+                        ticket_type_id,
+                        timezone.now()
                     ])
                     ticket_id = cursor.fetchone()[0]
 
@@ -2311,98 +2390,209 @@ def adjust_form(request):
                         VALUES (%s, %s, %s)
                     """, [
                         ticket_id,
-                        adj_category,
+                        category_name,
                         json.dumps(items)
                     ])
 
                 # ---------------- CREATE APPROVAL ----------------
-                # ถ้าไม่มี team จะ raise แล้ว rollback ทั้งหมด
                 create_ticket_approval_by_ticket_type(
                     ticket_id=ticket_id,
                     ticket_type_id=ticket_type_id,
                     requester_user_id=user_id
                 )
 
-                # ---------------- UPLOAD FILES ----------------
+                # ---------------- FILE UPLOAD ----------------
                 files = request.FILES.getlist("attachments[]")
-                upload_dir = f"media/uploads/adjust/{ticket_id}"
-                os.makedirs(upload_dir, exist_ok=True)
 
-                for f in files:
-                    file_path = f"{upload_dir}/{f.name}"
+                if files:
+                    upload_dir = os.path.join(
+                        settings.MEDIA_ROOT,
+                        "uploads",
+                        "adjust",
+                        str(ticket_id)
+                    )
+                    os.makedirs(upload_dir, exist_ok=True)
 
-                    with open(file_path, "wb+") as destination:
-                        for chunk in f.chunks():
-                            destination.write(chunk)
+                    for f in files:
 
-                    with connection.cursor() as cursor:
-                        cursor.execute("""
-                            INSERT INTO tickets.ticket_files
-                            (
+                        file_path = os.path.join(upload_dir, f.name)
+
+                        with open(file_path, "wb+") as destination:
+                            for chunk in f.chunks():
+                                destination.write(chunk)
+
+                        relative_path = f"uploads/adjust/{ticket_id}/{f.name}"
+
+                        with connection.cursor() as cursor:
+                            cursor.execute("""
+                                INSERT INTO tickets.ticket_files
+                                (
+                                    ticket_id,
+                                    ref_type,
+                                    file_name,
+                                    file_path,
+                                    file_type,
+                                    file_size,
+                                    uploaded_by,
+                                    create_at
+                                )
+                                VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+                            """, [
                                 ticket_id,
-                                ref_type,
-                                file_name,
-                                file_path,
-                                file_type,
-                                file_size,
-                                uploaded_by,
-                                create_at
-                            )
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                        """, [
-                            ticket_id,
-                            "ADJUST",
-                            f.name,
-                            file_path,
-                            f.content_type,
-                            f.size,
-                            user_id,
-                            timezone.now()
-                        ])
+                                "ADJUST",
+                                f.name,
+                                relative_path,
+                                f.content_type,
+                                f.size,
+                                user_id,
+                                timezone.now()
+                            ])
+
+                messages.success(request, "ส่งคำร้องปรับยอดเรียบร้อยแล้ว")
+                return redirect("ticket_success")
 
         except ApprovalTeamNotFound as e:
             messages.error(request, str(e))
             return redirect(request.path)
 
-        return redirect("ticket_success")
+        except Exception as e:
+            messages.error(request, f"เกิดข้อผิดพลาด: {str(e)}")
+            return redirect(request.path)
 
     return render(request, "tickets_form/adjust_form.html")
-
+@login_required_custom
 @page_permission_required
+def adjust_detail(request, ticket_id):
+
+    user = request.session["user"]
+    user_id = user["id"]
+    role_id = user["role_id"]
+    is_admin = (role_id == 1)
+
+    # =============================
+    # TICKET + ADJUST DATA
+    # =============================
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                t.id,
+                t.title,
+                t.description,
+                t.create_at,
+                u.full_name,
+                s.name AS status_name,
+                t.status_id,
+                a.adj_category,
+                a.items
+            FROM tickets.tickets t
+            JOIN tickets.users u ON u.id = t.user_id
+            JOIN tickets.status s ON s.id = t.status_id
+            JOIN tickets.ticket_adjust_draft a ON a.ticket_id = t.id
+            WHERE t.id = %s
+        """, [ticket_id])
+
+        row = cursor.fetchone()
+
+    if not row:
+        raise Http404("Ticket not found")
+
+    ticket = {
+        "id": row[0],
+        "title": row[1],
+        "description": row[2],
+        "create_at": row[3],
+        "user_name": row[4],
+        "status_name": row[5],
+        "status_id": row[6],
+        "adj_category": row[7],
+    }
+
+    items = json.loads(row[8]) if row[8] else []
+
+    # =============================
+    # FILES
+    # =============================
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id, file_name, file_path, file_type
+            FROM tickets.ticket_files
+            WHERE ticket_id = %s
+            ORDER BY id
+        """, [ticket_id])
+
+        files = []
+        for f in cursor.fetchall():
+            files.append({
+                "id": f[0],
+                "file_name": f[1],
+                "file_path": f[2].replace("\\", "/"),
+                "file_type": f[3],
+            })
+
+    # =============================
+    # APPROVE CHECK
+    # =============================
+    can_approve = False
+    my_level = None
+
+    can_approve, my_level = can_user_approve_ticket(ticket_id, user_id)
+
+    if is_admin:
+        can_approve = True
+
+    return render(
+        request,
+        "tickets_form/adjust_detail.html",
+        {
+            "ticket": ticket,
+            "items": items,
+            "files": files,
+            "can_approve": can_approve,
+            "my_level": my_level,
+            "is_admin": is_admin,
+        }
+    )
 def build_adjust_items(request):
     source_cust = request.POST.getlist("source_cust[]")
-    source_name = request.POST.getlist("source_customer_name[]")
-    promo_info = request.POST.getlist("promo_info[]")
+    source_customer_name = request.POST.getlist("source_customer_name[]")
+    promo_code = request.POST.getlist("promo_code[]")
+    promo_name = request.POST.getlist("promo_name[]")
     earn_master = request.POST.getlist("earn_master[]")
     amount = request.POST.getlist("amount[]")
 
     target_cust = request.POST.getlist("target_cust[]")
-    target_name = request.POST.getlist("target_customer_name[]")
-    target_promo = request.POST.getlist("target_promo_name[]")
-    target_earn = request.POST.getlist("target_earn_master[]")
+    target_customer_name = request.POST.getlist("target_customer_name[]")
+    target_promo_code = request.POST.getlist("target_promo_code[]")
+    target_promo_name = request.POST.getlist("target_promo_name[]")
+    target_earn_master = request.POST.getlist("target_earn_master[]")
     target_amount = request.POST.getlist("target_amount[]")
 
     items = []
 
     for i in range(len(source_cust)):
-        if not (amount[i] or target_amount[i]):
+        if not source_cust[i]:
             continue
 
         items.append({
-            "source": {
-                "cust": source_cust[i],
-                "name": source_name[i],
-                "promo": promo_info[i],
-                "earn_master": earn_master[i],
-                "amount": float(amount[i] or 0),
-            },
-            "target": {
-                "cust": target_cust[i],
-                "name": target_name[i],
-                "promo": target_promo[i],
-                "earn_master": target_earn[i],
-                "amount": float(target_amount[i] or 0),
-            }
+            "source_cust": source_cust[i],
+            "source_customer_name": source_customer_name[i],
+            "promo_code": promo_code[i],
+            "promo_name": promo_name[i],
+            "earn_master": earn_master[i],
+            "amount": amount[i],
+        })
+
+    for i in range(len(target_cust)):
+        if not target_cust[i]:
+            continue
+
+        items.append({
+            "target_cust": target_cust[i],
+            "target_customer_name": target_customer_name[i],
+            "target_promo_code": target_promo_code[i],
+            "target_promo_name": target_promo_name[i],
+            "target_earn_master": target_earn_master[i],
+            "target_amount": target_amount[i],
         })
 
     return items
