@@ -125,52 +125,58 @@
     </div>
     </div>
 
-    <!-- ================= APPROVE SECTION ================= -->
+    <!-- ================= APPROVE / REJECT SECTION ================= -->
     {% if can_approve or is_admin %}
+    {% if ticket.status_id != 3 and ticket.status_id != 5 and ticket.status_id != 8 %}
     <div class="card shadow-sm border-success mb-4">
         <div class="card-body">
 
-            {% if is_admin %}
-                <div class="fw-semibold text-danger mb-2">
-                    ⚠ สิทธิ์ Admin
-                </div>
+            <!-- ===== Role Info ===== -->
+            {% if is_admin or status_id == 1  %}
+            <div class="fw-semibold text-danger mb-3">
+                ⚠ สิทธิ์ Admin
+            </div>
             {% else %}
-                <div class="fw-semibold text-success mb-2">
-                    คุณสามารถอนุมัติได้ (Level {{ my_level }})
+            <div class="fw-semibold text-success mb-3">
+                คุณสามารถอนุมัติได้ (Level {{ my_level }})
+            </div>
+            {% endif %}
+
+            <div class="row g-3 align-items-start">
+
+                <!-- ===== Approve ===== -->
+                <div class="col-md-3">
+                    <form method="post" action="{% url 'approve_ticket' ticket.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success w-100 py-2">
+                            ✅ Approve
+                        </button>
+                    </form>
                 </div>
-            {% endif %}
 
-            {% if can_approve %}
-            <form method="post" action="{% url 'approve_ticket' ticket.id %}" class="mb-2">
-                {% csrf_token %}
-                <textarea name="remark"
-                          class="form-control mb-2"
-                          rows="2"
-                          placeholder="หมายเหตุ (ถ้ามี)"></textarea>
-                <button type="submit" class="btn btn-success">
-                    ✅ Approve
-                </button>
-            </form>
-            {% endif %}
+                <!-- ===== Reject ===== -->
+                <div class="col-md-9">
+                    <form method="post" action="{% url 'reject_ticket' ticket.id %}"
+                        onsubmit="return confirm('ยืนยันการ Reject คำขอนี้ ?');">
+                        {% csrf_token %}
 
-            {% if is_admin and ticket.status_id == 8 %}
-            <form method="post" action="{% url 'admin_complete_ticket' ticket.id %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary">
-                    ✅ ทำเสร็จแล้ว
-                </button>
-            </form>
-            {% endif %}
+                        <input type="text" name="remark" class="form-control mb-2"
+                            placeholder="เหตุผลในการ Reject (จำเป็น)" required>
+
+                        <button type="submit" class="btn btn-outline-danger">
+                            ❌ Reject
+                        </button>
+                    </form>
+                </div>
+
+            </div>
 
         </div>
     </div>
     {% endif %}
+    {% endif %}
 
-</div>
 {% endblock %}
-
-
-
 
 {% block extra_js %}
 <script>
