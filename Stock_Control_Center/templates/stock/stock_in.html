@@ -13,22 +13,32 @@
         {% csrf_token %}
 
         <div class="mb-3">
-          <label>ชื่ออุปกรณ์</label>
+          <label class="fw-semibold">ชื่ออุปกรณ์</label>
           <input type="text" name="name" class="form-control" required>
         </div>
 
         <div class="mb-3">
-          <label>สเปค</label>
+          <label class="fw-semibold">สเปค</label>
           <input type="text" name="spec" class="form-control">
         </div>
 
+        <!-- 🔥 เพิ่ม item_type -->
         <div class="mb-3">
-          <label>จำนวน</label>
-          <input type="number" name="quantity" class="form-control" required>
+          <label class="fw-semibold">ประเภทอุปกรณ์</label>
+          <select name="item_type" class="form-select" required>
+            <option value="">-- เลือกประเภท --</option>
+            <option value="borrow">ของยืม (Borrow)</option>
+            <option value="use_up">ใช้แล้วหมด (Use Up)</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="fw-semibold">จำนวน</label>
+          <input type="number" name="quantity" class="form-control" min="1" required>
         </div>
 
         <button type="submit" class="btn btn-success">
-          บันทึก
+          💾 บันทึก
         </button>
 
         <a href="{% url 'stock_dashboard' %}" class="btn btn-secondary">

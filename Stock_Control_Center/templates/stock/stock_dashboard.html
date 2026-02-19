@@ -2,60 +2,69 @@
 {% block title %}Stock Dashboard{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="dashboard-table">
 
   <div class="d-flex justify-content-between mb-4">
-    <h4 class="fw-bold">📦 Stock Dashboard</h4>
+    <h4>📦 Stock Dashboard</h4>
     <div class="d-flex gap-2">
-      <a href="{% url 'stock_in' %}" class="btn btn-success btn-sm">
-        ➕ เพิ่มสินค้า (IN)
+      <a href="{% url 'stock_in' %}" class="btn btn-primary btn-sm">
+        ➕ เพิ่มสินค้า
       </a>
       <a href="{% url 'stock_dispatch_list' %}" class="btn btn-primary btn-sm">
-        🚚 รายการจ่ายของ
+        🚚 จ่ายของ
       </a>
-      <a href="{% url 'stock_movement_list' %}" class="btn btn-dark btn-sm">
-        📜 ประวัติการเคลื่อนไหว
-      </a>
-            <a href="{% url 'stock_return_list' %}" class="btn btn-dark btn-sm">
-        📜 คืนอุปกรณ์
+      <a href="{% url 'stock_return_list' %}" class="btn btn-dark btn-sm">
+        🔄 คืนของ
       </a>
     </div>
   </div>
 
-  <div class="card shadow-sm">
-    <div class="card-body">
-
-      <table class="table table-bordered align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>ชื่ออุปกรณ์</th>
-            <th>สเปค</th>
-            <th width="120">จำนวน</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for s in stocks %}
-          <tr>
-            <td>{{ s.name }}</td>
-            <td>{{ s.spec }}</td>
-            <td>
-              {% if s.quantity < 5 %}
-                <span class="badge bg-danger">{{ s.quantity }}</span>
-              {% else %}
-                <span class="badge bg-success">{{ s.quantity }}</span>
-              {% endif %}
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="3" class="text-center text-muted">ไม่มีข้อมูลสต๊อก</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-
-    </div>
-  </div>
+  <table class="table table-hover align-middle">
+    <thead>
+      <tr>
+        <th>ชื่ออุปกรณ์</th>
+        <th>สเปค</th>
+        <th>ประเภท</th>
+        <th width="100">จำนวน</th>
+        <th width="80"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in stocks %}
+      <tr class="hover-row">
+        <td class="fw-semibold">{{ s.name }}</td>
+        <td class="text-muted">{{ s.spec }}</td>
+        <td>
+          {% if s.item_type == "borrow" %}
+            <span class="status-badge bg-primary-soft">Borrow</span>
+          {% else %}
+            <span class="status-badge bg-warning-soft">Use Up</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if s.quantity < 5 %}
+            <span class="badge bg-danger">{{ s.quantity }}</span>
+          {% else %}
+            <span class="badge bg-success">{{ s.quantity }}</span>
+          {% endif %}
+        </td>
+        <td class="text-center">
+          <a href="{% url 'stock_edit' s.id %}"
+             class="action-btn"
+             title="แก้ไข">
+            <i class="bi bi-pencil"></i>
+          </a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5" class="text-center text-muted">
+          ไม่มีข้อมูลสต๊อก
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 
 </div>
 {% endblock %}

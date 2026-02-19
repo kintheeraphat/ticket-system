@@ -2,49 +2,42 @@
 {% block title %}Dispatch List{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="dashboard-table">
 
-  <h4 class="fw-bold mb-4">🚚 รายการคำขอจ่ายของ</h4>
+  <h4 class="mb-4">📦 รายการรอจ่ายของ</h4>
 
-  <div class="card shadow-sm">
-    <div class="card-body">
-
-      <table class="table table-bordered">
-        <thead class="table-light">
-          <tr>
-            <th>ID</th>
-            <th>หัวข้อ</th>
-            <th>ผู้ขอ</th>
-            <th>วันที่ยืม</th>
-            <th>แผนก</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for b in borrows %}
-          <tr>
-            <td>{{ b.id }}</td>
-            <td>{{ b.title }}</td>
-            <td>{{ b.full_name }}</td>
-            <td>{{ b.borrow_date }}</td>
-            <td>{{ b.department }}</td>
-            <td>
-              <a href="{% url 'stock_dispatch_detail' b.id %}"
-                 class="btn btn-sm btn-primary">
-                จ่ายของ
-              </a>
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="6" class="text-center text-muted">ไม่มีรายการ</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-
+  {% if borrows %}
+  <table class="table table-hover align-middle">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>หัวข้อ</th>
+        <th>ผู้ขอ</th>
+        <th class="text-center">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for b in borrows %}
+      <tr class="hover-row">
+        <td>{{ b.id }}</td>
+        <td class="fw-semibold">{{ b.title }}</td>
+        <td class="text-muted">{{ b.full_name }}</td>
+        <td class="text-center">
+          <a href="{% url 'stock_dispatch_detail' b.id %}"
+             class="action-btn"
+             title="จ่ายของ">
+            <i class="bi bi-box-arrow-up"></i>
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <div class="text-center text-muted py-4">
+      ไม่มีรายการรอจ่าย
     </div>
-  </div>
+  {% endif %}
 
 </div>
 {% endblock %}

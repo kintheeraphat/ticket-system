@@ -4,34 +4,45 @@
 {% block content %}
 <div class="container py-4">
 
-    <h4 class="fw-bold mb-4">🔄 รายการรอคืนของ</h4>
+  <h4 class="fw-bold mb-4">🔄 รายการรอคืนของ</h4>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
+  <div class="card shadow-sm">
+    <div class="card-body">
 
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>หัวข้อ</th>
-                        <th>ผู้ขอ</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if b.remaining > 0 %}
-                    <a href="{% url 'stock_return_detail' b.id %}" class="btn btn-sm btn-primary">
-                        คืนของ
-                    </a>
-                    {% else %}
-                    <span class="badge bg-success">คืนครบแล้ว</span>
-                    {% endif %}
-
-                </tbody>
-            </table>
-
+      {% if borrows %}
+      <table class="table table-bordered align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>หัวข้อ</th>
+            <th>ผู้ขอ</th>
+            <th width="120"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in borrows %}
+          <tr>
+            <td>{{ b.id }}</td>
+            <td>{{ b.title }}</td>
+            <td>{{ b.full_name }}</td>
+            <td class="text-center">
+              <a href="{% url 'stock_return_detail' b.id %}"
+                 class="btn btn-sm btn-warning">
+                คืนของ
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+        <div class="text-center text-muted py-4">
+          ไม่มีรายการรอคืนของ
         </div>
+      {% endif %}
+
     </div>
+  </div>
 
 </div>
 {% endblock %}

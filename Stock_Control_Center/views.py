@@ -22,8 +22,6 @@ def stock_dashboard(request):
         "stocks": stocks
     })
 
-
-# Create your views here.
 @login_required_custom
 @page_permission_required
 def stock_in(request):
@@ -33,41 +31,57 @@ def stock_in(request):
         name = request.POST.get("name")
         spec = request.POST.get("spec")
         quantity = request.POST.get("quantity")
+        item_type = request.POST.get("item_type")  # 🔥 เพิ่มตรงนี้
 
-        if not name or not quantity:
+        if not name or not quantity or not item_type:
             messages.error(request, "กรอกข้อมูลไม่ครบ")
             return redirect("stock_in")
 
-        quantity = int(quantity)
-
+        try:
+            quantity = int(quantity)
+        except ValueError:
+            messages.error(request, "จำนวนต้องเป็นตัวเลข")
+            return redirect("stock_in")
 
         with transaction.atomic():
             with connection.cursor() as cursor:
 
+                # -----------------------------
+                # เช็คว่ามี item นี้อยู่แล้วไหม
+                # -----------------------------
                 cursor.execute("""
-                    SELECT id FROM tickets.stock_items
-                    WHERE name=%s AND spec=%s
+                    SELECT id
+                    FROM tickets.stock_items
+                    WHERE name = %s
+                    AND COALESCE(spec,'') = COALESCE(%s,'')
                 """, [name, spec])
 
                 row = cursor.fetchone()
 
                 if row:
                     stock_id = row[0]
+
+                    # เพิ่มจำนวนอย่างเดียว (ไม่เปลี่ยน item_type)
                     cursor.execute("""
                         UPDATE tickets.stock_items
                         SET quantity = quantity + %s
-                        WHERE id=%s
+                        WHERE id = %s
                     """, [quantity, stock_id])
+
                 else:
+                    # เพิ่ม item ใหม่
                     cursor.execute("""
                         INSERT INTO tickets.stock_items
-                        (name, spec, quantity)
-                        VALUES (%s,%s,%s)
+                        (name, spec, quantity, item_type)
+                        VALUES (%s,%s,%s,%s)
                         RETURNING id
-                    """, [name, spec, quantity])
+                    """, [name, spec, quantity, item_type])
+
                     stock_id = cursor.fetchone()[0]
 
-                # movement log
+                # -----------------------------
+                # movement log (IN)
+                # -----------------------------
                 cursor.execute("""
                     INSERT INTO tickets.stock_movement
                     (stock_id, movement_type, quantity)
@@ -81,37 +95,100 @@ def stock_in(request):
 
 @login_required_custom
 @page_permission_required
+def stock_edit(request, stock_id):
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id, name, spec, quantity, item_type
+            FROM tickets.stock_items
+            WHERE id = %s
+        """, [stock_id])
+
+        row = cursor.fetchone()
+
+        if not row:
+            messages.error(request, "ไม่พบข้อมูลสินค้า")
+            return redirect("stock_dashboard")
+
+        stock = {
+            "id": row[0],
+            "name": row[1],
+            "spec": row[2],
+            "quantity": row[3],
+            "item_type": row[4],
+        }
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+        spec = request.POST.get("spec")
+        quantity = request.POST.get("quantity")
+        item_type = request.POST.get("item_type")
+
+        if not name or not quantity or not item_type:
+            messages.error(request, "กรอกข้อมูลไม่ครบ")
+            return redirect(request.path)
+
+        try:
+            quantity = int(quantity)
+        except ValueError:
+            messages.error(request, "จำนวนต้องเป็นตัวเลข")
+            return redirect(request.path)
+
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    UPDATE tickets.stock_items
+                    SET name = %s,
+                        spec = %s,
+                        quantity = %s,
+                        item_type = %s
+                    WHERE id = %s
+                """, [name, spec, quantity, item_type, stock_id])
+
+        messages.success(request, "แก้ไขข้อมูลเรียบร้อยแล้ว")
+        return redirect("stock_dashboard")
+
+    return render(request, "stock/stock_edit.html", {
+        "stock": stock
+    })
+
+
+@login_required_custom
+@page_permission_required
 def stock_dispatch_list(request):
 
     with connection.cursor() as cursor:
-
         cursor.execute("""
             SELECT 
                 b.id,
                 t.title,
-                u.full_name,
-                b.borrow_date,
-                b.return_date,
-                t.department
+                u.full_name
             FROM tickets.borrow_requests b
             JOIN tickets.tickets t ON b.ticket_id = t.id
             JOIN tickets.users u ON b.user_id = u.id
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM tickets.stock_dispatch_log s
+                WHERE s.borrow_id = b.id
+                AND s.status IN ('borrow', 'return')
+            )
             ORDER BY b.id DESC
         """)
-
         borrows = dictfetchall(cursor)
 
     return render(request, "stock/dispatch_list.html", {
         "borrows": borrows
     })
-        
+
+
 @login_required_custom
 @page_permission_required
 def stock_dispatch_detail(request, borrow_id):
 
+    # ================= GET DATA =================
     with connection.cursor() as cursor:
 
-        # ================= BORROW + USER =================
+        # ---------- BORROW + USER ----------
         cursor.execute("""
             SELECT 
                 b.id,
@@ -120,7 +197,7 @@ def stock_dispatch_detail(request, borrow_id):
                 u.full_name
             FROM tickets.borrow_requests b
             JOIN tickets.users u ON b.user_id = u.id
-            WHERE b.id=%s
+            WHERE b.id = %s
         """, [borrow_id])
 
         row = cursor.fetchone()
@@ -135,7 +212,20 @@ def stock_dispatch_detail(request, borrow_id):
             "full_name": row[3],
         }
 
-        # ================= PARSE REQUEST ITEM =================
+        # ---------- CHECK ALREADY DISPATCH ----------
+        cursor.execute("""
+            SELECT 1
+            FROM tickets.stock_dispatch_log
+            WHERE borrow_id = %s
+            AND status = 'borrow'
+            LIMIT 1
+        """, [borrow_id])
+
+        if cursor.fetchone():
+            messages.info(request, "รายการนี้จ่ายของไปแล้ว")
+            return redirect("stock_dispatch_list")
+
+        # ---------- PARSE REQUEST ITEM ----------
         request_items = []
 
         if borrow["request_item"]:
@@ -146,7 +236,7 @@ def stock_dispatch_detail(request, borrow_id):
                 if not line:
                     continue
 
-                # ตัดเลขลำดับหน้าออก เช่น 1. xxx
+                # ตัดเลขลำดับ เช่น 1. xxx
                 if ". " in line:
                     line = line.split(". ", 1)[1]
 
@@ -167,7 +257,7 @@ def stock_dispatch_detail(request, borrow_id):
                     "qty": qty
                 })
 
-        # ================= STOCK LIST =================
+        # ---------- STOCK LIST ----------
         cursor.execute("""
             SELECT id, name, spec, quantity
             FROM tickets.stock_items
@@ -175,7 +265,7 @@ def stock_dispatch_detail(request, borrow_id):
         """)
         stocks = dictfetchall(cursor)
 
-    # ================= POST =================
+    # ================= POST (DISPATCH) =================
     if request.method == "POST":
 
         stock_ids = request.POST.getlist("stock_id")
@@ -185,11 +275,8 @@ def stock_dispatch_detail(request, borrow_id):
             with transaction.atomic():
                 with connection.cursor() as cursor:
 
-                    # ----------------------------
-                    # 1️⃣ CHECK STOCK ALL FIRST
-                    # ----------------------------
+                    # ---------- 1️⃣ CHECK STOCK FIRST ----------
                     for i in range(len(stock_ids)):
-
                         stock_id = int(stock_ids[i])
                         qty = int(quantities[i])
 
@@ -199,7 +286,7 @@ def stock_dispatch_detail(request, borrow_id):
                         cursor.execute("""
                             SELECT quantity
                             FROM tickets.stock_items
-                            WHERE id=%s
+                            WHERE id = %s
                             FOR UPDATE
                         """, [stock_id])
 
@@ -208,18 +295,11 @@ def stock_dispatch_detail(request, borrow_id):
                         if not row:
                             raise Exception("ไม่พบสินค้าในระบบ")
 
-                        current_qty = row[0]
+                        if row[0] < qty:
+                            raise Exception(f"สต๊อกไม่พอ (เหลือ {row[0]})")
 
-                        if current_qty < qty:
-                            raise Exception(
-                                f"สต๊อกไม่เพียงพอ (เหลือ {current_qty})"
-                            )
-
-                    # ----------------------------
-                    # 2️⃣ CUT STOCK AFTER CHECK
-                    # ----------------------------
+                    # ---------- 2️⃣ CUT STOCK + LOG ----------
                     for i in range(len(stock_ids)):
-
                         stock_id = int(stock_ids[i])
                         qty = int(quantities[i])
 
@@ -230,22 +310,22 @@ def stock_dispatch_detail(request, borrow_id):
                         cursor.execute("""
                             UPDATE tickets.stock_items
                             SET quantity = quantity - %s
-                            WHERE id=%s
+                            WHERE id = %s
                         """, [qty, stock_id])
 
-                        # Dispatch Log (ผูก ticket_id)
+                        # Dispatch Log
                         cursor.execute("""
                             INSERT INTO tickets.stock_dispatch_log
                             (borrow_id, stock_id, quantity, dispatch_by, status)
-                            VALUES (%s,%s,%s,%s,%s)
+                            VALUES (%s,%s,%s,%s,'borrow')
                         """, [
                             borrow["borrow_id"],
                             stock_id,
                             qty,
-                            request.session["user"]["id"],
-                            "borrow"
+                            request.session["user"]["id"]
                         ])
-                        # Movement Log (ผูก borrow_request)
+
+                        # Movement OUT
                         cursor.execute("""
                             INSERT INTO tickets.stock_movement
                             (stock_id, movement_type, quantity, ref_borrow_id)
@@ -263,12 +343,12 @@ def stock_dispatch_detail(request, borrow_id):
             messages.error(request, str(e))
             return redirect(request.path)
 
+    # ================= RENDER =================
     return render(request, "stock/dispatch_detail.html", {
         "borrow": borrow,
         "stocks": stocks,
         "request_items": request_items
     })
-
 
 
 @login_required_custom
@@ -300,184 +380,52 @@ def stock_return_list(request):
     with connection.cursor() as cursor:
 
         cursor.execute("""
-            SELECT 
+            SELECT DISTINCT
                 b.id,
                 t.title,
                 u.full_name
-            FROM tickets.borrow_requests b
+            FROM tickets.stock_dispatch_log s
+            JOIN tickets.borrow_requests b ON s.borrow_id = b.id
             JOIN tickets.tickets t ON b.ticket_id = t.id
             JOIN tickets.users u ON b.user_id = u.id
+            WHERE s.status = 'borrow'
             ORDER BY b.id DESC
         """)
 
         borrows = dictfetchall(cursor)
 
-        for b in borrows:
-
-            # -----------------------
-            # รวมจำนวนที่จ่ายออก
-            # -----------------------
-            cursor.execute("""
-                SELECT COALESCE(SUM(quantity), 0)
-                FROM tickets.stock_dispatch_log
-                WHERE borrow_id = %s
-            """, [b["id"]])
-            dispatched = cursor.fetchone()[0]
-
-            # -----------------------
-            # รวมจำนวนที่คืนเข้า
-            # -----------------------
-            cursor.execute("""
-                SELECT COALESCE(SUM(quantity), 0)
-                FROM tickets.stock_movement
-                WHERE ref_borrow_id = %s
-                AND movement_type = 'IN'
-            """, [b["id"]])
-            returned = cursor.fetchone()[0]
-
-            remaining = dispatched - returned
-
-            # -----------------------
-            # สถานะ
-            # -----------------------
-            if dispatched == 0:
-                status = "no-dispatch"
-            elif remaining <= 0:
-                status = "returned"
-            elif returned > 0:
-                status = "partial"
-            else:
-                status = "borrowed"
-
-            b["status"] = status
-            b["remaining"] = remaining
-
-        # ❗ แสดงเฉพาะที่ยังต้องคืน
-        borrows = [
-            b for b in borrows
-            if b["status"] in ("borrowed", "partial")
-        ]
-
     return render(request, "stock/return_list.html", {
         "borrows": borrows
     })
-
+    
 @login_required_custom
 @page_permission_required
 def stock_return_detail(request, borrow_id):
 
     with connection.cursor() as cursor:
-
         cursor.execute("""
             SELECT 
-                b.id,
-                u.full_name
-            FROM tickets.borrow_requests b
-            JOIN tickets.users u ON b.user_id = u.id
-            WHERE b.id=%s
+                s.id,
+                i.name,
+                i.spec,
+                s.quantity
+            FROM tickets.stock_dispatch_log s
+            JOIN tickets.stock_items i ON s.stock_id = i.id
+            WHERE s.borrow_id = %s
+            AND s.status = 'borrow'
         """, [borrow_id])
 
-        row = cursor.fetchone()
+        items = dictfetchall(cursor)
 
-        if not row:
-            messages.error(request, "ไม่พบข้อมูลคำขอ")
+        if not items:
+            messages.info(request, "ไม่มีของที่ต้องคืน")
             return redirect("stock_return_list")
-
-        borrow = {
-            "borrow_id": row[0],
-            "full_name": row[1],
-        }
-
-        # ดึงของที่เคยจ่าย
-        cursor.execute("""
-            SELECT 
-                d.stock_id,
-                s.name,
-                s.spec,
-                SUM(d.quantity) as dispatched_qty
-            FROM tickets.stock_dispatch_log d
-            JOIN tickets.stock_items s ON d.stock_id = s.id
-            WHERE d.borrow_id=%s
-            GROUP BY d.stock_id, s.name, s.spec
-        """, [borrow_id])
-
-        dispatch_items = dictfetchall(cursor)
-
-    # ================= POST =================
-    if request.method == "POST":
-
-        stock_ids = request.POST.getlist("stock_id")
-        quantities = request.POST.getlist("quantity")
-
-        try:
-            with transaction.atomic():
-                with connection.cursor() as cursor:
-
-                    for i in range(len(stock_ids)):
-
-                        stock_id = int(stock_ids[i])
-                        return_qty = int(quantities[i])
-
-                        if return_qty <= 0:
-                            continue
-
-                        # รวมที่เคยจ่าย
-                        cursor.execute("""
-                            SELECT COALESCE(SUM(quantity),0)
-                            FROM tickets.stock_dispatch_log
-                            WHERE stock_id=%s
-                            AND borrow_id=%s
-                        """, [stock_id, borrow_id])
-
-                        dispatched_qty = cursor.fetchone()[0]
-
-                        # รวมที่เคยคืน
-                        cursor.execute("""
-                            SELECT COALESCE(SUM(quantity),0)
-                            FROM tickets.stock_movement
-                            WHERE stock_id=%s
-                            AND ref_borrow_id=%s
-                            AND movement_type='IN'
-                        """, [stock_id, borrow_id])
-
-                        returned_qty = cursor.fetchone()[0]
-
-                        available_to_return = dispatched_qty - returned_qty
-
-                        if return_qty > available_to_return:
-                            raise Exception(
-                                f"คืนเกินจำนวนที่ยังไม่คืน (เหลือคืนได้ {available_to_return})"
-                            )
-
-                        # เพิ่ม stock กลับ
-                        cursor.execute("""
-                            UPDATE tickets.stock_items
-                            SET quantity = quantity + %s
-                            WHERE id=%s
-                        """, [return_qty, stock_id])
-
-                        # movement log
-                        cursor.execute("""
-                            INSERT INTO tickets.stock_movement
-                            (stock_id, movement_type, quantity, ref_borrow_id)
-                            VALUES (%s,'IN',%s,%s)
-                        """, [
-                            stock_id,
-                            return_qty,
-                            borrow_id
-                        ])
-
-            messages.success(request, "คืนของเรียบร้อยแล้ว")
-            return redirect("stock_return_list")
-
-        except Exception as e:
-            messages.error(request, str(e))
-            return redirect(request.path)
 
     return render(request, "stock/return_detail.html", {
-        "borrow": borrow,
-        "dispatch_items": dispatch_items
+        "items": items,
+        "borrow_id": borrow_id,   # ต้องส่งชื่อนี้เป๊ะ ๆ
     })
+
 
 @login_required_custom
 @page_permission_required
@@ -487,46 +435,49 @@ def stock_return_now(request, borrow_id):
         with transaction.atomic():
             with connection.cursor() as cursor:
 
+                # 🔥 ดึง item_type มาด้วย
                 cursor.execute("""
                     SELECT 
-                        stock_id,
-                        SUM(quantity) as total_qty
-                    FROM tickets.stock_dispatch_log
-                    WHERE borrow_id=%s
-                    GROUP BY stock_id
+                        s.id,
+                        s.stock_id,
+                        s.quantity,
+                        i.item_type
+                    FROM tickets.stock_dispatch_log s
+                    JOIN tickets.stock_items i ON s.stock_id = i.id
+                    WHERE s.borrow_id = %s
+                    AND s.status = 'borrow'
+                    FOR UPDATE
                 """, [borrow_id])
 
-                dispatch_items = cursor.fetchall()
+                rows = cursor.fetchall()
 
-                if not dispatch_items:
-                    messages.error(request, "ไม่พบรายการที่ต้องคืน")
+                if not rows:
+                    messages.warning(request, "ไม่มีรายการที่ต้องคืน")
                     return redirect("stock_return_list")
 
-                for stock_id, total_qty in dispatch_items:
+                for log_id, stock_id, qty, item_type in rows:
 
-                    # บวก stock กลับ
-                    cursor.execute("""
-                        UPDATE tickets.stock_items
-                        SET quantity = quantity + %s
-                        WHERE id=%s
-                    """, [total_qty, stock_id])
+                    # ✅ คืน stock เฉพาะของ borrow
+                    if item_type == "borrow":
+                        cursor.execute("""
+                            UPDATE tickets.stock_items
+                            SET quantity = quantity + %s
+                            WHERE id = %s
+                        """, [qty, stock_id])
 
-                    # movement log
+                    # 📝 movement IN (เก็บประวัติทุกกรณี)
                     cursor.execute("""
                         INSERT INTO tickets.stock_movement
                         (stock_id, movement_type, quantity, ref_borrow_id)
                         VALUES (%s,'IN',%s,%s)
-                    """, [
-                        stock_id,
-                        total_qty,
-                        borrow_id
-                    ])
+                    """, [stock_id, qty, borrow_id])
 
-                # ลบ dispatch log
-                cursor.execute("""
-                    DELETE FROM tickets.stock_dispatch_log
-                    WHERE borrow_id=%s
-                """, [borrow_id])
+                    # 🔄 update status
+                    cursor.execute("""
+                        UPDATE tickets.stock_dispatch_log
+                        SET status = 'return'
+                        WHERE id = %s
+                    """, [log_id])
 
         messages.success(request, "คืนของเรียบร้อยแล้ว")
         return redirect("stock_return_list")
@@ -534,59 +485,3 @@ def stock_return_now(request, borrow_id):
     except Exception as e:
         messages.error(request, str(e))
         return redirect("stock_return_list")
-
-@login_required_custom
-@page_permission_required
-def stock_return_now(request, borrow_id):
-
-    try:
-        with transaction.atomic():
-            with connection.cursor() as cursor:
-
-                # ดึงของที่เคยจ่าย
-                cursor.execute("""
-                    SELECT stock_id, SUM(quantity)
-                    FROM tickets.stock_dispatch_log
-                    WHERE borrow_id=%s
-                    GROUP BY stock_id
-                """, [borrow_id])
-
-                items = cursor.fetchall()
-
-                if not items:
-                    raise Exception("ไม่มีรายการให้คืน")
-
-                for stock_id, total_qty in items:
-
-                    # บวก stock กลับ
-                    cursor.execute("""
-                        UPDATE tickets.stock_items
-                        SET quantity = quantity + %s
-                        WHERE id=%s
-                    """, [total_qty, stock_id])
-
-                    # movement log
-                    cursor.execute("""
-                        INSERT INTO tickets.stock_movement
-                        (stock_id, movement_type, quantity, ref_borrow_id)
-                        VALUES (%s,'IN',%s,%s)
-                    """, [
-                        stock_id,
-                        total_qty,
-                        borrow_id
-                    ])
-
-                # ลบ dispatch log กันคืนซ้ำ
-                cursor.execute("""
-                    DELETE FROM tickets.stock_dispatch_log
-                    WHERE borrow_id=%s
-                """, [borrow_id])
-
-        messages.success(request, "คืนของทั้งหมดเรียบร้อย")
-        return redirect("stock_return_list")
-
-    except Exception as e:
-        messages.error(request, str(e))
-        return redirect("stock_return_list")
-    
-   
