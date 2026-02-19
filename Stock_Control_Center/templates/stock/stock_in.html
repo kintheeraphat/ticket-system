@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Stock IN{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <h4 class="fw-bold mb-4">➕ เพิ่มสินค้าเข้าสต๊อก</h4>
+
+  <div class="card shadow-sm col-md-6">
+    <div class="card-body">
+
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label>ชื่ออุปกรณ์</label>
+          <input type="text" name="name" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label>สเปค</label>
+          <input type="text" name="spec" class="form-control">
+        </div>
+
+        <div class="mb-3">
+          <label>จำนวน</label>
+          <input type="number" name="quantity" class="form-control" required>
+        </div>
+
+        <button type="submit" class="btn btn-success">
+          บันทึก
+        </button>
+
+        <a href="{% url 'stock_dashboard' %}" class="btn btn-secondary">
+          ยกเลิก
+        </a>
+
+      </form>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

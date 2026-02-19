@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',   
     'ticket',
+    "Stock_Control_Center",
     'django_extensions'
 ]
 

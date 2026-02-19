@@ -23,3 +23,17 @@ JOIN tickets.permissions p ON p.id = up.permission_id
 WHERE up.user_id = 1;
 
 https://gamma.app/docs/Django-PostgreSQL-3kvzdumwl1t69na?mode=doc
+ALTER TABLE tickets.stock_dispatch_log
+DROP CONSTRAINT fk_dispatch_borrow;
+
+ALTER TABLE tickets.stock_dispatch_log
+ADD COLUMN borrow_id int;
+
+ALTER TABLE tickets.stock_dispatch_log
+ADD CONSTRAINT fk_dispatch_borrow
+FOREIGN KEY (borrow_id)
+REFERENCES tickets.borrow_requests(id)
+ON DELETE CASCADE;
+
+
+<a href="{% url 'stock_dashboard' %}">

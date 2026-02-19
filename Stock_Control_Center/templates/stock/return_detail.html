@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Return Detail{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <h4 class="fw-bold mb-4">🔄 คืนอุปกรณ์</h4>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <p><strong>ผู้ขอ:</strong> {{ borrow.full_name }}</p>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+
+      <form method="post">
+        {% csrf_token %}
+
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>ชื่ออุปกรณ์</th>
+              <th>สเปค</th>
+              <th>จ่ายไป</th>
+              <th>จำนวนคืน</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in dispatch_items %}
+            <tr>
+              <td>{{ item.name }}</td>
+              <td>{{ item.spec }}</td>
+              <td>{{ item.dispatched_qty }}</td>
+              <td>
+                <input type="hidden" name="stock_id" value="{{ item.stock_id }}">
+                <input type="number"
+                       name="quantity"
+                       class="form-control"
+                       min="0"
+                       max="{{ item.dispatched_qty }}"
+                       value="{{ item.dispatched_qty }}">
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="text-end">
+          <button type="submit" class="btn btn-success">
+            ยืนยันคืนของ
+          </button>
+          <a href="{% url 'stock_return_list' %}" class="btn btn-secondary">
+            กลับ
+          </a>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

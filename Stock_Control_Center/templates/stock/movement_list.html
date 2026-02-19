@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Stock Movement{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <h4 class="fw-bold mb-4">📜 ประวัติการเคลื่อนไหวสต๊อก</h4>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+
+      <table class="table table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th>ชื่ออุปกรณ์</th>
+            <th>สเปค</th>
+            <th>ประเภท</th>
+            <th>จำนวน</th>
+            <th>วันที่</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in movements %}
+          <tr>
+            <td>{{ m.name }}</td>
+            <td>{{ m.spec }}</td>
+            <td>
+              {% if m.movement_type == "IN" %}
+                <span class="badge bg-success">IN</span>
+              {% else %}
+                <span class="badge bg-danger">OUT</span>
+              {% endif %}
+            </td>
+            <td>{{ m.quantity }}</td>
+            <td>{{ m.created_at }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center text-muted">ไม่มีข้อมูล</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
