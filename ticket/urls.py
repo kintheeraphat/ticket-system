@@ -41,6 +41,8 @@ urlpatterns = [
     # ===== APPROVAL =====
     path("approval/add-line/", views.add_approve_line, name="add_approve_line"),
     path("approval/flow/<int:category_id>/<int:team_id>/",views.approval_flow_detail,name="approval_flow_detail",),
+    # ===== Reject =====
+    path("tickets/reject/<int:ticket_id>/", views.reject_ticket, name="reject_ticket"),
 
     # ===== ADMIN ACTIONS =====
     path("tickets/delete/<int:ticket_id>/", views.delete_ticket, name="delete_ticket"),

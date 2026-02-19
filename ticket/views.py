@@ -756,7 +756,7 @@ def tickets_list(request):
             "created_at": created_at,
             "status": row[8],
             "ticket_owner_id": row[9],
-            "assignee": row[10],   # 👈 เพิ่มตรงนี้
+            "assignee": row[10],   
         })
 
 
@@ -1451,7 +1451,8 @@ def borrow_detail(request, ticket_id):
                 b.request_item,
                 d.dept_name,
                 t.create_at,
-                u.full_name
+                u.full_name,
+                t.status_id
             FROM tickets.borrow_requests b
             JOIN tickets.tickets t ON t.id = b.ticket_id
             JOIN tickets.users u ON u.id = b.user_id
@@ -1473,6 +1474,7 @@ def borrow_detail(request, ticket_id):
             "department": row[5],
             "create_at": row[6],
             "full_name": row[7],
+            "status_id": row[8],
         }
 
         # -------------------------
@@ -1558,10 +1560,9 @@ def borrow_detail(request, ticket_id):
             "can_approve": can_approve_flag,
             "my_level": my_level,
             "is_admin": is_admin,
-            "ticket": {"id": ticket_id},
+            "ticket": {"id": ticket_id, "status_id": borrow["status_id"]},
         }
     )
-
 @login_required_custom
 @page_permission_required
 def tickets_detail_vpn(request, ticket_id):
@@ -4095,13 +4096,16 @@ def preview_media(request, path):
 def reject_ticket(request, ticket_id):
 
     if request.method != "POST":
-        return redirect("report_detail", ticket_id=ticket_id)
+        return redirect("borrow_detail", ticket_id=ticket_id)
 
     remark = request.POST.get("remark", "").strip()
 
     if not remark:
         messages.error(request, "กรุณาระบุเหตุผลในการ Reject")
-        return redirect("report_detail", ticket_id=ticket_id)
+        return redirect("borrow_detail", ticket_id=ticket_id)
+
+    user = request.session["user"]
+    user_id = user["id"]   
 
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -4113,11 +4117,11 @@ def reject_ticket(request, ticket_id):
                 reject_at = NOW()
             WHERE id = %s
         """, [
-            5,  # สมมติ 5 = Rejected
+            3,  #-- Rejected        
             remark,
-            request.session["user_id"],
+            user_id,
             ticket_id
         ])
 
-    messages.success(request, "Reject รายการเรียบร้อยแล้ว")
-    return redirect("report_detail", ticket_id=ticket_id)
+    messages.success(request, "Reject คำขอยืมอุปกรณ์เรียบร้อยแล้ว")
+    return redirect("borrow_detail", ticket_id=ticket_id)
