@@ -12,7 +12,7 @@ def stock_dashboard(request):
 
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT id, name, spec, quantity
+            SELECT id, name, spec, quantity, item_type
             FROM tickets.stock_items
             ORDER BY name
         """)

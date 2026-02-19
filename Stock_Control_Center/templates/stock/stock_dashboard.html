@@ -36,22 +36,22 @@
         <td class="text-muted">{{ s.spec }}</td>
         <td>
           {% if s.item_type == "borrow" %}
-            <span class="status-badge bg-primary-soft">Borrow</span>
+          <span class="status-badge bg-primary-soft">Borrow</span>
+          {% elif s.item_type == "use_up" %}
+          <span class="status-badge bg-warning-soft">Use Up</span>
           {% else %}
-            <span class="status-badge bg-warning-soft">Use Up</span>
+          <span class="status-badge bg-light">ไม่ระบุ</span>
           {% endif %}
         </td>
+
         <td>
-          {% if s.quantity < 5 %}
-            <span class="badge bg-danger">{{ s.quantity }}</span>
-          {% else %}
+          {% if s.quantity < 5 %} <span class="badge bg-danger">{{ s.quantity }}</span>
+            {% else %}
             <span class="badge bg-success">{{ s.quantity }}</span>
-          {% endif %}
+            {% endif %}
         </td>
         <td class="text-center">
-          <a href="{% url 'stock_edit' s.id %}"
-             class="action-btn"
-             title="แก้ไข">
+          <a href="{% url 'stock_edit' s.id %}" class="action-btn" title="แก้ไข">
             <i class="bi bi-pencil"></i>
           </a>
         </td>
