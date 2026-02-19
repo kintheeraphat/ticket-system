@@ -108,7 +108,7 @@
 
     {% if "IT_Stock" in user_permissions %}
     <li>
-      <a href="http://127.0.0.1:3000/admin_dash/items/">
+      <a href="{% url 'stock_dashboard' %}">
         <i class="fa-solid fa-boxes-stacked"></i>
         <span>IT Stock</span>
       </a>
