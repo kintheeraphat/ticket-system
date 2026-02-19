@@ -36,4 +36,8 @@ REFERENCES tickets.borrow_requests(id)
 ON DELETE CASCADE;
 
 
-<a href="{% url 'stock_dashboard' %}">
+
+ALTER TABLE tickets.tickets
+ADD COLUMN reject_remark TEXT,
+ADD COLUMN reject_by INT,
+ADD COLUMN reject_at TIMESTAMP;

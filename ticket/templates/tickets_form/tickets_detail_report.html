@@ -17,93 +17,104 @@
 </style>
 {% block content %}
 
-    <div class="dashboard-card">
+<div class="dashboard-card">
 
-        <h3 class="fw-bold mb-3">
-            {{ ticket.title }}
-        </h3>
+    <h3 class="fw-bold mb-3">
+        {{ ticket.title }}
+    </h3>
 
-        <p class="text-muted mb-4">
-            แจ้งโดย {{ ticket.user_name }}
-            {% if ticket.department %}
-            | แผนก {{ ticket.department }}
-            {% endif %}
-            <br>
-            วันที่ {{ ticket.create_at|localtime|date:"d M Y H:i" }} น.
-        </p>
-
-        <hr>
-
-        <!-- DESCRIPTION -->
-        <div class="mb-4">
-            <h6 class="fw-semibold">รายละเอียดคำขอ</h6>
-            <p>{{ ticket.description|linebreaksbr }}</p>
-        </div>
-
-        <!-- OLD / NEW VALUE -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header fw-semibold">
-                        ค่าเดิม (Old Value)
-                    </div>
-                    <div class="card-body">
-                        <pre class="mb-0">{{ detail.old_value }}</pre>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header fw-semibold">
-                        ค่าใหม่ (New Value)
-                    </div>
-                    <div class="card-body">
-                        <pre class="mb-0">{{ detail.new_value }}</pre>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {# ================= APPROVE SECTION ================= #}
-        {% if can_approve or is_admin %}
-        <div class="card shadow-sm border-success mb-4">
-            <div class="card-body">
-
-                {# ---------- INFO ---------- #}
-                {% if is_admin %}
-                <div class="fw-semibold text-danger mb-2">
-                    ⚠ สิทธิ์ Admin
-                </div>
-                {% else %}
-                <div class="fw-semibold text-success mb-2">
-                    คุณสามารถอนุมัติได้ (Level {{ my_level }})
-                </div>
-                {% endif %}
-
-                {# ---------- APPROVE ตามสาย ---------- #}
-                {% if can_approve %}
-                <form method="post" action="{% url 'approve_ticket' ticket.id %}" class="mb-2">
-                    {% csrf_token %}
-                    <textarea name="remark" class="form-control mb-2" rows="2"
-                        placeholder="หมายเหตุ (ถ้ามี)"></textarea>
-                    <button type="submit" class="btn btn-success">
-                        ✅ Approve
-                    </button>
-                </form>
-                {% endif %}
-
-                {# ---------- ADMIN รับงาน ---------- #}
-                {% if is_admin and has_pending_approve %}
-                <form method="post" action="{% url 'approve_ticket' ticket.id %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="admin_override" value="1">
-                    <button class="btn btn-danger">
-                        🚀 Admin รับงาน
-                    </button>
-                </form>
-                {% endif %}
-            </div>
-        </div>
+    <p class="text-muted mb-4">
+        แจ้งโดย {{ ticket.user_name }}
+        {% if ticket.department %}
+        | แผนก {{ ticket.department }}
         {% endif %}
-        {%endblock %}
+        <br>
+        วันที่ {{ ticket.create_at|localtime|date:"d M Y H:i" }} น.
+    </p>
+
+    <hr>
+
+    <!-- DESCRIPTION -->
+    <div class="mb-4">
+        <h6 class="fw-semibold">รายละเอียดคำขอ</h6>
+        <p>{{ ticket.description|linebreaksbr }}</p>
+    </div>
+
+    <!-- OLD / NEW VALUE -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header fw-semibold">
+                    ค่าเดิม (Old Value)
+                </div>
+                <div class="card-body">
+                    <pre class="mb-0">{{ detail.old_value }}</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header fw-semibold">
+                    ค่าใหม่ (New Value)
+                </div>
+                <div class="card-body">
+                    <pre class="mb-0">{{ detail.new_value }}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ================= APPROVE SECTION ================= #}
+    {% if can_approve or is_admin %}
+    <div class="card shadow-sm border-success mb-4">
+        <div class="card-body">
+
+            {# ---------- INFO ---------- #}
+            {% if is_admin %}
+            <div class="fw-semibold text-danger mb-2">
+                ⚠ สิทธิ์ Admin
+            </div>
+            {% else %}
+            <div class="fw-semibold text-success mb-2">
+                คุณสามารถอนุมัติได้ (Level {{ my_level }})
+            </div>
+            {% endif %}
+
+            {# ---------- APPROVE ตามสาย ---------- #}
+            {% if can_approve %}
+            <form method="post" action="{% url 'approve_ticket' ticket.id %}" class="mb-2">
+                {% csrf_token %}
+                <textarea name="remark" class="form-control mb-2" rows="2" placeholder="หมายเหตุ (ถ้ามี)"></textarea>
+                <button type="submit" class="btn btn-success">
+                    ✅ Approve
+                </button>
+            </form>
+            {% endif %}
+            {% if can_approve or is_admin %}
+            <form method="post" action="{% url 'reject_ticket' ticket.id %}" class="mb-2">
+                {% csrf_token %}
+                <textarea name="remark" class="form-control mb-2" rows="2"
+                    placeholder="เหตุผลที่ Reject (จำเป็น)"></textarea>
+
+                <button type="submit" class="btn btn-outline-danger" onclick="return confirm('ยืนยันการ Reject ?')">
+                    ❌ Reject
+                </button>
+            </form>
+            {% endif %}
+
+
+            {# ---------- ADMIN รับงาน ---------- #}
+            {% if is_admin and has_pending_approve %}
+            <form method="post" action="{% url 'approve_ticket' ticket.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="admin_override" value="1">
+                <button class="btn btn-danger">
+                    🚀 Admin รับงาน
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    {%endblock %}

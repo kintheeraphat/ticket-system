@@ -4085,3 +4085,36 @@ def preview_media(request, path):
         raise Http404("File not found")
 
     return FileResponse(open(full_path, "rb"))
+
+# reject
+@login_required_custom
+@page_permission_required
+def reject_ticket(request, ticket_id):
+
+    if request.method != "POST":
+        return redirect("report_detail", ticket_id=ticket_id)
+
+    remark = request.POST.get("remark", "").strip()
+
+    if not remark:
+        messages.error(request, "กรุณาระบุเหตุผลในการ Reject")
+        return redirect("report_detail", ticket_id=ticket_id)
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            UPDATE tickets.tickets
+            SET
+                status_id = %s,
+                reject_remark = %s,
+                reject_by = %s,
+                reject_at = NOW()
+            WHERE id = %s
+        """, [
+            5,  # สมมติ 5 = Rejected
+            remark,
+            request.session["user_id"],
+            ticket_id
+        ])
+
+    messages.success(request, "Reject รายการเรียบร้อยแล้ว")
+    return redirect("report_detail", ticket_id=ticket_id)
