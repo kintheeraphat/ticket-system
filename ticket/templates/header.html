@@ -105,9 +105,9 @@
       </a>
     </li>
     {% endif %}
-
+     <li class="sidebar-section mt-3">STOCK IT</li>
     {% if "IT_Stock" in user_permissions %}
-    <li class="{% if request.resolver_match.url_name == 'manage_permission' %}active{% endif %}">
+    <li class="{% if request.resolver_match.url_name == 'stock_dashboard' %}active{% endif %}">
       <a href="{% url 'stock_dashboard' %}">
         <i class="fa-solid fa-boxes-stacked"></i>
         <span>IT Stock</span>
