@@ -30,40 +30,16 @@
     </select>
   </div>
 
-  <!-- SOURCE -->
+  <!-- ================= SOURCE ================= -->
   <h6 class="fw-bold mb-2">รายการปรับยอด : ต้นทาง</h6>
-  <div class="table-responsive mb-4">
+  <div class="table-responsive mb-2">
     <table class="table table-bordered text-center" id="sourceTable">
       <thead class="table-light">
         <tr>
           <th>รหัสลูกค้า</th>
           <th>ชื่อลูกค้า</th>
-          <th>Promotion</th>
-          <th>Earn Master</th>
-          <th>จำนวน</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><input class="form-control" name="source_cust[]" /></td>
-          <td><input class="form-control" name="source_customer_name[]" /></td>
-          <td><input class="form-control" name="promo_info[]" /></td>
-          <td><input class="form-control" name="earn_master[]" /></td>
-          <td><input class="form-control" type="text" step="0.01" name="amount[]" /></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- TARGET -->
-  <h6 class="fw-bold mb-2">รายการปรับยอด : ปลายทาง</h6>
-  <div class="table-responsive">
-    <table class="table table-bordered text-center" id="targetTable">
-      <thead class="table-light">
-        <tr>
-          <th>รหัสลูกค้า</th>
-          <th>ชื่อลูกค้า</th>
-          <th>Promotion</th>
+          <th>Promo Code</th>
+          <th>Promo Name</th>
           <th>Earn Master</th>
           <th>จำนวน</th>
           <th width="60"></th>
@@ -71,39 +47,71 @@
       </thead>
       <tbody>
         <tr>
-          <td><input class="form-control" name="target_cust[]" /></td>
-          <td><input class="form-control" name="target_customer_name[]" /></td>
-          <td><input class="form-control" name="target_promo_name[]" /></td>
-          <td><input class="form-control" name="target_earn_master[]" /></td>
-          <td><input class="form-control" type="text" step="0.01" name="target_amount[]" /></td>
+          <td><input class="form-control" name="source_cust[]" required /></td>
+          <td><input class="form-control" name="source_customer_name[]" required /></td>
+          <td><input class="form-control" name="promo_code[]" required /></td>
+          <td><input class="form-control" name="promo_name[]" required /></td>
+          <td><input class="form-control" name="earn_master[]" required /></td>
+          <td><input class="form-control" type="number" step="0.01" name="amount[]" required /></td>
           <td>
-            <button type="button" class="btn btn-outline-danger btn-sm remove-row">&times;</button>
+            <button type="button" class="btn btn-outline-danger btn-sm remove-source-row">
+              &times;
+            </button>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <button type="button" class="btn btn-outline-primary btn-sm my-3" id="addRow">
-    <i class="fas fa-plus me-1"></i> เพิ่มรายการ
+  <button type="button"
+          class="btn btn-outline-primary btn-sm my-2"
+          id="addSourceRow">
+      <i class="fas fa-plus me-1"></i> เพิ่มรายการต้นทาง
   </button>
 
-<!-- =======================
-      แผนก
-  ======================== -->
-  <div class="mb-3">
-    <label class="form-label">แผนก</label>
-    <input
-      type="text"
-      name="department"
-      class="form-control w-50"
-      placeholder="เช่น IT, Accounting, HR"
-      required
-    />
+  <!-- ================= TARGET ================= -->
+  <div id="targetSection">
+    <h6 class="fw-bold mt-4 mb-2">รายการปรับยอด : ปลายทาง</h6>
+    <div class="table-responsive">
+      <table class="table table-bordered text-center" id="targetTable">
+        <thead class="table-light">
+          <tr>
+            <th>รหัสลูกค้า</th>
+            <th>ชื่อลูกค้า</th>
+            <th>Promo Code</th>
+            <th>Promo Name</th>
+            <th>Earn Master</th>
+            <th>จำนวน</th>
+            <th width="60"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input class="form-control" name="target_cust[]" required /></td>
+            <td><input class="form-control" name="target_customer_name[]" required /></td>
+            <td><input class="form-control" name="target_promo_code[]" required /></td>
+            <td><input class="form-control" name="target_promo_name[]" required /></td>
+            <td><input class="form-control" name="target_earn_master[]" required /></td>
+            <td><input class="form-control" type="number" step="0.01" name="target_amount[]" required /></td>
+            <td>
+              <button type="button" class="btn btn-outline-danger btn-sm remove-target-row">
+                &times;
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button type="button"
+            class="btn btn-outline-primary btn-sm my-2"
+            id="addTargetRow">
+        <i class="fas fa-plus me-1"></i> เพิ่มรายการปลายทาง
+    </button>
   </div>
 
   <!-- REMARK -->
-  <div class="mb-4">
+  <div class="mb-4 mt-3">
     <label class="fw-bold mb-2">หมายเหตุ</label>
     <textarea class="form-control" rows="3" name="remark"></textarea>
   </div>
@@ -114,21 +122,28 @@
       <i class="fas fa-paperclip me-1"></i>เอกสารแนบ (ไม่เกิน 3 ไฟล์)
     </label>
 
-    <input
-      type="file"
-      class="form-control"
-      multiple
-      accept="image/*,application/pdf"
-      onchange="handleFiles(this)"
-    />
+    <input type="file"
+           name="attachments[]"
+           class="form-control"
+           multiple
+           accept="image/*,application/pdf"
+           onchange="handleFiles(this)"/>
 
     <div id="filePreview" class="mt-3 d-flex gap-3 flex-wrap"></div>
   </div>
 
   <!-- BUTTON -->
   <div class="text-end border-top pt-3">
-    <button type="button" class="btn btn-outline-secondary me-2" onclick="saveDraft()">💾 บันทึกร่าง</button>
-    <button type="submit" class="btn btn-primary px-5 fw-bold">ส่งคำร้อง</button>
+    <button type="button"
+            class="btn btn-outline-secondary me-2"
+            onclick="saveDraft()">
+        💾 บันทึกร่าง
+    </button>
+
+    <button type="submit"
+            class="btn btn-primary px-5 fw-bold">
+        ส่งคำร้อง
+    </button>
   </div>
 
 </div>
@@ -142,19 +157,164 @@
         <h6 class="modal-title">ดูเอกสารแนบ</h6>
         <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body p-0">
-        <iframe id="previewFrame" style="width:100%;height:80vh;border:none"></iframe>
+      <div class="modal-body text-center p-0">
+        <iframe id="previewFrame"
+                style="width:100%;height:80vh;border:none"></iframe>
       </div>
     </div>
   </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+/* ================= TYPE TOGGLE ================= */
+document.addEventListener("DOMContentLoaded", function(){
+
+    const categorySelect = document.querySelector("select[name='adj_category']");
+    const targetSection = document.getElementById("targetSection");
+
+    function toggleForm(){
+        const value = categorySelect.value;
+
+        if(value !== "7" && value !== "8"){
+            targetSection.style.display = "none";
+        } else {
+            targetSection.style.display = "block";
+        }
+    }
+
+    categorySelect.addEventListener("change", toggleForm);
+    toggleForm();
+
+});
+
+/* ================= ADD / REMOVE SOURCE ================= */
+document.getElementById("addSourceRow").addEventListener("click", function(){
+    const tbody = document.querySelector("#sourceTable tbody");
+    const newRow = tbody.rows[0].cloneNode(true);
+    newRow.querySelectorAll("input").forEach(i => i.value = "");
+    tbody.appendChild(newRow);
+});
+
+document.addEventListener("click", function(e){
+    if(e.target.classList.contains("remove-source-row")){
+        const tbody = document.querySelector("#sourceTable tbody");
+        if(tbody.rows.length > 1){
+            e.target.closest("tr").remove();
+        }
+    }
+});
+
+/* ================= ADD / REMOVE TARGET ================= */
+document.getElementById("addTargetRow").addEventListener("click", function(){
+
+    const category = document.querySelector("select[name='adj_category']").value;
+
+    if(category !== "7" && category !== "8"){
+        alert("ประเภทนี้ไม่มีปลายทาง");
+        return;
+    }
+
+    const tbody = document.querySelector("#targetTable tbody");
+    const newRow = tbody.rows[0].cloneNode(true);
+    newRow.querySelectorAll("input").forEach(i => i.value = "");
+    tbody.appendChild(newRow);
+});
+
+document.addEventListener("click", function(e){
+    if(e.target.classList.contains("remove-target-row")){
+        const tbody = document.querySelector("#targetTable tbody");
+        if(tbody.rows.length > 1){
+            e.target.closest("tr").remove();
+        }
+    }
+});
+
+/* ================= FILE PREVIEW ================= */
+function handleFiles(input){
+
+    const preview = document.getElementById("filePreview");
+    preview.innerHTML = "";
+
+    if(input.files.length > 3){
+        alert("อัปโหลดได้ไม่เกิน 3 ไฟล์");
+        input.value = "";
+        return;
+    }
+
+    Array.from(input.files).forEach(file => {
+
+        const reader = new FileReader();
+
+        reader.onload = function(e){
+
+            const wrapper = document.createElement("div");
+            wrapper.style.width = "150px";
+
+            wrapper.innerHTML = `
+                <div style="cursor:pointer"
+                     onclick="previewFile('${e.target.result}')">
+                    ${file.type.startsWith("image/")
+                        ? `<img src="${e.target.result}"
+                                class="img-fluid rounded shadow-sm"
+                                style="height:110px;object-fit:cover;">`
+                        : `<div style="height:110px;
+                                       display:flex;
+                                       align-items:center;
+                                       justify-content:center;">
+                              <i class="fas fa-file-pdf text-danger fs-1"></i>
+                           </div>`
+                    }
+                </div>
+                <div class="small text-truncate mt-1">${file.name}</div>
+            `;
+
+            preview.appendChild(wrapper);
+        };
+
+        reader.readAsDataURL(file);
+    });
+}
+
+function previewFile(src){
+    document.getElementById("previewFrame").src = src;
+    new bootstrap.Modal(
+        document.getElementById("fileModal")
+    ).show();
+}
+
+/* ================= SAVE DRAFT ================= */
+function saveDraft(){
+    const formData = new FormData(document.getElementById("adjustForm"));
+    let draft = {};
+    for(let [key,val] of formData.entries()){
+        if(!draft[key]) draft[key] = [];
+        draft[key].push(val);
+    }
+    localStorage.setItem("adjustDraft", JSON.stringify(draft));
+    alert("บันทึกร่างเรียบร้อยแล้ว");
+}
+
+/* ================= LOAD DRAFT ================= */
+window.addEventListener("load", function(){
+    const draft = localStorage.getItem("adjustDraft");
+    if(!draft) return;
+
+    const data = JSON.parse(draft);
+
+    Object.keys(data).forEach(key => {
+        const inputs = document.getElementsByName(key);
+        data[key].forEach((val,i)=>{
+            if(inputs[i]) inputs[i].value = val;
+        });
+    });
+});
+document.getElementById("adjustForm").addEventListener("submit", function(){
+    alert("form submitting");
+});
+
 </script>
-<script src="{% static 'script/adjust_form.js' %}"></script>
 {% endblock %}
