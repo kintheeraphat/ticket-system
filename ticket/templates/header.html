@@ -107,7 +107,7 @@
     {% endif %}
 
     {% if "IT_Stock" in user_permissions %}
-    <li>
+    <li class="{% if request.resolver_match.url_name == 'manage_permission' %}active{% endif %}">
       <a href="{% url 'stock_dashboard' %}">
         <i class="fa-solid fa-boxes-stacked"></i>
         <span>IT Stock</span>
