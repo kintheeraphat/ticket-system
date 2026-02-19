@@ -83,7 +83,7 @@
                             {% elif t.ticket_type_id == 14 %}
                                 {% url 'borrow_detail' t.id %}
                             {% else %}
-                                {% url 'borrow_detail' t.id %}
+                                {% url 'tickets_detail_erp' t.id %}
                             {% endif %} ">
 
                     <!-- ID -->
@@ -154,7 +154,7 @@
                             {% elif t.ticket_type_id == 14 %}
                                 {% url 'borrow_detail' t.id %}
                             {% else %}
-                                {% url 'borrow_detail' t.id %}
+                                {% url 'tickets_detail_erp' t.id %}
                             {% endif %} 
                         " class="btn btn-sm btn-outline-primary me-1">
                             <i class="fas fa-chevron-right"></i>

@@ -3657,89 +3657,6 @@ def api_admin_users(request):
             {"error": str(e)},
             status=500
         )
-    
-def repairs_it_form(request):
-
-    if "user" not in request.session:
-        return redirect("login")
-
-    user_id = request.session["user"]["id"]
-
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT id, name 
-            FROM tickets.it_category
-            WHERE is_active = true
-            ORDER BY name
-        """)
-        it_categories = cursor.fetchall()
-
-    if request.method == "POST":
-
-        it_category_id = request.POST.get("it_category_id")
-        problem_detail = request.POST.get("problem_detail", "").strip()
-        building = request.POST.get("building", "").strip()
-
-        if not all([it_category_id, problem_detail, building]):
-            messages.error(request, "กรุณากรอกข้อมูลให้ครบถ้วน")
-            return render(request, "tickets_form/repairs_it_form.html", {
-                "it_categories": it_categories
-            })
-
-        with transaction.atomic():
-
-            type_id = 1   # ✅ FIX เป็น IT (id = 1)
-
-            title = "แจ้งซ่อม IT"
-            description = problem_detail
-            status_id = 1
-            ticket_type_id = 3
-
-            # 🔹 สร้าง ticket หลัก
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO tickets.tickets
-                    (title, description, user_id, status_id, ticket_type_id, create_at)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                    RETURNING id
-                """, [
-                    title,
-                    description,
-                    user_id,
-                    status_id,
-                    ticket_type_id,
-                    timezone.now()
-                ])
-                ticket_id = cursor.fetchone()[0]
-
-            # 🔹 insert detail table
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO tickets.ticket_data_building_repair
-                    (ticket_id, user_id, type_id, it_category_id, problem_detail, building)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                """, [
-                    ticket_id,
-                    user_id,
-                    type_id,           # ✅ เป็น 1 เสมอ
-                    it_category_id,
-                    problem_detail,
-                    building
-                ])
-
-        create_ticket_approval_by_ticket_type(
-            ticket_id=ticket_id,
-            ticket_type_id=ticket_type_id,
-            requester_user_id=user_id
-        )
-
-        messages.success(request, "ส่งคำร้องซ่อม IT เรียบร้อยแล้ว")
-        return redirect("ticket_success")
-
-    return render(request, "tickets_form/repairs_it_form.html", {
-        "it_categories": it_categories
-    })
-
 
 @login_required_custom
 @page_permission_required
@@ -4035,13 +3952,13 @@ def repairs_it_form(request):
 
         with transaction.atomic():
 
-            type_id = 1  # IT
-
             title = "แจ้งซ่อม IT"
             description = problem_detail
             status_id = 1
             ticket_type_id = 13
+            type_id = 1  # IT
 
+            # INSERT ticket
             with connection.cursor() as cursor:
                 cursor.execute("""
                     INSERT INTO tickets.tickets
@@ -4058,25 +3975,67 @@ def repairs_it_form(request):
                 ])
                 ticket_id = cursor.fetchone()[0]
 
+            # INSERT detail
             with connection.cursor() as cursor:
                 cursor.execute("""
                     INSERT INTO tickets.ticket_data_building_repair
-                    (ticket_id, user_id, type_id, it_category_id, problem_detail, building)
-                    VALUES (%s, %s, %s, %s, %s, %s)
+                    (ticket_id, user_id, type_id, it_category_id, problem_detail)
+                    VALUES (%s, %s, %s, %s, %s)
                 """, [
                     ticket_id,
                     user_id,
                     type_id,
                     it_category_id,
-                    problem_detail,
-                    None  # ไม่มี building แล้ว
+                    problem_detail
                 ])
 
-        create_ticket_approval_by_ticket_type(
-            ticket_id=ticket_id,
-            ticket_type_id=ticket_type_id,
-            requester_user_id=user_id
-        )
+            # CREATE APPROVAL
+            create_ticket_approval_by_ticket_type(
+                ticket_id=ticket_id,
+                ticket_type_id=ticket_type_id,
+                requester_user_id=user_id
+            )
+
+            # ================= FILE UPLOAD =================
+            files = request.FILES.getlist("attachments[]")
+
+            upload_root = os.path.join(
+                settings.MEDIA_ROOT,
+                "uploads",
+                "repairs_it",
+                str(ticket_id)
+            )
+            os.makedirs(upload_root, exist_ok=True)
+
+            for f in files:
+
+                file_path = os.path.join(upload_root, f.name)
+
+                with open(file_path, "wb+") as destination:
+                    for chunk in f.chunks():
+                        destination.write(chunk)
+
+                relative_path = f"uploads/repairs_it/{ticket_id}/{f.name}"
+
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO tickets.ticket_files
+                        (ticket_id, ref_type, ref_id,
+                         file_name, file_path,
+                         file_type, file_size,
+                         uploaded_by, create_at)
+                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    """, [
+                        ticket_id,
+                        "REPAIRS_IT",
+                        ticket_id,
+                        f.name,
+                        relative_path,
+                        f.content_type,
+                        f.size,
+                        user_id,
+                        timezone.now()
+                    ])
 
         messages.success(request, "ส่งคำร้องซ่อม IT เรียบร้อยแล้ว")
         return redirect("ticket_success")
@@ -4084,7 +4043,7 @@ def repairs_it_form(request):
     return render(request, "tickets_form/repairs_it_form.html", {
         "it_categories": it_categories
     })
-    
+
 @page_permission_required
 def repairs_it_detail(request, ticket_id):
 
@@ -4093,7 +4052,7 @@ def repairs_it_detail(request, ticket_id):
 
     user = request.session["user"]
     user_id = user["id"]
-    is_admin = (user["role_id"] == 1)   # ✅ เพิ่มบรรทัดนี้
+    is_admin = (user["role_id"] == 1)
 
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -4103,14 +4062,19 @@ def repairs_it_detail(request, ticket_id):
                 t.description,
                 t.create_at,
                 t.status_id,
+                s.name AS status_name,
                 u.username,
+                t.assign_id,
+                assign_user.username AS assigned_to,
                 td.it_category_id,
                 ic.name AS it_category_name,
                 td.problem_detail
             FROM tickets.tickets t
             JOIN tickets.users u ON u.id = t.user_id
+            JOIN tickets.status s ON s.id = t.status_id
             JOIN tickets.ticket_data_building_repair td ON td.ticket_id = t.id
             LEFT JOIN tickets.it_category ic ON ic.id = td.it_category_id
+            LEFT JOIN tickets.users assign_user ON assign_user.id = t.assign_id
             WHERE t.id = %s
         """, [ticket_id])
 
@@ -4125,20 +4089,43 @@ def repairs_it_detail(request, ticket_id):
         "description": row[2],
         "create_at": row[3],
         "status_id": row[4],
-        "username": row[5],
-        "it_category_id": row[6],
-        "it_category_name": row[7],
-        "problem_detail": row[8],
+        "status_name": row[5],
+        "username": row[6],
+        "assign_id": row[7],
+        "assigned_to": row[8],
+        "it_category_id": row[9],
+        "it_category_name": row[10],
+        "problem_detail": row[11],
     }
+
+    # FILES
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id, file_name, file_path, file_type
+            FROM tickets.ticket_files
+            WHERE ticket_id = %s
+            ORDER BY id
+        """, [ticket_id])
+
+        files = []
+        for f in cursor.fetchall():
+            files.append({
+                "id": f[0],
+                "file_name": f[1],
+                "file_path": f[2].replace("\\", "/"),
+                "file_type": f[3],
+            })
 
     can_approve, level = can_user_approve_ticket(ticket_id, user_id)
 
     return render(request, "tickets_form/repairs_it_detail.html", {
         "ticket": ticket,
+        "files": files,
         "can_approve": can_approve,
         "level": level,
-        "is_admin": is_admin,   # ✅ ส่งเข้า template
+        "is_admin": is_admin,
     })
+
 
 def preview_media(request, path):
 

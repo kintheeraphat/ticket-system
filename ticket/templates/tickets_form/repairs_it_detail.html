@@ -52,6 +52,48 @@
             </table>
         </div>
     </div>
+    <div class="card shadow-sm mb-4">
+    <div class="card-header bg-light fw-semibold">
+        <i class="fas fa-paperclip me-2 text-secondary"></i>
+        เอกสารแนบ
+    </div>
+
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-3">
+
+                {% for f in files %}
+                <div style="width:150px;">
+                    <div class="border rounded shadow-sm p-2 text-center"
+                        style="cursor:pointer;"
+                        onclick="previewFile('{% url "preview_media" f.file_path %}', '{{ f.file_type }}')">
+
+                        {% if "image" in f.file_type %}
+                            <img src="{% url 'preview_media' f.file_path %}"
+                                class="img-fluid rounded mb-2"
+                                style="height:110px;object-fit:cover;">
+                        {% elif "pdf" in f.file_type %}
+                            <div style="height:110px;display:flex;align-items:center;justify-content:center;">
+                                <i class="fas fa-file-pdf text-danger fs-1"></i>
+                            </div>
+                        {% else %}
+                            <div style="height:110px;display:flex;align-items:center;justify-content:center;">
+                                <i class="fas fa-file text-secondary fs-1"></i>
+                            </div>
+                        {% endif %}
+
+                        <div class="small fw-semibold text-truncate">
+                            {{ f.file_name }}
+                        </div>
+
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-muted">ไม่มีเอกสารแนบ</div>
+                {% endfor %}
+
+            </div>
+        </div>
+    </div>
 
     {# ================================================= #}
     {# ================= APPROVE SECTION =============== #}
@@ -114,6 +156,26 @@
         </div>
     </div>
     {% endif %}
+    <!-- FILE MODAL -->
+    <div class="modal fade" id="fileModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h6 class="modal-title">ดูเอกสารแนบ</h6>
+            <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center p-0">
+            <img id="previewImage"
+                class="img-fluid d-none"
+                style="max-height:85vh;">
+            <embed id="previewFrame"
+                type="application/pdf"
+                class="d-none"
+                style="width:100%;height:85vh;">
+        </div>
+        </div>
+    </div>
+    </div>
 
     <!-- ================= SHOW ASSIGNED USER ================= -->
     {% if ticket.assigned_to %}
@@ -128,4 +190,31 @@
     {% endif %}
 
 </div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function previewFile(url, fileType) {
+
+    const img = document.getElementById("previewImage");
+    const frame = document.getElementById("previewFrame");
+
+    img.classList.add("d-none");
+    frame.classList.add("d-none");
+    img.src = "";
+    frame.src = "";
+
+    if (fileType.includes("image")) {
+        img.src = url;
+        img.classList.remove("d-none");
+    } else {
+        frame.src = url;
+        frame.classList.remove("d-none");
+    }
+
+    const modal = new bootstrap.Modal(
+        document.getElementById("fileModal")
+    );
+    modal.show();
+}
+</script>
 {% endblock %}
