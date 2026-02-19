@@ -19,6 +19,9 @@
   <!-- ===== MENU ===== -->
   <ul class="sidebar-menu list-unstyled flex-grow-1">
 
+    <!-- ================= MAIN ================= -->
+    <li class="sidebar-section">MAIN</li>
+
     {% if "dashboard" in user_permissions %}
     <li class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
       <a href="{% url 'dashboard' %}">
@@ -46,6 +49,21 @@
     </li>
     {% endif %}
 
+    {% if "tickets_accepting_work" in user_permissions %}
+    <li class="{% if request.resolver_match.url_name == 'tickets_accepting_work' %}active{% endif %}">
+      <a href="{% url 'tickets_accepting_work' %}">
+        <i class="fa-solid fa-handshake"></i>
+        <span>Accepting Work</span>
+      </a>
+    </li>
+    {% endif %}
+
+
+    <!-- ================= MANAGEMENT ================= -->
+    {% if "setting_team" in user_permissions or "add_approve_line" in user_permissions %}
+    <li class="sidebar-section mt-3">MANAGEMENT</li>
+    {% endif %}
+
     {% if "setting_team" in user_permissions %}
     <li class="{% if request.resolver_match.url_name == 'setting_team' %}active{% endif %}">
       <a href="{% url 'setting_team' %}">
@@ -62,6 +80,12 @@
         <span>Approve Line</span>
       </a>
     </li>
+    {% endif %}
+
+
+    <!-- ================= ADMIN ================= -->
+    {% if "manage_user" in user_permissions or "manage_permission" in user_permissions or "IT_Stock" in user_permissions %}
+    <li class="sidebar-section mt-3">ADMINISTRATION</li>
     {% endif %}
 
     {% if "manage_user" in user_permissions %}
@@ -82,14 +106,6 @@
     </li>
     {% endif %}
 
-    {% if "tickets_accepting_work" in user_permissions %}
-    <li class="{% if request.resolver_match.url_name == 'tickets_accepting_work' %}active{% endif %}">
-      <a href="{% url 'tickets_accepting_work' %}">
-        <i class="fa-solid fa-handshake"></i>
-        <span>Accepting Work</span>
-      </a>
-    </li>
-    {% endif %}
     {% if "IT_Stock" in user_permissions %}
     <li>
       <a href="http://127.0.0.1:3000/admin_dash/items/">
@@ -100,6 +116,7 @@
     {% endif %}
 
   </ul>
+
 
   <!-- ===== FOOTER ===== -->
   <div class="sidebar-footer">
