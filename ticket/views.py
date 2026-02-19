@@ -3663,18 +3663,16 @@ def api_admin_users(request):
 def report_dashboard(request):
 
     today = timezone.localdate()
-    current_year = today.year
 
-    # ===== รับค่า filter =====
     selected_month = request.GET.get("month")
     selected_title = request.GET.get("title", "all")
+    selected_status = request.GET.get("status", "all")
 
     if not selected_month:
         selected_month = today.strftime("%Y-%m")
 
     year, month = selected_month.split("-")
 
-    # ===== Query หลัก =====
     query = """
         SELECT
             t.id,
@@ -3683,6 +3681,10 @@ def report_dashboard(request):
             u.full_name AS requester,
             t.create_at,
             s.name AS status_name,
+            CASE 
+                WHEN LOWER(s.name) = 'accepting work' THEN 'inprogress'
+                ELSE s.name
+            END AS display_status,
             (
                 SELECT action_time
                 FROM tickets.ticket_approval_status tas
@@ -3700,9 +3702,13 @@ def report_dashboard(request):
 
     params = [year, month]
 
-    if selected_title and selected_title != "all":
+    if selected_title != "all":
         query += " AND t.title = %s"
         params.append(selected_title)
+
+    if selected_status != "all":
+        query += " AND s.name = %s"
+        params.append(selected_status)
 
     query += " ORDER BY t.create_at DESC"
 
@@ -3711,116 +3717,54 @@ def report_dashboard(request):
         columns = [col[0] for col in cursor.description]
         reports = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-    # ===== คำนวณจำนวนวัน =====
+    # ===== คำนวณวันดำเนินการ =====
     for r in reports:
         if r["completed_at"]:
             delta = r["completed_at"] - r["create_at"]
-            r["duration_days"] = delta.days
+            r["process_days"] = delta.days
         else:
-            r["duration_days"] = None
+            r["process_days"] = None
 
-    # ===== ดึงหัวข้อทั้งหมด (สำหรับ dropdown) =====
+    # ===== Dropdown =====
     with connection.cursor() as cursor:
         cursor.execute("SELECT DISTINCT title FROM tickets.tickets ORDER BY title")
         titles = [row[0] for row in cursor.fetchall()]
 
-    # ===== Chart Summary =====
-    status_counter = Counter(r["status_name"] for r in reports)
+        cursor.execute("SELECT DISTINCT name FROM tickets.status ORDER BY name")
+        statuses = [row[0] for row in cursor.fetchall()]
+
+    # ===== Charts =====
+    from collections import Counter
+
+    status_counter = Counter(r["display_status"] for r in reports)
     title_counter = Counter(r["title"] for r in reports)
+    dept_counter = Counter(r["department"] for r in reports)
 
-    chart_status_labels = list(status_counter.keys())
-    chart_status_data = list(status_counter.values())
-
-    chart_title_labels = list(title_counter.keys())
-    chart_title_data = list(title_counter.values())
-
-    # ===== เดือนเฉพาะปีปัจจุบัน =====
+    # ===== เดือนปี 2025 + ปีปัจจุบัน =====
     month_list = []
-    for m in range(1, 13):
-        month_value = f"{current_year}-{str(m).zfill(2)}"
-        month_label = f"{calendar.month_name[m]} {current_year}"
-        month_list.append({
-            "value": month_value,
-            "label": month_label
-        })
+
+    for y in [2025, today.year]:
+        for m in range(1, 13):
+            month_list.append({
+                "value": f"{y}-{str(m).zfill(2)}",
+                "label": f"{calendar.month_name[m]} {y}"
+            })
 
     return render(request, "report_dashboard.html", {
         "reports": reports,
         "titles": titles,
+        "statuses": statuses,
         "selected_month": selected_month,
         "selected_title": selected_title,
+        "selected_status": selected_status,
         "month_list": month_list,
-        "chart_status_labels": json.dumps(chart_status_labels),
-        "chart_status_data": json.dumps(chart_status_data),
-        "chart_title_labels": json.dumps(chart_title_labels),
-        "chart_title_data": json.dumps(chart_title_data),
+        "chart_status_labels": json.dumps(list(status_counter.keys())),
+        "chart_status_data": json.dumps(list(status_counter.values())),
+        "chart_title_labels": json.dumps(list(title_counter.keys())),
+        "chart_title_data": json.dumps(list(title_counter.values())),
+        "chart_dept_labels": json.dumps(list(dept_counter.keys())),
+        "chart_dept_data": json.dumps(list(dept_counter.values())),
     })
-
-
-# =====================================
-# EXPORT EXCEL (ตรงกับ filter จริง)
-# =====================================
-@login_required_custom
-@page_permission_required
-def report_export_excel(request):
-
-    selected_month = request.GET.get("month")
-    selected_title = request.GET.get("title", "all")
-
-    today = timezone.localdate()
-
-    if not selected_month:
-        selected_month = today.strftime("%Y-%m")
-
-    year, month = selected_month.split("-")
-
-    query = """
-        SELECT
-            t.id,
-            t.title,
-            t.department,
-            u.full_name,
-            t.create_at,
-            s.name
-        FROM tickets.tickets t
-        LEFT JOIN tickets.users u ON u.id = t.user_id
-        LEFT JOIN tickets.status s ON s.id = t.status_id
-        WHERE EXTRACT(YEAR FROM t.create_at) = %s
-          AND EXTRACT(MONTH FROM t.create_at) = %s
-    """
-
-    params = [year, month]
-
-    if selected_title and selected_title != "all":
-        query += " AND t.title = %s"
-        params.append(selected_title)
-
-    query += " ORDER BY t.create_at DESC"
-
-    with connection.cursor() as cursor:
-        cursor.execute(query, params)
-        rows = cursor.fetchall()
-
-    response = HttpResponse(
-        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-    response["Content-Disposition"] = 'attachment; filename="report.xlsx"'
-
-    workbook = xlsxwriter.Workbook(response)
-    worksheet = workbook.add_worksheet("Report")
-
-    headers = ["ID", "Title", "Department", "Requester", "Created Date", "Status"]
-
-    for col, header in enumerate(headers):
-        worksheet.write(0, col, header)
-
-    for row_num, row in enumerate(rows, 1):
-        for col_num, value in enumerate(row):
-            worksheet.write(row_num, col_num, str(value))
-
-    workbook.close()
-    return response
-
 
 
 # ================================
@@ -3857,39 +3801,44 @@ def report_detail(request, ticket_id):
     })
 
 @login_required_custom
-@role_required_role_id([1, 2])
+@page_permission_required
 def report_export_excel(request):
 
-    start_date = request.GET.get("start_date")
-    end_date = request.GET.get("end_date")
-    status_id = request.GET.get("status_id")
+    today = timezone.localdate()
+
+    selected_month = request.GET.get("month")
+    selected_title = request.GET.get("title", "all")
+    selected_status = request.GET.get("status", "all")
+
+    if not selected_month:
+        selected_month = today.strftime("%Y-%m")
+
+    year, month = selected_month.split("-")
 
     query = """
         SELECT
             t.id,
             t.title,
-            t.department,
+            COALESCE(NULLIF(TRIM(t.department), ''), 'ไม่ระบุ') AS department,
             u.full_name,
             t.create_at,
             s.name
         FROM tickets.tickets t
         LEFT JOIN tickets.users u ON u.id = t.user_id
         LEFT JOIN tickets.status s ON s.id = t.status_id
-        WHERE 1=1
+        WHERE EXTRACT(YEAR FROM t.create_at) = %s
+          AND EXTRACT(MONTH FROM t.create_at) = %s
     """
 
-    params = []
+    params = [year, month]
 
-    # ✅ กัน None / empty string
-    if start_date and start_date != "None" and \
-       end_date and end_date != "None":
+    if selected_title and selected_title != "all":
+        query += " AND t.title = %s"
+        params.append(selected_title)
 
-        query += " AND t.create_at::date BETWEEN %s AND %s"
-        params.extend([start_date, end_date])
-
-    if status_id and status_id != "None":
-        query += " AND t.status_id = %s"
-        params.append(status_id)
+    if selected_status and selected_status != "all":
+        query += " AND s.name = %s"
+        params.append(selected_status)
 
     query += " ORDER BY t.create_at DESC"
 
@@ -3908,7 +3857,7 @@ def report_export_excel(request):
 
     headers = [
         "ID", "Title", "Department",
-        "Requester", "Created Date", "Status"
+        "Requester", "Requested Date", "Status"
     ]
 
     for col, header in enumerate(headers):
