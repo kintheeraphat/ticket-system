@@ -1449,12 +1449,13 @@ def borrow_detail(request, ticket_id):
                 b.return_date,
                 b.remark,
                 b.request_item,
-                t.department,
+                d.dept_name,
                 t.create_at,
                 u.full_name
             FROM tickets.borrow_requests b
             JOIN tickets.tickets t ON t.id = b.ticket_id
             JOIN tickets.users u ON u.id = b.user_id
+            LEFT JOIN tickets.department d ON d.id = u.department_id 
             WHERE b.ticket_id = %s
         """, [ticket_id])
 
