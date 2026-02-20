@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.utils import timezone
 from ticket.decorators import login_required_custom
 from ticket.templatetags.page_permission import page_permission_required
-from ticket.views import dictfetchall
+from ticket.views import borrow, dictfetchall
 
 @login_required_custom
 @page_permission_required
@@ -180,7 +180,6 @@ def stock_dispatch_list(request):
         "borrows": borrows
     })
 
-
 @login_required_custom
 @page_permission_required
 def stock_dispatch_detail(request, borrow_id):
@@ -241,29 +240,37 @@ def stock_dispatch_detail(request, borrow_id):
                     line = line.split(". ", 1)[1]
 
                 qty = 1
-                label = line
 
-                # หา pattern " x จำนวน"
+                # 🔹 แยกจำนวน
                 if " x " in line:
                     parts = line.rsplit(" x ", 1)
-                    label = parts[0].strip()
+                    line = parts[0].strip()
                     try:
                         qty = int(parts[1].strip())
                     except:
                         qty = 1
 
-                request_items.append({
-                    "label": label,
+                name = line
+                spec = ""
+
+                # 🔹 แยก spec จากวงเล็บ (เหมือน borrow_detail)
+                if "(" in line and ")" in line:
+                    name = line.split("(", 1)[0].strip()
+                    spec = line.split("(", 1)[1].rsplit(")", 1)[0].strip()
+
+                    request_items.append({
+                    "name": name,
+                    "spec": spec,
                     "qty": qty
                 })
 
-        # ---------- STOCK LIST ----------
-        cursor.execute("""
-            SELECT id, name, spec, quantity
-            FROM tickets.stock_items
-            ORDER BY name
-        """)
-        stocks = dictfetchall(cursor)
+                # ---------- STOCK LIST ----------
+                cursor.execute("""
+                    SELECT id, name, spec, quantity
+                    FROM tickets.stock_items
+                    ORDER BY name
+                """)
+                stocks = dictfetchall(cursor)
 
     # ================= POST (DISPATCH) =================
     if request.method == "POST":

@@ -773,6 +773,7 @@ def tickets_list(request):
 @page_permission_required
 def tickets_create(req):
     return render(req,'tickets_create.html')
+
 @page_permission_required
 @handle_approval_error
 def erp_perm(request):

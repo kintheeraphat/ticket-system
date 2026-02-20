@@ -2,32 +2,73 @@
 {% block title %}Dispatch Detail{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="container py-5">
 
-  <h4 class="fw-bold mb-4">📦 รายละเอียดคำขอ</h4>
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-bold mb-1">🚚 รายละเอียดการจ่ายของ</h4>
+      <small class="text-muted">ตรวจสอบข้อมูลก่อนยืนยันการจ่ายสินค้า</small>
+    </div>
+    <a href="{% url 'stock_dispatch_list' %}" class="btn btn-outline-secondary btn-sm">
+      ← กลับ
+    </a>
+  </div>
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-0">
 
-  <div class="card shadow-sm mb-4">
-    <div class="card-body">
-      <p><strong>ผู้ขอ:</strong> {{ borrow.full_name }}</p>
-      <p><strong>รายการที่ขอ:</strong></p>
-      <pre class="bg-light p-3 rounded">{{ borrow.request_item }}</pre>
+      <div class="px-3 py-2 border-bottom bg-light fw-semibold">
+        📋 รายการอุปกรณ์
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle mb-0 custom-table">
+          <thead class="table-light text-center">
+            <tr>
+              <th style="width:60px;">#</th>
+              <th>ชื่ออุปกรณ์</th>
+              <th>สเปค</th>
+              <th style="width:100px;">จำนวน</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for item in request_items %}
+            <tr>
+              <td class="text-center">{{ forloop.counter }}</td>
+              <td>{{ item.name }}</td>
+              <td>{{ item.spec }}</td>
+              <td class="text-center">{{ item.qty }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+
+        </table>
+      </div>
+
     </div>
   </div>
-
+  <!-- Form -->
   <form method="post">
     {% csrf_token %}
 
     {% for item in request_items %}
-    <div class="card mb-3 shadow-sm">
+    <div class="card border-0 shadow-sm mb-4 dispatch-card">
       <div class="card-body">
 
-        <h6 class="fw-bold mb-3">
-          {{ item.label }} (ขอ {{ item.qty }})
-        </h6>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-bold mb-0">
+            {{ item.label }}
+          </h6>
+          <span class="badge bg-primary-subtle text-primary px-3 py-2">
+            ขอ {{ item.qty }} ชิ้น
+          </span>
+        </div>
 
+        <!-- เลือกสินค้า -->
         <div class="mb-3">
-          <label class="fw-semibold">เลือกอุปกรณ์</label>
-          <select name="stock_id" class="form-select" required>
+          <label class="form-label fw-semibold">เลือกอุปกรณ์</label>
+          <select name="stock_id" class="form-select custom-input" required>
             {% for s in stocks %}
             <option value="{{ s.id }}">
               {{ s.name }} ({{ s.spec }}) — คงเหลือ {{ s.quantity }}
@@ -36,29 +77,27 @@
           </select>
         </div>
 
-        <div class="mb-3">
-          <label class="fw-semibold">จำนวนที่จ่าย</label>
-          <input type="number"
-                 name="quantity"
-                 class="form-control"
-                 value="{{ item.qty }}"
-                 min="1"
-                 required>
+        <!-- จำนวน -->
+        <div class="mb-2">
+          <label class="form-label fw-semibold">จำนวนที่จ่าย</label>
+          <input type="number" name="quantity" class="form-control custom-input" value="{{ item.qty }}" min="1"
+            required>
         </div>
 
       </div>
     </div>
     {% endfor %}
 
-    <div class="mt-4">
-      <button type="submit" class="btn btn-success">
+
+    <!-- Action Buttons -->
+    <div class="d-flex justify-content-end gap-2 mt-4">
+      <a href="{% url 'stock_dispatch_list' %}" class="btn btn-outline-secondary px-4">
+        ยกเลิก
+      </a>
+
+      <button type="submit" class="btn btn-success px-4">
         ✅ ยืนยันจ่ายของ
       </button>
-
-      <a href="{% url 'stock_dispatch_list' %}"
-         class="btn btn-secondary">
-        กลับ
-      </a>
     </div>
 
   </form>

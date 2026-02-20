@@ -120,12 +120,12 @@
                     </td>
 
                     <!-- Status -->
-                    <td class="text-center">
+                    <td class="text-center"
+                        data-order="{% if t.status == 'Waiting for Approve' %}0{% else %}1{% endif %}">
                         <span class="badge-status">
                             {{ t.status }}
                         </span>
                     </td>
-
                     <!-- Assignee -->
                     <td>
                         {% if t.assignee %}
@@ -238,9 +238,13 @@
 
         const table = $('#ticketTable').DataTable({
             pageLength: 10,
-            order: [[4, 'desc']],
+            order: [
+                [5, 'asc'],
+                [0, 'asc']
+            ],
             language: { zeroRecords: "ไม่พบข้อมูล" }
         });
+
 
         // filter ตาม status (column index 5)
         $('#statusFilter').on('change', function () {

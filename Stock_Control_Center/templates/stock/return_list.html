@@ -2,47 +2,92 @@
 {% block title %}Return List{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="container py-5">
 
-  <h4 class="fw-bold mb-4">🔄 รายการรอคืนของ</h4>
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-bold mb-1">🔄 รายการรอคืนของ</h4>
+      <small class="text-muted">ตรวจสอบและบันทึกการคืนอุปกรณ์เข้าสต๊อก</small>
+    </div>
+  </div>
 
-  <div class="card shadow-sm">
-    <div class="card-body">
+  <!-- Card -->
+  <div class="card border-0 shadow-sm return-card">
+    <div class="card-body p-0">
 
       {% if borrows %}
-      <table class="table table-bordered align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>ID</th>
-            <th>หัวข้อ</th>
-            <th>ผู้ขอ</th>
-            <th width="120"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for b in borrows %}
-          <tr>
-            <td>{{ b.id }}</td>
-            <td>{{ b.title }}</td>
-            <td>{{ b.full_name }}</td>
-            <td class="text-center">
-              <a href="{% url 'stock_return_detail' b.id %}"
-                 class="btn btn-sm btn-warning">
-                คืนของ
-              </a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light text-center">
+            <tr>
+              <th style="width:80px;">#</th>
+              <th class="text-start">หัวข้อ</th>
+              <th style="width:200px;">ผู้ขอ</th>
+              <th style="width:140px;">จัดการ</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for b in borrows %}
+            <tr class="clickable-row"
+                data-href="{% url 'stock_return_detail' b.id %}">
+              
+              <td class="text-center fw-semibold">
+                {{ b.id }}
+              </td>
+
+              <td class="text-start">
+                {{ b.title }}
+              </td>
+
+              <td class="text-center">
+                <i class="bi bi-person-circle me-1 text-muted"></i>
+                {{ b.full_name }}
+              </td>
+
+              <td class="text-center">
+                <!-- ปุ่มยังอยู่ และไม่ชนกับ click row -->
+                <a href="{% url 'stock_return_detail' b.id %}"
+                   class="btn btn-sm btn-return px-3"
+                   onclick="event.stopPropagation();">
+                  ↩ คืนของ
+                </a>
+              </td>
+
+            </tr>
+            {% endfor %}
+          </tbody>
+
+        </table>
+      </div>
+
       {% else %}
-        <div class="text-center text-muted py-4">
-          ไม่มีรายการรอคืนของ
+      <div class="text-center py-5 empty-state">
+        <div style="font-size:40px;">📦</div>
+        <div class="fw-semibold mt-2">ไม่มีรายการรอคืนของ</div>
+        <div class="text-muted small">
+          เมื่อมีการยืมอุปกรณ์ ระบบจะแสดงรายการที่นี่
         </div>
+      </div>
       {% endif %}
 
     </div>
   </div>
 
 </div>
+
+<!-- JS สำหรับคลิกทั้งแถว -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const rows = document.querySelectorAll(".clickable-row");
+
+  rows.forEach(row => {
+    row.addEventListener("click", function () {
+      window.location.href = this.dataset.href;
+    });
+  });
+});
+</script>
+
 {% endblock %}
