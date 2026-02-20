@@ -1234,8 +1234,7 @@ def borrow(request):
             return redirect("ticket_success")
 
         except Exception as e:
-            messages.error(request, str(e))
-            return redirect(request.path)
+            raise e
 
     today = timezone.localdate()
 
@@ -2291,11 +2290,12 @@ def adjust_form(request):
                 if not category_name:
                     messages.error(request, "ประเภทไม่ถูกต้อง")
                     return redirect(request.path)
-
+                
                 # ---------------- GET SOURCE ----------------
                 source_cust = request.POST.getlist("source_cust[]")
                 source_name = request.POST.getlist("source_customer_name[]")
-                promo_info = request.POST.getlist("promo_info[]")
+                promo_code = request.POST.getlist("promo_code[]")
+                promo_name = request.POST.getlist("promo_name[]")
                 earn_master = request.POST.getlist("earn_master[]")
                 amount = request.POST.getlist("amount[]")
 
@@ -2303,11 +2303,7 @@ def adjust_form(request):
                 if not source_cust or not source_cust[0].strip():
                     messages.error(request, "กรุณากรอกข้อมูลต้นทางให้ครบ")
                     return redirect(request.path)
-
-                if ticket_type_id in [5, 6] and len(source_cust) > 1:
-                    messages.error(request, "ประเภทนี้สามารถมีได้เพียง 1 รายการ")
-                    return redirect(request.path)
-
+                
                 items = []
 
                 for i in range(len(source_cust)):
@@ -2315,20 +2311,24 @@ def adjust_form(request):
                     if not all([
                         source_cust[i].strip(),
                         source_name[i].strip(),
-                        promo_info[i].strip(),
+                        promo_code[i].strip(),
+                        promo_name[i].strip(),
                         earn_master[i].strip(),
                         amount[i].strip()
                     ]):
                         messages.error(request, "กรุณากรอกข้อมูลต้นทางให้ครบทุกช่อง")
                         return redirect(request.path)
 
+                    # ✅ แปลง amount เป็น float แบบปลอดภัย
+
                     items.append({
                         "type": "source",
                         "cust_code": source_cust[i],
                         "customer_name": source_name[i],
-                        "promo": promo_info[i],
+                        "promo_code": promo_code[i],
+                        "promo_name": promo_name[i],
                         "earn_master": earn_master[i],
-                        "amount": float(amount[i])
+                        "amount": amount[i].strip()
                     })
 
                 # ---------------- TARGET (เฉพาะโอน) ----------------
@@ -2336,7 +2336,8 @@ def adjust_form(request):
 
                     target_cust = request.POST.getlist("target_cust[]")
                     target_name = request.POST.getlist("target_customer_name[]")
-                    target_promo = request.POST.getlist("target_promo_name[]")
+                    target_promo_code = request.POST.getlist("target_promo_code[]")
+                    target_promo_name = request.POST.getlist("target_promo_name[]")
                     target_earn = request.POST.getlist("target_earn_master[]")
                     target_amount = request.POST.getlist("target_amount[]")
 
@@ -2349,20 +2350,24 @@ def adjust_form(request):
                         if not all([
                             target_cust[i].strip(),
                             target_name[i].strip(),
-                            target_promo[i].strip(),
+                            target_promo_code[i].strip(),
+                            target_promo_name[i].strip(),
                             target_earn[i].strip(),
                             target_amount[i].strip()
                         ]):
                             messages.error(request, "กรุณากรอกข้อมูลปลายทางให้ครบทุกช่อง")
                             return redirect(request.path)
 
+                        # ✅ แปลง target amount
+
                         items.append({
                             "type": "target",
                             "cust_code": target_cust[i],
                             "customer_name": target_name[i],
-                            "promo": target_promo[i],
+                            "promo_code": target_promo_code[i],
+                            "promo_name": target_promo_name[i],
                             "earn_master": target_earn[i],
-                            "amount": float(target_amount[i])
+                            "amount": target_amount[i].strip()
                         })
 
                 # ---------------- INSERT TICKET ----------------
@@ -2383,16 +2388,37 @@ def adjust_form(request):
                     ticket_id = cursor.fetchone()[0]
 
                 # ---------------- INSERT ADJUST DATA ----------------
+                # บันทึกหัวข้อมูลก่อน
                 with connection.cursor() as cursor:
                     cursor.execute("""
-                        INSERT INTO tickets.ticket_adjust_draft
-                        (ticket_id, adj_category, items)
-                        VALUES (%s, %s, %s)
+                        INSERT INTO tickets.ticket_data_adjust
+                        (ticket_id, adj_category)
+                        VALUES (%s, %s)
+                        RETURNING id
                     """, [
                         ticket_id,
-                        category_name,
-                        json.dumps(items)
+                        category_name
                     ])
+                    adjust_id = cursor.fetchone()[0]   # ✅ ต้องอยู่ตรงนี้
+
+                # บันทึกรายการ
+                with connection.cursor() as cursor:
+                    for item in items:
+                        cursor.execute("""
+                            INSERT INTO tickets.ticket_data_adjust_item
+                            (ticket_id, item_type, cust_code, customer_name,
+                            promo_code, promo_name, earn_master, amount)
+                            VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+                        """, [
+                            ticket_id,
+                            item["type"],
+                            item["cust_code"],
+                            item["customer_name"],
+                            item["promo_code"],
+                            item["promo_name"],
+                            item["earn_master"],
+                            item["amount"]
+                        ])
 
                 # ---------------- CREATE APPROVAL ----------------
                 create_ticket_approval_by_ticket_type(
@@ -2429,6 +2455,7 @@ def adjust_form(request):
                                 (
                                     ticket_id,
                                     ref_type,
+                                    ref_id,
                                     file_name,
                                     file_path,
                                     file_type,
@@ -2436,10 +2463,11 @@ def adjust_form(request):
                                     uploaded_by,
                                     create_at
                                 )
-                                VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+                                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
                             """, [
                                 ticket_id,
                                 "ADJUST",
+                                adjust_id,
                                 f.name,
                                 relative_path,
                                 f.content_type,
@@ -2456,8 +2484,7 @@ def adjust_form(request):
             return redirect(request.path)
 
         except Exception as e:
-            messages.error(request, f"เกิดข้อผิดพลาด: {str(e)}")
-            return redirect(request.path)
+            raise e
 
     return render(request, "tickets_form/adjust_form.html")
 @login_required_custom
@@ -2482,12 +2509,11 @@ def adjust_detail(request, ticket_id):
                 u.full_name,
                 s.name AS status_name,
                 t.status_id,
-                a.adj_category,
-                a.items
+                a.adj_category
             FROM tickets.tickets t
             JOIN tickets.users u ON u.id = t.user_id
             JOIN tickets.status s ON s.id = t.status_id
-            JOIN tickets.ticket_adjust_draft a ON a.ticket_id = t.id
+            JOIN tickets.ticket_data_adjust a ON a.ticket_id = t.id
             WHERE t.id = %s
         """, [ticket_id])
 
@@ -2507,8 +2533,26 @@ def adjust_detail(request, ticket_id):
         "adj_category": row[7],
     }
 
-    items = json.loads(row[8]) if row[8] else []
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT item_type, cust_code, customer_name,
+                promo_code, promo_name, earn_master, amount
+            FROM tickets.ticket_data_adjust_item
+            WHERE ticket_id = %s
+            ORDER BY id
+        """, [ticket_id])
 
+        items = []
+        for r in cursor.fetchall():
+            items.append({
+                "type": r[0],
+                "cust_code": r[1],
+                "customer_name": r[2],
+                "promo_code": r[3],
+                "promo_name": r[4],
+                "earn_master": r[5],
+                "amount": r[6],
+            })
     # =============================
     # FILES
     # =============================

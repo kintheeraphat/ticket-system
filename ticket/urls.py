@@ -20,6 +20,7 @@ urlpatterns = [
     path("tickets/detail/promotion/<int:ticket_id>/", views.active_promotion_detail, name="active_promotion_detail"),
     path("tickets/detail/repairs-it/<int:ticket_id>/", views.repairs_it_detail, name="repairs_it_detail"),
     path("tickets/detail/borrow/<int:ticket_id>/", views.borrow_detail, name="borrow_detail"),
+    path("tickets/detail/adjust/<int:ticket_id>/",views.adjust_detail,name="adjust_detail"),
     # ===== CREATE =====
     path("create/", views.tickets_create, name="create"),
     path("create/erp-perm/", views.erp_perm, name="erp_perm"),

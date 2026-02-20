@@ -52,7 +52,7 @@
           <td><input class="form-control" name="promo_code[]" required /></td>
           <td><input class="form-control" name="promo_name[]" required /></td>
           <td><input class="form-control" name="earn_master[]" required /></td>
-          <td><input class="form-control" type="number" step="0.01" name="amount[]" required /></td>
+          <td><input class="form-control" type="text" name="amount[]" required /></td>
           <td>
             <button type="button" class="btn btn-outline-danger btn-sm remove-source-row">
               &times;
@@ -92,7 +92,7 @@
             <td><input class="form-control" name="target_promo_code[]" required /></td>
             <td><input class="form-control" name="target_promo_name[]" required /></td>
             <td><input class="form-control" name="target_earn_master[]" required /></td>
-            <td><input class="form-control" type="number" step="0.01" name="target_amount[]" required /></td>
+            <td><input class="form-control" type="text" name="target_amount[]" required /></td>
             <td>
               <button type="button" class="btn btn-outline-danger btn-sm remove-target-row">
                 &times;
@@ -178,11 +178,23 @@ document.addEventListener("DOMContentLoaded", function(){
 
     function toggleForm(){
         const value = categorySelect.value;
+        const targetInputs = document.querySelectorAll("#targetSection input");
 
         if(value !== "7" && value !== "8"){
             targetSection.style.display = "none";
+
+            targetInputs.forEach(i => {
+                i.disabled = true;
+                i.removeAttribute("required");
+            });
+
         } else {
             targetSection.style.display = "block";
+
+            targetInputs.forEach(i => {
+                i.disabled = false;
+                i.setAttribute("required","required");
+            });
         }
     }
 
@@ -312,9 +324,5 @@ window.addEventListener("load", function(){
         });
     });
 });
-document.getElementById("adjustForm").addEventListener("submit", function(){
-    alert("form submitting");
-});
-
 </script>
 {% endblock %}

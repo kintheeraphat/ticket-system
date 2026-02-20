@@ -39,7 +39,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- CATEGORY -->
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-light fw-semibold">
@@ -49,49 +49,69 @@
             {{ ticket.adj_category }}
         </div>
     </div>
-
-    <!-- ITEMS TABLE -->
+    <!-- REMARK -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light fw-semibold">
+            หมายเหตุ
+        </div>
+        <div class="card-body">
+            {% if ticket.description %}
+                {{ ticket.description|linebreaks }}
+            {% else %}
+                <span class="text-muted">ไม่มีหมายเหตุ</span>
+            {% endif %}
+        </div>
+    </div>
+    <!-- ================= ITEMS ================= -->
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-light fw-semibold">
             รายการปรับยอด
         </div>
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle mb-0">
-                <thead class="table-light text-center">
-                    <tr>
-                        <th>ประเภท</th>
-                        <th>รหัสลูกค้า</th>
-                        <th>ชื่อลูกค้า</th>
-                        <th>Promotion</th>
-                        <th>Earn Master</th>
-                        <th>จำนวน</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in items %}
-                    <tr>
-                        <td class="text-center">
-                            {% if item.type == "source" %}
-                                <span class="badge bg-danger">ต้นทาง</span>
-                            {% else %}
-                                <span class="badge bg-success">ปลายทาง</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ item.cust_code }}</td>
-                        <td>{{ item.customer_name }}</td>
-                        <td>{{ item.promo }}</td>
-                        <td>{{ item.earn_master }}</td>
-                        <td class="text-end">{{ item.amount }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center text-muted">
-                            ไม่มีข้อมูล
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0">
+                    <thead class="table-light text-center">
+                        <tr>
+                            <th>ประเภท</th>
+                            <th>รหัสลูกค้า</th>
+                            <th>ชื่อลูกค้า</th>
+                            <th>Promo Code</th>
+                            <th>Promo Name</th>
+                            <th>Earn Master</th>
+                            <th class="text-end">จำนวน</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td class="text-center">
+                                {% if item.type == "source" %}
+                                    <span class="badge bg-danger">ต้นทาง</span>
+                                {% else %}
+                                    <span class="badge bg-success">ปลายทาง</span>
+                                {% endif %}
+                            </td>
+
+                            <td>{{ item.cust_code }}</td>
+                            <td>{{ item.customer_name }}</td>
+                            <td>{{ item.promo_code }}</td>
+                            <td>{{ item.promo_name }}</td>
+                            <td>{{ item.earn_master }}</td>
+                            <td class="text-end">
+                                {{ item.amount }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">
+                                ไม่มีข้อมูลรายการปรับยอด
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 

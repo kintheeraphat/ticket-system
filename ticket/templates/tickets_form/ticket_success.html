@@ -7,14 +7,14 @@
     <h4>ส่งคำร้องเรียบร้อยแล้ว!</h4>
     <p>คำร้องของคุณถูกบันทึกเรียบร้อย รอการอนุมัติจากผู้ดูแลระบบ</p>
 
-    {% if request.user.role == "admin" %}
-        <a href="{% url 'dashboard' %}" class="btn btn-primary mt-3">
-            กลับไปหน้าหลัก
-        </a>
-    {% else %}
-        <a href="{% url 'tickets_list' %}" class="btn btn-primary mt-3">
-            ไปหน้ารายการคำร้อง
-        </a>
-    {% endif %}
+    <a href="{% url 'tickets_list' %}" class="btn btn-primary mt-3">
+        ไปหน้ารายการคำร้อง
+    </a>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+localStorage.removeItem("adjustDraft");
+</script>
 {% endblock %}
