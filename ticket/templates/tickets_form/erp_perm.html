@@ -6,7 +6,6 @@
 {% block content %}
 <div class="dashboard-table shadow-sm p-4 bg-white rounded">
 
-    <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-start mb-4">
         <div>
             <h4 class="fw-bold text-primary mb-1">
@@ -16,230 +15,206 @@
         </div>
     </div>
 
-    <!-- FORM -->
     <form method="post" enctype="multipart/form-data" id="erpForm">
         {% csrf_token %}
 
         <!-- REQUEST TYPE -->
         <div class="mb-4 p-3 bg-light rounded border">
-            <label class="fw-bold mb-3 d-block">
-                <i class="fas fa-list-ul me-2"></i>ประเภทคำร้อง
-            </label>
-
+            <label class="fw-bold mb-3 d-block">ประเภทคำร้อง</label>
             <div class="d-flex gap-4">
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="request_type" value="open_user" checked>
+                    <input class="form-check-input" type="radio"
+                           name="request_type" value="open_user" checked>
                     <label class="form-check-label fw-bold">
-                        <i class="fas fa-user-plus text-success me-1"></i> ขอเปิด User ใหม่
+                        ขอเปิด User ใหม่
                     </label>
                 </div>
-
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="request_type" value="adjust_perm">
+                    <input class="form-check-input" type="radio"
+                           name="request_type" value="adjust_perm">
                     <label class="form-check-label fw-bold">
-                        <i class="fas fa-user-edit text-warning me-1"></i> ปรับปรุงสิทธิ์เดิม
+                        ปรับปรุงสิทธิ์เดิม
                     </label>
                 </div>
             </div>
         </div>
 
-        <!-- USER NAMES + DEPARTMENT -->
+        <!-- NAMES -->
         <div class="mb-4">
-            <label class="fw-bold mb-2">
-                <i class="fas fa-user me-1"></i> ชื่อ - นามสกุล / แผนก
-            </label>
+            <label class="fw-bold mb-2">ชื่อ - นามสกุล / แผนก</label>
             <div id="nameFields">
                 <div class="d-flex gap-2 mb-2 align-items-center name-row">
-                    <input type="text" name="name_en[]" class="form-control" placeholder="ชื่อ - นามสกุล" required>
-
-                    <input type="text" name="department[]" class="form-control" placeholder="แผนก" required>
-
-                    <button type="button" class="btn btn-danger btn-sm remove-btn" style="visibility:hidden;">
-                        ลบ
-                    </button>
+                    <input type="text" name="name_en[]" class="form-control"
+                           placeholder="ชื่อ - นามสกุล" required>
+                    <input type="text" name="department[]" class="form-control"
+                           placeholder="แผนก" required>
+                    <button type="button"
+                            class="btn btn-danger btn-sm remove-btn"
+                            style="visibility:hidden;">ลบ</button>
                 </div>
             </div>
-
-            <button type="button" id="addNameBtn" class="btn btn-outline-secondary btn-sm mt-1">
-                <i class="fas fa-plus me-1"></i> เพิ่มรายชื่อ
+            <button type="button" id="addNameBtn"
+                    class="btn btn-outline-secondary btn-sm mt-1">
+                เพิ่มรายชื่อ
             </button>
         </div>
 
-        <!-- ERP MODULES -->
+        <!-- MODULE -->
         <div class="mb-4">
-            <label class="fw-bold mb-2">
-                <i class="fas fa-cubes me-1"></i> Module ERP
-            </label>
-
+            <label class="fw-bold mb-2">Module ERP</label>
             <div id="moduleFields">
-                <div class="d-flex mb-2 align-items-center">
-                    <input type="text" name="erp_module[]" class="form-control me-2"
-                        placeholder="เช่น Sales, Accounting" required>
-                    <button type="button" class="btn btn-danger btn-sm remove-btn"
-                        style="visibility:hidden;">ลบ</button>
+                <div class="d-flex gap-2 mb-2 align-items-center module-row">
+                    <input type="text" name="erp_module[]" class="form-control"
+                           placeholder="เช่น Sales, Accounting" required>
+                    <button type="button"
+                            class="btn btn-danger btn-sm remove-module"
+                            style="visibility:hidden;">ลบ</button>
                 </div>
             </div>
-
-            <button type="button" id="addModuleBtn" class="btn btn-outline-secondary btn-sm mt-1">
-                <i class="fas fa-plus me-1"></i> เพิ่มโมดูล
+            <button type="button" id="addModuleBtn"
+                    class="btn btn-outline-secondary btn-sm mt-1">
+                เพิ่มโมดูล
             </button>
         </div>
 
-        <hr class="my-4">
+        <hr>
 
         <!-- REMARK -->
         <div class="mb-4">
-            <label class="fw-bold mb-2">
-                <i class="fas fa-comment-dots me-1"></i> หมายเหตุ
-            </label>
-            <textarea name="remark" rows="3" class="form-control"></textarea>
+            <label class="fw-bold mb-2">หมายเหตุ</label>
+            <textarea name="remark" rows="3"
+                      class="form-control"></textarea>
         </div>
 
-        <!-- FILE UPLOAD -->
+        <!-- FILE -->
         <div class="mb-4">
-            <label class="fw-bold mb-2">
-                <i class="fas fa-paperclip me-1"></i> แนบไฟล์
-            </label>
-            <input
-                type="file"
-                name="files"
-                class="form-control w-50"
-                multiple
-                onchange="handleFiles(this)"
-            />
-
-
-                <div id="filePreview" class="mt-3 d-flex gap-3 flex-wrap"></div>
-
+            <label class="fw-bold mb-2">แนบไฟล์</label>
+            <input type="file" name="files"
+                   class="form-control w-50" multiple>
         </div>
+
+        <!-- BUTTONS -->
         <div class="text-end border-top pt-3">
-            <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
-                <i class="fas fa-arrow-left me-1"></i> กลับ
+
+            <button type="button"
+                    id="saveDraftBtn"
+                    class="btn btn-outline-warning me-2">
+                💾 บันทึกร่าง
             </button>
-            <button type="submit" class="btn btn-primary px-5 fw-bold">
+
+            <button type="button"
+                    id="clearDraftBtn"
+                    class="btn btn-outline-danger me-2">
+                🗑 เคลียร์ทั้งหมด
+            </button>
+
+            <button type="submit"
+                    name="action"
+                    value="submit"
+                    class="btn btn-primary px-5 fw-bold">
                 ส่งคำร้อง
             </button>
+
         </div>
     </form>
-    <!-- FILE MODAL -->
-    <div class="modal fade" id="fileModal" tabindex="-1">
-        <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-            <h6 class="modal-title">ดูเอกสารแนบ</h6>
-            <button class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-0">
-            <iframe id="previewFrame" style="width:100%;height:80vh;border:none"></iframe>
-            </div>
-        </div>
-        </div>
-    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-</script>
-<script src="{% static 'script/script.js' %}"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
 
-        const nameContainer = document.getElementById("nameFields");
-        const addNameBtn = document.getElementById("addNameBtn");
+    const form = document.getElementById("erpForm");
+    const STORAGE_KEY = "erp_form_draft";
 
-        // สร้างแถวใหม่ 
-        function createNewRow(nameValue = "", deptValue = "") {
-            const row = document.createElement("div");
-            row.className = "d-flex gap-2 mb-2 align-items-center name-row";
-
-            const nameInput = document.createElement("input");
-            nameInput.type = "text";
-            nameInput.name = "name_en[]";
-            nameInput.className = "form-control";
-            nameInput.placeholder = "ชื่อ - นามสกุล";
-            nameInput.required = true;
-            nameInput.value = nameValue;
-
-            const deptInput = document.createElement("input");
-            deptInput.type = "text";
-            deptInput.name = "department[]";
-            deptInput.className = "form-control";
-            deptInput.placeholder = "แผนก";
-            deptInput.required = true;
-            deptInput.value = deptValue;
-
-            const removeBtn = document.createElement("button");
-            removeBtn.type = "button";
-            removeBtn.className = "btn btn-danger btn-sm remove-btn";
-            removeBtn.textContent = "ลบ";
-
-            removeBtn.addEventListener("click", function () {
-                row.remove();
-                updateRemoveButtons();
-            });
-
-            row.appendChild(nameInput);
-            row.appendChild(deptInput);
-            row.appendChild(removeBtn);
-
-            return row;
-        }
-
-        // เพิ่มรายชื่อ
-        addNameBtn.addEventListener("click", function () {
-            nameContainer.appendChild(createNewRow());
-            updateRemoveButtons();
-        });
-
-        // ซ่อนปุ่มลบแถวแรก
-        function updateRemoveButtons() {
-            const rows = nameContainer.querySelectorAll(".name-row");
-            rows.forEach((row, index) => {
-                const btn = row.querySelector(".remove-btn");
-                btn.style.visibility = index === 0 ? "hidden" : "visible";
-            });
-        }
-
-        updateRemoveButtons();
-    });
+    const nameContainer = document.getElementById("nameFields");
     const moduleContainer = document.getElementById("moduleFields");
-    const addModuleBtn = document.getElementById("addModuleBtn");
 
-    function createModuleRow() {
-        const row = document.createElement("div");
-        row.className = "d-flex gap-2 mb-2 align-items-center module-row";
-
-        row.innerHTML = `
-            <input type="text" name="erp_module[]" class="form-control"
-                   placeholder="เช่น Sales, Accounting" required>
-            <button type="button" class="btn btn-danger btn-sm remove-module">ลบ</button>
-        `;
-
-        row.querySelector(".remove-module").addEventListener("click", () => {
-            row.remove();
-            updateModuleButtons();
-        });
-
-        return row;
-    }
-
-    addModuleBtn.addEventListener("click", () => {
-        moduleContainer.appendChild(createModuleRow());
-        updateModuleButtons();
+    // ---------------- ADD NAME ----------------
+    document.getElementById("addNameBtn").addEventListener("click", function () {
+        const row = nameContainer.querySelector(".name-row").cloneNode(true);
+        row.querySelectorAll("input").forEach(i => i.value = "");
+        row.querySelector(".remove-btn").style.visibility = "visible";
+        row.querySelector(".remove-btn").onclick = () => row.remove();
+        nameContainer.appendChild(row);
     });
 
-    function updateModuleButtons() {
-        const rows = moduleContainer.querySelectorAll(".module-row");
-        rows.forEach((row) => {
-            row.querySelector(".remove-module").style.visibility = "visible";
+    // ---------------- ADD MODULE ----------------
+    document.getElementById("addModuleBtn").addEventListener("click", function () {
+        const row = moduleContainer.querySelector(".module-row").cloneNode(true);
+        row.querySelector("input").value = "";
+        row.querySelector(".remove-module").style.visibility = "visible";
+        row.querySelector(".remove-module").onclick = () => row.remove();
+        moduleContainer.appendChild(row);
+    });
+
+    // ---------------- SAVE DRAFT ----------------
+    document.getElementById("saveDraftBtn").addEventListener("click", function () {
+
+        const draft = {
+            request_type: document.querySelector("input[name='request_type']:checked").value,
+            names: [...document.querySelectorAll("input[name='name_en[]']")].map((n, i) => ({
+                name: n.value,
+                department: document.querySelectorAll("input[name='department[]']")[i].value
+            })),
+            modules: [...document.querySelectorAll("input[name='erp_module[]']")].map(m => m.value),
+            remark: document.querySelector("textarea[name='remark']").value
+        };
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+        alert("บันทึกร่างเรียบร้อย ✅");
+    });
+
+    // ---------------- LOAD DRAFT ----------------
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+        const data = JSON.parse(saved);
+
+        document.querySelector(
+            `input[name='request_type'][value='${data.request_type}']`
+        ).checked = true;
+
+        nameContainer.innerHTML = "";
+        data.names.forEach(item => {
+            const row = document.createElement("div");
+            row.className = "d-flex gap-2 mb-2 align-items-center";
+            row.innerHTML = `
+                <input type="text" name="name_en[]" class="form-control" value="${item.name}">
+                <input type="text" name="department[]" class="form-control" value="${item.department}">
+                <button type="button" class="btn btn-danger btn-sm remove-btn">ลบ</button>
+            `;
+            row.querySelector(".remove-btn").onclick = () => row.remove();
+            nameContainer.appendChild(row);
         });
+
+        moduleContainer.innerHTML = "";
+        data.modules.forEach(m => {
+            const row = document.createElement("div");
+            row.className = "d-flex gap-2 mb-2 align-items-center";
+            row.innerHTML = `
+                <input type="text" name="erp_module[]" class="form-control" value="${m}">
+                <button type="button" class="btn btn-danger btn-sm remove-module">ลบ</button>
+            `;
+            row.querySelector(".remove-module").onclick = () => row.remove();
+            moduleContainer.appendChild(row);
+        });
+
+        document.querySelector("textarea[name='remark']").value = data.remark;
     }
 
-    updateModuleButtons();
+    // ---------------- CLEAR ----------------
+    document.getElementById("clearDraftBtn").addEventListener("click", function () {
+        if (!confirm("ต้องการล้างข้อมูลทั้งหมดใช่หรือไม่?")) return;
+        localStorage.removeItem(STORAGE_KEY);
+        form.reset();
+        location.reload();
+    });
 
+    // ---------------- SUBMIT CLEAR DRAFT ----------------
+    form.addEventListener("submit", function () {
+        localStorage.removeItem(STORAGE_KEY);
+    });
+
+});
 </script>
 {% endblock %}

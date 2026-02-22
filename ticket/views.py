@@ -806,6 +806,8 @@ def erp_perm(request):
 
     if request.method == "POST":
 
+        action = request.POST.get("action", "submit")  # draft / submit
+
         try:
             with transaction.atomic():
 
@@ -828,6 +830,7 @@ def erp_perm(request):
 
                 description = request.POST.get("remark", "")
                 user_id = request.session["user"]["id"]
+
                 departments = request.POST.getlist("department[]")
                 department = ", ".join(departments)
 
@@ -837,8 +840,9 @@ def erp_perm(request):
                 with connection.cursor() as cursor:
                     cursor.execute("""
                         INSERT INTO tickets.tickets
-                        (title, description, user_id, status_id, ticket_type_id, department)
-                        VALUES (%s, %s, %s, %s, %s, %s)
+                        (title, description, user_id, status_id,
+                         ticket_type_id, department, create_at)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
                         RETURNING id
                     """, [
                         title,
@@ -846,18 +850,20 @@ def erp_perm(request):
                         user_id,
                         status_id,
                         ticket_type_id,
-                        department
+                        department,
+                        timezone.now()
                     ])
                     ticket_id = cursor.fetchone()[0]
 
                 # -----------------------------
-                # CREATE APPROVAL
+                # IF SUBMIT → CREATE APPROVAL
                 # -----------------------------
-                create_ticket_approval_by_ticket_type(
-                    ticket_id=ticket_id,
-                    ticket_type_id=ticket_type_id,
-                    requester_user_id=user_id
-                )
+                if action == "submit":
+                    create_ticket_approval_by_ticket_type(
+                        ticket_id=ticket_id,
+                        ticket_type_id=ticket_type_id,
+                        requester_user_id=user_id
+                    )
 
                 # -----------------------------
                 # PREPARE ERP DATA
@@ -866,10 +872,14 @@ def erp_perm(request):
                 perm_change = (request_type == "adjust_perm")
 
                 names = request.POST.getlist("name_en[]")
-                requester_names = "\n".join([n.strip() for n in names if n.strip()])
+                requester_names = "\n".join(
+                    [n.strip() for n in names if n.strip()]
+                )
 
                 modules = request.POST.getlist("erp_module[]")
-                requested_modules = "\n".join([m.strip() for m in modules if m.strip()])
+                requested_modules = "\n".join(
+                    [m.strip() for m in modules if m.strip()]
+                )
 
                 # -----------------------------
                 # INSERT ERP DATA
@@ -880,7 +890,6 @@ def erp_perm(request):
                         (ticket_id, module_access, perm_change,
                          requester_names, module_name)
                         VALUES (%s, %s, %s, %s, %s)
-                        RETURNING id
                     """, [
                         ticket_id,
                         module_access,
@@ -888,15 +897,13 @@ def erp_perm(request):
                         requester_names,
                         requested_modules
                     ])
-                    erp_data_id = cursor.fetchone()[0]
 
                 # -----------------------------
-                # FILE UPLOAD (STANDARD)
+                # FILE UPLOAD
                 # -----------------------------
                 files = request.FILES.getlist("files")
 
                 if files:
-
                     upload_root = os.path.join(
                         settings.MEDIA_ROOT,
                         "uploads",
@@ -920,9 +927,9 @@ def erp_perm(request):
                             cursor.execute("""
                                 INSERT INTO tickets.ticket_files
                                 (ticket_id, ref_type, ref_id,
-                                file_name, file_path,
-                                file_type, file_size,
-                                uploaded_by, create_at)
+                                 file_name, file_path,
+                                 file_type, file_size,
+                                 uploaded_by, create_at)
                                 VALUES (%s, %s, %s,
                                         %s, %s,
                                         %s, %s,
@@ -935,17 +942,24 @@ def erp_perm(request):
                                 relative_path,
                                 f.content_type,
                                 f.size,
-                                user_id,          # ✅ ตรงกับ uploaded_by
+                                user_id,
                                 timezone.now()
                             ])
-
 
         except ApprovalTeamNotFound as e:
             messages.error(request, str(e))
             return redirect(request.path)
 
-        messages.success(request, "สร้างคำร้องสำเร็จ")
-        return redirect("ticket_success")
+        # -----------------------------
+        # SUCCESS MESSAGE
+        # -----------------------------
+        if action == "draft":
+            messages.success(request, "บันทึกร่างเรียบร้อย ✅")
+            return redirect(request.path)
+
+        else:
+            messages.success(request, "สร้างคำร้องสำเร็จ 🎉")
+            return redirect("ticket_success")
 
     return render(request, "tickets_form/erp_perm.html")
 
