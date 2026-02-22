@@ -719,7 +719,8 @@ def tickets_list(request):
             )
         """
         params.extend([user_id, user_id])
-
+        
+        
     # ===============================
     # SEARCH
     # ===============================
@@ -765,11 +766,11 @@ def tickets_list(request):
 
         created_at = row[7]
 
-        if created_at and timezone.is_naive(created_at):
-            created_at = timezone.make_aware(created_at)
-
         if created_at:
+            if timezone.is_naive(created_at):
+                created_at = timezone.make_aware(created_at, dt_timezone.utc)
             created_at = timezone.localtime(created_at)
+
 
         tickets_data.append({
             "id": row[0],
@@ -1308,7 +1309,7 @@ def tickets_detail_erp(request, ticket_id):
     is_admin = (role_id == 1)
 
     # -----------------------------
-    # ticket
+    # TICKET
     # -----------------------------
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -1324,7 +1325,6 @@ def tickets_detail_erp(request, ticket_id):
             JOIN tickets.users u ON u.id = t.user_id
             JOIN tickets.status s ON s.id = t.status_id
             WHERE t.id = %s
-
         """, [ticket_id])
 
         row = cursor.fetchone()
@@ -1332,26 +1332,37 @@ def tickets_detail_erp(request, ticket_id):
     if not row:
         raise Http404("Ticket not found")
 
+   
+    # -----------------------------
+    # ✅ TIMEZONE FIX (รองรับ naive)
+    # -----------------------------
+    created_at = row[4]
+
+    if created_at:
+        if timezone.is_naive(created_at):
+            created_at = timezone.make_aware(created_at, dt_timezone.utc)
+
+        created_at = timezone.localtime(created_at)
+
     ticket = {
         "id": row[0],
         "title": row[1],
         "description": row[2],
         "user_name": row[3],
-        "create_at": row[4],
-        "status": row[5],      # ← ชื่อสถานะ
+        "create_at": created_at,
+        "status": row[5],
         "status_id": row[6],
     }
 
-
     # -----------------------------
-    # current pending level
+    # CURRENT PENDING LEVEL
     # -----------------------------
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT level
             FROM tickets.ticket_approval_status
             WHERE ticket_id = %s
-              AND status_id = %s   -- PENDING
+              AND status_id = %s
             ORDER BY level
             LIMIT 1
         """, [ticket_id, APPROVE_PENDING])
@@ -1361,7 +1372,7 @@ def tickets_detail_erp(request, ticket_id):
     current_level = row[0] if row else None
 
     # -----------------------------
-    # check approver (ตามสาย)
+    # CHECK APPROVER
     # -----------------------------
     can_approve = False
     my_level = None
@@ -1391,14 +1402,14 @@ def tickets_detail_erp(request, ticket_id):
                 my_level = current_level
 
     # -----------------------------
-    # has pending approve (ADMIN)
+    # ADMIN PENDING CHECK
     # -----------------------------
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT 1
             FROM tickets.ticket_approval_status
             WHERE ticket_id = %s
-            AND status_id IN (6, 7)   -- Waiting / Pending เท่านั้น
+              AND status_id IN (6, 7)
             LIMIT 1
         """, [ticket_id])
 
@@ -1416,12 +1427,11 @@ def tickets_detail_erp(request, ticket_id):
         """, [ticket_id])
 
         files = []
-
         for f in cursor.fetchall():
             files.append({
                 "id": f[0],
                 "file_name": f[1],
-                "file_path": f[2].replace("\\", "/"),  # กัน windows path
+                "file_path": f[2].replace("\\", "/"),
                 "file_type": f[3],
             })
 
@@ -1431,9 +1441,9 @@ def tickets_detail_erp(request, ticket_id):
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT module_access,
-                perm_change,
-                requester_names,
-                module_name
+                   perm_change,
+                   requester_names,
+                   module_name
             FROM tickets.ticket_data_erp_app
             WHERE ticket_id = %s
         """, [ticket_id])
@@ -1449,7 +1459,6 @@ def tickets_detail_erp(request, ticket_id):
             "module_name": row[3],
         }
 
-
     return render(
         request,
         "tickets_form/tickets_detail_erp.html",
@@ -1459,14 +1468,10 @@ def tickets_detail_erp(request, ticket_id):
             "my_level": my_level,
             "is_admin": is_admin,
             "has_pending_approve": has_pending_approve,
-
-            # ✅ เพิ่มสองตัวนี้
             "files": files,
             "erp_data": erp_data,
         }
     )
-
-    
 @page_permission_required
 def borrow_detail(request, ticket_id):
 

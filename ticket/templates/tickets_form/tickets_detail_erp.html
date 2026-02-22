@@ -29,7 +29,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="text-muted small">วันที่แจ้ง</div>
-                    <div>{{ ticket.create_at|date:"d/m/Y H:i" }}</div>
+                    <div>{{ticket.create_at|localtime|date:"d M Y H:i"}}</div>
                 </div>
                 <div class="col-md-4">
                     <div class="text-muted small">สถานะ</div>
