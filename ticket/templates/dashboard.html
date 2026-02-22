@@ -24,14 +24,25 @@
 
 <!-- ================= FILTER ================= -->
 <form method="get" class="filter-panel d-flex gap-2 align-items-end shadow-sm mb-4">
+
     <div>
         <label class="form-label mb-1">ตั้งแต่วันที่</label>
-        <input type="date" name="start_date" value="{{ start_date }}" class="form-control">
+        <input type="text"
+               id="start_date"
+               name="start_date"
+               value="{{ start_date }}"
+               class="form-control"
+               autocomplete="off">
     </div>
 
     <div>
         <label class="form-label mb-1">ถึงวันที่</label>
-        <input type="date" name="end_date" value="{{ end_date }}" class="form-control">
+        <input type="text"
+               id="end_date"
+               name="end_date"
+               value="{{ end_date }}"
+               class="form-control"
+               autocomplete="off">
     </div>
 
     <button class="btn btn-primary px-4">
@@ -41,7 +52,6 @@
 
 <!-- ================= DASHBOARD CARDS ================= -->
 <div class="dashboard-cards mb-4">
-
     <div class="dashboard-card card-pending">
         <div class="d-flex justify-content-between">
             <div>
@@ -53,6 +63,7 @@
             </div>
         </div>
     </div>
+
     <div class="dashboard-card" style="border-left: 6px solid var(--primary);">
         <div class="d-flex justify-content-between">
             <div>
@@ -64,6 +75,7 @@
             </div>
         </div>
     </div>
+
     <div class="dashboard-card card-closed">
         <div class="d-flex justify-content-between">
             <div>
@@ -75,6 +87,7 @@
             </div>
         </div>
     </div>
+
     <div class="dashboard-card card-closed">
         <div class="d-flex justify-content-between">
             <div>
@@ -93,7 +106,7 @@
                 <p class="card-label">ทั้งหมด</p>
                 <h3 class="card-value">{{ total }}</h3>
             </div>
-            <div class="icon-box bg-primary-soft" style="background-color: rgba(79, 70, 229, 0.1); color: #4f46e5;">
+            <div class="icon-box bg-primary-soft">
                 <i class="fas fa-list-ul"></i>
             </div>
         </div>
@@ -107,9 +120,6 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h4 class="mb-0 fw-bold">สัดส่วนประเภทคำขอ</h4>
-                    <small class="text-muted">
-                        เปรียบเทียบข้อมูลสรุปในรูปแบบแผนภูมิ
-                    </small>
                 </div>
                 <i class="fas fa-chart-pie text-muted fa-lg"></i>
             </div>
@@ -123,19 +133,56 @@
 
 {% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+{% endblock %}
+
 {% block extra_js %}
+
+<!-- Flatpickr -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const endPicker = flatpickr("#end_date", {
+        locale: "th",
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d/m/Y",
+        allowInput: true
+    });
+
+    flatpickr("#start_date", {
+        locale: "th",
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d/m/Y",
+        allowInput: true,
+        onChange: function(selectedDates) {
+            endPicker.set("minDate", selectedDates[0]);
+        }
+    });
+
+});
+</script>
+
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
     const canvas = document.getElementById('ticketChart');
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
-    const chartLabels = {{ chart_labels|safe }};
-    const chartValues = {{ chart_values|safe }};
+    const chartLabels = {{ chart_labels|default:"[]"|safe }};
+    const chartValues = {{ chart_values|default:"[]"|safe }};
 
-    new Chart(ctx, {
+    if (chartLabels.length === 0) return;
+
+    new Chart(canvas.getContext('2d'), {
         type: 'doughnut',
         data: {
             labels: chartLabels,
@@ -146,28 +193,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     '#f59e0b', '#ef4444', '#22c55e'
                 ],
                 borderWidth: 4,
-                borderColor: '#ffffff',
-                hoverOffset: 15
+                borderColor: '#ffffff'
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: '70%',
-            plugins: {
-                legend: {
-                    position: 'right',
-                    labels: {
-                        usePointStyle: true,
-                        padding: 25,
-                        font: { size: 14 }
-                    }
-                },
-                tooltip: {
-                    padding: 12,
-                    cornerRadius: 8
-                }
-            }
+            cutout: '70%'
         }
     });
 
@@ -180,4 +212,5 @@ document.addEventListener('DOMContentLoaded', function () {
     position: relative;
 }
 </style>
+
 {% endblock %}

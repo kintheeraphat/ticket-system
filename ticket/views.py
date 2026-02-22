@@ -55,6 +55,7 @@ def handle_approval_error(view_func):
     return wrapper
 
 
+
 @csrf_exempt
 def erp_auth(username, password):
     """
@@ -488,22 +489,46 @@ def dashboard(request):
     # =====================
     # DATE FILTER
     # =====================
-    start_date = request.GET.get("start_date")
-    end_date = request.GET.get("end_date")
+    start_raw = request.GET.get("start_date")
+    end_raw = request.GET.get("end_date")
 
+    today = date.today()
+
+    def parse_input_date(value):
+        if not value:
+            return None
+
+        # ISO format (2026-02-01)
+        try:
+            return date.fromisoformat(value)
+        except ValueError:
+            pass
+
+        # dd/mm/YYYY (01/02/2026)
+        try:
+            return datetime.strptime(value, "%d/%m/%Y").date()
+        except ValueError:
+            pass
+
+        return None
+
+    start_date = parse_input_date(start_raw)
+    end_date = parse_input_date(end_raw)
+
+    # ถ้าไม่มีค่า หรือ parse ไม่ได้ → default เดือนปัจจุบัน
     if not start_date or not end_date:
-        today = date.today()
-        start_date = today.replace(day=1)   # วันที่ 1 ของเดือนปัจจุบัน
+        start_date = today.replace(day=1)
         end_date = today
-    else:
-        start_date = date.fromisoformat(start_date)
-        end_date = date.fromisoformat(end_date)
 
-    # แปลงวันที่เป็นภาษาไทย (สำหรับแสดงผล)
+    # =====================
+    # DISPLAY DATE (TH)
+    # =====================
     start_date_th = thai_date(start_date)
     end_date_th = thai_date(end_date)
 
-    # ⚠️ สำคัญ: แปลงเป็น datetime ให้ครอบคลุมทั้งวัน
+    # =====================
+    # DATETIME RANGE (ครอบคลุมทั้งวัน)
+    # =====================
     start_dt = datetime.combine(start_date, time.min)
     end_dt   = datetime.combine(end_date, time.max)
 
@@ -560,16 +585,17 @@ def dashboard(request):
         """, [start_dt, end_dt])
 
         category_rows = cursor.fetchall()
-        chart_labels = [row[0] for row in category_rows]
-        chart_values = [row[1] for row in category_rows]
+
+        chart_labels = [row[0] for row in category_rows] if category_rows else []
+        chart_values = [row[1] for row in category_rows] if category_rows else []
 
     # =====================
     # CONTEXT
     # =====================
     context = {
         # DATE (input)
-        "start_date": start_date,
-        "end_date": end_date,
+        "start_date": start_date.strftime("%Y-%m-%d"),
+        "end_date": end_date.strftime("%Y-%m-%d"),
 
         # DATE (display)
         "start_date_th": start_date_th,
