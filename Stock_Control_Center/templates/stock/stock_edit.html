@@ -2,67 +2,61 @@
 {% block title %}Edit Stock{% endblock %}
 
 {% block content %}
-<div class="form-card">
+<div class="container-fluid">
 
-  <h4 class="mb-4">✏️ แก้ไขข้อมูลสต๊อก</h4>
+  <!-- HEADER -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold">
+      <i class="fas fa-edit text-warning me-2"></i>
+      แก้ไขข้อมูลสต๊อก
+    </h4>
+  </div>
 
-  <form method="post">
-    {% csrf_token %}
+  <div class="card shadow-sm">
+    <div class="card-body">
 
-    <div class="grid-2">
-      <div>
-        <label class="form-label">ชื่ออุปกรณ์</label>
-        <input type="text"
-               name="name"
-               class="form-control"
-               value="{{ stock.name }}"
-               required>
-      </div>
+      <form method="post">
+        {% csrf_token %}
 
-      <div>
-        <label class="form-label">สเปค</label>
-        <input type="text"
-               name="spec"
-               class="form-control"
-               value="{{ stock.spec }}">
-      </div>
+        <div class="row g-3">
 
-      <div>
-        <label class="form-label">ประเภท</label>
-        <select name="item_type" class="form-select" required>
-          <option value="borrow"
-            {% if stock.item_type == "borrow" %}selected{% endif %}>
-            Borrow
-          </option>
-          <option value="userup"
-            {% if stock.item_type == "userup" %}selected{% endif %}>
-            User Up
-          </option>
-        </select>
-      </div>
+          <div class="col-md-6">
+            <label class="form-label">ชื่ออุปกรณ์</label>
+            <input type="text" name="name" class="form-control"
+                   value="{{ stock.name }}" required>
+          </div>
 
-      <div>
-        <label class="form-label">จำนวน</label>
-        <input type="number"
-               name="quantity"
-               class="form-control"
-               min="0"
-               value="{{ stock.quantity }}"
-               required>
-      </div>
+          <div class="col-md-6">
+            <label class="form-label">สเปค</label>
+            <input type="text" name="spec" class="form-control"
+                   value="{{ stock.spec }}">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">ประเภท</label>
+            <select name="item_type" class="form-select" required>
+              <option value="borrow" {% if stock.item_type == "borrow" %}selected{% endif %}>Borrow</option>
+              <option value="use_up" {% if stock.item_type == "use_up" %}selected{% endif %}>Use Up</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">จำนวน</label>
+            <input type="number" name="quantity" class="form-control"
+                   value="{{ stock.quantity }}" min="0" required>
+          </div>
+
+        </div>
+
+        <div class="mt-4 d-flex gap-2">
+          <button class="btn btn-primary">บันทึก</button>
+          <a href="{% url 'stock_dashboard' %}" class="btn btn-secondary">ยกเลิก</a>
+        </div>
+
+      </form>
+
     </div>
-
-    <div class="d-flex gap-2 mt-4">
-      <button class="btn btn-primary">
-        💾 บันทึก
-      </button>
-      <a href="{% url 'stock_dashboard' %}"
-         class="btn btn-secondary">
-        ยกเลิก
-      </a>
-    </div>
-
-  </form>
+  </div>
 
 </div>
 {% endblock %}

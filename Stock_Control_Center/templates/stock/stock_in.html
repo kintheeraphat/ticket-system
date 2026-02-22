@@ -2,93 +2,55 @@
 {% block title %}Stock IN{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container-fluid">
 
-  <!-- Header -->
-  <div class="text-center mb-4">
-    <h3 class="fw-bold mb-1">📦 เพิ่มสินค้าอุปกรณ์</h3>
-    <p class="text-muted small mb-0">
-      กรอกข้อมูลอุปกรณ์เพื่อเพิ่มเข้าสู่ระบบคลัง
-    </p>
+  <div class="mb-4">
+    <h4 class="fw-bold">
+      <i class="fas fa-plus text-success me-2"></i>
+      เพิ่มสินค้าอุปกรณ์
+    </h4>
   </div>
 
-  <!-- Card -->
-  <div class="row justify-content-center">
-    <div class="col-lg-6 col-md-8">
+  <div class="card shadow-sm">
+    <div class="card-body">
 
-      <div class="card border-0 shadow-sm stock-card">
-        <div class="card-body p-4">
+      <form method="post">
+        {% csrf_token %}
 
-          <form method="post">
-            {% csrf_token %}
+        <div class="row g-3">
 
-            <!-- ชื่ออุปกรณ์ -->
-            <div class="mb-4">
-              <label class="form-label fw-semibold">ชื่ออุปกรณ์</label>
-              <div class="input-group">
-                <span class="input-group-text bg-light">
-                  <i class="bi bi-box"></i>
-                </span>
-                <input type="text" name="name" class="form-control custom-input" required>
-              </div>
-            </div>
+          <div class="col-md-6">
+            <label class="form-label">ชื่ออุปกรณ์</label>
+            <input type="text" name="name" class="form-control" required>
+          </div>
 
-            <!-- สเปค -->
-            <div class="mb-4">
-              <label class="form-label fw-semibold">สเปค</label>
-              <div class="input-group">
-                <span class="input-group-text bg-light">
-                  <i class="bi bi-cpu"></i>
-                </span>
-                <input type="text" name="spec" class="form-control custom-input">
-              </div>
-            </div>
+          <div class="col-md-6">
+            <label class="form-label">สเปค</label>
+            <input type="text" name="spec" class="form-control">
+          </div>
 
-            <!-- ประเภท -->
-            <div class="mb-4">
-              <label class="form-label fw-semibold">ประเภทอุปกรณ์</label>
-              <div class="input-group">
-                <span class="input-group-text bg-light">
-                  <i class="bi bi-tag"></i>
-                </span>
-                <select name="item_type" class="form-select custom-input" required>
-                  <option value="">-- เลือกประเภท --</option>
-                  <option value="borrow">📦 ของยืม (Borrow)</option>
-                  <option value="use_up">🧴 ใช้แล้วหมด (Use Up)</option>
-                </select>
-              </div>
-            </div>
+          <div class="col-md-6">
+            <label class="form-label">ประเภท</label>
+            <select name="item_type" class="form-select" required>
+              <option value="">-- เลือกประเภท --</option>
+              <option value="borrow">Borrow</option>
+              <option value="use_up">Use Up</option>
+            </select>
+          </div>
 
-            <!-- จำนวน -->
-            <div class="mb-4">
-              <label class="form-label fw-semibold">จำนวน</label>
-              <div class="input-group">
-                <span class="input-group-text bg-light">
-                  <i class="bi bi-123"></i>
-                </span>
-                <input type="number" name="quantity" 
-                       class="form-control custom-input" 
-                       min="1" required>
-              </div>
-            </div>
-
-            <!-- ปุ่ม -->
-            <div class="d-flex justify-content-between mt-4">
-              <a href="{% url 'stock_dashboard' %}" 
-                 class="btn btn-outline-secondary px-4">
-                 ยกเลิก
-              </a>
-
-              <button type="submit" 
-                      class="btn btn-success px-4">
-                💾 บันทึกข้อมูล
-              </button>
-            </div>
-
-          </form>
+          <div class="col-md-6">
+            <label class="form-label">จำนวน</label>
+            <input type="number" name="quantity" class="form-control" min="1" required>
+          </div>
 
         </div>
-      </div>
+
+        <div class="mt-4 d-flex justify-content-end gap-2">
+          <a href="{% url 'stock_dashboard' %}" class="btn btn-secondary">ยกเลิก</a>
+          <button class="btn btn-success">บันทึก</button>
+        </div>
+
+      </form>
 
     </div>
   </div>

@@ -2,17 +2,22 @@
 {% block title %}Stock Movement{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="container-fluid">
 
-  <h4 class="fw-bold mb-4">📜 ประวัติการเคลื่อนไหวสต๊อก</h4>
+  <div class="mb-4">
+    <h4 class="fw-bold">
+      <i class="fas fa-history me-2 text-info"></i>
+      ประวัติการเคลื่อนไหวสต๊อก
+    </h4>
+  </div>
 
   <div class="card shadow-sm">
     <div class="card-body">
 
-      <table class="table table-bordered">
-        <thead class="table-light">
+      <table class="table table-striped">
+        <thead class="table-light text-center">
           <tr>
-            <th>ชื่ออุปกรณ์</th>
+            <th>ชื่อ</th>
             <th>สเปค</th>
             <th>ประเภท</th>
             <th>จำนวน</th>
@@ -24,19 +29,15 @@
           <tr>
             <td>{{ m.name }}</td>
             <td>{{ m.spec }}</td>
-            <td>
+            <td class="text-center">
               {% if m.movement_type == "IN" %}
                 <span class="badge bg-success">IN</span>
               {% else %}
                 <span class="badge bg-danger">OUT</span>
               {% endif %}
             </td>
-            <td>{{ m.quantity }}</td>
-            <td>{{ m.created_at }}</td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="5" class="text-center text-muted">ไม่มีข้อมูล</td>
+            <td class="text-center">{{ m.quantity }}</td>
+            <td class="text-center">{{ m.created_at }}</td>
           </tr>
           {% endfor %}
         </tbody>

@@ -2,73 +2,73 @@
 {% block title %}Return List{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container-fluid">
 
-  <!-- Header -->
+  <!-- HEADER -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-      <h4 class="fw-bold mb-1">🔄 รายการรอคืนของ</h4>
-      <small class="text-muted">ตรวจสอบและบันทึกการคืนอุปกรณ์เข้าสต๊อก</small>
+      <h4 class="fw-bold mb-1">
+        <i class="fas fa-undo text-success me-2"></i>
+        รายการรอคืนของ
+      </h4>
+      <small class="text-muted">
+        ตรวจสอบและบันทึกการคืนอุปกรณ์เข้าสต๊อก
+      </small>
     </div>
+
+    <a href="{% url 'stock_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-arrow-left me-1"></i> กลับ
+    </a>
   </div>
 
-  <!-- Card -->
-  <div class="card border-0 shadow-sm return-card">
-    <div class="card-body p-0">
+  <!-- TABLE -->
+  <div class="card shadow-sm">
+    <div class="card-body">
 
       {% if borrows %}
       <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
+        <table class="table table-striped align-middle">
           <thead class="table-light text-center">
             <tr>
-              <th style="width:80px;">#</th>
+              <th width="80">#</th>
               <th class="text-start">หัวข้อ</th>
-              <th style="width:200px;">ผู้ขอ</th>
-              <th style="width:140px;">จัดการ</th>
+              <th width="220">ผู้ขอ</th>
+              <th width="150">จัดการ</th>
             </tr>
           </thead>
 
           <tbody>
             {% for b in borrows %}
-            <tr class="clickable-row"
-                data-href="{% url 'stock_return_detail' b.id %}">
-              
-              <td class="text-center fw-semibold">
-                {{ b.id }}
-              </td>
+            <tr class="hover-row"
+                onclick="window.location.href='{% url 'stock_return_detail' b.id %}'">
 
-              <td class="text-start">
-                {{ b.title }}
-              </td>
+              <td class="text-center fw-semibold">{{ b.id }}</td>
+
+              <td class="fw-semibold">{{ b.title }}</td>
 
               <td class="text-center">
-                <i class="bi bi-person-circle me-1 text-muted"></i>
+                <i class="fas fa-user-circle text-muted me-1"></i>
                 {{ b.full_name }}
               </td>
 
               <td class="text-center">
-                <!-- ปุ่มยังอยู่ และไม่ชนกับ click row -->
                 <a href="{% url 'stock_return_detail' b.id %}"
-                   class="btn btn-sm btn-return px-3"
+                   class="btn btn-sm btn-success px-3"
                    onclick="event.stopPropagation();">
-                  ↩ คืนของ
+                  ↩ คืน
                 </a>
               </td>
 
             </tr>
             {% endfor %}
           </tbody>
-
         </table>
       </div>
 
       {% else %}
-      <div class="text-center py-5 empty-state">
-        <div style="font-size:40px;">📦</div>
-        <div class="fw-semibold mt-2">ไม่มีรายการรอคืนของ</div>
-        <div class="text-muted small">
-          เมื่อมีการยืมอุปกรณ์ ระบบจะแสดงรายการที่นี่
-        </div>
+      <div class="text-center text-muted py-5">
+        <i class="fas fa-box-open fa-2x mb-2"></i>
+        <div class="fw-semibold">ไม่มีรายการรอคืนของ</div>
       </div>
       {% endif %}
 
@@ -77,17 +77,13 @@
 
 </div>
 
-<!-- JS สำหรับคลิกทั้งแถว -->
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  const rows = document.querySelectorAll(".clickable-row");
-
-  rows.forEach(row => {
-    row.addEventListener("click", function () {
-      window.location.href = this.dataset.href;
-    });
-  });
-});
-</script>
-
+<style>
+.hover-row {
+  cursor: pointer;
+  transition: 0.2s;
+}
+.hover-row:hover {
+  background-color: #f8f9fa;
+}
+</style>
 {% endblock %}
