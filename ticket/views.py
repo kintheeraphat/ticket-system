@@ -3983,15 +3983,29 @@ def report_dashboard(request):
 
     today = timezone.localdate()
 
-    selected_month = request.GET.get("month")
+    selected_date_range = request.GET.get("date_range")
     selected_title = request.GET.get("title", "all")
     selected_status = request.GET.get("status", "all")
 
-    if not selected_month:
-        selected_month = today.strftime("%Y-%m")
+    # ===== จัดการช่วงวันที่ =====
+    if not selected_date_range:
+        start_date = today.replace(day=1)
+        end_date = today
+        selected_date_range = f"{start_date.strftime('%d/%m/%Y')} to {end_date.strftime('%d/%m/%Y')}"
+    else:
+        try:
+            start_str, end_str = selected_date_range.split(" to ")
+            start_date = datetime.strptime(start_str, "%d/%m/%Y").date()
+            end_date = datetime.strptime(end_str, "%d/%m/%Y").date()
+        except:
+            start_date = today.replace(day=1)
+            end_date = today
 
-    year, month = selected_month.split("-")
+    # กัน user เลือกย้อน
+    if start_date > end_date:
+        start_date, end_date = end_date, start_date
 
+    # ===== QUERY =====
     query = """
         SELECT
             t.id,
@@ -4016,12 +4030,10 @@ def report_dashboard(request):
         LEFT JOIN tickets.users u ON u.id = t.user_id
         LEFT JOIN tickets.department d ON d.id = u.department_id
         LEFT JOIN tickets.status s ON s.id = t.status_id
-        WHERE EXTRACT(YEAR FROM t.create_at) = %s
-        AND EXTRACT(MONTH FROM t.create_at) = %s
+        WHERE DATE(t.create_at) BETWEEN %s AND %s
     """
 
-
-    params = [year, month]
+    params = [start_date, end_date]
 
     if selected_title != "all":
         query += " AND t.title = %s"
@@ -4038,7 +4050,7 @@ def report_dashboard(request):
         columns = [col[0] for col in cursor.description]
         reports = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-    # ===== คำนวณวันดำเนินการ =====
+    # ===== process days =====
     for r in reports:
         if r["completed_at"]:
             delta = r["completed_at"] - r["create_at"]
@@ -4046,7 +4058,7 @@ def report_dashboard(request):
         else:
             r["process_days"] = None
 
-    # ===== Dropdown =====
+    # ===== dropdown =====
     with connection.cursor() as cursor:
         cursor.execute("SELECT DISTINCT title FROM tickets.tickets ORDER BY title")
         titles = [row[0] for row in cursor.fetchall()]
@@ -4054,30 +4066,20 @@ def report_dashboard(request):
         cursor.execute("SELECT DISTINCT name FROM tickets.status ORDER BY name")
         statuses = [row[0] for row in cursor.fetchall()]
 
-    # ===== Charts =====
+    # ===== charts =====
     from collections import Counter
 
     status_counter = Counter(r["display_status"] for r in reports)
     title_counter = Counter(r["title"] for r in reports)
     dept_counter = Counter(r["department"] for r in reports)
 
-    # ===== เดือนปี 2025 + ปีปัจจุบัน =====
-    month_list = []
-    for y in [2025, today.year]:
-        for m in range(1, 13):
-            month_list.append({
-                "value": f"{y}-{str(m).zfill(2)}",
-                "label": f"{calendar.month_name[m]} {y}"
-            })
-
     return render(request, "report_dashboard.html", {
         "reports": reports,
         "titles": titles,
         "statuses": statuses,
-        "selected_month": selected_month,
+        "selected_date_range": selected_date_range,
         "selected_title": selected_title,
         "selected_status": selected_status,
-        "month_list": month_list,
         "chart_status_labels": json.dumps(list(status_counter.keys())),
         "chart_status_data": json.dumps(list(status_counter.values())),
         "chart_title_labels": json.dumps(list(title_counter.keys())),

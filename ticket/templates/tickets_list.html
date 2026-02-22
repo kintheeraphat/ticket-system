@@ -82,7 +82,7 @@
                                 {% url 'active_promotion_detail' t.id %}
                             {% elif t.ticket_type_id == 14 %}
                                 {% url 'borrow_detail' t.id %}
-                            {% elif t.ticket_type_id == 5 or t.ticket_type_id == 6 or t.ticket_type_id == 7  or t.ticket_type_id == 8 %}
+                            {% elif t.ticket_type_id == 5 or t.ticket_type_id == 6 or t.ticket_type_id == 7 or t.ticket_type_id == 8 %}
                                 {% url 'adjust_detail' t.id %}
                             {% else %}
                                 {% url 'tickets_detail_erp' t.id %}

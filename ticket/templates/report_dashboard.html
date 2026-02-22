@@ -19,15 +19,11 @@
         <form method="get" id="filterForm" class="row g-3">
 
             <div class="col-md-4">
-                <label class="form-label">เลือกเดือน</label>
-                <select name="month" class="form-select" onchange="submitFilter()">
-                    {% for m in month_list %}
-                        <option value="{{ m.value }}"
-                            {% if selected_month == m.value %}selected{% endif %}>
-                            {{ m.label }}
-                        </option>
-                    {% endfor %}
-                </select>
+                <label class="form-label">ช่วงวันที่</label>
+                <input type="text" id="date_range" name="date_range"
+                    class="form-control"
+                    value="{{ selected_date_range }}"
+                    placeholder="เลือกช่วงวันที่">
             </div>
 
             <div class="col-md-4">
@@ -147,8 +143,26 @@
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
 
 <script>
+flatpickr("#date_range", {
+    mode: "range",
+    dateFormat: "d/m/Y",
+    locale: "th",
+    allowInput: true,
+
+    showMonths: 1, // ✅ บังคับ 1 เดือน
+
+    onClose: function(selectedDates, dateStr) {
+        if (dateStr) {
+            document.getElementById("filterForm").submit();
+        }
+    }
+});
+
 function submitFilter(){
     document.getElementById("filterForm").submit();
 }
