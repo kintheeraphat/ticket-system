@@ -3,10 +3,15 @@
 
 {% block title %}แบบฟอร์มขอใช้งาน VPN - TECHNO-SELL{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
+{% endblock %}
+
 {% block content %}
 <div class="dashboard-table shadow-sm p-4 bg-white rounded animate-fade-in">
 
-    <!-- HEADER แบบ ERP -->
+    <!-- HEADER -->
     <div class="erp-header d-flex justify-content-between align-items-start mb-4">
         <div>
             <h4 class="fw-bold text-primary mb-1">
@@ -16,144 +21,160 @@
                 กรุณากรอกข้อมูลเพื่อขออนุมัติใช้งาน Virtual Private Network
             </p>
         </div>
-
-        <a href="#" class="btn btn-outline-info btn-sm shadow-sm" download>
-            <i class="fas fa-file-download me-1"></i> ดาวน์โหลดแบบฟอร์ม
-        </a>
     </div>
 
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
+
         <!-- เรื่อง -->
         <div class="mb-4">
             <label class="fw-bold mb-2">เรื่อง (Subject)</label>
-            <input type="text" class="form-control bg-light"
-                value="ขออนุมัติเปิดสิทธิ์ Virtual Private Network (VPN) (เข้าใช้งานจากภายนอกบริษัท)" readonly>
-        </div>
-        <div class="mb-4 d-grid" style="grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-            <div>
-                <label class="fw-bold mb-2">ตั้งแต่วันที่</label>
-                <input type="date" name="start_date" class="form-control" required>
-            </div>
-
-            <div>
-                <label class="fw-bold mb-2">ถึงวันที่</label>
-                <input type="date" name="end_date" class="form-control" required>
-            </div>
+            <input type="text"
+                   class="form-control bg-light"
+                   value="ขออนุมัติเปิดสิทธิ์ Virtual Private Network (VPN)"
+                   readonly>
         </div>
 
-        <!-- รายชื่อผู้ใช้งาน -->
-        <div class="mb-4 erp-section">
+        <!-- DATE RANGE -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <label class="form-label">วันที่เริ่มต้น</label>
+                <input type="text"
+                       id="start_date"
+                       name="start_date"
+                       class="form-control"
+                       autocomplete="off"
+                       required>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">วันที่สิ้นสุด</label>
+                <input type="text"
+                       id="end_date"
+                       name="end_date"
+                       class="form-control"
+                       autocomplete="off"
+                       required>
+            </div>
+        </div>
+
+        <!-- USERS -->
+        <div class="mb-4">
             <label class="fw-bold mb-2 text-primary">
                 <i class="fas fa-users me-2"></i>รายชื่อผู้ขอใช้งาน / แผนก
             </label>
 
-
             <div id="vpnUserContainer">
-                <div class="d-flex mb-2 vpn-user-row animate-fade-in">
+                <div class="d-flex mb-2 vpn-user-row">
                     <span class="input-group-text bg-light me-2">1.</span>
-                    <input type="text" name="user_names[]" class="form-control me-2" placeholder="ชื่อ-นามสกุล"
-                        required>
-                    <input type="text" name="department[]" class="form-control me-2" placeholder="แผนก"
-                        required>
-                    <button type="button" class="btn btn-danger btn-sm remove-user" style="display:none;">
-                        ลบ
-                    </button>
+                    <input type="text" name="user_names[]" class="form-control me-2"
+                           placeholder="ชื่อ-นามสกุล" required>
+                    <input type="text" name="department[]" class="form-control me-2"
+                           placeholder="แผนก" required>
+                    <button type="button"
+                            class="btn btn-danger btn-sm remove-user"
+                            style="display:none;">ลบ</button>
                 </div>
             </div>
-            <button type="button" id="addUserBtn" class="btn btn-outline-secondary btn-sm mt-2">
+
+            <button type="button"
+                    id="addUserBtn"
+                    class="btn btn-outline-secondary btn-sm mt-2">
                 <i class="fas fa-plus me-1"></i> เพิ่มรายชื่อ
             </button>
         </div>
 
-        <!-- เหตุผล -->
+        <!-- REASON -->
         <div class="mb-4">
-            <label class="fw-bold mb-2">
-                มีความจำเป็นต้องใช้งานเพื่อ (Reason)
-            </label>
-            <textarea name="reason" class="form-control" rows="3"
-                placeholder="ระบุวัตถุประสงค์ในการขอเข้าถึงระบบจากภายนอก..."></textarea>
+            <label class="fw-bold mb-2">เหตุผล (Reason)</label>
+            <textarea name="reason"
+                      class="form-control"
+                      rows="3"
+                      required></textarea>
         </div>
 
-        <!-- FILE UPLOAD -->
+        <!-- FILE -->
         <div class="mb-4">
             <label class="fw-bold mb-2">
                 <i class="fas fa-paperclip me-1"></i> แนบไฟล์
             </label>
-            <input
-                type="file"
-                name="order_file"
-                class="form-control w-50"
-                multiple
-                onchange="handleFiles(this)"
-            />
-
-
-                <div id="filePreview" class="mt-3 d-flex gap-3 flex-wrap"></div>
-
+            <input type="file"
+                   name="order_file"
+                   class="form-control w-50"
+                   multiple
+                   onchange="handleFiles(this)">
+            <div id="filePreview"
+                 class="mt-3 d-flex gap-3 flex-wrap"></div>
         </div>
-        <!-- ปุ่ม -->
+
+        <!-- BUTTON -->
         <div class="text-end border-top pt-3">
-            <button type="submit" class="btn btn-primary px-5 fw-bold shadow-sm">
+            <button type="submit"
+                    class="btn btn-primary px-5 fw-bold shadow-sm">
                 <i class="fas fa-paper-plane me-2"></i>ส่งคำร้องขออนุมัติ
             </button>
         </div>
 
     </form>
-    <!-- FILE MODAL -->
-    <div class="modal fade" id="fileModal" tabindex="-1">
-        <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-            <h6 class="modal-title">ดูเอกสารแนบ</h6>
-            <button class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-0">
-            <iframe id="previewFrame" style="width:100%;height:80vh;border:none"></iframe>
-            </div>
-        </div>
-        </div>
-    </div>
+
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script>
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-</script>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
 <script src="{% static 'script/script.js' %}"></script>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+
+    // ================= DATE PICKER =================
+    const endPicker = flatpickr("#end_date", {
+        locale: "th",
+        dateFormat: "Y-m-d",   // ส่งเข้า backend
+        altInput: true,
+        altFormat: "d/m/Y",    // แสดงผล
+        allowInput: true
+    });
+
+    flatpickr("#start_date", {
+        locale: "th",
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d/m/Y",
+        allowInput: true,
+        onChange: function(selectedDates) {
+            endPicker.set("minDate", selectedDates[0]);
+        }
+    });
+
+    // ================= ADD USER =================
     const container = document.getElementById("vpnUserContainer");
     const addBtn = document.getElementById("addUserBtn");
-
-    if (!container || !addBtn) return;
-
     const maxUsers = 10;
 
-    // สร้าง row ใหม่
-    function createUserRow(index) {
+    function updateIndex() {
+        const rows = container.querySelectorAll(".vpn-user-row");
+        rows.forEach((row, i) => {
+            row.querySelector("span").innerText = (i + 1) + ".";
+            const removeBtn = row.querySelector(".remove-user");
+            removeBtn.style.display = (i === 0) ? "none" : "inline-block";
+        });
+    }
+
+    function createRow(index) {
         const row = document.createElement("div");
-        row.className = "d-flex mb-2 vpn-user-row animate-fade-in";
+        row.className = "d-flex mb-2 vpn-user-row";
 
         row.innerHTML = `
-            <span class="input-group-text bg-light me-2">${index + 1}.</span>
-
-            <input type="text" name="user_names[]" class="form-control me-2"
-                   placeholder="ชื่อ-นามสกุล" required>
-
-            <input type="text" name="department[]" class="form-control me-2"
-                   placeholder="แผนก" required>
-
-            <button type="button" class="btn btn-danger btn-sm remove-user">
-                ลบ
-            </button>
+            <span class="input-group-text bg-light me-2">${index+1}.</span>
+            <input type="text" name="user_names[]" class="form-control me-2" required>
+            <input type="text" name="department[]" class="form-control me-2" required>
+            <button type="button" class="btn btn-danger btn-sm remove-user">ลบ</button>
         `;
 
-        // ปุ่มลบ
-        row.querySelector(".remove-user").addEventListener("click", function () {
+        row.querySelector(".remove-user").addEventListener("click", function(){
             row.remove();
             updateIndex();
         });
@@ -161,32 +182,16 @@ document.addEventListener("DOMContentLoaded", function () {
         return row;
     }
 
-    // เพิ่มรายชื่อ
-    addBtn.addEventListener("click", function () {
+    addBtn.addEventListener("click", function(){
         const count = container.querySelectorAll(".vpn-user-row").length;
-
         if (count >= maxUsers) {
             alert("เพิ่มรายชื่อได้สูงสุด 10 คน");
             return;
         }
-
-        container.appendChild(createUserRow(count));
+        container.appendChild(createRow(count));
         updateIndex();
     });
 
-    // อัปเดตลำดับ + ปุ่มลบ
-    function updateIndex() {
-        const rows = container.querySelectorAll(".vpn-user-row");
-
-        rows.forEach((row, i) => {
-            row.querySelector("span").innerText = (i + 1) + ".";
-
-            const removeBtn = row.querySelector(".remove-user");
-            removeBtn.style.display = (i === 0) ? "none" : "inline-block";
-        });
-    }
-
-    // เรียกครั้งแรก
     updateIndex();
 });
 </script>
