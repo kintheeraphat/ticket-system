@@ -54,7 +54,7 @@
     <!-- =======================
          วันที่ต้องการแล้วเสร็จ
     ======================== -->
-    <div class="mb-4">
+    <!-- <div class="mb-4">
       <label class="form-label">
         วันที่ต้องการแล้วเสร็จ (วัน / เดือน / ปี ค.ศ. /เวลา)
       </label>
@@ -62,10 +62,22 @@
         type="datetime-local"
         name="deadline"
         class="form-control w-50"
+        autocomplete="off"
         required
       />
-
-    </div>
+    </div> -->
+            <div class="col-md-6">
+          <label class="form-label"> วันที่ต้องการแล้วเสร็จ</label>
+          <input
+            type="text"
+            id="start_date"
+            name="start_date"
+            class="form-control"
+            placeholder="วัน / เดือน / ปี"
+            autocomplete="off"
+            required
+          />
+        </div>
     <!-- =======================
          รายละเอียด
     ======================== -->
@@ -109,15 +121,27 @@
 </div>
 {% endblock %}
 
+
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-flatpickr("#deadline", {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+</script>
+<script src="{% static 'script/script.js' %}"></script>
+<script>
+flatpickr("#start_date", {
   locale: "th",
-  dateFormat: "d/m/Y",   // วัน / เดือน / ปี (ค.ศ.)
-  allowInput: true,
+  dateFormat: "d/m/Y",
+  allowInput: true
+});
+
+flatpickr("#end_date", {
+  locale: "th",
+  dateFormat: "d/m/Y",
+  allowInput: true
 });
 </script>
 {% endblock %}
