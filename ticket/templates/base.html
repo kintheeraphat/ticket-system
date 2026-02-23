@@ -65,5 +65,18 @@
 {% endif %}
 
 {% block extra_js %}{% endblock %}
+
+<style>
+  @media (max-width: 768px) {
+
+  /* ===== Header buttons ===== */
+  .container-fluid > .d-flex.justify-content-between {
+    flex-direction: column;
+    padding-top: 64px;
+    align-items: flex-start !important;
+    gap: 12px;
+  }
+}
+</style>
 </body>
 </html>

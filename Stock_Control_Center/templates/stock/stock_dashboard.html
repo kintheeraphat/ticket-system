@@ -110,4 +110,66 @@
   </div>
 
 </div>
+<style>
+/* ===============================
+   Mobile Responsive Fix (CSS only)
+   =============================== */
+@media (max-width: 768px) {
+
+  /* ===== Header buttons ===== */
+  .container-fluid > .d-flex.justify-content-between {
+    flex-direction: column;
+    padding-top: 64px;
+    align-items: flex-start !important;
+    gap: 12px;
+  }
+
+  .container-fluid > .d-flex.justify-content-between .d-flex.gap-2 {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .container-fluid > .d-flex.justify-content-between .btn {
+    flex: 1 1 100%;
+    font-size: 0.9rem;
+    padding: 0.6rem;
+  }
+
+  /* ===== Filter ===== */
+  .card .form-control {
+    font-size: 0.95rem;
+  }
+
+  /* ===== Table: ซ่อนคอลัมน์ที่ไม่จำเป็น ===== */
+  table thead th:nth-child(2),
+  table tbody td:nth-child(2),
+  table thead th:nth-child(3),
+  table tbody td:nth-child(3) {
+    display: none;
+  }
+
+  /* ===== Table spacing ===== */
+  table th,
+  table td {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+    vertical-align: middle;
+  }
+
+  table tbody td:first-child {
+    font-weight: 600;
+  }
+
+  /* ===== Action button ===== */
+  table .btn {
+    padding: 0.35rem 0.45rem;
+  }
+
+  /* ===== Prevent horizontal overflow ===== */
+  .table {
+    table-layout: fixed;
+    word-wrap: break-word;
+  }
+}
+</style>
 {% endblock %}

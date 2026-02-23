@@ -195,7 +195,7 @@
     {% endif %}
 
     {% if "IT_Stock" in user_permissions %}
-    <li><a href="http://127.0.0.1:3000/admin_dash/items/">นับสต๊อก</a></li>
+    <li><a href="{% url 'stock_dashboard' %}">นับสต๊อก</a></li>
     {% endif %}
 
     <li class="mt-3">
