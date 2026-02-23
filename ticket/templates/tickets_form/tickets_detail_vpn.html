@@ -174,8 +174,8 @@
                     </form>
                 </div>
 
-                <!-- ===== Reject ===== -->
-                <div class="col-md-9">
+               
+                <div class="col-md-3">
                     <form method="post" action="{% url 'reject_ticket' ticket.id %}"
                         onsubmit="return confirm('ยืนยันการ Reject คำขอนี้ ?');">
                         {% csrf_token %}
