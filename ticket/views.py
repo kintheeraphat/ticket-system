@@ -1,4 +1,5 @@
 from datetime import date, datetime, time, timedelta
+from zoneinfo import ZoneInfo
 from django.shortcuts import render, redirect
 from django.db import connection ,transaction
 from django.utils import timezone
@@ -1646,8 +1647,7 @@ def borrow_detail(request, ticket_id):
             "ticket": {"id": ticket_id, "status_id": borrow["status_id"]},
         }
     )
-@login_required_custom
-@page_permission_required
+    
 def tickets_detail_vpn(request, ticket_id):
 
     user = request.session["user"]
@@ -1692,11 +1692,26 @@ def tickets_detail_vpn(request, ticket_id):
         raise Http404("VPN Ticket not found")
 
     # -----------------------------
+    # ✅ TIMEZONE FIX (เหมือนหน้าอื่น)
+    # -----------------------------
+    created_at = data["create_at"]
+
+    if created_at:
+    # ถ้า naive แปลว่า DB เก็บเป็น UTC
+        if timezone.is_naive(created_at):
+            created_at = created_at.replace(tzinfo=ZoneInfo("UTC"))
+
+    # แปลงเป็นเวลาไทย
+    created_at = created_at.astimezone(ZoneInfo("Asia/Bangkok"))
+
+    # -----------------------------
     # VPN USERS (parse)
     # -----------------------------
     vpn_users = []
     if data.get("uservpn"):
-        vpn_user_list = [u.strip() for u in data["uservpn"].splitlines() if u.strip()]
+        vpn_user_list = [
+            u.strip() for u in data["uservpn"].splitlines() if u.strip()
+        ]
         for name in vpn_user_list:
             vpn_users.append({
                 "name": name
@@ -1727,7 +1742,7 @@ def tickets_detail_vpn(request, ticket_id):
         can_approve = True
 
     # -----------------------------
-    # HIDE ACTION (🔥 สำคัญ)
+    # HIDE ACTION
     # -----------------------------
     hide_action = data["status_id"] in (3, 5, 8)
 
@@ -1759,7 +1774,7 @@ def tickets_detail_vpn(request, ticket_id):
                 "id": data["ticket_id"],
                 "title": data["title"],
                 "description": data["description"],
-                "create_at": data["create_at"],
+                "create_at": created_at,  # ✅ ใช้เวลาที่แปลงแล้ว
                 "status_id": data["status_id"],
                 "status_name": data["status_name"],
                 "user_name": data["full_name"],
@@ -1773,10 +1788,9 @@ def tickets_detail_vpn(request, ticket_id):
             "can_approve": can_approve,
             "my_level": my_level,
             "is_admin": is_admin,
-            "hide_action": hide_action,   # 🔥 ส่งไปให้ template
+            "hide_action": hide_action,
         }
     )
-    
 
 @login_required_custom
 @page_permission_required
@@ -1815,8 +1829,14 @@ def tickets_detail_repairs(request, ticket_id):
         """, [ticket_id])
 
         row = cursor.fetchone()
+        
+    created_at = row[3]
 
+    if created_at:
+        if timezone.is_naive(created_at):
+            created_at = created_at.replace(tzinfo=ZoneInfo("UTC"))
 
+        created_at = created_at.astimezone(ZoneInfo("Asia/Bangkok"))
     if not row:
         raise Http404("Ticket not found")
 
@@ -1824,7 +1844,7 @@ def tickets_detail_repairs(request, ticket_id):
         "id": row[0],
         "title": row[1],
         "description": row[2],
-        "created_at": row[3],
+        "created_at": created_at,
         "user_name": row[4],
         "department": row[5],
         "ticket_type_id": row[6],
@@ -2631,11 +2651,24 @@ def adjust_detail(request, ticket_id):
     if not row:
         raise Http404("Ticket not found")
 
+ # -----------------------------
+    # ✅ TIMEZONE FIX (รองรับ naive)
+    # -----------------------------
+    created_at = row[3]
+
+    if created_at:
+        if timezone.is_naive(created_at):
+            # ถ้าเป็น naive ให้ถือว่าเป็น UTC ก่อน
+            created_at = timezone.make_aware(created_at, dt_timezone.utc)
+
+        # แปลงเป็น Asia/Bangkok ตาม settings.py
+        created_at = timezone.localtime(created_at)
+
     ticket = {
         "id": row[0],
         "title": row[1],
         "description": row[2],
-        "create_at": row[3],
+        "create_at": created_at,
         "user_name": row[4],
         "status_name": row[5],
         "status_id": row[6],
@@ -4544,7 +4577,15 @@ def repairs_it_detail(request, ticket_id):
 
     if not row:
         raise Http404("ไม่พบคำร้อง")
+    
+    created_at = row[3]
 
+    if created_at:
+        if timezone.is_naive(created_at):
+            created_at = created_at.replace(tzinfo=ZoneInfo("UTC"))
+
+        created_at = created_at.astimezone(ZoneInfo("Asia/Bangkok"))
+    
     ticket = {
     "id": row[0],
     "title": row[1],
@@ -4556,7 +4597,7 @@ def repairs_it_detail(request, ticket_id):
     "it_category_name": row[11],    # ic.name
 
     # สถานะ
-    "create_at": row[3],
+    "create_at": created_at,
     "status_id": row[4],
     "status_name": row[5],
 
