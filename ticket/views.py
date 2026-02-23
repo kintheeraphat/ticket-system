@@ -55,6 +55,26 @@ def handle_approval_error(view_func):
     return wrapper
 
 
+# logนาครับพรี้ๆ
+def insert_log(user_id, action, target_table):
+    """
+    บันทึก log การทำงานของ user
+
+    :param user_id: int | None
+    :param action: str เช่น 'APPROVE', 'REJECT' 'CREATE', 'UPDATE'
+    :param target_table: str เช่น 'tickets', 'ticket_approval_status'
+    """
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            INSERT INTO tickets.log
+            (user_id, action, target_table, create_at)
+            VALUES (%s, %s, %s, %s)
+        """, [
+            user_id,
+            action,
+            target_table,
+            timezone.now()
+        ])
 
 @csrf_exempt
 def erp_auth(username, password):
@@ -961,6 +981,16 @@ def erp_perm(request):
         else:
             messages.success(request, "สร้างคำร้องสำเร็จ 🎉")
             return redirect("ticket_success")
+    insert_log(
+    user_id=user_id,
+    action=(
+        f"CREATE_TICKET "
+        f"ticket_id={ticket_id} "
+        f"type=ERP "
+        f"request_type={request_type}"
+    ),
+    target_table="tickets"
+)
 
     return render(request, "tickets_form/erp_perm.html")
 
@@ -1094,10 +1124,16 @@ def vpn(request):
                             timezone.now()
                         ])
 
+         # ✅ LOG: SUBMIT TICKET
+                insert_log(
+                    user_id=user_id,
+                    action=f"SUBMIT_TICKET ticket_id={ticket_id} type=VPN",
+                    target_table="tickets"
+                )
+
         except ApprovalTeamNotFound as e:
             messages.error(request, str(e))
             return redirect(request.path)
-
         return redirect("ticket_success")
 
     return render(request, "tickets_form/vpn.html")
@@ -1217,7 +1253,16 @@ def borrow(request):
                     ticket_type_id=ticket_type_id,
                     requester_user_id=user_id
                 )
-
+                # ✅ LOG: SUBMIT TICKET (จุดเดียวพอ)
+                insert_log(
+                    user_id=user_id,
+                    action=(
+                        f"SUBMIT_TICKET "
+                        f"ticket_id={ticket_id} "
+                        f"type=BORROW"
+                    ),
+                    target_table="ticket_approval_status"
+                )
                 # -----------------------------
                 # FILE UPLOAD
                 # -----------------------------
@@ -2178,15 +2223,24 @@ def repairs_form(request):
                                 user_id,
                                 timezone.now()
                             ])
-
-
+                            
+            insert_log(
+                user_id=user_id,
+                action=(
+                    f"SUBMIT_TICKET "
+                    f"ticket_id={ticket_id} "
+                    f"type=BUILDING_REPAIR"
+                ),
+                target_table="ticket_approval_status"
+            )
         except ApprovalTeamNotFound as e:
             messages.error(request, str(e))
             return redirect(request.path)
 
         return redirect("ticket_success")
-
+    
     return render(request, "tickets_form/repairs_form.html")
+
 @login_required_custom
 @page_permission_required
 @handle_approval_error
@@ -2472,7 +2526,15 @@ def adjust_form(request):
                     ticket_type_id=ticket_type_id,
                     requester_user_id=user_id
                 )
-
+                insert_log(
+                        user_id=user_id,
+                        action=(
+                            f"SUBMIT_TICKET "
+                            f"ticket_id={ticket_id} "
+                            f"type=Adjust"
+                        ),
+                        target_table="ticket_approval_status"
+                    )
                 # ---------------- FILE UPLOAD ----------------
                 files = request.FILES.getlist("attachments[]")
 
@@ -2533,6 +2595,7 @@ def adjust_form(request):
             raise e
 
     return render(request, "tickets_form/adjust_form.html")
+
 @login_required_custom
 @page_permission_required
 def adjust_detail(request, ticket_id):
@@ -2769,6 +2832,15 @@ def app_form(request):
                     ticket_type_id=ticket_type_id,
                     requester_user_id=user_id
                 )
+                insert_log(
+                    user_id=user_id,
+                    action=(
+                        f"SUBMIT_TICKET "
+                        f"ticket_id={ticket_id} "
+                        f"type=APP"
+                    ),
+                    target_table="ticket_approval_status"
+                )
 
         except ApprovalTeamNotFound as e:
             messages.error(request, str(e))
@@ -2838,7 +2910,15 @@ def report_form(request):
                     ticket_type_id=ticket_type_id,
                     requester_user_id=user_id
                 )
-
+                insert_log(
+                user_id=user_id,
+                action=(
+                    f"SUBMIT_TICKET "
+                    f"ticket_id={ticket_id} "
+                    f"type=Report"
+                ),
+                target_table="ticket_approval_status"
+            )
         except ApprovalTeamNotFound as e:
             messages.error(request, str(e))
             return redirect(request.path)
@@ -2995,7 +3075,15 @@ def active_promotion_form(request):
                     ticket_type_id=ticket_type_id,
                     requester_user_id=user_id
                 )
-
+                insert_log(
+                    user_id=user_id,
+                    action=(
+                        f"SUBMIT_TICKET "
+                        f"ticket_id={ticket_id} "
+                        f"type=Adjust"
+                    ),
+                    target_table="ticket_approval_status"
+                )
         except ApprovalTeamNotFound as e:
             messages.error(request, str(e))
             return redirect(request.path)
@@ -3100,7 +3188,17 @@ def setting_team(request):
                     INSERT INTO tickets.team_members (team_id, user_id)
                     VALUES (%s, %s)
                 """, [team_id, user_id])
-
+                # ✅ LOG: CREATE TEAM
+            insert_log(
+                user_id=user_id,
+                action=(
+                    f"CREATE_TEAM "
+                    f"team_id={team_id} "
+                    f"name={team_name} "
+                    f"department_id={department_id}"
+                ),
+                target_table="team"
+            )
             messages.success(request, "สร้างทีมเรียบร้อยแล้ว")
             return redirect("setting_team")
 
@@ -3250,10 +3348,19 @@ def team_adduser(request, team_id):
                 VALUES (%s, %s)
                 ON CONFLICT DO NOTHING
             """, [team_id, user_id])
-
+            
+        insert_log(
+            user_id=request.session["user"]["id"],   # คนที่กดเพิ่ม
+            action=(
+                f"ADD_TEAM_MEMBER "
+                f"team_id={team_id} "
+                f"added_user_id={user_id}"
+            ),
+            target_table="team_members"
+        )
         messages.success(request, "เพิ่มสมาชิกเข้าทีมเรียบร้อยแล้ว")
         return redirect("team_adduser", team_id=team_id)
-
+    
     return render(request, "team_adduser.html", {
         "team": team,
         "members": members,
@@ -3269,7 +3376,15 @@ def team_removeuser(request, team_id, member_id):
             WHERE team_id = %s
               AND user_id = %s
         """, [team_id, member_id])
-
+    insert_log(
+        user_id=request.session["user"]["id"],   # คนที่กดเพิ่ม
+        action=(
+            f"REMOVE_TEAM_MEMBER "
+            f"team_id={team_id} "
+            f"removed_user_id={member_id}"
+        ),
+        target_table="team_members"
+    )
     messages.success(request, "ลบสมาชิกออกจากทีมเรียบร้อยแล้ว")
     return redirect("team_adduser", team_id=team_id)
 
@@ -3316,7 +3431,17 @@ def add_approve_line(request):
                     level,
                     approve_user_id
                 ])
-
+        insert_log(
+            user_id=user_id,   # คนที่สร้าง flow
+            action=(
+                f"CREATE_APPROVE_LINE "
+                f"category_id={category_id} "
+                f"team_id={team_id} "
+                f"flow_no={flow_no} "
+                f"levels={len(approvers)}"
+            ),
+            target_table="approve_line"
+        )
         messages.success(request, "บันทึกสายอนุมัติเรียบร้อยแล้ว")
         return redirect("add_approve_line")
 
@@ -3602,6 +3727,7 @@ def approve_ticket(request, ticket_id):
         remark=request.POST.get("remark", ""),
         is_admin=is_admin
     )
+    
 
     messages.success(request, "ดำเนินการเรียบร้อยแล้ว")
     return redirect("tickets_list")
@@ -3623,6 +3749,11 @@ def approve_ticket_flow(
                 SET status_id = 8   -- Accepting work
                 WHERE id = %s
             """, [ticket_id])
+            insert_log(
+                user_id=approver_user_id,
+                action=f"ADMIN_ACCEPT_WORK ticket_id={ticket_id}",
+                target_table="tickets"
+            )
             return
 
         cursor.execute("""
@@ -3683,6 +3814,14 @@ def approve_ticket_flow(
                 SET status_id = 4   -- ยังไม่รับงาน
                 WHERE id = %s
             """, [ticket_id])
+        # =============================
+        # LOG (อยู่ใน transaction)
+        # =============================
+        insert_log(
+            user_id=approver_user_id,
+            action=f"APPROVE ticket_id={ticket_id} level={current_level}",
+            target_table="ticket_approval_status"
+        )
 
                  
 def get_approve_line_dict_all_flows(category_id, team_id):
@@ -3727,12 +3866,16 @@ def admin_accept_work(request, ticket_id):
     if not user or user["role_id"] != 1:
         return redirect("login")
 
+    user_id = user["id"]   # ✅ ต้องมีบรรทัดนี้
+
     with connection.cursor() as cursor:
         cursor.execute("""
             UPDATE tickets.tickets
             SET status_id = 8   -- Accepting work
             WHERE id = %s
         """, [ticket_id])
+
+    
 
     messages.success(request, "รับงานเรียบร้อยแล้ว")
     return redirect("tickets_accepting_work")
@@ -3751,7 +3894,14 @@ def admin_complete_ticket(request, ticket_id):
             SET status_id = 5  -- Completed
             WHERE id = %s
         """, [ticket_id])
-
+        insert_log(
+        user_id=user["id"],   # ✅ ตอนนี้มีค่าแล้ว
+        action=(
+            f"ADMIN_COMPLETE_TICKET "
+            f"ticket_id={ticket_id}"
+        ),
+        target_table="tickets"
+    )
     messages.success(request, "ปิดงานเรียบร้อยแล้ว")
     return redirect("tickets_list")
 
@@ -3796,6 +3946,7 @@ def manage_permission(request):
 
     selected_user_id = request.GET.get("user_id")
 
+    # ================= GET DATA =================
     with connection.cursor() as cursor:
 
         cursor.execute("""
@@ -3819,15 +3970,15 @@ def manage_permission(request):
                 SELECT permission_id
                 FROM tickets.user_permissions
                 WHERE user_id = %s
-                AND allow = TRUE
+                  AND allow = TRUE
             """, [selected_user_id])
-
             user_permission_ids = [row[0] for row in cursor.fetchall()]
 
     # ================= POST HANDLER =================
     if request.method == "POST":
 
         action = request.POST.get("action")
+        admin_id = request.session["user"]["id"]
 
         # ------------------------------------------------
         # 1) SAVE USER PERMISSION
@@ -3843,12 +3994,14 @@ def manage_permission(request):
 
             with connection.cursor() as cursor:
 
+                # ปิดสิทธิ์ทั้งหมดก่อน
                 cursor.execute("""
                     UPDATE tickets.user_permissions
                     SET allow = FALSE
                     WHERE user_id = %s
                 """, [user_id])
 
+                # เปิดเฉพาะที่เลือก
                 for perm_id in selected_permissions:
                     cursor.execute("""
                         INSERT INTO tickets.user_permissions
@@ -3857,6 +4010,13 @@ def manage_permission(request):
                         ON CONFLICT (user_id, permission_id)
                         DO UPDATE SET allow = TRUE
                     """, [user_id, perm_id])
+
+            # ✅ LOG : ครั้งเดียวพอ
+            insert_log(
+                user_id=admin_id,
+                action=f"UPDATE_USER_PERMISSION target_user_id={user_id}",
+                target_table="tickets.user_permissions"
+            )
 
             messages.success(request, "บันทึกสิทธิ์เรียบร้อยแล้ว")
             return redirect(f"/manage/permissions/?user_id={user_id}")
@@ -3880,26 +4040,41 @@ def manage_permission(request):
                         WHERE id=%s
                     """, [code, url_name, description, perm_id])
 
+                    insert_log(
+                        user_id=admin_id,
+                        action=f"UPDATE_PERMISSION permission_id={perm_id}",
+                        target_table="tickets.permissions"
+                    )
+
                     messages.success(request, "แก้ไข Permission เรียบร้อยแล้ว")
 
                 else:  # ADD
                     cursor.execute("""
                         INSERT INTO tickets.permissions
                         (code, url_name, description)
-                        VALUES (%s,%s,%s)
+                        VALUES (%s, %s, %s)
+                        RETURNING id
                     """, [code, url_name, description])
+
+                    new_perm_id = cursor.fetchone()[0]
+
+                    insert_log(
+                        user_id=admin_id,
+                        action=f"CREATE_PERMISSION permission_id={new_perm_id}",
+                        target_table="tickets.permissions"
+                    )
 
                     messages.success(request, "เพิ่ม Permission ใหม่เรียบร้อยแล้ว")
 
             return redirect("/manage/permissions/")
 
+    # ================= RENDER =================
     return render(request, "admin/manage_permission.html", {
         "users": users,
         "permissions": permissions,
         "user_permission_ids": user_permission_ids,
         "selected_user_id": selected_user_id,
     })
-
 @login_required_custom
 @page_permission_required
 def add_permission(request):
@@ -3915,6 +4090,15 @@ def add_permission(request):
                 INSERT INTO tickets.permissions (code, url_name, description)
                 VALUES (%s, %s, %s)
             """, [code, url_name, description])
+            insert_log(
+            user_id=request.session["user"]["id"],
+            action=(
+                f"CREATE_PERMISSION "
+                f"code={code} "
+                f"url_name={url_name}"
+            ),
+            target_table="tickets.permissions"
+        )
 
         messages.success(request, "เพิ่ม Permission เรียบร้อยแล้ว")
 
@@ -3939,7 +4123,15 @@ def edit_permission(request, perm_id):
                     description = %s
                 WHERE id = %s
             """, [code, url_name, description, perm_id])
-
+            insert_log(
+            user_id=request.session["user"]["id"],
+            action=(
+                f"UPDATE_PERMISSION "
+                f"code={code} "
+                f"url_name={url_name}"
+            ),
+            target_table="tickets.permissions"
+        )
             messages.success(request, "แก้ไข Permission เรียบร้อยแล้ว")
             return redirect("/manage/permissions/")
 
@@ -4230,8 +4422,18 @@ def repairs_it_form(request):
                     ticket_type_id,
                     timezone.now()
                 ])
+                
                 ticket_id = cursor.fetchone()[0]
-
+                insert_log(
+                user_id=user_id,
+                action=(
+                    f"SUBMIT_TICKET "
+                    f"ticket_id={ticket_id} "
+                    f"type=REPAIRS_IT "
+                    f"it_category_id={it_category_id}"
+                ),
+                target_table="tickets"
+            )
             # INSERT detail
             with connection.cursor() as cursor:
                 cursor.execute("""
@@ -4337,7 +4539,7 @@ def repairs_it_detail(request, ticket_id):
             
             WHERE t.id = %s
         """, [ticket_id])
-
+        
         row = cursor.fetchone()
 
     if not row:
@@ -4439,6 +4641,15 @@ def reject_ticket(request, ticket_id):
             user_id,
             ticket_id
         ])
+    insert_log(
+    user_id=user_id,
+    action=(
+        f"REJECT_TICKET "
+        f"ticket_id={ticket_id} "
+        f"remark={remark}"
+    ),
+    target_table="tickets"
+)
 
     messages.success(request, "Reject คำขอยืมอุปกรณ์เรียบร้อยแล้ว")
     return redirect("tickets_list")
